@@ -58,9 +58,9 @@ Full documentation map: [docs/README.md](docs/README.md).
 | `README.md`, `README.ru.md` | Human-facing overview (en, ru) | exists |
 | `docs/` | Technical documentation, see [docs/README.md](docs/README.md) | exists |
 | `docs/user/` | User manuals (en, ru) | placeholder |
-| `server/` | Ktor backend | planned (M0) |
-| `client/` | KMP client: shared code, Android app, later web/iOS/desktop | planned (M0) |
-| `contract/` | KMP module shared by server and client: DTOs, routes, sync protocol, shared domain logic | planned (M0) |
+| `server/` | Ktor backend | skeleton (M0-01) |
+| `client/` | KMP client: shared code, Android app, later web/iOS/desktop | skeleton (M0-01) |
+| `contract/` | KMP module shared by server and client: DTOs, routes, sync protocol, shared domain logic | skeleton (M0-01) |
 | `deploy/` | Docker Compose, Caddy, example configs, scripts | planned (M0) |
 | `integration-tests/` | Multi-device sync tests: server + several clients in one JVM | planned (M0-06) |
 | `tools/loadsim/` | Load simulation CLI | planned (M0-11) |
@@ -69,4 +69,19 @@ Layout is provisional until M0 scaffolding; see [architecture overview](docs/arc
 
 ## Commands
 
-None yet. M0 adds build, test, lint and local-run commands here.
+Run from the repo root. Gradle uses JDK 21 via `~/.gradle/gradle.properties`; setup and troubleshooting:
+[dev-setup](docs/process/dev-setup.md). Shell commands below assume
+`export ANDROID_HOME=$HOME/Library/Android/sdk`.
+
+| Task | Command |
+| --- | --- |
+| Format (run before `check`) | `./gradlew spotlessApply` |
+| Lint + all tests | `./gradlew check` |
+| Full verification (as CI) | `./gradlew spotlessApply check :client:android:assembleDebug` |
+| Run server (port 8080) | `./gradlew :server:run`, then `curl localhost:8080/health/live` |
+| Build debug APK | `./gradlew :client:android:assembleDebug` → `client/android/build/outputs/apk/debug/android-debug.apk` |
+| Start emulator (headless) | `$ANDROID_HOME/emulator/emulator -avd familyhub -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect &` |
+| Wait for boot | `$ANDROID_HOME/platform-tools/adb wait-for-device`; poll `adb shell getprop sys.boot_completed` until `1` |
+| Install and launch app | `./gradlew :client:android:installDebug`; `adb shell am start -n app.familyhub.android.debug/app.familyhub.android.MainActivity` |
+| Screenshot | `adb exec-out screencap -p > <scratchpad>/screen.png` |
+| Stop emulator | `adb emu kill` |

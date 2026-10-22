@@ -43,7 +43,7 @@ Statuses: `ready` → `in-progress` → `done` | `blocked`.
 
 | Plan | Title | Depends on | Status |
 | --- | --- | --- | --- |
-| [M0-01](M0/01-dev-env-and-skeleton.md) | Dev environment and Gradle monorepo skeleton | — | ready |
+| [M0-01](M0/01-dev-env-and-skeleton.md) | Dev environment and Gradle monorepo skeleton | — | done |
 | [M0-02](M0/02-server-foundation.md) | Server foundation | M0-01 | ready |
 | [M0-03](M0/03-identity.md) | Identity: setup, login, sessions, permissions catalogue | M0-02 | ready |
 | [M0-04](M0/04-household-admin.md) | Household administration: groups, members, invites, login codes | M0-03 | ready |

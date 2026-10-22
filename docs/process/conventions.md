@@ -1,10 +1,18 @@
 # Conventions
 
 Preliminary. M0 completes this file with the concrete toolchain (formatter, linter, libraries) and commands.
+Toolchain versions: [versions.md](../plans/M0/versions.md) and `gradle/libs.versions.toml` (authoritative).
 
 ## General
 
-- Kotlin official code style; formatter and static analysis enforced in CI (tools chosen in M0).
+- Code style: ktlint 1.8.0 via Spotless, `ktlint_official` style, max line length 140, `@Composable` functions may be
+  PascalCase (settings in `.editorconfig`). `spotlessCheck` is part of `./gradlew check` and runs in CI.
+- Format before checking: `./gradlew spotlessApply`. Never disable ktlint globally; if it cannot parse valid code
+  (it embeds the Kotlin 2.2 parser), avoid the newer syntax or report the problem.
+- Modules: `:contract` (KMP), `:server` (Ktor), `:client:shared` (KMP + Compose), `:client:android` (app). Packages
+  `app.familyhub.contract`, `app.familyhub.server`, `app.familyhub.client`; refer to modules via typesafe accessors
+  (`projects.contract`).
+- New ids: `Ids.newId()` from `contract` (UUIDv7); do not call the UUID API directly.
 - Package / module per feature (ADR-0012); no cross-feature access to internals.
 - Terms from the [glossary](../domain/glossary.md); no synonyms in code (`Member`, not `FamilyUser`).
 - Comments explain why, not what. Reference requirement IDs where the code implements a specific rule.

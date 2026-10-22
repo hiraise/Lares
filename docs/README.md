@@ -22,6 +22,7 @@ User-facing manuals live in [user/](user/).
 | Why something is the way it is | [adr/](adr/README.md) |
 | How to work: lifecycle, DoD, escalation | [process/workflow.md](process/workflow.md) |
 | Code conventions | [process/conventions.md](process/conventions.md) |
+| Developer machine setup | [process/dev-setup.md](process/dev-setup.md) |
 | Testing strategy | [process/testing.md](process/testing.md) |
 
 ## Identifiers

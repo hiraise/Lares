@@ -1,6 +1,6 @@
 ---
 id: M0-01
-status: ready
+status: done
 depends_on: []
 requirements: []
 ---

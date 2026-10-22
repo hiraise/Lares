@@ -4,8 +4,8 @@ Updated: 2026-10-22
 
 ## Phase
 
-**M0 Foundation — planning done, implementation not started.** Detailed plans for implementation sessions are in
-[docs/plans/](plans/README.md).
+**M0 Foundation — implementation in progress: M0-01 done.**
+Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
 
@@ -22,12 +22,14 @@ Updated: 2026-10-22
 - 2026-10-22 Plans reviewed by a fresh agent from the executor's point of view; 17 findings fixed (pull snapshot, sync epoch
   for restores, refresh grace window, lenient enums, shared write rules, safe tombstone purge, cross-household id checks,
   ADR-0015 for the M0 load test scope).
+- 2026-10-22 M0-01: dev environment (JDK 21, Android SDK 37, AOSP emulator) and Gradle monorepo skeleton
+  (`contract`, `server`, `client:shared`, `client:android`); `./gradlew check :client:android:assembleDebug` green,
+  `/health/live` answers, emulator shows the placeholder screen; Spotless/ktlint and CI workflow added.
 
 ## Next steps
 
-1. Customer approves the M0 planning documents → commit.
-2. Execute plans in order, one fresh session per plan (medium effort): start with [M0-01](plans/M0/01-dev-env-and-skeleton.md).
-3. After M0-11: M0 acceptance with the customer (APK, walkthrough, Russian changelog).
+1. Next plan: [M0-02 Server foundation](plans/M0/02-server-foundation.md), in a fresh session.
+2. After M0-11: M0 acceptance with the customer (APK, walkthrough, Russian changelog).
 
 ## Plan progress
 
@@ -35,7 +37,6 @@ See the table in [plans README](plans/README.md#m0-plans).
 
 ## Waiting for the customer
 
-- Approval of the M0 planning documents for commit.
 - GitHub repository: the customer will create it later; until then work is local.
 
 ## Risks
@@ -54,4 +55,6 @@ See the table in [plans README](plans/README.md#m0-plans).
 
 ## Dev environment notes
 
-- Host: macOS (Apple Silicon), Homebrew, Docker. JDK 21, Android SDK and emulator are installed by M0-01.
+- Host: macOS (Apple Silicon), Homebrew, Docker. JDK 21 (Homebrew), Android SDK from Android Studio
+  (`~/Library/Android/sdk`) and the `familyhub` AOSP emulator;
+  see [dev-setup](process/dev-setup.md).
