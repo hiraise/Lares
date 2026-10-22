@@ -18,6 +18,26 @@ Toolchain versions: [versions.md](../plans/M0/versions.md) and `gradle/libs.vers
 - Comments explain why, not what. Reference requirement IDs where the code implements a specific rule.
 - No personal data (positions, amounts, names) in logs.
 
+## Server
+
+- Packages: `app.familyhub.server.<feature>` per feature module (ADR-0012); infrastructure in
+  `app.familyhub.server.platform` (`db`, `http`, `sync`, `AppConfig`). A feature defines its own Exposed tables in its package.
+- Configuration only from `FAMILYHUB_*` environment variables (`AppConfig.fromEnv`); no HOCON/YAML files.
+- No DI framework: dependencies are passed by constructor; `AppDeps` is the hand-wired container,
+  `fun Application.module(deps: AppDeps)` installs plugins and routes.
+- Database access only through `AppDatabase.dbQuery { … }` (one transaction, Exposed DSL, `Dispatchers.IO`).
+  Do not open transactions any other way and do not nest `dbQuery`.
+- Every write to a syncable row calls `recordChange(householdId)` inside `dbQuery`: it allocates the household `seq`
+  (stamp it on the row) and publishes `HouseholdChanged` on `HouseholdChangeBus` after commit; nothing is published on rollback.
+- Errors: `throw ApiException(ErrorCode.X, "English message", fields)`; HTTP status comes from `ErrorCode.httpStatus`
+  ([API errors](../architecture/api.md#errors)). Other exceptions become 500 `INTERNAL` with no details in the body.
+- Routes under `/api/v1` that need the protocol header go inside `protocolChecked { … }` (everything except `/instance`).
+- Timestamps: `timestamptz` columns, `java.time.Instant` in tables, `kotlin.time.Instant` in contract DTOs.
+  UUID columns: `javaUUID(...)` (`java.util.UUID`).
+- Tests: `testApp { deps -> … }` runs the full module on an emptied Testcontainers database; `jsonClient()` sends the
+  protocol header; `testDeps()` for tests without HTTP. Test functions must return `Unit` (JUnit silently skips others —
+  write `fun x(): Unit = runBlocking { … }` when the block ends with an expression).
+
 ## Data and values
 
 - IDs: UUIDv7, generated on the client for syncable entities.

@@ -1,0 +1,25 @@
+# Local development database. Start: docker compose -f deploy/dev/docker-compose.yml up -d
+# If host port 5432 is taken, set FAMILYHUB_DEV_DB_PORT (and FAMILYHUB_DB_URL for the server) to another port.
+# Not for production: see deploy/ (M0-10).
+name: familyhub-dev
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: familyhub
+      POSTGRES_PASSWORD: familyhub
+      POSTGRES_DB: familyhub
+    ports:
+      - "127.0.0.1:${FAMILYHUB_DEV_DB_PORT:-5432}:5432"
+    volumes:
+      # PostgreSQL 18 images keep data under /var/lib/postgresql (not .../data).
+      - familyhub-dev-db:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U familyhub -d familyhub"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+
+volumes:
+  familyhub-dev-db:

@@ -1,6 +1,6 @@
 ---
 id: M0-02
-status: ready
+status: done
 depends_on: [M0-01]
 requirements: [FND-002, FND-070]
 ---

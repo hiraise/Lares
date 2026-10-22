@@ -4,7 +4,7 @@ Updated: 2026-10-22
 
 ## Phase
 
-**M0 Foundation — implementation in progress: M0-01 done.**
+**M0 Foundation — implementation in progress: M0-01, M0-02 done.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
@@ -25,10 +25,15 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 - 2026-10-22 M0-01: dev environment (JDK 21, Android SDK 37, AOSP emulator) and Gradle monorepo skeleton
   (`contract`, `server`, `client:shared`, `client:android`); `./gradlew check :client:android:assembleDebug` green,
   `/health/live` answers, emulator shows the placeholder screen; Spotless/ktlint and CI workflow added.
+- 2026-10-22 M0-02: server foundation — env config, HikariCP + Flyway (`V1__foundation`: `household`,
+  `household_sync_state`), Exposed DSL, `dbQuery`/`recordChange` with after-commit `HouseholdChangeBus`, JSON errors
+  (`ApiException` → `ErrorCode`), protocol header check, request ids in logs (plain/JSON), `/health/live|ready`,
+  `/api/v1/instance`; contract: `ErrorCode`/`FieldErrorCode` with lenient decoding, `InstanceInfo`, `FamilyHubJson`.
+  Test harness on Testcontainers PostgreSQL; dev database in `deploy/dev/docker-compose.yml`.
 
 ## Next steps
 
-1. Next plan: [M0-02 Server foundation](plans/M0/02-server-foundation.md), in a fresh session.
+1. Next plan: [M0-03 Identity](plans/M0/03-identity.md), in a fresh session.
 2. After M0-11: M0 acceptance with the customer (APK, walkthrough, Russian changelog).
 
 ## Plan progress
@@ -58,3 +63,6 @@ See the table in [plans README](plans/README.md#m0-plans).
 - Host: macOS (Apple Silicon), Homebrew, Docker. JDK 21 (Homebrew), Android SDK from Android Studio
   (`~/Library/Android/sdk`) and the `familyhub` AOSP emulator;
   see [dev-setup](process/dev-setup.md).
+- The shell's default `java` may be older than 21; Gradle uses JDK 21 from `~/.gradle/gradle.properties`. To run
+  `server/build/install/server/bin/server` directly, set `JAVA_HOME` to that JDK.
+- Host port 5432 may be taken by another local PostgreSQL; the dev compose file accepts `FAMILYHUB_DEV_DB_PORT`.
