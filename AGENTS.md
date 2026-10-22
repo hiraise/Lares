@@ -28,6 +28,7 @@ no dependency on Google services.
 4. [docs/process/workflow.md](docs/process/workflow.md) — how work is done, Definition of Done.
 5. The feature spec for the area you touch: [docs/product/features/](docs/product/features/).
 6. [docs/domain/glossary.md](docs/domain/glossary.md) — use these terms in code, docs and UI.
+7. If you were given a plan from [docs/plans/](docs/plans/README.md): follow it exactly; it lists what else to read.
 
 Full documentation map: [docs/README.md](docs/README.md).
 
@@ -60,7 +61,9 @@ Full documentation map: [docs/README.md](docs/README.md).
 | `server/` | Ktor backend | planned (M0) |
 | `client/` | KMP client: shared code, Android app, later web/iOS/desktop | planned (M0) |
 | `contract/` | KMP module shared by server and client: DTOs, routes, sync protocol, shared domain logic | planned (M0) |
-| `deploy/` | Docker Compose, Caddy, example configs | planned (M0) |
+| `deploy/` | Docker Compose, Caddy, example configs, scripts | planned (M0) |
+| `integration-tests/` | Multi-device sync tests: server + several clients in one JVM | planned (M0-06) |
+| `tools/loadsim/` | Load simulation CLI | planned (M0-11) |
 
 Layout is provisional until M0 scaffolding; see [architecture overview](docs/architecture/overview.md).
 

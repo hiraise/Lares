@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 milestone: M0
 updated: 2026-10-22
 ---
@@ -12,7 +12,8 @@ localization and deployment — everything feature modules depend on.
 
 ## Scenarios
 
-1. Admin rents a VPS, runs `docker compose up`, opens the server URL, creates the first admin account and a household.
+1. Admin rents a VPS, runs `docker compose up`, installs the app, enters the server URL and the setup code from the server log,
+   and creates the household and the first admin account ([auth design](../../architecture/auth.md)).
 2. Admin invites the spouse by link into the "Adults" group; spouse installs the APK, opens the link, sets a password, and is in.
 3. Admin creates an account for the daughter in the "Kids" group; her phone logs in by scanning a QR code on the admin's phone.
 4. Admin creates a group "Grandparents" that may only see the calendar and shopping lists.
@@ -23,13 +24,15 @@ localization and deployment — everything feature modules depend on.
 
 ### Instance and household
 
-- **FND-001** `MVP` `todo` — On first start the server offers a one-time setup to create the first admin and household.
+- **FND-001** `MVP` `todo` — On first start the server offers a one-time setup, protected by a setup code from the server log,
+  to create the first admin and household.
 - **FND-002** `MVP` `todo` — One instance can host several households; data of different households is fully isolated.
 - **FND-003** `MVP` `todo` — Household settings: name, time zone, currency, default language.
 
 ### Accounts and sessions
 
-- **FND-010** `MVP` `todo` — A user logs in with login + password; email is optional. Passwords are hashed with a modern KDF.
+- **FND-010** `MVP` `todo` — A user logs in with login + password; email is not used. Members created by an admin may have
+  no password and log in by QR code only. Passwords are hashed with Argon2id.
 - **FND-011** `MVP` `todo` — Sessions survive app restarts; a user can see and revoke their sessions (devices).
 - **FND-012** `MVP` `todo` — A member with `household.manage` can reset another member's password.
 - **FND-013** `MVP` `todo` — A user can delete their account from inside the app (also a Google Play requirement).
@@ -55,7 +58,8 @@ localization and deployment — everything feature modules depend on.
 ### Persons
 
 - **FND-030** `MVP` `todo` — A person is anyone relevant to the family: members and relatives without accounts.
-- **FND-031** `MVP` `todo` — Person fields: name, optional birth date (year optional), relation label, photo, notes, contacts.
+- **FND-031** `MVP` `todo` — Person fields: name, optional birth date (year optional), relation label, notes, contacts.
+- **FND-033** `later` `todo` — Person photo (needs file storage).
 - **FND-032** `MVP` `todo` — Every member has a person profile; a relative can later be linked to a new account.
 
 ### Offline and sync

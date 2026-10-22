@@ -51,7 +51,7 @@ flowchart LR
 
 ## Client
 
-- Kotlin Multiplatform; Compose Multiplatform UI.
+- Kotlin Multiplatform; Compose Multiplatform UI. Details: [sync.md](sync.md), [auth.md](auth.md), [api.md](api.md).
 - Layers: UI (screens, view models, unidirectional data flow) → repositories → local DB + sync engine → HTTP client.
 - UI reads from the local DB only; the sync engine pushes the outbox and pulls changes (ADR-0008).
 - Android-specific: location foreground service, notification scheduling, UnifiedPush receiver, battery optimization guidance.
@@ -61,7 +61,7 @@ flowchart LR
 - KMP module used by server and client: DTOs, route paths, mutation types, validation rules, protocol version.
 - A breaking change to the contract requires a protocol version bump and compatibility handling.
 
-## Planned repository layout (finalized in M0)
+## Repository layout (from the M0 plans)
 
 ```
 contract/                 shared server/client contract and domain logic (KMP)
@@ -69,7 +69,9 @@ server/                   Ktor app; feature modules as Gradle subprojects or pac
 client/shared/            KMP shared client code (data, sync, domain, UI)
 client/android/           Android application shell
 client/web/               M7
-deploy/                   docker-compose.yml, Caddyfile, .env.example
+integration-tests/        multi-device sync tests (server + clients in one JVM)
+tools/loadsim/            load simulation CLI
+deploy/                   docker-compose.yml, Caddyfile, .env.example, scripts
 docs/                     documentation
 ```
 

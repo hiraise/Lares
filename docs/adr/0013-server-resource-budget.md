@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: accepted  # §2 amended by ADR-0015
 date: 2026-10-22
 ---
 # ADR-0013: Server resource budget

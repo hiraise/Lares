@@ -6,8 +6,8 @@ One file per module. A spec says **what** the product does; architecture and ADR
 
 | Area | Spec | Milestone | Status |
 | --- | --- | --- | --- |
-| FND | [foundation.md](foundation.md) | M0 | draft |
-| TAG | [tags.md](tags.md) | M0 (core), each module | draft |
+| FND | [foundation.md](foundation.md) | M0 | approved |
+| TAG | [tags.md](tags.md) | M0 (core), each module | approved |
 | TSK | [tasks.md](tasks.md) | M1 | draft |
 | SHP | [shopping.md](shopping.md) | M2 | outline |
 | CAL | [calendar.md](calendar.md) | M3 | outline |

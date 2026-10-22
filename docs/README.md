@@ -15,6 +15,10 @@ User-facing manuals live in [user/](user/).
 | Terms and their Russian equivalents | [domain/glossary.md](domain/glossary.md) |
 | Entities and relations | [domain/model.md](domain/model.md) |
 | System structure | [architecture/overview.md](architecture/overview.md) |
+| Sync protocol | [architecture/sync.md](architecture/sync.md) |
+| Authentication and onboarding | [architecture/auth.md](architecture/auth.md) |
+| HTTP API conventions and endpoints | [architecture/api.md](architecture/api.md) |
+| Implementation plans for sessions | [plans/](plans/README.md) |
 | Why something is the way it is | [adr/](adr/README.md) |
 | How to work: lifecycle, DoD, escalation | [process/workflow.md](process/workflow.md) |
 | Code conventions | [process/conventions.md](process/conventions.md) |

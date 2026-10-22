@@ -4,30 +4,38 @@ Updated: 2026-10-22
 
 ## Phase
 
-**Pre-M0: kickoff done.** Scope, stack, permissions model and documentation system decided. No code yet.
+**M0 Foundation — planning done, implementation not started.** Detailed plans for implementation sessions are in
+[docs/plans/](plans/README.md).
 
 ## Active milestone
 
-[M0 Foundation](product/roadmap.md#m0-foundation) — not started.
+[M0 Foundation](product/roadmap.md#m0-foundation). Specs `foundation` and `tags` approved.
 
 ## Done
 
 - 2026-10-22 Kickoff with the customer: modules, priorities, license, distribution, docs language.
-- 2026-10-22 Repository initialized (local only), AGPL-3.0 license, documentation skeleton, roadmap, draft feature specs.
-- 2026-10-22 Kickoff discussion, round 2: stack re-reviewed (Kotlin kept, resource budget ADR-0013), group-based
-  permissions (ADR-0014), Q-001…Q-011 answered, GPS trackers moved to "Later", web client is M7.
-- 2026-10-22 Access model clarified: section access, actions, data visibility, household management;
-  administrators see all data (ADR-0014, Q-012).
+- 2026-10-22 Kickoff discussion, round 2: stack re-reviewed (Kotlin kept, ADR-0013), group-based permissions (ADR-0014),
+  all open questions answered; access model clarified (administrators see all data).
+- 2026-10-22 First commit `30e9207` (kickoff documentation).
+- 2026-10-22 M0 planning: [sync protocol](architecture/sync.md), [auth design](architecture/auth.md),
+  [API](architecture/api.md), verified [versions](plans/M0/versions.md), plans M0-01…M0-11.
+- 2026-10-22 Plans reviewed by a fresh agent from the executor's point of view; 17 findings fixed (pull snapshot, sync epoch
+  for restores, refresh grace window, lenient enums, shared write rules, safe tombstone purge, cross-household id checks,
+  ADR-0015 for the M0 load test scope).
 
 ## Next steps
 
-1. Customer approves the kickoff documentation → first commit to `main`.
-2. M0 kickoff: finalize the [foundation spec](product/features/foundation.md) and the sync design (ADR-0008 is `proposed`).
-3. M0 scaffolding: Gradle monorepo, CI, server skeleton, Android shell, Docker Compose deploy, load simulation (ADR-0013).
+1. Customer approves the M0 planning documents → commit.
+2. Execute plans in order, one fresh session per plan (medium effort): start with [M0-01](plans/M0/01-dev-env-and-skeleton.md).
+3. After M0-11: M0 acceptance with the customer (APK, walkthrough, Russian changelog).
+
+## Plan progress
+
+See the table in [plans README](plans/README.md#m0-plans).
 
 ## Waiting for the customer
 
-- Approval of the kickoff documentation for the first commit.
+- Approval of the M0 planning documents for commit.
 - GitHub repository: the customer will create it later; until then work is local.
 
 ## Risks
@@ -36,11 +44,14 @@ Updated: 2026-10-22
 | --- | --- | --- |
 | Google developer verification for sideloaded apps (rolling out from 2026, global 2027) | APK / F-Droid installs may require a verified developer | Re-check before M6; a developer account likely covers it |
 | OEM battery optimizations (Xiaomi, Huawei, Samsung) kill background location | Gaps in location tracking | In-app guide to exclude the app from battery optimization; detect and warn about stale positions |
-| JVM server memory above budget | Stack does not fit a 1 GB VPS | Measure in M0 (ADR-0013); tune, then GraalVM native image |
+| JVM server memory above budget | Stack does not fit a 1 GB VPS | Measured in M0-11 (ADR-0013); tune, then GraalVM native image |
 | Compose Multiplatform web target is Beta | Web client (M7) may need workarounds | Re-evaluate at M7; fallback is a separate web UI |
-| Sync engine complexity | Data loss or conflicts | Prototype in M0, multi-device sync tests ([testing](process/testing.md)) |
+| Sync engine complexity | Data loss or conflicts | Protocol fixed in sync.md; invariant tests in M0-05/M0-06 |
 | Flexible permissions make UI and testing harder | Confusing group editor, permission bugs | Templates "Adults"/"Kids", plain wording, permission matrix tests (ADR-0014) |
+| Pre-release UI libraries (CMP Material3 alpha, navigation RC) | Possible API changes or bugs | Versions paired by JetBrains with CMP 1.12.2; upgrade when stable |
+| ktlint 1.8 parses only Kotlin ≤ 2.2 syntax | Lint failures on newest syntax | Avoid newest syntax; report instead of disabling lint |
+| Medium-effort sessions deviate from plans | Inconsistent code | Plans fix all decisions; "stop and report" rules; customer approves each commit |
 
 ## Dev environment notes
 
-- Host: macOS, Docker installed. No JDK/Gradle check done yet; M0 sets up the toolchain.
+- Host: macOS (Apple Silicon), Homebrew, Docker. JDK 21, Android SDK and emulator are installed by M0-01.

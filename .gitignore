@@ -31,8 +31,9 @@ Thumbs.db
 !.env.example
 *.pem
 
-# Local data
+# Local data (family data must never be committed)
 deploy/data/
+deploy/backups/
 *.log
 
 # Claude Code local settings

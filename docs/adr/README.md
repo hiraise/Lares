@@ -19,8 +19,9 @@ Status values: `proposed` (direction chosen, details or customer confirmation pe
 | [0010](0010-household-tenancy.md) | Household is the tenant boundary | accepted | 2026-10-22 |
 | [0011](0011-no-e2ee-initially.md) | No end-to-end encryption in initial versions | accepted | 2026-10-22 |
 | [0012](0012-modular-monolith.md) | Server is a modular monolith | accepted | 2026-10-22 |
-| [0013](0013-server-resource-budget.md) | Server resource budget | accepted | 2026-10-22 |
+| [0013](0013-server-resource-budget.md) | Server resource budget | accepted (§2 amended by 0015) | 2026-10-22 |
 | [0014](0014-group-based-permissions.md) | Group-based permissions | accepted | 2026-10-22 |
+| [0015](0015-load-measurement-amendment.md) | Load measurement in M0 without location uploads (amends 0013) | accepted | 2026-10-22 |
 
 ## When to write an ADR
 

@@ -14,8 +14,10 @@ How agents work on this project. The customer sets goals and accepts results; ag
    Ask the customer the open product questions, in Russian, briefly, with a recommended option.
 2. **Customer approves the spec** (status `approved`). Technical design does not need customer approval.
 3. **Design:** write ADRs for significant choices; update architecture/model docs.
-4. **Plan:** break the milestone into small work items in STATUS.md (or GitHub Issues once the repo exists).
-5. **Implement** work items one by one (see below).
+4. **Plan:** a planning session (high effort) writes detailed, self-contained plans in [docs/plans/](../plans/README.md):
+   one plan per work item, with all technical decisions made, so an implementation session with a clean context
+   (medium effort) can execute it without re-deciding anything.
+5. **Implement** plans one by one in fresh sessions (see [plans README](../plans/README.md) and the loop below).
 6. **Accept:** build an APK + server image, write a short Russian changelog for the customer, collect feedback,
    turn feedback into requirements or open questions.
 

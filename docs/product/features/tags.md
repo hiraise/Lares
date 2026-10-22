@@ -1,5 +1,5 @@
 ---
-status: draft
+status: approved
 milestone: M0 (core), integrations in M1–M5
 updated: 2026-10-22
 ---
