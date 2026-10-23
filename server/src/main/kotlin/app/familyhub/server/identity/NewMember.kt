@@ -43,7 +43,10 @@ internal fun JdbcTransaction.createMemberWithAccount(
     val name = displayName.trim()
     val personId =
         if (linkedPerson == null) {
-            newEntityId().also { PersonRepository.create(householdId, it, PersonData(name = name), recordChange(householdId), now) }
+            newEntityId().also {
+                val data = PersonData(name = name, color = PersonRepository.leastUsedColor(householdId))
+                PersonRepository.create(householdId, it, data, recordChange(householdId), now)
+            }
         } else {
             if (linkedPerson.data.name != name) PersonRepository.rename(householdId, linkedPerson.id, name, recordChange(householdId), now)
             linkedPerson.id

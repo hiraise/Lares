@@ -64,6 +64,19 @@ object MemberRepository {
             .singleOrNull()
             ?.let(::toRow)
 
+    /** A change to the member's sync data (`MemberData`, e.g. `hasPassword`); the caller allocates [seq]. */
+    fun stampSeq(
+        householdId: UUID,
+        id: UUID,
+        seq: Long,
+        now: Instant,
+    ) {
+        MemberTable.update({ (MemberTable.householdId eq householdId) and (MemberTable.id eq id) }) {
+            it[MemberTable.seq] = seq
+            it[updatedAt] = now
+        }
+    }
+
     /** Marks the member deleted; the caller allocates [seq] (the tombstone travels through sync). */
     fun tombstone(
         householdId: UUID,

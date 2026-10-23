@@ -1,6 +1,8 @@
 package app.familyhub.contract.validation
 
 import app.familyhub.contract.api.FieldErrorCode
+import app.familyhub.contract.entities.PersonData
+import app.familyhub.contract.entities.TagData
 import kotlinx.datetime.IllegalTimeZoneException
 import kotlinx.datetime.TimeZone
 
@@ -19,6 +21,12 @@ object Validators {
     const val DEVICE_NAME_MAX = 100
     const val PLATFORM_MAX = 40
     const val MIN_BIRTH_YEAR = 1900
+    const val TAG_NAME_MAX = 40
+    const val ICON_MAX = 64
+    const val RELATION_MAX = 60
+    const val NOTES_MAX = 2000
+    const val CONTACTS_MAX = 20
+    const val CONTACT_VALUE_MAX = 200
 
     val LANGUAGES: Set<String> = setOf("en", "ru")
 
@@ -52,6 +60,36 @@ object Validators {
     fun householdName(value: String): FieldErrorCode? = requiredText(value, HOUSEHOLD_NAME_MAX)
 
     fun groupName(value: String): FieldErrorCode? = requiredText(value, GROUP_NAME_MAX)
+
+    /** Tag names are trimmed; uniqueness (TAG-006) is checked by the server. */
+    fun tagName(value: String): FieldErrorCode? = requiredText(value, TAG_NAME_MAX)
+
+    /** An optional icon key; when given it must not be blank. */
+    fun icon(value: String?): FieldErrorCode? = value?.let { requiredText(it, ICON_MAX)?.let { FieldErrorCode.INVALID_FORMAT } }
+
+    fun tag(data: TagData): Map<String, FieldErrorCode> =
+        ValidationErrors()
+            .add("name", tagName(data.name))
+            .add("icon", icon(data.icon))
+            .fields
+
+    /** All person fields (FND-031). Errors are keyed by field name; contact problems by `contacts`. */
+    fun person(
+        data: PersonData,
+        currentYear: Int,
+    ): Map<String, FieldErrorCode> {
+        val errors = ValidationErrors().add("name", personName(data.name))
+        errors.addAll(birthDate(data.birthYear, data.birthMonth, data.birthDay, currentYear))
+        errors.add("relation", optionalText(data.relation, RELATION_MAX))
+        errors.add("notes", optionalText(data.notes, NOTES_MAX))
+        val contactProblem =
+            when {
+                data.contacts.size > CONTACTS_MAX -> FieldErrorCode.OUT_OF_RANGE
+                else -> data.contacts.firstNotNullOfOrNull { requiredText(it.value, CONTACT_VALUE_MAX) }
+            }
+        errors.add("contacts", contactProblem)
+        return errors.fields
+    }
 
     fun deviceName(value: String): FieldErrorCode? = requiredText(value, DEVICE_NAME_MAX)
 
@@ -112,6 +150,11 @@ object Validators {
         }
 
     private fun isLeapYear(year: Int): Boolean = (year % 4 == 0 && year % 100 != 0) || year % 400 == 0
+
+    private fun optionalText(
+        value: String?,
+        max: Int,
+    ): FieldErrorCode? = if (value != null && value.length > max) FieldErrorCode.TOO_LONG else null
 
     private fun requiredText(
         value: String,

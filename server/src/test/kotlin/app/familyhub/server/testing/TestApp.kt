@@ -29,6 +29,7 @@ fun testDeps(): AppDeps {
         changeBus = changeBus,
         buildInfo = BuildInfo.load(),
         clock = TestClock(),
+        backgroundJobs = false,
     )
 }
 

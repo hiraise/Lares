@@ -4,7 +4,7 @@ Updated: 2026-10-23
 
 ## Phase
 
-**M0 Foundation — implementation in progress: M0-01…M0-04 done.**
+**M0 Foundation — implementation in progress: M0-01…M0-05 done.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
@@ -47,10 +47,18 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
   removal (shared with account deletion), invites (create/list/revoke/preview/accept, single use under row lock),
   QR login codes; migration `V3__admin`; contract `api/admin` DTOs and `DeepLinks`. 99 server tests incl. permission
   matrix and cross-household isolation; manual curl walkthrough done.
+- 2026-10-23 M0-05: sync server — contract sync DTOs, `TagData`, `PaletteColor`/`PaletteColors` (personal colors, FND-034),
+  `PersonData.color`, tag/person validators, shared `WriteRules`; migration `V4__sync` (`tag`, `sync_mutation_log`,
+  `person.color`); `SyncEntityHandler` registry (household, member, group read-only; person, tag writable); pull in one
+  REPEATABLE READ snapshot with reset rules 1–4, push with idempotency log, strict field-level merge and per-mutation
+  transactions, WebSocket events (hello/changed, 500 ms debounce), daily tombstone purge and log cleanup. Also: password
+  changes now give the member a new seq (`hasPassword` is synced); persons referenced by invites are not purged.
+  121 server tests (invariants 1–7, 9, 10 at server level); manual walkthrough on the real server incl. WebSocket.
 
 ## Next steps
 
-1. Next plan: [M0-05 Sync server](plans/M0/05-sync-server.md), in a fresh session.
+1. Next plan: [M0-06 Client data layer and sync engine](plans/M0/06-client-data-sync.md), in a fresh session
+   (M0-10 Deploy can also start now; it depends only on M0-05).
 2. After M0-11: M0 acceptance with the customer (APK, walkthrough, Russian changelog).
 
 ## Plan progress
@@ -69,7 +77,7 @@ See the table in [plans README](plans/README.md#m0-plans).
 | OEM battery optimizations (Xiaomi, Huawei, Samsung) kill background location | Gaps in location tracking | In-app guide to exclude the app from battery optimization; detect and warn about stale positions |
 | JVM server memory above budget | Stack does not fit a 1 GB VPS | Measured in M0-11 (ADR-0013); tune, then GraalVM native image |
 | Compose Multiplatform web target is Beta | Web client (M7) may need workarounds | Re-evaluate at M7; fallback is a separate web UI |
-| Sync engine complexity | Data loss or conflicts | Protocol fixed in sync.md; invariant tests in M0-05/M0-06 |
+| Sync engine complexity | Data loss or conflicts | Protocol fixed in sync.md; server invariant tests done (M0-05), convergence in M0-06 |
 | Flexible permissions make UI and testing harder | Confusing group editor, permission bugs | Templates "Adults"/"Kids", plain wording, permission matrix tests (ADR-0014) |
 | Pre-release UI libraries (CMP Material3 alpha, navigation RC) | Possible API changes or bugs | Versions paired by JetBrains with CMP 1.12.2; upgrade when stable |
 | ktlint 1.8 parses only Kotlin ≤ 2.2 syntax | Lint failures on newest syntax | Avoid newest syntax; report instead of disabling lint |

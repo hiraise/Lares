@@ -7,6 +7,7 @@ import app.familyhub.contract.api.admin.ResetPasswordRequest
 import app.familyhub.contract.api.admin.SetGroupsRequest
 import app.familyhub.contract.validation.Validators
 import app.familyhub.server.household.HouseholdRefs
+import app.familyhub.server.household.MemberRepository
 import app.familyhub.server.household.setGroupsOfMember
 import app.familyhub.server.identity.crypto.PasswordHasher
 import app.familyhub.server.platform.db.AppDatabase
@@ -14,6 +15,7 @@ import app.familyhub.server.platform.http.validate
 import app.familyhub.server.platform.notFound
 import app.familyhub.server.platform.nowForDb
 import app.familyhub.server.platform.sync.lockHousehold
+import app.familyhub.server.platform.sync.recordChange
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.UUID
@@ -69,10 +71,14 @@ class MemberAdminService(
         db.dbQuery { HouseholdRefs.requireMember(householdId, memberId) }
         val hash = withContext(Dispatchers.Default) { hasher.hash(request.newPassword) }
         db.dbQuery {
+            lockHousehold(householdId)
             val member = HouseholdRefs.requireMember(householdId, memberId)
             val userId = member.userId ?: throw notFound("Member")
+            val now = clock.nowForDb()
             UserRepository.setPasswordHash(userId, hash)
-            SessionRepository.revokeAllOfUser(userId, clock.nowForDb())
+            SessionRepository.revokeAllOfUser(userId, now)
+            // `hasPassword` is part of the member's sync data.
+            MemberRepository.stampSeq(householdId, member.id, recordChange(householdId), now)
         }
     }
 

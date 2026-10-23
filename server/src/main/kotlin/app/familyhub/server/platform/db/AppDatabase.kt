@@ -22,11 +22,19 @@ class AppDatabase(
     private val database: Database,
     private val changeBus: HouseholdChangeBus,
 ) {
-    suspend fun <T> dbQuery(block: suspend JdbcTransaction.() -> T): T {
+    /**
+     * [isolation] is a `java.sql.Connection.TRANSACTION_*` level (default: the database default, READ COMMITTED);
+     * sync pulls use REPEATABLE READ to read all tables from one snapshot.
+     */
+    suspend fun <T> dbQuery(
+        isolation: Int? = null,
+        readOnly: Boolean = false,
+        block: suspend JdbcTransaction.() -> T,
+    ): T {
         var pending = PendingChanges()
         val result =
             withContext(Dispatchers.IO) {
-                suspendTransaction(db = database) {
+                suspendTransaction(db = database, transactionIsolation = isolation, readOnly = readOnly) {
                     // A fresh holder per attempt, so nothing from a rolled-back attempt leaks out.
                     pending = PendingChanges().also { putUserData(PendingChanges.Key, it) }
                     block()

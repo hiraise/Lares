@@ -1,8 +1,11 @@
 package app.familyhub.server
 
 import app.familyhub.server.household.GroupAdminService
+import app.familyhub.server.household.GroupSyncHandler
 import app.familyhub.server.household.HouseholdAdminService
+import app.familyhub.server.household.HouseholdSyncHandler
 import app.familyhub.server.household.PermissionService
+import app.familyhub.server.household.PersonSyncHandler
 import app.familyhub.server.household.householdRoutes
 import app.familyhub.server.household.installPermissionChecks
 import app.familyhub.server.identity.AccountService
@@ -12,6 +15,7 @@ import app.familyhub.server.identity.InviteService
 import app.familyhub.server.identity.LoginCodeService
 import app.familyhub.server.identity.MeQuery
 import app.familyhub.server.identity.MemberAdminService
+import app.familyhub.server.identity.MemberSyncHandler
 import app.familyhub.server.identity.SetupCodeProvider
 import app.familyhub.server.identity.SetupService
 import app.familyhub.server.identity.crypto.CodeGenerator
@@ -27,14 +31,26 @@ import app.familyhub.server.platform.http.installHttpPlumbing
 import app.familyhub.server.platform.http.instanceRoute
 import app.familyhub.server.platform.http.protocolChecked
 import app.familyhub.server.platform.sync.HouseholdChangeBus
+import app.familyhub.server.sync.SyncEventsService
+import app.familyhub.server.sync.SyncHandlers
+import app.familyhub.server.sync.SyncHousekeeping
+import app.familyhub.server.sync.SyncPullService
+import app.familyhub.server.sync.SyncPushService
+import app.familyhub.server.sync.syncRoutes
+import app.familyhub.server.tags.TagSyncHandler
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.server.application.Application
+import io.ktor.server.application.install
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
+import io.ktor.server.websocket.WebSockets
+import io.ktor.server.websocket.pingPeriod
+import io.ktor.server.websocket.timeout
 import kotlinx.coroutines.runBlocking
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.seconds
 
 /** Everything the application needs, wired by hand (no DI framework on the server). */
 class AppDeps(
@@ -44,6 +60,8 @@ class AppDeps(
     val buildInfo: BuildInfo,
     val clock: Clock = Clock.System,
     val passwordHasher: PasswordHasher = PasswordHasher(),
+    /** Daily sync housekeeping; tests switch it off and call the job functions directly. */
+    val backgroundJobs: Boolean = true,
 ) {
     val tokenGenerator = TokenGenerator()
     val codeGenerator = CodeGenerator()
@@ -62,6 +80,15 @@ class AppDeps(
     /** Wrong invite and login codes count per IP like failed logins (10 per 15 minutes); keys have their own prefixes. */
     val inviteService = InviteService(db, clock, passwordHasher, codeGenerator, authService, loginLimiter, config.publicUrl)
     val loginCodeService = LoginCodeService(db, clock, codeGenerator, authService, permissionService, loginLimiter, config.publicUrl)
+
+    val syncHandlers =
+        SyncHandlers(
+            listOf(HouseholdSyncHandler(), MemberSyncHandler(), GroupSyncHandler(), TagSyncHandler(), PersonSyncHandler()),
+        )
+    val syncPullService = SyncPullService(db, syncHandlers, permissionService)
+    val syncPushService = SyncPushService(db, clock, syncHandlers, permissionService)
+    val syncEventsService = SyncEventsService(db, changeBus)
+    val syncHousekeeping = SyncHousekeeping(db, clock)
 }
 
 fun main() {
@@ -92,6 +119,10 @@ fun main() {
 
 fun Application.module(deps: AppDeps) {
     installHttpPlumbing()
+    install(WebSockets) {
+        pingPeriod = 30.seconds
+        timeout = 60.seconds
+    }
     installPermissionChecks(deps.permissionService)
     routing {
         healthRoutes(deps.db)
@@ -101,7 +132,9 @@ fun Application.module(deps: AppDeps) {
                 identityRoutes(deps.setupService, deps.authService, deps.accountService)
                 memberAdminRoutes(deps.authService, deps.memberAdminService, deps.inviteService, deps.loginCodeService)
                 householdRoutes(deps.authService, deps.householdAdminService, deps.groupAdminService)
+                syncRoutes(deps.authService, deps.syncPullService, deps.syncPushService, deps.syncEventsService)
             }
         }
     }
+    if (deps.backgroundJobs) deps.syncHousekeeping.start(this)
 }

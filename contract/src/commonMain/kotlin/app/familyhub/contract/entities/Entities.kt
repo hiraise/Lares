@@ -21,7 +21,11 @@ data class HouseholdData(
     val defaultLanguage: String,
 )
 
-/** A person: a member's profile or a relative without an account. The birth year may be unknown. */
+/**
+ * A person: a member's profile or a relative without an account. The birth year may be unknown.
+ * [color] is the personal color (FND-034); null for persons created before it existed, see `PaletteColors.fallbackFor`.
+ * It stays the last field so that older payloads still decode.
+ */
 @Serializable
 data class PersonData(
     val name: String,
@@ -31,6 +35,7 @@ data class PersonData(
     val relation: String? = null,
     val notes: String? = null,
     val contacts: List<ContactData> = emptyList(),
+    val color: PaletteColor? = null,
 )
 
 @Serializable
@@ -55,6 +60,15 @@ data class MemberData(
     val userId: String?,
     val login: String?,
     val hasPassword: Boolean,
+)
+
+/** A tag (TAG-001). The name is unique in the household, case-insensitive (TAG-006); archived tags keep their name. */
+@Serializable
+data class TagData(
+    val name: String,
+    val color: PaletteColor,
+    val icon: String? = null,
+    val archived: Boolean = false,
 )
 
 @Serializable

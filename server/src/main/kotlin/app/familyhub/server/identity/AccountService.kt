@@ -14,6 +14,7 @@ import app.familyhub.server.platform.http.ApiException
 import app.familyhub.server.platform.http.validate
 import app.familyhub.server.platform.nowForDb
 import app.familyhub.server.platform.sync.lockHousehold
+import app.familyhub.server.platform.sync.recordChange
 import app.familyhub.server.platform.toContract
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -40,7 +41,12 @@ class AccountService(
         validate { add("newPassword", Validators.password(request.newPassword)) }
         checkCurrentPassword(principal, request.currentPassword, field = "currentPassword")
         val newHash = withContext(Dispatchers.Default) { hasher.hash(request.newPassword) }
-        db.dbQuery { UserRepository.setPasswordHash(principal.userId, newHash) }
+        db.dbQuery {
+            lockHousehold(principal.householdId)
+            UserRepository.setPasswordHash(principal.userId, newHash)
+            // `hasPassword` is part of the member's sync data.
+            MemberRepository.stampSeq(principal.householdId, principal.memberId, recordChange(principal.householdId), clock.nowForDb())
+        }
     }
 
     suspend fun sessions(principal: MemberPrincipal): List<SessionInfo> =

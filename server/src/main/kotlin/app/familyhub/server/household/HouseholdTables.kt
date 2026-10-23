@@ -19,6 +19,9 @@ object PersonTable : Table("person") {
 
     /** JSON array of `ContactData`. */
     val contacts = text("contacts").default("[]")
+
+    /** `PaletteColor` wire name; null for persons created before FND-034. */
+    val color = text("color").nullable()
     val seq = long("seq")
     val createdAt = timestamp("created_at")
     val updatedAt = timestamp("updated_at")

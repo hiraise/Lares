@@ -1,6 +1,6 @@
 ---
 status: draft  # becomes "accepted" together with ADR-0008 when the M0 multi-device tests pass
-updated: 2026-10-22
+updated: 2026-10-23
 ---
 # Sync protocol v1
 
@@ -24,6 +24,9 @@ Implemented in M0 plans [M0-05](../plans/M0/05-sync-server.md) (server) and [M0-
 | `group` | no | groups endpoints | Embeds `permissions` and `memberIds` |
 | `person` | yes | — | Relatives and member profiles |
 | `tag` | yes | — | |
+
+Member data includes `login` and `hasPassword`, so password changes and resets also give the member a new seq.
+Tag name uniqueness uses PostgreSQL `lower()`, which needs a UTF-8 database locale (ctype) to fold Cyrillic.
 
 Later modules add types (`task`, `shopping_list`, …). Every type has a JSON data schema defined in `contract/`
 as a `@Serializable` data class; wire data is that class serialized without `id`, `seq`, `deleted`.
@@ -105,6 +108,9 @@ The server answers `{"reset": true, "changes": [], "cursor": 0, "hasMore": false
 4. `epoch` differs from `sync_epoch` — the database was restored (the restore procedure sets a new epoch; rule 3 alone
    misses restores once other clients have written past the stale cursor).
 
+An incremental pull (`after > 0`) without `accessVersion` or `epoch` is treated like a mismatch and also resets: the client
+cannot show that its data is current.
+
 The client then performs a **full resync** (see client section).
 
 ## Push
@@ -138,6 +144,12 @@ Processing, in order, **each mutation in its own transaction**:
 5. Tombstoned row: `upsert` → `rejected` / `ENTITY_DELETED`; `delete` → `applied` no-op.
 6. Permission check with the shared `WriteRules` from `contract/` (ADR-0014); validation of the merged entity (shared validators).
 7. Apply fields, allocate seq, write, log the mutation → `applied` with `seq`.
+
+Decoding is strict on the server: unknown field names, missing required fields (for a create) and values that the lenient
+client decoders would map to a fallback (e.g. an unknown color) are rejected with `VALIDATION_FAILED` and per-field codes.
+Text fields are normalized before validation (names are trimmed). An upsert that leaves the stored data unchanged is an
+`applied` no-op with `seq: null`. An unknown `type` or a malformed `mutationId` / `id` is `VALIDATION_FAILED`; a malformed
+`mutationId` cannot be logged.
 
 No-op applies return `seq: null`. Every outcome (applied or rejected) is logged, so a retry returns the same result.
 
@@ -208,7 +220,8 @@ Backoff after failures: 2 s doubling to 5 min; reset on success.
 ## Housekeeping (server jobs)
 
 - Daily: purge tombstones older than 90 days for rows nothing references (M0: `tag`, `group`, and `person` rows not referenced
-  by any member; `member` and `household` tombstones are kept); set `purge_horizon_seq = max(purge_horizon_seq, max purged seq)`.
+  by any member or invite; `member` and `household` tombstones are kept); set `purge_horizon_seq = max(purge_horizon_seq, max purged seq)`.
+  The purge of a household runs under its sync-state lock, like every writer.
 - Restore procedure (`deploy/scripts/restore.sh`): after `pg_restore`, set a new `sync_epoch` for every household.
 - Daily: delete `sync_mutation_log` rows older than 30 days.
 

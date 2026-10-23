@@ -1,6 +1,11 @@
 package app.familyhub.contract.validation
 
 import app.familyhub.contract.api.FieldErrorCode
+import app.familyhub.contract.entities.ContactData
+import app.familyhub.contract.entities.ContactKind
+import app.familyhub.contract.entities.PaletteColor
+import app.familyhub.contract.entities.PersonData
+import app.familyhub.contract.entities.TagData
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -105,5 +110,41 @@ class ValidatorsTest {
                 .addAll(mapOf("birthDay" to FieldErrorCode.OUT_OF_RANGE))
         assertEquals(mapOf("password" to FieldErrorCode.TOO_SHORT, "birthDay" to FieldErrorCode.OUT_OF_RANGE), errors.fields)
         assertTrue(ValidationErrors().isEmpty)
+    }
+
+    @Test
+    fun tag() {
+        assertTrue(Validators.tag(TagData("Car", PaletteColor.BLUE)).isEmpty())
+        assertTrue(Validators.tag(TagData("  Car  ", PaletteColor.BLUE, icon = "car")).isEmpty())
+        assertEquals(mapOf("name" to FieldErrorCode.REQUIRED), Validators.tag(TagData("   ", PaletteColor.BLUE)))
+        assertEquals(mapOf("name" to FieldErrorCode.TOO_LONG), Validators.tag(TagData("x".repeat(41), PaletteColor.BLUE)))
+        assertTrue(Validators.tag(TagData("x".repeat(40), PaletteColor.BLUE)).isEmpty())
+        assertEquals(mapOf("icon" to FieldErrorCode.INVALID_FORMAT), Validators.tag(TagData("Car", PaletteColor.BLUE, icon = " ")))
+    }
+
+    @Test
+    fun person() {
+        assertTrue(Validators.person(PersonData("Grandma", birthMonth = 2, birthDay = 29), 2026).isEmpty())
+        assertEquals(
+            mapOf(
+                "name" to FieldErrorCode.REQUIRED,
+                "birthYear" to FieldErrorCode.OUT_OF_RANGE,
+                "relation" to FieldErrorCode.TOO_LONG,
+                "notes" to FieldErrorCode.TOO_LONG,
+                "contacts" to FieldErrorCode.REQUIRED,
+            ),
+            Validators.person(
+                PersonData(
+                    name = "",
+                    birthYear = 1800,
+                    relation = "r".repeat(61),
+                    notes = "n".repeat(2001),
+                    contacts = listOf(ContactData(ContactKind.PHONE, " ")),
+                ),
+                2026,
+            ),
+        )
+        val tooMany = List(21) { ContactData(ContactKind.EMAIL, "a@b.c") }
+        assertEquals(mapOf("contacts" to FieldErrorCode.OUT_OF_RANGE), Validators.person(PersonData("A", contacts = tooMany), 2026))
     }
 }
