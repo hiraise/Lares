@@ -1,0 +1,3 @@
+# The server image only needs the installDist output (see server/Dockerfile).
+*
+!server/build/install/server/

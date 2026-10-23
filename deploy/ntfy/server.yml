@@ -1,0 +1,8 @@
+# ntfy push server for UnifiedPush (ADR-0006). base-url comes from NTFY_BASE_URL in docker-compose.yml.
+# Anonymous users may only use UnifiedPush topics ("up…"). One-time step after the first start:
+#   docker compose exec ntfy ntfy access '*' 'up*' read-write
+listen-http: ":80"
+behind-proxy: true
+cache-file: "/var/cache/ntfy/cache.db"
+auth-file: "/var/lib/ntfy/user.db"
+auth-default-access: "deny-all"

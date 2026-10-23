@@ -64,7 +64,7 @@ Full documentation map: [docs/README.md](docs/README.md).
 | `server/` | Ktor backend; test harness in `src/testFixtures` (shared with `integration-tests/`) | identity, administration, sync (M0-02…M0-05) |
 | `client/` | KMP client: shared code, Android app, later web/iOS/desktop | client core (M0-06); Android app shell (M0-07): onboarding, main scaffold, settings; family management (M0-08) |
 | `contract/` | KMP module shared by server and client: DTOs, routes, sync protocol, shared domain logic | errors, protocol, instance info (M0-02) |
-| `deploy/` | Docker Compose, Caddy, example configs, scripts | dev database only (`deploy/dev/`); production in M0-10 |
+| `deploy/` | Docker Compose, Caddy, ntfy, example configs, backup/restore/smoke scripts | production stack (M0-10); dev database in `deploy/dev/` |
 | `integration-tests/` | Multi-device sync tests: server + several clients in one JVM | sync invariants and scenarios (M0-06) |
 | `tools/dev/` | Agent dev scripts: short-output build/test, local server, test family, emulator driving | exists |
 | `tools/design-assets/` | Generates bundled fonts and icons (Python + fonttools) | exists (M0-07) |
@@ -108,6 +108,9 @@ troubleshooting: [dev-setup](docs/process/dev-setup.md).
 | Drive the app by text, screenshot | `tools/dev/ui.sh dump` / `tap TEXT` / `field N` / `type TEXT` / `shot NAME` / `crash` |
 | Start dev database only | `docker compose -f deploy/dev/docker-compose.yml up -d --wait` (port taken: `FAMILYHUB_DEV_DB_PORT=5434 …`) |
 | Run server with Gradle (main dev DB) | `./gradlew :server:run`, then `curl localhost:8080/health/ready` |
+| Server image (local) | `./gradlew :server:installDist && docker build -f server/Dockerfile -t familyhub-server:dev .` |
+| Production stack smoke test (ports 80/443 free) | `./gradlew :server:installDist && deploy/scripts/smoke.sh` |
+| Backup / restore (on the server host) | `deploy/scripts/backup.sh` / `deploy/scripts/restore.sh <file>` ([manual](docs/user/en/install-server.md)) |
 | Build debug APK | `./gradlew :client:android:assembleDebug` → `client/android/build/outputs/apk/debug/android-debug.apk` |
 | Regenerate fonts/icons | `tools/design-assets/.venv/bin/python tools/design-assets/build.py` ([README](tools/design-assets/README.md)) |
 

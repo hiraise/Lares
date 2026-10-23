@@ -4,7 +4,7 @@ Updated: 2026-10-23
 
 ## Phase
 
-**M0 Foundation — implementation in progress: M0-01…M0-09 done.**
+**M0 Foundation — implementation in progress: M0-01…M0-10 done.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
@@ -13,6 +13,8 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 
 ## Last completed
 
+- 2026-10-23 M0-10 Deploy and operations: Docker Compose stack (HTTPS, optional ntfy), backup/restore, smoke test,
+  release workflow (multi-arch image, APK), install manual en/ru.
 - 2026-10-23 M0-09 Notifications: local reminders, UnifiedPush (ntfy), background sync, Settings › Notifications.
 - 2026-10-23 M0-08 Family management screens.
 - 2026-10-23 Agent tooling: skills `plan-run`, `plan-finish`, `build-check`, `emulator`, agent `emulator-tester`,
@@ -20,9 +22,9 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 
 ## Next steps
 
-1. Next plan: [M0-10 Deploy and operations](plans/M0/10-deploy-and-ops.md), in a fresh session: `/plan-run M0-10`.
-   It brings the ntfy service; then check instant notifications end to end on a real phone (FND-051).
-2. After M0-11: M0 acceptance with the customer (APK, walkthrough, Russian changelog).
+1. Next plan: [M0-11 Load simulation](plans/M0/11-load-simulation.md), in a fresh session: `/plan-run M0-11`.
+2. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
+3. After M0-11: M0 acceptance with the customer (APK, walkthrough, Russian changelog).
 
 ## Plan progress
 
@@ -30,7 +32,9 @@ See the table in [plans README](plans/README.md#m0-plans).
 
 ## Waiting for the customer
 
-- GitHub repository: the customer will create it later; until then work is local.
+- GitHub repository: the customer will create it later; until then work is local. Release images and the
+  `ghcr.io/OWNER/...` default in `deploy/docker-compose.yml` need the owner name then.
+- For a real installation: a VPS (1 vCPU / 2 GB / 20 GB) and a domain with DNS access.
 
 ## Risks
 

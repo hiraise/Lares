@@ -1,0 +1,9 @@
+# Override for running a locally built server image instead of pulling one (development, smoke test):
+#   ./gradlew :server:installDist   # from the repository root
+#   docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build
+services:
+  server:
+    image: familyhub-server:local
+    build:
+      context: ..
+      dockerfile: server/Dockerfile

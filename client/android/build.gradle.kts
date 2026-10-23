@@ -17,9 +17,27 @@ android {
         versionName = "0.1.0"
     }
 
+    // Release signing only when a keystore is provided through the environment (release workflow); keystores are
+    // never committed. Without it, `assembleRelease` produces an unsigned APK and releases ship the debug APK.
+    val keystoreFile = providers.environmentVariable("ANDROID_KEYSTORE_FILE").orNull
+    val releaseSigning =
+        if (keystoreFile.isNullOrBlank()) {
+            null
+        } else {
+            signingConfigs.create("release") {
+                storeFile = file(keystoreFile)
+                storePassword = providers.environmentVariable("ANDROID_KEYSTORE_PASSWORD").get()
+                keyAlias = providers.environmentVariable("ANDROID_KEY_ALIAS").get()
+                keyPassword = providers.environmentVariable("ANDROID_KEY_PASSWORD").get()
+            }
+        }
+
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
+        }
+        release {
+            signingConfig = releaseSigning
         }
     }
 

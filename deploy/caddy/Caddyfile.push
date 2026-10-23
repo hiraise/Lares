@@ -1,0 +1,9 @@
+# Same as Caddyfile plus the ntfy push server (start with `--profile push`, FAMILYHUB_CADDYFILE=Caddyfile.push).
+{$FAMILYHUB_DOMAIN} {
+	encode zstd gzip
+	reverse_proxy server:8080
+}
+
+{$FAMILYHUB_NTFY_DOMAIN} {
+	reverse_proxy ntfy:80
+}

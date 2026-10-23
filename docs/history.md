@@ -95,3 +95,12 @@ Current state and next steps: [STATUS.md](STATUS.md).
   dialog, Settings › Notifications. Tests: server +11 (fake push service decrypts RFC 8291 messages), client +5,
   contract +5. Emulator (API 37): permission flow, offline test reminder, WorkManager job and its cancellation on
   logout, exact-alarm settings, en/ru; four small UI fixes after it. End-to-end UnifiedPush needs a phone with ntfy.
+- 2026-10-23 **M0-10 Deploy and operations.** `server/Dockerfile` (temurin 21 JRE noble, copies `installDist`, non-root
+  uid 10001, small-heap `JAVA_OPTS`, curl healthcheck); `deploy/docker-compose.yml` (postgres 18, server 384 MiB,
+  Caddy 64 MiB with `Caddyfile`/`Caddyfile.push`, ntfy behind profile `push`, deny-all + anonymous `up*`), documented
+  `.env.example`, `docker-compose.build.yml` override for local images; `backup.sh` (pg_dump -Fc, keeps 14),
+  `restore.sh` (validates dump, recreates DB, new sync epoch), `smoke.sh` (HTTPS on localhost via Caddy's local CA,
+  setup, backup, tag via sync, ntfy access check, restore, tag gone + epoch changed). Env-based Android release
+  signing; `release.yml` (multi-arch GHCR image, APK on a GitHub Release, tag/version check) and CI job
+  `deploy-smoke`; actionlint and shellcheck clean. Smoke passes locally; server 160 MiB of 384 MiB after start.
+  User manual `install-server.md` (en/ru).

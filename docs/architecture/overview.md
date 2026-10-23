@@ -37,6 +37,9 @@ flowchart LR
     A -- tiles --> M
 ```
 
+Deployment details (M0-10): only Caddy publishes ports; ntfy has its own domain behind Caddy, so the server's push
+requests and the phones' ntfy connections both go through Caddy. Files and scripts: [deploy/README.md](../../deploy/README.md).
+
 ## Server
 
 - One Ktor process, feature modules per ADR-0012:
@@ -74,7 +77,7 @@ client/android/           Android application shell
 client/web/               M7
 integration-tests/        multi-device sync tests (server + clients in one JVM; reuses server test fixtures)
 tools/loadsim/            load simulation CLI
-deploy/                   docker-compose.yml, Caddyfile, .env.example, scripts
+deploy/                   docker-compose.yml, caddy/, ntfy/, .env.example, scripts/ (backup, restore, smoke)
 docs/                     documentation
 ```
 

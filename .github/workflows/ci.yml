@@ -30,3 +30,21 @@ jobs:
           name: familyhub-debug-apk
           path: client/android/build/outputs/apk/debug/*.apk
           if-no-files-found: error
+
+  deploy-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Build the server distribution
+        run: ./gradlew :server:installDist --stacktrace
+
+      - name: Smoke test the Docker Compose stack (HTTPS, setup, backup, restore, ntfy)
+        run: deploy/scripts/smoke.sh

@@ -1,0 +1,87 @@
+# FamilyHub production stack (ADR-0005). Run from this directory with a filled-in `.env` (copy `.env.example`):
+#   docker compose up -d                     # server, database, HTTPS proxy
+#   docker compose --profile push up -d      # plus ntfy for instant notifications (see .env.example)
+# Installation guide: docs/user/en/install-server.md. Only Caddy publishes ports.
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: familyhub
+      POSTGRES_DB: familyhub
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      # PostgreSQL 18 images keep data under /var/lib/postgresql (not .../data).
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "familyhub", "-d", "familyhub"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    logging: *logging
+
+  server:
+    image: ${FAMILYHUB_IMAGE:-ghcr.io/OWNER/familyhub-server}:${FAMILYHUB_VERSION:-latest}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      FAMILYHUB_DB_URL: jdbc:postgresql://postgres:5432/familyhub
+      FAMILYHUB_DB_USER: familyhub
+      FAMILYHUB_DB_PASSWORD: ${FAMILYHUB_DB_PASSWORD:?set FAMILYHUB_DB_PASSWORD in .env (same value as POSTGRES_PASSWORD)}
+      FAMILYHUB_PUBLIC_URL: ${FAMILYHUB_PUBLIC_URL:-https://${FAMILYHUB_DOMAIN:?set FAMILYHUB_DOMAIN in .env}}
+      FAMILYHUB_SETUP_CODE: ${FAMILYHUB_SETUP_CODE:-}
+      FAMILYHUB_LOG_FORMAT: ${FAMILYHUB_LOG_FORMAT:-json}
+      FAMILYHUB_PUSH_ALLOWED_HOSTS: ${FAMILYHUB_PUSH_ALLOWED_HOSTS:-}
+    mem_limit: 384m
+    logging: *logging
+
+  caddy:
+    image: caddy:2.11.7-alpine
+    restart: unless-stopped
+    depends_on:
+      - server
+    command: ["caddy", "run", "--config", "/etc/caddy/${FAMILYHUB_CADDYFILE:-Caddyfile}", "--adapter", "caddyfile"]
+    environment:
+      FAMILYHUB_DOMAIN: ${FAMILYHUB_DOMAIN:?set FAMILYHUB_DOMAIN in .env}
+      FAMILYHUB_NTFY_DOMAIN: ${FAMILYHUB_NTFY_DOMAIN:-ntfy.${FAMILYHUB_DOMAIN}}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./caddy:/etc/caddy:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    mem_limit: 64m
+    logging: *logging
+
+  ntfy:
+    image: binwiederhier/ntfy:v2.32.0
+    profiles: ["push"]
+    restart: unless-stopped
+    command: ["serve"]
+    environment:
+      NTFY_BASE_URL: https://${FAMILYHUB_NTFY_DOMAIN:-ntfy.${FAMILYHUB_DOMAIN}}
+    volumes:
+      - ./ntfy/server.yml:/etc/ntfy/server.yml:ro
+      - ntfy_cache:/var/cache/ntfy
+      - ntfy_data:/var/lib/ntfy
+    mem_limit: 64m
+    logging: *logging
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:
+  ntfy_cache:
+  ntfy_data:
