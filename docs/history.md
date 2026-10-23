@@ -123,3 +123,9 @@ Current state and next steps: [STATUS.md](STATUS.md).
 - 2026-10-23 Release signing and flow (ADR-0019): new Lares-only release key (not shared with babylog), stored in GitHub
   secrets and `~/.android/lares-release/`; release workflow requires it and verifies the certificate; releases per
   milestone plus patch releases, no betas (customer); `tools/release/` scripts; `v0.1.1` was a debug APK.
+- 2026-10-23 M1-01 Tasks contract: `TaskData`, `Recurrence`, `ChecklistItemData`, `TaskCompletionData` (ISO dates,
+  lenient enums; an unknown repeat rule decodes to `null` = one-off), entity types, `Recurrences` and `TaskSchedule`
+  (current occurrence, overdue, groups, reminder and notice times, checklist reset, next overdue check), `TaskRules` +
+  `tasks.view` write gate, task validators and normalizers, `NotificationType.TASK_REMINDER` (label en/ru). Contract
+  tests 103 (all task rules from the spec examples, Moscow and Berlin DST). Fix during the work: a week rule's anchor is
+  scheduled only on a chosen weekday (design clarified; M1-02 plan gets the unknown-rule rejection).

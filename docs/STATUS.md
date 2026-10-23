@@ -4,7 +4,8 @@ Updated: 2026-10-23
 
 ## Phase
 
-**M0 Foundation — all plans M0-01…M0-11 done; M0 acceptance with the customer next.**
+**M0 Foundation — all plans M0-01…M0-11 done; M0 acceptance with the customer pending.
+M1 Tasks in progress: M1-01 done, M1-02 next.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
@@ -13,6 +14,8 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 
 ## Last completed
 
+- 2026-10-23 M1-01 Tasks contract: task data classes, repeat rules and current-occurrence logic (`TaskSchedule`),
+  `TaskRules`, validators, `task.reminder` type; 103 contract tests.
 - 2026-10-23 Release signing and flow (ADR-0019): permanent Lares key (GitHub secrets; original in
   `~/.android/lares-release/`), release workflow fails without it and checks the certificate fingerprint, notes from
   CHANGELOG, `tools/release/release.sh`, versionCode derived from the version, [release process](process/release.md).
@@ -36,7 +39,8 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
    ([deploy/README](../deploy/README.md#releases)).
 3. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
 4. M4 plan: re-run the load test with location uploads every 30 s (ADR-0015).
-5. M1 Tasks: [tasks spec](product/features/tasks.md) approved (2026-10-23); execute plans [M1-01…M1-07](plans/README.md#m1-plans) (design: [architecture/tasks.md](architecture/tasks.md), ADR-0017, ADR-0018).
+5. M1 Tasks: next plan M1-02 (server tables and sync), then M1-03…M1-07 ([plans](plans/README.md#m1-plans); design:
+   [architecture/tasks.md](architecture/tasks.md), ADR-0017, ADR-0018).
 
 ## Plan progress
 

@@ -51,6 +51,7 @@ import app.lares.client.resources.notif_type_system_test
 import app.lares.client.resources.notif_type_task_assigned
 import app.lares.client.resources.notif_type_task_completed
 import app.lares.client.resources.notif_type_task_overdue
+import app.lares.client.resources.notif_type_task_reminder
 import app.lares.client.resources.notif_types
 import app.lares.client.resources.notif_use
 import app.lares.client.resources.settings_notifications
@@ -372,6 +373,7 @@ private fun NotificationType.label(): StringResource =
         NotificationType.TASK_ASSIGNED -> Res.string.notif_type_task_assigned
         NotificationType.TASK_OVERDUE -> Res.string.notif_type_task_overdue
         NotificationType.TASK_COMPLETED -> Res.string.notif_type_task_completed
+        NotificationType.TASK_REMINDER -> Res.string.notif_type_task_reminder
     }
 
 private fun PushTestResult.message(): StringResource =

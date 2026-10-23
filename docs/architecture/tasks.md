@@ -67,9 +67,14 @@ data class TaskCompletionData(
 )
 ```
 
-`RecurrenceMode`, `RecurrenceUnit` use lenient enum serializers (unknown → the client hides the rule and shows the task as
-a one-off; the server rejects unknown values as usual). `DayOfWeek` sets are serialized as ISO names (`MONDAY`) through a
-lenient set serializer (unknown values dropped).
+`RecurrenceMode`, `RecurrenceUnit` use lenient enum serializers without a fallback, and `TaskData.recurrence` uses
+`LenientRecurrenceSerializer`: a rule with an unknown mode or unit decodes to `null`, so the client shows the task as a
+one-off. The server shares the serializer, so its task handler rejects a mutation whose merged JSON has a non-null
+`recurrence` that decoded to `null` (`recurrence: INVALID_FORMAT`). `DayOfWeek` sets are serialized as ISO names
+(`MONDAY`) through a lenient set serializer (unknown values dropped).
+
+A week rule's anchor is scheduled only if its weekday is chosen: with anchor Wednesday and weekdays Mon/Thu, the first
+date is that Thursday.
 
 Entity types: `EntityTypes.TASK = "task"`, `CHECKLIST_ITEM = "checklist_item"`, `TASK_COMPLETION = "task_completion"`.
 

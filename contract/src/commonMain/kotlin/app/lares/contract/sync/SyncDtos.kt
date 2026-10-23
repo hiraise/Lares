@@ -16,6 +16,9 @@ object EntityTypes {
     const val GROUP = "group"
     const val PERSON = "person"
     const val TAG = "tag"
+    const val TASK = "task"
+    const val CHECKLIST_ITEM = "checklist_item"
+    const val TASK_COMPLETION = "task_completion"
 }
 
 /** Limits of pull and push. */

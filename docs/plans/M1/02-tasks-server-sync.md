@@ -53,6 +53,9 @@ Out of scope: notifications, `overdue_check_at` maintenance (M1-03); client (M1-
   members via `HouseholdRefs` style query on `member` (non-deleted), tags via `TagTable` (non-deleted, same household).
   Routine → one-off → `recurrence: INVALID_FORMAT`; changed `createdBy` → `createdBy: INVALID_FORMAT`; changed `taskId` of a child
   → `taskId: INVALID_FORMAT`.
+- Unknown rule values (added by M1-01): `TaskData.recurrence` decodes leniently, so a rule with an unknown `mode`/`unit` becomes
+  `null`. The task handler rejects a mutation whose merged JSON has a non-null `recurrence` but whose decoded `recurrence` is
+  `null` → `VALIDATION_FAILED recurrence: INVALID_FORMAT` (test it).
 - Cascade: `TaskSyncHandler.tombstone` also tombstones non-deleted checklist items and completions of the task, one
   `tx.recordChange(householdId)` per row, children before the task row is returned.
 - `canSee` = `viewer.permissions.has(Permission.TASKS_VIEW)` for all three handlers.

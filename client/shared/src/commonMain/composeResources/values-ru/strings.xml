@@ -435,6 +435,7 @@
     <string name="notif_type_task_assigned">Мне назначили задачу</string>
     <string name="notif_type_task_overdue">Задача просрочена</string>
     <string name="notif_type_task_completed">Задача выполнена</string>
+    <string name="notif_type_task_reminder">Напоминания о задачах</string>
     <string name="notif_device">На этом телефоне</string>
     <string name="notif_permission">Показ уведомлений</string>
     <string name="notif_permission_off">Не разрешён</string>

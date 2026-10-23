@@ -1,8 +1,14 @@
 package app.lares.contract.validation
 
 import app.lares.contract.api.FieldErrorCode
+import app.lares.contract.entities.ChecklistItemData
 import app.lares.contract.entities.PersonData
+import app.lares.contract.entities.Recurrence
+import app.lares.contract.entities.RecurrenceMode
+import app.lares.contract.entities.RecurrenceUnit
 import app.lares.contract.entities.TagData
+import app.lares.contract.entities.TaskCompletionData
+import app.lares.contract.entities.TaskData
 import kotlinx.datetime.IllegalTimeZoneException
 import kotlinx.datetime.TimeZone
 
@@ -27,6 +33,13 @@ object Validators {
     const val NOTES_MAX = 2000
     const val CONTACTS_MAX = 20
     const val CONTACT_VALUE_MAX = 200
+    const val TASK_TITLE_MAX = 200
+    const val CHECKLIST_TEXT_MAX = 200
+    const val TASK_MAX_ASSIGNEES = 20
+    const val TASK_MAX_TAGS = 20
+    const val RECURRENCE_INTERVAL_MAX = 999
+    const val REMINDER_MINUTES_MAX = 43200
+    const val CHECKLIST_POSITION_MAX = 1_000_000
 
     val LANGUAGES: Set<String> = setOf("en", "ru")
 
@@ -90,6 +103,59 @@ object Validators {
         errors.add("contacts", contactProblem)
         return errors.fields
     }
+
+    /** Trims the title and notes; blank notes become null. Server and client normalize before validating and storing. */
+    fun normalizeTask(data: TaskData): TaskData = data.copy(title = data.title.trim(), notes = data.notes?.trim()?.ifEmpty { null })
+
+    fun normalizeChecklistItem(data: ChecklistItemData): ChecklistItemData = data.copy(text = data.text.trim())
+
+    /**
+     * Field rules of a task (architecture/tasks.md § Validation). Rules that need the database (members, tags, creator,
+     * routine → one-off) are checked by the server handlers.
+     */
+    fun task(data: TaskData): Map<String, FieldErrorCode> {
+        val errors =
+            ValidationErrors()
+                .add("title", requiredText(data.title, TASK_TITLE_MAX))
+                .add("notes", optionalText(data.notes, NOTES_MAX))
+        val needsDate = data.dueTime != null || data.recurrence != null || data.reminderMinutesBefore != null
+        if (needsDate && data.dueDate == null) errors.add("dueDate", FieldErrorCode.REQUIRED)
+        val time = data.dueTime
+        if (time != null && (time.second != 0 || time.nanosecond != 0)) errors.add("dueTime", FieldErrorCode.INVALID_FORMAT)
+        errors.add("recurrence", data.recurrence?.let(::recurrence))
+        val reminder = data.reminderMinutesBefore
+        if (reminder != null && reminder !in 0..REMINDER_MINUTES_MAX) {
+            errors.add("reminderMinutesBefore", FieldErrorCode.OUT_OF_RANGE)
+        }
+        if (data.assigneeIds.size > TASK_MAX_ASSIGNEES) errors.add("assigneeIds", FieldErrorCode.OUT_OF_RANGE)
+        if (data.tagIds.size > TASK_MAX_TAGS) errors.add("tagIds", FieldErrorCode.OUT_OF_RANGE)
+        return errors.fields
+    }
+
+    /** Weekdays only for fixed weekly rules, and then at least one. */
+    fun recurrence(rule: Recurrence): FieldErrorCode? {
+        val weekly = rule.mode == RecurrenceMode.FIXED && rule.unit == RecurrenceUnit.WEEK
+        return when {
+            rule.interval !in 1..RECURRENCE_INTERVAL_MAX -> FieldErrorCode.OUT_OF_RANGE
+            weekly == rule.weekdays.isEmpty() -> FieldErrorCode.INVALID_FORMAT
+            else -> null
+        }
+    }
+
+    fun checklistItem(data: ChecklistItemData): Map<String, FieldErrorCode> =
+        ValidationErrors()
+            .add("text", requiredText(data.text, CHECKLIST_TEXT_MAX))
+            .add("position", if (data.position in 0..CHECKLIST_POSITION_MAX) null else FieldErrorCode.OUT_OF_RANGE)
+            .fields
+
+    /** [task] is the parent; skipping is for routines only. Other completion rules need the server (handlers). */
+    fun taskCompletion(
+        data: TaskCompletionData,
+        task: TaskData,
+    ): Map<String, FieldErrorCode> =
+        ValidationErrors()
+            .add("skipped", if (data.skipped && task.recurrence == null) FieldErrorCode.INVALID_FORMAT else null)
+            .fields
 
     fun deviceName(value: String): FieldErrorCode? = requiredText(value, DEVICE_NAME_MAX)
 

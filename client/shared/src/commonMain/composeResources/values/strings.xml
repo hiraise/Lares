@@ -436,6 +436,7 @@
     <string name="notif_type_task_assigned">Task assigned to me</string>
     <string name="notif_type_task_overdue">Task overdue</string>
     <string name="notif_type_task_completed">Task completed</string>
+    <string name="notif_type_task_reminder">Task reminders</string>
     <string name="notif_device">On this phone</string>
     <string name="notif_permission">Show notifications</string>
     <string name="notif_permission_off">Not allowed</string>

@@ -17,8 +17,9 @@ data class Viewer(
 object WriteRules {
     /**
      * [existingPersonOwner] is true when the mutation targets an existing person that is the viewer's own profile;
-     * members may always edit their own profile. Types not listed here (including read-only `household`, `member`,
-     * `group`) cannot be changed through sync.
+     * members may always edit their own profile. For `task`, `checklist_item` and `task_completion` this is only the
+     * coarse `tasks.view` gate; the entity-level decision is [TaskRules]. Types not listed here (including read-only
+     * `household`, `member`, `group`) cannot be changed through sync.
      */
     fun canMutate(
         type: String,
@@ -37,6 +38,10 @@ object WriteRules {
                     MutationOp.UPSERT -> permissions.has(Permission.PERSONS_MANAGE) || existingPersonOwner
                     MutationOp.DELETE -> permissions.has(Permission.PERSONS_MANAGE)
                 }
+            }
+
+            EntityTypes.TASK, EntityTypes.CHECKLIST_ITEM, EntityTypes.TASK_COMPLETION -> {
+                permissions.has(Permission.TASKS_VIEW)
             }
 
             else -> {
