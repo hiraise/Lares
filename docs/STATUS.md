@@ -30,6 +30,7 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 1. M0 acceptance with the customer (APK, walkthrough, Russian changelog).
 2. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
 3. M4 plan: re-run the load test with location uploads every 30 s (ADR-0015).
+4. M1 Tasks: [tasks spec](product/features/tasks.md) approved (2026-10-23); execute plans [M1-01…M1-07](plans/README.md#m1-plans) (design: [architecture/tasks.md](architecture/tasks.md), ADR-0017, ADR-0018).
 
 ## Plan progress
 

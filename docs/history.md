@@ -116,3 +116,5 @@ Current state and next steps: [STATUS.md](STATUS.md).
   `app.familyhub` → `app.lares` (also Android application id), classes `FamilyHub*` → `Lares*`, env vars
   `FAMILYHUB_*` → `LARES_*`, database, volume and image names `familyhub*` → `lares*`, protocol header
   `Lares-Protocol`, UI strings. Image default `ghcr.io/hiraise/lares-server`. Remote: `github.com/hiraise/lares`.
+- 2026-10-23 M1 planning: tasks spec detailed and approved (Q-014…Q-017 answered), [tasks design](architecture/tasks.md),
+  ADR-0017 (occurrences derived from completions), ADR-0018 (tags embedded in entities), plans M1-01…M1-07.

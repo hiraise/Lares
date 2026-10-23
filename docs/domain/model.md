@@ -1,6 +1,6 @@
 ---
 status: draft
-updated: 2026-10-22
+updated: 2026-10-23
 ---
 # Domain model
 
@@ -27,24 +27,23 @@ erDiagram
     HOUSEHOLD ||--o{ INVITE : "issues"
     USER ||--o{ SESSION : "has"
     HOUSEHOLD ||--o{ TAG : "has"
-    TAG ||--o{ TAG_LINK : "links"
 ```
 
-- `TAG_LINK` points to any taggable entity: (`tag_id`, `entity_type`, `entity_id`).
+- Taggable entities carry `tagIds` (a set of tag ids) in their own data; there is no link entity (ADR-0018).
 - Access rules (location visibility, money account access) have a subject and a target, each a group or a member (ADR-0014).
 
 ## Tasks and shopping (M1, M2)
 
 ```mermaid
 erDiagram
-    TASK ||--o{ TASK_ASSIGNEE : "assigned to"
-    MEMBER ||--o{ TASK_ASSIGNEE : ""
+    MEMBER ||--o{ TASK : "creates"
     TASK ||--o{ CHECKLIST_ITEM : "contains"
     TASK ||--o{ TASK_COMPLETION : "history"
     SHOPPING_LIST ||--o{ SHOPPING_ITEM : "contains"
 ```
 
-- A routine is a task with recurrence fields; occurrence modelling decided in M1.
+- A routine is a task with a recurrence rule. Occurrences are computed from the task and its completions, not stored
+  (ADR-0017); assignees and tags are id sets inside the task. Design: [architecture/tasks.md](../architecture/tasks.md).
 
 ## Calendar (M3)
 

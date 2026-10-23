@@ -39,10 +39,15 @@ Add terms here before using them in code.
 | --- | --- | --- |
 | Task | Задача | Something to do, optionally with due date and assignees. |
 | Routine | Регулярная задача | Task with a recurrence rule. |
-| Occurrence | Повторение | One instance of a routine. |
+| Occurrence | Повторение | One instance of a routine, identified by its date. Computed, not stored (ADR-0017). |
+| Current occurrence | Текущее повторение | The one open occurrence of a routine; for a one-off task, the task itself. |
+| Anyone task | Задача для всех («Кто угодно») | Task without assignees: any member with access can complete it (TSK-002). |
+| Fixed schedule | По расписанию | Routine repeating on calendar dates (every N days/weeks on weekdays/months/years). |
+| After-completion schedule | После выполнения | Routine whose next occurrence counts from the last completion (TSK-011). |
+| Skip | Пропустить | Close the current occurrence of a routine without doing it; recorded in history (TSK-005). |
 | Assignee | Исполнитель | Member responsible for a task. |
 | Rotation | Очерёдность | Assignees of a routine take turns. |
-| Completion | Выполнение | Record of who completed an occurrence and when. |
+| Completion | Выполнение | Record of who completed (or skipped) an occurrence and when. Immutable; undo deletes it. |
 | Checklist item | Пункт чек-листа | Sub-item inside a task. |
 | Shopping list | Список покупок | Shared list of items to buy. |
 | Shopping item | Позиция | One entry in a shopping list. |

@@ -29,3 +29,7 @@ Q-001…Q-012 answered by the customer on 2026-10-22 during kickoff; later answe
 | Q-011 | Tasks in M1 | Add overdue notification to the creator. Rotation moved to later. Parent approval not requested. |
 | Q-012 | Do administrators see private accounts | Yes: administrators see all data; nothing is hidden from them. Sections can be restricted per group (ADR-0014). |
 | Q-013 | Bottom bar (2026-10-23) | Today · Tasks · Shopping · Calendar · More; Map, Budget, Family, Tags under "More" (FND-064). |
+| Q-014 | Several assignees (2026-10-23) | One completion closes the task (or the occurrence) for all assignees. |
+| Q-015 | Who gets a task reminder (2026-10-23) | Assignees; for "anyone" tasks everybody with access to tasks. |
+| Q-016 | Tasks without a time (2026-10-23) | Reminder at 09:00 on the day; overdue notice to the creator at 09:00 the next morning. |
+| Q-017 | Who can tick a task off (2026-10-23) | Assignees, the creator and members with "Edit others' tasks". |

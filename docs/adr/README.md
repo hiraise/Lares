@@ -23,6 +23,8 @@ Status values: `proposed` (direction chosen, details or customer confirmation pe
 | [0014](0014-group-based-permissions.md) | Group-based permissions | accepted | 2026-10-22 |
 | [0015](0015-load-measurement-amendment.md) | Load measurement in M0 without location uploads (amends 0013) | accepted | 2026-10-22 |
 | [0016](0016-visual-design-system.md) | Visual design system: neutral Material 3 with a lake-gradient accent | accepted | 2026-10-23 |
+| [0017](0017-task-occurrences-derived-from-completions.md) | Routine occurrences are derived from completions, not stored | accepted | 2026-10-23 |
+| [0018](0018-tags-embedded-in-entities.md) | Tags are stored as id sets inside taggable entities | accepted | 2026-10-23 |
 
 ## When to write an ADR
 
