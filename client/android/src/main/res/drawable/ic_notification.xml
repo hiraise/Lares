@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Notification small icon: Material Symbols "notifications" (Apache 2.0), white for the status bar. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="960"
+    android:viewportHeight="960">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M190 753.1V703.1H258.5V395.4Q258.5 315.8 308.2 255.1Q357.9 194.3 435 178.4V155Q435 136.2 448.1 123.1Q461.2 110 479.9 110Q498.7 110 511.8 123.1Q525 136.2 525 155V178.4Q602.1 194.3 651.8 255.1Q701.5 315.8 701.5 395.4V703.1H770V753.1ZM651.5 395.4V703.1H308.5V395.4Q308.5 324.2 358.6 274Q408.8 223.8 480 223.8Q551.2 223.8 601.4 274Q651.5 324.2 651.5 395.4ZM479.9 861.5Q451.6 861.5 431.6 841.4Q411.5 821.3 411.5 793.1H548.5Q548.5 821.5 528.3 841.5Q508.2 861.5 479.9 861.5ZM308.5 703.1H651.5V395.4Q651.5 324.2 601.4 274Q551.2 223.8 480 223.8Q408.8 223.8 358.6 274Q308.5 324.2 308.5 395.4Z" />
+</vector>

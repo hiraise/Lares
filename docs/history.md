@@ -82,3 +82,16 @@ Current state and next steps: [STATUS.md](STATUS.md).
   calls, `emu.sh` emulator lifecycle, `ui.sh` tap-by-text and downscaled screenshots), project skills `plan-run`,
   `plan-finish`, `build-check`, `emulator` and the `emulator-tester` agent (walkthroughs in their own context).
   STATUS.md shortened; the log of past work moved here.
+- 2026-10-23 M0-09 Notifications. Contract: `NotificationType` (stable wire names, channel per type), `PushPayload`,
+  push registration, test result and notification settings DTOs. Server: migration V5 (`push_registration` per session,
+  `instance_secret` with the VAPID keys, `notification_setting`), `WebPushSender` on `com.interaso:webpush` (own HTTP
+  call so any 2xx counts; 404/410 deletes the registration), SSRF guard with `FAMILYHUB_PUSH_ALLOWED_HOSTS`,
+  `NotificationService` (mutes respected, revoked sessions lose their registration), sync tickles throttled to one per
+  30 s per household with a trailing send, endpoints `/me/push`, `/me/push/test`, `/me/notification-settings`.
+  Client: local `reminder`, `notification_mute`, `push_endpoint` tables (SQLDelight migration 1 → 2), `Reminders`,
+  `PushMessageHandler`, `PushEndpoints` (re-upload when offline or the UI language changed), `NotificationsCoordinator`
+  (login/logout lifecycle); Android: channels, `AlarmManager` reminders with boot/update re-registration, `SyncWorker`
+  (periodic 15 min + expedited on tickles), UnifiedPush `PushService` and distributor picker, post-login permission
+  dialog, Settings › Notifications. Tests: server +11 (fake push service decrypts RFC 8291 messages), client +5,
+  contract +5. Emulator (API 37): permission flow, offline test reminder, WorkManager job and its cancellation on
+  logout, exact-alarm settings, en/ru; four small UI fixes after it. End-to-end UnifiedPush needs a phone with ntfy.

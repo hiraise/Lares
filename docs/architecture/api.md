@@ -127,3 +127,26 @@ DTOs live in `contract/…/api/admin/AdminDtos.kt`; QR/link payloads are built a
 - Taken logins answer `LOGIN_TAKEN` with `fields.login = TAKEN`.
 - `POST /login-codes` with another member's id checks `household.manage` first (403 without it, even for unknown ids),
   then the id (404).
+
+### Notification endpoint details (M0-09)
+
+DTOs live in `contract/…/api/notifications/NotificationDtos.kt` (FND-051, FND-052; plan M0-09).
+
+- `PUT /me/push` body `PushRegistrationRequest {endpoint, p256dh, auth, language}`: the UnifiedPush endpoint of the
+  calling **session** (one per session; a new PUT replaces it) → **204**. `p256dh` (65-byte uncompressed P-256 key) and
+  `auth` (16 bytes) are base64url; encryption is mandatory. `language` is the device UI language (`en`/`ru`, other
+  values fall back to `en`); the server renders notification texts in it. `VALIDATION_FAILED` with field errors for a
+  bad key, an endpoint longer than 2048 characters, or an endpoint that is not http(s) or whose host resolves to a
+  non-global address (loopback, RFC 1918, RFC 4193, link-local, CGNAT) unless the host is listed in
+  `FAMILYHUB_PUSH_ALLOWED_HOSTS` (comma-separated). The same check runs again before every send.
+- `DELETE /me/push` → **204**. Logout and every session revocation also delete the session's registration.
+- `POST /me/push/test` → **200** `PushTestResponse {result}`: `sent`, `muted` (the member muted `system.test`),
+  `not_registered`, `expired` (the push service answered 404/410; the registration was deleted), `failed`.
+- `GET /me/notification-settings` → `NotificationSettings {muted: [type…]}`; `PUT` replaces the muted set and answers the
+  stored settings. Types are `NotificationType` wire names (`system.test`, `task.assigned`, `task.overdue`,
+  `task.completed`); unknown names are dropped.
+- Sending (server): Web Push (RFC 8030) with `aes128gcm` (RFC 8291) and VAPID (RFC 8292). The VAPID key pair is generated
+  on first use and kept in the `instance_secret` table. `TTL` 86400 s and `Urgency: high` for notifications, `TTL` 600 s
+  for sync tickles. 404/410 deletes the registration; other failures are logged and dropped (no retry queue).
+- Payload (cleartext ≤ 2 KB): `PushPayload {kind: "sync" | "notification", seq?, type?, title?, body?, entityType?, entityId?}`.
+  Muted notification types are not sent at all; sync tickles cannot be muted.

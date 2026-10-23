@@ -40,4 +40,7 @@ dependencies {
     implementation(projects.client.shared)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.work.runtime)
+    // UnifiedPush connector only; never `embedded-fcm-distributor` (Google Play Services, ADR-0006).
+    implementation(libs.unifiedpush.connector)
 }

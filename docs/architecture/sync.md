@@ -177,7 +177,10 @@ WebSocket `GET /api/v1/sync/events` (bearer token on the upgrade request).
 - Server → client: `{"type":"hello","seq":N}` on connect, `{"type":"changed","seq":N}` after each commit in the household
   (debounced to at most one message per 500 ms per connection).
 - Ping every 30 s. The client keeps the socket open only while the app is in the foreground.
-- In the background, the same "changed" signal arrives as a content-free push (M0-09).
+- In the background, the same signal arrives as a content-free UnifiedPush message `{"kind":"sync","seq":N}` (M0-09):
+  after household changes the server sends it to every registered session of the household, the originating one
+  included, **at most once per 30 s per household with a trailing send** (changes inside a window are pushed when it
+  ends). The phone enqueues an expedited one-time sync work; WorkManager also syncs every 15 min while logged in.
 
 ## Client data model (SQLite)
 

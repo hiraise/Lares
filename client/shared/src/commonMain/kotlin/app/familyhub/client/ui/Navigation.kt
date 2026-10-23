@@ -35,6 +35,7 @@ import app.familyhub.client.ui.settings.ChangePasswordRoute
 import app.familyhub.client.ui.settings.DevicesRoute
 import app.familyhub.client.ui.settings.LicensesRoute
 import app.familyhub.client.ui.settings.LoginQrRoute
+import app.familyhub.client.ui.settings.NotificationSettingsRoute
 import app.familyhub.client.ui.settings.ProfileRoute
 import app.familyhub.client.ui.settings.SettingsNavigation
 import app.familyhub.client.ui.settings.SettingsRoute
@@ -94,6 +95,9 @@ data object LoginQrDestination
 
 @Serializable
 data object DevicesDestination
+
+@Serializable
+data object NotificationSettingsDestination
 
 @Serializable
 data object AboutDestination
@@ -229,6 +233,7 @@ fun MainNavHost() {
                     onBack = { navController.popBackStack() },
                     onProfile = { navController.navigate(ProfileDestination) },
                     onDevices = { navController.navigate(DevicesDestination) },
+                    onNotifications = { navController.navigate(NotificationSettingsDestination) },
                     onAbout = { navController.navigate(AboutDestination) },
                 ),
             )
@@ -243,6 +248,7 @@ fun MainNavHost() {
         composable<ChangePasswordDestination> { ChangePasswordRoute(onBack = { navController.popBackStack() }) }
         composable<LoginQrDestination> { LoginQrRoute(onBack = { navController.popBackStack() }) }
         composable<DevicesDestination> { DevicesRoute(onBack = { navController.popBackStack() }) }
+        composable<NotificationSettingsDestination> { NotificationSettingsRoute(onBack = { navController.popBackStack() }) }
         composable<AboutDestination> {
             AboutRoute(onBack = { navController.popBackStack() }, onLicenses = { navController.navigate(LicensesDestination) })
         }

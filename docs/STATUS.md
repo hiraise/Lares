@@ -4,7 +4,7 @@ Updated: 2026-10-23
 
 ## Phase
 
-**M0 Foundation — implementation in progress: M0-01…M0-08 done.**
+**M0 Foundation — implementation in progress: M0-01…M0-09 done.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
@@ -13,14 +13,15 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 
 ## Last completed
 
+- 2026-10-23 M0-09 Notifications: local reminders, UnifiedPush (ntfy), background sync, Settings › Notifications.
 - 2026-10-23 M0-08 Family management screens.
 - 2026-10-23 Agent tooling: skills `plan-run`, `plan-finish`, `build-check`, `emulator`, agent `emulator-tester`,
   scripts in `tools/dev/`. Full log: [history.md](history.md).
 
 ## Next steps
 
-1. Next plan: [M0-09 Notifications](plans/M0/09-notifications.md), in a fresh session: `/plan-run M0-09`
-   (M0-10 Deploy can also start now; it depends only on M0-05).
+1. Next plan: [M0-10 Deploy and operations](plans/M0/10-deploy-and-ops.md), in a fresh session: `/plan-run M0-10`.
+   It brings the ntfy service; then check instant notifications end to end on a real phone (FND-051).
 2. After M0-11: M0 acceptance with the customer (APK, walkthrough, Russian changelog).
 
 ## Plan progress

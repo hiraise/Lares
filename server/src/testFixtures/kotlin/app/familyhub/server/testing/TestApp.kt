@@ -23,11 +23,14 @@ const val TEST_SETUP_CODE = "ABCDE-12345"
  * Fresh dependencies against the shared test database, with all tables emptied and a [TestClock].
  * Integration tests pass a clock near the real time, because clients stamp mutations with their own clock.
  */
-fun testDeps(clock: TestClock = TestClock()): AppDeps {
+fun testDeps(
+    clock: TestClock = TestClock(),
+    configure: (AppConfig) -> AppConfig = { it },
+): AppDeps {
     TestDatabase.reset()
     val changeBus = HouseholdChangeBus()
     return AppDeps(
-        config = AppConfig.fromEnv(emptyMap()).copy(db = TestDatabase.dbConfig, setupCode = TEST_SETUP_CODE),
+        config = configure(AppConfig.fromEnv(emptyMap()).copy(db = TestDatabase.dbConfig, setupCode = TEST_SETUP_CODE)),
         db = AppDatabase(TestDatabase.database, changeBus),
         changeBus = changeBus,
         buildInfo = BuildInfo.load(),
@@ -39,8 +42,11 @@ fun testDeps(clock: TestClock = TestClock()): AppDeps {
 val AppDeps.testClock: TestClock get() = clock as TestClock
 
 /** Runs [block] against the full application module on an empty database. */
-fun testApp(block: suspend ApplicationTestBuilder.(deps: AppDeps) -> Unit) {
-    val deps = testDeps()
+fun testApp(
+    configure: (AppConfig) -> AppConfig = { it },
+    block: suspend ApplicationTestBuilder.(deps: AppDeps) -> Unit,
+) {
+    val deps = testDeps(configure = configure)
     testApplication {
         application { module(deps) }
         block(deps)

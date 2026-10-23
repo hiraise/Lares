@@ -8,6 +8,7 @@ import androidx.core.os.LocaleListCompat
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.Flow
@@ -25,6 +26,7 @@ class DataStorePreferencesStore(
             AppPreferences(
                 theme = ThemeMode.entries.firstOrNull { it.name == prefs[THEME] } ?: ThemeMode.SYSTEM,
                 language = AppLanguage.entries.firstOrNull { it.name == prefs[LANGUAGE] } ?: AppLanguage.SYSTEM,
+                notificationPromptShown = prefs[NOTIFICATION_PROMPT_SHOWN] ?: false,
             )
         }
 
@@ -36,9 +38,14 @@ class DataStorePreferencesStore(
         dataStore.edit { it[LANGUAGE] = language.name }
     }
 
+    override suspend fun setNotificationPromptShown() {
+        dataStore.edit { it[NOTIFICATION_PROMPT_SHOWN] = true }
+    }
+
     private companion object {
         val THEME = stringPreferencesKey("theme")
         val LANGUAGE = stringPreferencesKey("language")
+        val NOTIFICATION_PROMPT_SHOWN = booleanPreferencesKey("notification_prompt_shown")
     }
 }
 

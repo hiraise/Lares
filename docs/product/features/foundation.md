@@ -109,10 +109,17 @@ localization and deployment — everything feature modules depend on.
 
 ### Notifications
 
-- **FND-050** `MVP` `todo` — Time-based reminders are scheduled on the device and fire without network.
-- **FND-051** `MVP` `todo` — Event-based notifications (e.g. "task assigned to you", "task overdue") reach the phone
+- **FND-050** `MVP` `done` — Time-based reminders are scheduled on the device and fire without network.
+  *`ReminderScheduler` with a local `reminder` table and `AlarmManager` (exact when the user allows exact alarms),
+  re-registered after reboot and app update; Settings › Notifications › Diagnostics has a test reminder (M0-09).*
+- **FND-051** `MVP` `doing` — Event-based notifications (e.g. "task assigned to you", "task overdue") reach the phone
   without Google services ([ADR-0006](../../adr/0006-no-proprietary-dependencies.md)).
-- **FND-052** `MVP` `todo` — Each user can mute notification types.
+  *Infrastructure done (M0-09): UnifiedPush registration, encrypted Web Push from the server (tested against a fake push
+  service), sync tickles, test notification. Open: end-to-end check on a real phone with ntfy (needs the deployed
+  ntfy from M0-10); the task notifications themselves come with M1.*
+- **FND-052** `MVP` `done` — Each user can mute notification types.
+  *Stored per member on the server (muted types are not sent), mirrored on the phone; switches in Settings ›
+  Notifications. M0 shows only test notifications; task types get switches in M1 (M0-09).*
 
 ### Client basics
 

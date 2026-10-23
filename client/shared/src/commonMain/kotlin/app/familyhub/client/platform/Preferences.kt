@@ -20,6 +20,8 @@ enum class AppLanguage(
 data class AppPreferences(
     val theme: ThemeMode = ThemeMode.SYSTEM,
     val language: AppLanguage = AppLanguage.SYSTEM,
+    /** The post-login explanation for the notification permission was shown (M0-09); it is shown once per device. */
+    val notificationPromptShown: Boolean = false,
 )
 
 /** Device-level preferences; they survive logout. Android keeps them in DataStore, the JVM in memory. */
@@ -29,6 +31,8 @@ interface PreferencesStore {
     suspend fun setTheme(theme: ThemeMode)
 
     suspend fun setLanguage(language: AppLanguage)
+
+    suspend fun setNotificationPromptShown()
 }
 
 class InMemoryPreferencesStore : PreferencesStore {
@@ -39,6 +43,8 @@ class InMemoryPreferencesStore : PreferencesStore {
     override suspend fun setTheme(theme: ThemeMode) = state.update { it.copy(theme = theme) }
 
     override suspend fun setLanguage(language: AppLanguage) = state.update { it.copy(language = language) }
+
+    override suspend fun setNotificationPromptShown() = state.update { it.copy(notificationPromptShown = true) }
 }
 
 /** Switches the UI language of the running app. Android: per-app locales via AppCompat; elsewhere a no-op for now. */

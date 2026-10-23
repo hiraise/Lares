@@ -94,3 +94,14 @@ Add terms here before using them in code.
 | Change sequence (`seq`) | Номер изменения | Per-household counter assigned by the server. |
 | Cursor | Курсор | Last `seq` a client has pulled. |
 | Tombstone | Метка удаления | Marker that a record was deleted, so deletion syncs. |
+| Sync tickle | Сигнал синхронизации | Content-free push (`kind: sync`) that makes phones in the background sync; at most one per 30 s per household. |
+
+## Notifications
+
+| Code term | RU | Definition |
+| --- | --- | --- |
+| Reminder | Напоминание | Time-based notification scheduled on the phone; fires without network (FND-050). |
+| Notification type | Тип уведомления | Kind of event notification (`NotificationType`, e.g. `task.assigned`); each member can mute types (FND-052). |
+| Notification channel | Канал уведомлений | Android channel a type is shown on: `reminders`, `family_activity`, `system`. |
+| Distributor | Приложение для уведомлений (ntfy) | UnifiedPush app on the phone that holds the connection to a push server, e.g. ntfy (ADR-0006). |
+| Push registration | Подписка на уведомления | A session's UnifiedPush endpoint and encryption keys stored on the server (`push_registration`). |

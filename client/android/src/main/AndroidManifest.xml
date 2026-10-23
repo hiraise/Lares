@@ -7,6 +7,13 @@
     <!-- Only for scanning invite and login QR codes. -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <!-- Notifications (M0-09): showing them (Android 13+), exact reminders (granted in system settings; not
+         USE_EXACT_ALARM), re-registering reminders after a reboot, expedited sync before Android 12. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
 
     <application
         android:name=".FamilyHubApplication"
@@ -37,6 +44,35 @@
                 <data android:scheme="familyhub" android:host="login" />
             </intent-filter>
         </activity>
+
+        <!-- UnifiedPush events from the distributor (ntfy), decrypted by the connector. -->
+        <service
+            android:name=".notifications.FamilyHubPushService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="org.unifiedpush.android.connector.PUSH_EVENT" />
+            </intent-filter>
+        </service>
+
+        <receiver
+            android:name=".notifications.ReminderAlarmReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name=".notifications.RescheduleRemindersReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Expedited sync work runs as a foreground service before Android 12. -->
+        <service
+            android:name="androidx.work.impl.foreground.SystemForegroundService"
+            android:foregroundServiceType="dataSync"
+            tools:node="merge" />
 
         <!-- Keeps the per-app language on Android 12 and older (AppCompat stores it itself). -->
         <service

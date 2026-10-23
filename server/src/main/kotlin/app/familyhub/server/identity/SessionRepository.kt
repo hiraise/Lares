@@ -1,12 +1,16 @@
 package app.familyhub.server.identity
 
+import app.familyhub.server.notifications.PushRegistrationTable
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.greater
+import org.jetbrains.exposed.v1.core.inSubQuery
 import org.jetbrains.exposed.v1.core.isNull
+import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insert
+import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.update
 import java.time.Instant
@@ -138,12 +142,16 @@ object SessionRepository {
         }
     }
 
-    /** Ends a session. Rows are never deleted; an already revoked session keeps its original time. */
+    /**
+     * Ends a session. Rows are never deleted; an already revoked session keeps its original time.
+     * Its push registration is deleted, so a revoked device gets no more pushes.
+     */
     fun revoke(
         id: UUID,
         now: Instant,
     ) {
         SessionTable.update({ (SessionTable.id eq id) and SessionTable.revokedAt.isNull() }) { it[revokedAt] = now }
+        PushRegistrationTable.deleteWhere { sessionId eq id }
     }
 
     fun revokeAllOfUser(
@@ -151,6 +159,9 @@ object SessionRepository {
         now: Instant,
     ) {
         SessionTable.update({ (SessionTable.userId eq userId) and SessionTable.revokedAt.isNull() }) { it[revokedAt] = now }
+        PushRegistrationTable.deleteWhere {
+            sessionId inSubQuery SessionTable.select(SessionTable.id).where { SessionTable.userId eq userId }
+        }
     }
 
     private fun toRow(it: ResultRow) =

@@ -1,0 +1,25 @@
+-- Local time-based reminders (FND-050), kept so they can be re-registered with the OS after a reboot or an app update.
+CREATE TABLE reminder (
+    id TEXT NOT NULL PRIMARY KEY,
+    -- Epoch milliseconds.
+    at INTEGER NOT NULL,
+    title TEXT NOT NULL,
+    body TEXT NOT NULL,
+    -- NotificationChannel id, e.g. 'reminders'.
+    channel TEXT NOT NULL
+);
+
+get:
+SELECT * FROM reminder WHERE id = ?;
+
+all:
+SELECT * FROM reminder ORDER BY at;
+
+put:
+INSERT OR REPLACE INTO reminder (id, at, title, body, channel) VALUES (?, ?, ?, ?, ?);
+
+remove:
+DELETE FROM reminder WHERE id = ?;
+
+deleteAll:
+DELETE FROM reminder;

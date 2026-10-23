@@ -415,4 +415,40 @@
     <string name="color_pink">Pink</string>
     <string name="color_brown">Brown</string>
     <string name="color_gray">Gray</string>
+
+    <!-- Notifications (M0-09) -->
+    <string name="settings_notifications">Notifications</string>
+    <string name="notif_instant">Instant notifications</string>
+    <string name="notif_connected_via">Connected via %1$s</string>
+    <string name="notif_not_set_up">Not set up</string>
+    <string name="notif_failed">%1$s needs your attention: open it and check its settings.</string>
+    <string name="notif_help">Instant notifications come through the free ntfy app. Install ntfy from F-Droid or Google Play, set its default server to the address your family administrator gives you, then come back here. Without ntfy the app still checks for news about every 15 minutes.</string>
+    <string name="notif_choose">Choose an app for instant notifications</string>
+    <string name="notif_use">Use %1$s</string>
+    <string name="notif_send_test">Send test notification</string>
+    <string name="notif_test_sent">Sent. It should appear in a few seconds.</string>
+    <string name="notif_test_muted">Test notifications are turned off below.</string>
+    <string name="notif_test_not_registered">This phone is not connected to instant notifications yet.</string>
+    <string name="notif_test_expired">The connection expired. Open ntfy and try again.</string>
+    <string name="notif_test_failed">The notification service did not accept the message. Try again later.</string>
+    <string name="notif_types">What to notify about</string>
+    <string name="notif_type_system_test">Test notifications</string>
+    <string name="notif_type_task_assigned">Task assigned to me</string>
+    <string name="notif_type_task_overdue">Task overdue</string>
+    <string name="notif_type_task_completed">Task completed</string>
+    <string name="notif_device">On this phone</string>
+    <string name="notif_permission">Show notifications</string>
+    <string name="notif_permission_off">Not allowed</string>
+    <string name="notif_exact">Reminders on time</string>
+    <string name="notif_exact_off">May be a few minutes late</string>
+    <string name="notif_allowed">Allowed</string>
+    <string name="notif_allow">Allow</string>
+    <string name="notif_diagnostics">Diagnostics</string>
+    <string name="notif_test_reminder">Test reminder in 1 minute</string>
+    <string name="notif_test_reminder_set">Reminder set for %1$s. It works without internet.</string>
+    <string name="notif_test_reminder_title">Test reminder</string>
+    <string name="notif_test_reminder_body">Reminders on this phone work.</string>
+    <string name="notif_prompt_title">Allow notifications?</string>
+    <string name="notif_prompt_text">FamilyHub shows reminders and family news as notifications. You can change this later in Settings › Notifications.</string>
+    <string name="notif_prompt_later">Not now</string>
 </resources>

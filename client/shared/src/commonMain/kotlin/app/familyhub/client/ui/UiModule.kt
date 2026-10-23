@@ -1,6 +1,7 @@
 package app.familyhub.client.ui
 
 import app.familyhub.client.di.AppScope
+import app.familyhub.client.notifications.notificationsModule
 import app.familyhub.client.platform.AppStartup
 import app.familyhub.client.platform.AppearanceSettings
 import app.familyhub.client.platform.DeepLinkHandler
@@ -22,6 +23,8 @@ import app.familyhub.client.ui.settings.AboutViewModel
 import app.familyhub.client.ui.settings.ChangePasswordViewModel
 import app.familyhub.client.ui.settings.DevicesViewModel
 import app.familyhub.client.ui.settings.LoginQrViewModel
+import app.familyhub.client.ui.settings.NotificationPromptViewModel
+import app.familyhub.client.ui.settings.NotificationSettingsViewModel
 import app.familyhub.client.ui.settings.ProfileViewModel
 import app.familyhub.client.ui.settings.SettingsViewModel
 import org.koin.core.module.Module
@@ -35,6 +38,7 @@ import kotlin.time.Clock
  */
 fun uiModule(): Module =
     module {
+        includes(notificationsModule())
         single { DeepLinkHandler() }
         single { AppStartup(get(), get(AppScope)) }
         single { AppearanceSettings(get(), get(), get(AppScope)) }
@@ -49,6 +53,8 @@ fun uiModule(): Module =
         viewModel { ChangePasswordViewModel(get(), get()) }
         viewModel { params -> LoginQrViewModel(get(), getOrNull<Clock>() ?: Clock.System, params.getOrNull<String>()) }
         viewModel { DevicesViewModel(get()) }
+        viewModel { NotificationSettingsViewModel(get(), get(), get(), get(), getOrNull<Clock>() ?: Clock.System) }
+        viewModel { NotificationPromptViewModel(get(), get()) }
         viewModel { AboutViewModel(get(), get(), get()) }
         viewModel { FamilyViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
         viewModel { params -> MemberDetailViewModel(get(), get(), get(), get(), get(), get(), params.get()) }

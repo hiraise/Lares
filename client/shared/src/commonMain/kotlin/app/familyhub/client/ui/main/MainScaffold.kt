@@ -53,6 +53,7 @@ import app.familyhub.client.resources.sync_rejected_snackbar
 import app.familyhub.client.ui.common.messageRes
 import app.familyhub.client.ui.components.AppIcon
 import app.familyhub.client.ui.family.FamilyTab
+import app.familyhub.client.ui.settings.NotificationPermissionPromptHost
 import app.familyhub.client.ui.theme.FamilyHubTheme
 import app.familyhub.contract.permissions.Section
 import kotlinx.coroutines.flow.filterNotNull
@@ -100,6 +101,7 @@ fun MainScaffoldRoute(
     var sheetOpen by rememberSaveable { mutableStateOf(false) }
     val snackbar = remember { SnackbarHostState() }
     val shownRejections = rememberSaveable { mutableListOf<Long>() }
+    NotificationPermissionPromptHost()
 
     // New rejections also show a snackbar; the sheet lists them until the user marks them seen.
     LaunchedEffect(state.rejections) {

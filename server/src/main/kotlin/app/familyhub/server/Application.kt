@@ -23,6 +23,12 @@ import app.familyhub.server.identity.crypto.PasswordHasher
 import app.familyhub.server.identity.crypto.TokenGenerator
 import app.familyhub.server.identity.identityRoutes
 import app.familyhub.server.identity.memberAdminRoutes
+import app.familyhub.server.notifications.NotificationService
+import app.familyhub.server.notifications.PushEndpointGuard
+import app.familyhub.server.notifications.SyncTicklePublisher
+import app.familyhub.server.notifications.TickleThrottle
+import app.familyhub.server.notifications.WebPushSender
+import app.familyhub.server.notifications.notificationRoutes
 import app.familyhub.server.platform.AppConfig
 import app.familyhub.server.platform.BuildInfo
 import app.familyhub.server.platform.db.AppDatabase
@@ -89,6 +95,12 @@ class AppDeps(
     val syncPushService = SyncPushService(db, clock, syncHandlers, permissionService)
     val syncEventsService = SyncEventsService(db, changeBus)
     val syncHousekeeping = SyncHousekeeping(db, clock)
+
+    val pushEndpointGuard = PushEndpointGuard(config.pushAllowedHosts)
+    val webPushSender = WebPushSender(db, pushEndpointGuard, WebPushSender.subjectFor(config.publicUrl))
+    val notificationService = NotificationService(db, clock, pushEndpointGuard, webPushSender)
+    val syncTickles =
+        SyncTicklePublisher(changeBus, clock, TickleThrottle(), send = { householdId, seq -> notificationService.tickle(householdId, seq) })
 }
 
 fun main() {
@@ -133,8 +145,11 @@ fun Application.module(deps: AppDeps) {
                 memberAdminRoutes(deps.authService, deps.memberAdminService, deps.inviteService, deps.loginCodeService)
                 householdRoutes(deps.authService, deps.householdAdminService, deps.groupAdminService)
                 syncRoutes(deps.authService, deps.syncPullService, deps.syncPushService, deps.syncEventsService)
+                notificationRoutes(deps.authService, deps.notificationService)
             }
         }
     }
+    // Tickles only send to registered push endpoints, so they also run in tests.
+    deps.syncTickles.start(this)
     if (deps.backgroundJobs) deps.syncHousekeeping.start(this)
 }

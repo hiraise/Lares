@@ -53,6 +53,7 @@ dependencies {
     implementation(libs.flyway.core)
     implementation(libs.flyway.database.postgresql)
     implementation(libs.bouncycastle.bcprov)
+    implementation(libs.webpush)
 
     implementation(libs.logback.classic)
     implementation(libs.kotlin.logging)

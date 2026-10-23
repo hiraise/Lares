@@ -10,12 +10,14 @@ data class AppConfig(
     val logFormat: LogFormat,
     /** Optional one-time code required by first-run setup (M0-03). */
     val setupCode: String?,
+    /** Push endpoint hosts allowed despite resolving to non-global addresses, e.g. an internal ntfy (M0-09). */
+    val pushAllowedHosts: Set<String> = emptySet(),
 ) {
     enum class LogFormat { PLAIN, JSON }
 
     // Keeps secrets out of logs and exception messages.
     override fun toString(): String =
-        "AppConfig(port=$port, db=$db, publicUrl=$publicUrl, logFormat=$logFormat, setupCode=${if (setupCode == null) "unset" else "***"})"
+        "AppConfig(port=$port, db=$db, publicUrl=$publicUrl, logFormat=$logFormat, pushAllowedHosts=$pushAllowedHosts, setupCode=${if (setupCode == null) "unset" else "***"})"
 
     companion object {
         fun fromEnv(env: Map<String, String> = System.getenv()): AppConfig {
@@ -50,6 +52,13 @@ data class AppConfig(
                 publicUrl = publicUrl,
                 logFormat = logFormat,
                 setupCode = env["FAMILYHUB_SETUP_CODE"]?.takeIf { it.isNotBlank() },
+                pushAllowedHosts =
+                    env["FAMILYHUB_PUSH_ALLOWED_HOSTS"]
+                        .orEmpty()
+                        .split(',')
+                        .map { it.trim().lowercase() }
+                        .filter { it.isNotEmpty() }
+                        .toSet(),
             )
         }
 

@@ -1,0 +1,13 @@
+-- Notification types the member muted (FND-052), mirrored from the server for local reminders. Wire names.
+CREATE TABLE notification_mute (
+    type TEXT NOT NULL PRIMARY KEY
+);
+
+all:
+SELECT type FROM notification_mute;
+
+put:
+INSERT OR REPLACE INTO notification_mute (type) VALUES (?);
+
+deleteAll:
+DELETE FROM notification_mute;

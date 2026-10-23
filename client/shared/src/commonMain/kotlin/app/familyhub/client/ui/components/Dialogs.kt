@@ -64,6 +64,7 @@ fun ConfirmDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
     destructive: Boolean = false,
+    dismissLabel: String? = null,
     content: @Composable (() -> Unit)? = null,
 ) {
     AlertDialog(
@@ -82,7 +83,7 @@ fun ConfirmDialog(
                 color = if (destructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onPrimaryContainer,
             )
         },
-        dismissButton = { LinkButton(stringResource(Res.string.action_cancel), onDismiss) },
+        dismissButton = { LinkButton(dismissLabel ?: stringResource(Res.string.action_cancel), onDismiss) },
         containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
     )
 }

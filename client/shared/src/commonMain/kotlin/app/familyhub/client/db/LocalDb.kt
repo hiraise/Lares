@@ -32,5 +32,8 @@ class LocalDb(
             sync_stateQueries.deleteAll()
             sync_rejectionQueries.deleteAll()
             local_sessionQueries.deleteAll()
+            reminderQueries.deleteAll()
+            notification_muteQueries.deleteAll()
+            push_endpointQueries.deleteAll()
         }
 }

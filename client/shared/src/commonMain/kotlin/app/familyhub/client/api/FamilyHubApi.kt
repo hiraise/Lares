@@ -33,6 +33,9 @@ import app.familyhub.contract.api.auth.Me
 import app.familyhub.contract.api.auth.RefreshRequest
 import app.familyhub.contract.api.auth.SessionInfo
 import app.familyhub.contract.api.auth.SetupRequest
+import app.familyhub.contract.api.notifications.NotificationSettings
+import app.familyhub.contract.api.notifications.PushRegistrationRequest
+import app.familyhub.contract.api.notifications.PushTestResponse
 import app.familyhub.contract.sync.PullResponse
 import app.familyhub.contract.sync.PushRequest
 import app.familyhub.contract.sync.PushResponse
@@ -112,6 +115,20 @@ class FamilyHubApi(
     suspend fun revokeSession(id: String) = authed<Unit, Unit>(HttpMethod.Delete, "/api/v1/me/sessions/${id.encoded()}", Unit)
 
     suspend fun deleteMe(request: DeleteAccountRequest) = authed<DeleteAccountRequest, Unit>(HttpMethod.Delete, "/api/v1/me", request)
+
+    // Notifications (FND-051, FND-052).
+
+    suspend fun registerPush(request: PushRegistrationRequest) =
+        authed<PushRegistrationRequest, Unit>(HttpMethod.Put, "/api/v1/me/push", request)
+
+    suspend fun unregisterPush() = authed<Unit, Unit>(HttpMethod.Delete, "/api/v1/me/push", Unit)
+
+    suspend fun testPush(): PushTestResponse = authed(HttpMethod.Post, "/api/v1/me/push/test", Unit)
+
+    suspend fun notificationSettings(): NotificationSettings = authed(HttpMethod.Get, "/api/v1/me/notification-settings", Unit)
+
+    suspend fun setNotificationSettings(settings: NotificationSettings): NotificationSettings =
+        authed(HttpMethod.Put, "/api/v1/me/notification-settings", settings)
 
     suspend fun createLoginCode(request: CreateLoginCodeRequest): LoginCodeCreated = authed(HttpMethod.Post, "/api/v1/login-codes", request)
 

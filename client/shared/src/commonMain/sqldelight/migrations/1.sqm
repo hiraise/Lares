@@ -1,0 +1,20 @@
+-- Schema 1 → 2 (M0-09): local reminders, mirrored notification mutes, the push endpoint.
+CREATE TABLE reminder (
+    id TEXT NOT NULL PRIMARY KEY,
+    at INTEGER NOT NULL,
+    title TEXT NOT NULL,
+    body TEXT NOT NULL,
+    channel TEXT NOT NULL
+);
+
+CREATE TABLE notification_mute (
+    type TEXT NOT NULL PRIMARY KEY
+);
+
+CREATE TABLE push_endpoint (
+    id INTEGER NOT NULL PRIMARY KEY CHECK (id = 1),
+    url TEXT NOT NULL,
+    p256dh TEXT NOT NULL,
+    auth TEXT NOT NULL,
+    registered_language TEXT
+);

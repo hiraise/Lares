@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="channel_reminders">Напоминания</string>
+    <string name="channel_reminders_description">Напоминания, поставленные в приложении; работают без интернета.</string>
+    <string name="channel_family_activity">События семьи</string>
+    <string name="channel_family_activity_description">Что сделали члены семьи и что касается вас, например вам назначили задачу.</string>
+    <string name="channel_system">Системные</string>
+    <string name="channel_system_description">Тестовые уведомления и фоновая синхронизация.</string>
+    <string name="sync_in_progress">Синхронизация…</string>
+</resources>

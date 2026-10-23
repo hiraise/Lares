@@ -247,4 +247,6 @@ The foojay plugin is applied in `settings.gradle.kts` by literal version (`1.0.0
 ## Licenses
 
 All listed dependencies are Apache-2.0 or MIT (QRose, ktlint, webpush: MIT; Bouncy Castle: MIT-style) — compatible with
-AGPL-3.0 (ADR-0003). Re-check when adding anything new.
+AGPL-3.0 (ADR-0003). Re-check when adding anything new. The UnifiedPush connector brings `com.google.crypto.tink:tink` 1.23
+(Apache-2.0, open source, no Play Services) for message decryption, with gson and error_prone annotations (Apache-2.0),
+protobuf-java and jsr305 (BSD-3-Clause) — all AGPL-compatible (checked in M0-09).

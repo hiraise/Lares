@@ -414,4 +414,40 @@
     <string name="color_pink">Розовый</string>
     <string name="color_brown">Коричневый</string>
     <string name="color_gray">Серый</string>
+
+    <!-- Notifications (M0-09) -->
+    <string name="settings_notifications">Уведомления</string>
+    <string name="notif_instant">Мгновенные уведомления</string>
+    <string name="notif_connected_via">Подключены через %1$s</string>
+    <string name="notif_not_set_up">Не настроены</string>
+    <string name="notif_failed">Приложению %1$s нужно ваше внимание: откройте его и проверьте настройки.</string>
+    <string name="notif_help">Мгновенные уведомления приходят через бесплатное приложение ntfy. Установите ntfy из F-Droid или Google Play, укажите в нём сервер по умолчанию — адрес, который даст администратор семьи, — и вернитесь сюда. Без ntfy приложение всё равно проверяет новости примерно раз в 15 минут.</string>
+    <string name="notif_choose">Выберите приложение для мгновенных уведомлений</string>
+    <string name="notif_use">Использовать %1$s</string>
+    <string name="notif_send_test">Отправить тестовое уведомление</string>
+    <string name="notif_test_sent">Отправлено. Уведомление появится через несколько секунд.</string>
+    <string name="notif_test_muted">Тестовые уведомления выключены ниже.</string>
+    <string name="notif_test_not_registered">Этот телефон ещё не подключён к мгновенным уведомлениям.</string>
+    <string name="notif_test_expired">Подключение устарело. Откройте ntfy и попробуйте снова.</string>
+    <string name="notif_test_failed">Сервис уведомлений не принял сообщение. Попробуйте позже.</string>
+    <string name="notif_types">О чём уведомлять</string>
+    <string name="notif_type_system_test">Тестовые уведомления</string>
+    <string name="notif_type_task_assigned">Мне назначили задачу</string>
+    <string name="notif_type_task_overdue">Задача просрочена</string>
+    <string name="notif_type_task_completed">Задача выполнена</string>
+    <string name="notif_device">На этом телефоне</string>
+    <string name="notif_permission">Показ уведомлений</string>
+    <string name="notif_permission_off">Не разрешён</string>
+    <string name="notif_exact">Напоминания вовремя</string>
+    <string name="notif_exact_off">Могут опаздывать на несколько минут</string>
+    <string name="notif_allowed">Разрешено</string>
+    <string name="notif_allow">Разрешить</string>
+    <string name="notif_diagnostics">Диагностика</string>
+    <string name="notif_test_reminder">Тестовое напоминание через 1 минуту</string>
+    <string name="notif_test_reminder_set">Напоминание придёт в %1$s. Оно работает и без интернета.</string>
+    <string name="notif_test_reminder_title">Тестовое напоминание</string>
+    <string name="notif_test_reminder_body">Напоминания на этом телефоне работают.</string>
+    <string name="notif_prompt_title">Разрешить уведомления?</string>
+    <string name="notif_prompt_text">FamilyHub показывает напоминания и новости семьи в виде уведомлений. Это можно изменить позже в Настройках › Уведомления.</string>
+    <string name="notif_prompt_later">Не сейчас</string>
 </resources>

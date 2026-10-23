@@ -49,6 +49,7 @@ import app.familyhub.client.resources.ic_info
 import app.familyhub.client.resources.ic_language
 import app.familyhub.client.resources.ic_lock
 import app.familyhub.client.resources.ic_logout
+import app.familyhub.client.resources.ic_notifications
 import app.familyhub.client.resources.ic_palette
 import app.familyhub.client.resources.ic_person
 import app.familyhub.client.resources.ic_qr_code_2
@@ -84,6 +85,7 @@ import app.familyhub.client.resources.settings_delete_account
 import app.familyhub.client.resources.settings_devices
 import app.familyhub.client.resources.settings_language
 import app.familyhub.client.resources.settings_logout
+import app.familyhub.client.resources.settings_notifications
 import app.familyhub.client.resources.settings_profile
 import app.familyhub.client.resources.settings_theme
 import app.familyhub.client.resources.settings_title
@@ -120,6 +122,7 @@ class SettingsNavigation(
     val onBack: () -> Unit,
     val onProfile: () -> Unit,
     val onDevices: () -> Unit,
+    val onNotifications: () -> Unit,
     val onAbout: () -> Unit,
 )
 
@@ -144,6 +147,13 @@ fun SettingsRoute(
                 icon = Res.drawable.ic_devices,
                 showChevron = true,
                 onClick = navigation.onDevices,
+            )
+            ListDivider()
+            ListRow(
+                stringResource(Res.string.settings_notifications),
+                icon = Res.drawable.ic_notifications,
+                showChevron = true,
+                onClick = navigation.onNotifications,
             )
         }
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
