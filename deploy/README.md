@@ -18,6 +18,14 @@ Installation, backups, updates and troubleshooting for admins:
 | `scripts/loadtest.sh` | Load test with a simulated family (`tools/loadsim`), memory and cold start; results in `build/loadtest/` ([baseline](../docs/architecture/perf/M0-baseline.md)) |
 | `dev/docker-compose.yml` | Development database only |
 
+## Releases
+
+The server image exists only after a release: pushing a tag `v*` (e.g. `git tag v0.1.0 && git push origin v0.1.0`)
+runs `.github/workflows/release.yml`, which publishes `ghcr.io/hiraise/lares-server:<version>` and `:latest`
+(amd64 + arm64) and attaches the APK to a GitHub release. Until the first release `docker compose up` on a server fails
+to pull the image. A new GHCR package is private, like the repository; to let servers pull without a login, set the
+package visibility to public once (GitHub → Packages → `lares-server` → Package settings).
+
 Local build and smoke test, from the repository root (Docker running, ports 80 and 443 free):
 
 ```sh

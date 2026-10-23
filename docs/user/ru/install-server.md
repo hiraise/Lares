@@ -65,6 +65,10 @@ nano .env
 
 ## 5. Запуск
 
+Образ сервера `ghcr.io/hiraise/lares-server` публикуется вместе с каждым релизом проекта. Если `docker compose up`
+не может его скачать (`denied` или `not found`), образ не публичный: один раз войдите с токеном GitHub с правом
+`read:packages` — `docker login ghcr.io -u <пользователь-github>` — и повторите.
+
 ```sh
 docker compose up -d
 docker compose ps
@@ -152,7 +156,7 @@ docker compose up -d
 и по-прежнему без сервисов Google.
 
 1. Создайте DNS-запись `ntfy.family.example.com` (шаг 1).
-2. В `.env` укажите `LARES_CADDYFILE=Caddyfile.push`. Если адрес ntfy не совпадает с `ntfy.` + ваш домен,
+2. В `.env` раскомментируйте `LARES_CADDYFILE=Caddyfile.push` и `COMPOSE_PROFILES=push`. Если адрес ntfy не совпадает с `ntfy.` + ваш домен,
    задайте ещё `LARES_NTFY_DOMAIN`.
 3. Запустите с профилем `push` и один раз откройте анонимный доступ только к темам для push-уведомлений:
 
@@ -161,7 +165,8 @@ docker compose up -d
    docker compose exec ntfy ntfy access '*' 'up*' read-write
    ```
 
-4. Во всех следующих командах `docker compose` добавляйте `--profile push` (или пропишите `COMPOSE_PROFILES=push` в `.env`).
+4. С `COMPOSE_PROFILES=push` в `.env` все следующие команды `docker compose` включают ntfy; без этой строки добавляйте
+   `--profile push` каждый раз.
 5. Каждый член семьи настраивает приложение ntfy на своём телефоне:
    [Мгновенные уведомления через ntfy](instant-notifications.md).
 
