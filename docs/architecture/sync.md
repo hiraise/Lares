@@ -15,7 +15,7 @@ Implemented in M0 plans [M0-05](../plans/M0/05-sync-server.md) (server) and [M0-
 - Field-level last-writer-wins in server arrival order. Server validates and may reject.
 - Clients keep a **shadow** copy of the last known server state and rebuild rows as `shadow ⊕ pending mutations`.
 
-## Entity types (M0)
+## Entity types
 
 | Type (wire name) | Written by clients via sync? | Written via REST (admin) | Notes |
 | --- | --- | --- | --- |
@@ -24,11 +24,14 @@ Implemented in M0 plans [M0-05](../plans/M0/05-sync-server.md) (server) and [M0-
 | `group` | no | groups endpoints | Embeds `permissions` and `memberIds` |
 | `person` | yes | — | Relatives and member profiles |
 | `tag` | yes | — | |
+| `task` | yes | — | Tasks module (M1-02); entity-level rules `TaskRules`; delete tombstones its items and completions |
+| `checklist_item` | yes | — | Child of a `task` |
+| `task_completion` | yes | — | Child of a `task`; immutable, undo deletes it |
 
 Member data includes `login` and `hasPassword`, so password changes and resets also give the member a new seq.
 Tag name uniqueness uses PostgreSQL `lower()`, which needs a UTF-8 database locale (ctype) to fold Cyrillic.
 
-Later modules add types (`task`, `shopping_list`, …). Every type has a JSON data schema defined in `contract/`
+Later modules add types (`shopping_list`, …). Every type has a JSON data schema defined in `contract/`
 as a `@Serializable` data class; wire data is that class serialized without `id`, `seq`, `deleted`.
 
 ## Server data model
@@ -244,7 +247,7 @@ Code: `client/shared/src/commonMain/kotlin/app/lares/client/` (`sync`, `db`, `ap
 ## Housekeeping (server jobs)
 
 - Daily: purge tombstones older than 90 days for rows nothing references (M0: `tag`, `group`, and `person` rows not referenced
-  by any member or invite; `member` and `household` tombstones are kept); set `purge_horizon_seq = max(purge_horizon_seq, max purged seq)`.
+  by any member or invite; M1: `checklist_item`, `task_completion`, then `task`; `member` and `household` tombstones are kept); set `purge_horizon_seq = max(purge_horizon_seq, max purged seq)`.
   The purge of a household runs under its sync-state lock, like every writer.
 - Restore procedure (`deploy/scripts/restore.sh`): after `pg_restore`, set a new `sync_epoch` for every household.
 - Daily: delete `sync_mutation_log` rows older than 30 days.

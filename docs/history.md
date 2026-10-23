@@ -129,3 +129,9 @@ Current state and next steps: [STATUS.md](STATUS.md).
   `tasks.view` write gate, task validators and normalizers, `NotificationType.TASK_REMINDER` (label en/ru). Contract
   tests 103 (all task rules from the spec examples, Moscow and Berlin DST). Fix during the work: a week rule's anchor is
   scheduled only on a chosen weekday (design clarified; M1-02 plan gets the unknown-rule rejection).
+- 2026-10-23 **M1-02** Tasks on the server: `V6__tasks.sql` (`task`, `checklist_item`, `task_completion`, server-only
+  `overdue_*` columns), package `app.lares.server.tasks` (tables, `TaskRepository`, three `WritableSyncHandler`s), new
+  `WritableSyncHandler.authorize` hook for entity-level `TaskRules` checks, reference checks for added assignees and tags,
+  routine → one-off and `createdBy`/`taskId` changes rejected, immutable completions, cascade tombstones with one seq per
+  row, `tasks.view` visibility, housekeeping purge of the three tables, test helpers `testing/TaskFixtures.kt`.
+  Server tests +13 (`TaskSyncTest`, `TaskPermissionsTest`); M0 tests unchanged.

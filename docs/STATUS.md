@@ -5,7 +5,7 @@ Updated: 2026-10-23
 ## Phase
 
 **M0 Foundation — all plans M0-01…M0-11 done; M0 acceptance with the customer pending.
-M1 Tasks in progress: M1-01 done, M1-02 next.**
+M1 Tasks in progress: M1-01, M1-02 done; M1-03 and M1-04 next.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
@@ -14,6 +14,8 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 
 ## Last completed
 
+- 2026-10-23 M1-02 Tasks on the server: tables, three sync handlers with `TaskRules` checks (new `authorize` hook),
+  reference checks, immutable completions, cascade tombstones, `tasks.view` visibility, housekeeping; 13 server tests.
 - 2026-10-23 M1-01 Tasks contract: task data classes, repeat rules and current-occurrence logic (`TaskSchedule`),
   `TaskRules`, validators, `task.reminder` type; 103 contract tests.
 - 2026-10-23 Release signing and flow (ADR-0019): permanent Lares key (GitHub secrets; original in
@@ -39,7 +41,7 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
    ([deploy/README](../deploy/README.md#releases)).
 3. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
 4. M4 plan: re-run the load test with location uploads every 30 s (ADR-0015).
-5. M1 Tasks: next plan M1-02 (server tables and sync), then M1-03…M1-07 ([plans](plans/README.md#m1-plans); design:
+5. M1 Tasks: next plans M1-03 (server notifications) and M1-04 (client data), then M1-05…M1-07 ([plans](plans/README.md#m1-plans); design:
    [architecture/tasks.md](architecture/tasks.md), ADR-0017, ADR-0018).
 
 ## Plan progress

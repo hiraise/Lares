@@ -33,7 +33,8 @@ class SyncHousekeeping(
 ) {
     /**
      * Deletes tombstones older than 90 days that nothing references: tags, groups (their permission and membership rows
-     * cascade) and persons that no member or invite points to. Member and household tombstones are kept (sessions,
+     * cascade), persons that no member or invite points to, and checklist items, completions and tasks (children first;
+     * the foreign keys cascade anyway). Member and household tombstones are kept (sessions,
      * invites and login codes reference members). Moves `purge_horizon_seq` past the newest purged seq, so clients whose
      * cursor is older make a full resync. Returns the number of purged rows.
      */
@@ -61,6 +62,9 @@ class SyncHousekeeping(
                                     "AND NOT EXISTS (SELECT 1 FROM member m WHERE m.person_id = t.id) " +
                                         "AND NOT EXISTS (SELECT 1 FROM invite i WHERE i.person_id = t.id)",
                             ),
+                            purge("checklist_item", householdId, cutoff),
+                            purge("task_completion", householdId, cutoff),
+                            purge("task", householdId, cutoff),
                         )
                     val maxSeq = purged.mapNotNull { it.maxSeq }.maxOrNull()
                     if (maxSeq != null) {

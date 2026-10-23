@@ -28,14 +28,19 @@ Technical design: [architecture/tasks.md](../../architecture/tasks.md).
 ### Basics
 
 - **TSK-001** `MVP` `todo` — Create a task: title (required), notes, due date (optional time), assignees, tags.
+  *Server: storage, sync, validation and permissions done (M1-02).*
 - **TSK-002** `MVP` `todo` — Assignee options: specific members, or "anyone" (no assignees). One completion closes the
   task (or the occurrence) for everybody, also when several members are assigned (Q-014).
+  *Server: assignees checked against household members (M1-02).*
 - **TSK-003** `MVP` `todo` — Task states: open, done. Completion records who and when. Reopen is possible
   (by the person who completed it, the creator, or a member with "Edit others' tasks").
+  *Server: completions (immutable, undo deletes) and their permissions done (M1-02).*
 - **TSK-004** `MVP` `todo` — Checklist inside a task (sub-items with their own done flag). In a routine the checklist starts
   unticked for every occurrence.
+  *Server: checklist items; ticking needs completion rights, other changes edit rights (M1-02).*
 - **TSK-005** `MVP` `todo` — Edit and delete tasks; deleting a routine asks "this occurrence or the whole series"
   ("this occurrence" = skip it, the next one becomes current).
+  *Server: edit, delete with its checklist and completions, skip as a completion (M1-02).*
 - **TSK-006** `later` `todo` — Comments and photo attachments on a task (photos in M5b, [files](files.md); comments later).
 - **TSK-007** `MVP` `todo` — Undo right after completing (snackbar), and "Mark as not done" later from the task.
 
@@ -50,6 +55,7 @@ Technical design: [architecture/tasks.md](../../architecture/tasks.md).
   when the next scheduled date comes, the missed one is dropped.
 - **TSK-014** `later` `todo` — Rotation: assignees of a routine take turns in a set order.
 - **TSK-015** `MVP` `todo` — Completion history per routine (who did it and when; skipped occurrences marked).
+  *Server: completions with author, time, occurrence and skip flag are kept and synced (M1-02).*
 - **TSK-016** `MVP` `todo` — A routine can be completed early (before its date); for "after completion" schedules the next
   date counts from the actual completion.
 

@@ -44,6 +44,9 @@ import app.lares.server.sync.SyncPullService
 import app.lares.server.sync.SyncPushService
 import app.lares.server.sync.syncRoutes
 import app.lares.server.tags.TagSyncHandler
+import app.lares.server.tasks.ChecklistItemSyncHandler
+import app.lares.server.tasks.TaskCompletionSyncHandler
+import app.lares.server.tasks.TaskSyncHandler
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
@@ -89,7 +92,16 @@ class AppDeps(
 
     val syncHandlers =
         SyncHandlers(
-            listOf(HouseholdSyncHandler(), MemberSyncHandler(), GroupSyncHandler(), TagSyncHandler(), PersonSyncHandler()),
+            listOf(
+                HouseholdSyncHandler(),
+                MemberSyncHandler(),
+                GroupSyncHandler(),
+                TagSyncHandler(),
+                PersonSyncHandler(),
+                TaskSyncHandler(),
+                ChecklistItemSyncHandler(),
+                TaskCompletionSyncHandler(),
+            ),
         )
     val syncPullService = SyncPullService(db, syncHandlers, permissionService)
     val syncPushService = SyncPushService(db, clock, syncHandlers, permissionService)
