@@ -11,7 +11,7 @@ Add terms here before using them in code.
 | Operator | Администратор сервера | Person who runs the instance (usually the admin parent). |
 | Household | Семья | Tenant: a family and all its data (ADR-0010). |
 | User | Пользователь | Login identity (credentials, sessions). Global to the instance. |
-| Member | Член семьи | A user's membership in a household. Children are ordinary members. |
+| Member | Член семьи; in the UI «Участник» (Family › Участники) | A user's membership in a household. Children are ordinary members. |
 | Group | Группа | Set of members that receives permissions (ADR-0014). A member can be in several groups. |
 | Administrators | Администраторы | Built-in group: all permissions, sees all data, manages the household. Cannot be deleted; at least one member. |
 | Group template | Шаблон группы | Group created at household setup with default permissions: "Adults" (Взрослые), "Kids" (Дети). Editable. |
@@ -19,14 +19,14 @@ Add terms here before using them in code.
 | Section access | Доступ к разделу | Permission `<module>.view`: whether the member sees a section at all. |
 | Access rule | Правило видимости | Data visibility with subject and target (group or member): location visibility, money account access. |
 | Ownership rule | Правило владельца | Rights independent of groups: creator edits own items, assignee completes own tasks. |
-| Person | Человек, родственник | Anyone relevant to the family. Every member has one; relatives without accounts are persons only. |
+| Person | Человек, родственник; UI tab «Родные» | Anyone relevant to the family. Every member has one; relatives without accounts are persons only. |
 | Relation | Кем приходится | Free-text or preset label on a person: grandmother, uncle, friend. |
 | Invite | Приглашение | One-time link/QR to join a household with a given role. |
 | Device | Устройство | A logged-in app installation (phone) or a GPS tracker. |
 | Session | Сеанс, вход на устройстве | One logged-in app installation of a user: an access token (1 h) and a rotating refresh token (90 days). Revoked, never deleted. |
 | Setup code | Код первой настройки | One-time code from the server log that protects the first-run setup of an instance. |
 | Login code | Код входа | One-time QR code (5 min) that logs a member in on a new device. |
-| Tag | Тег | Household-wide label attachable to items in any module. |
+| Tag | Метка (UI; formerly «Тег») | Household-wide label attachable to items in any module. |
 | Tag page | Страница тега | Aggregated view of everything linked to a tag. |
 | Palette color | Цвет | One of 10 fixed colors (`PaletteColor`) used by tags and personal colors (ADR-0016). |
 | Personal color | Личный цвет | A person's palette color: avatar, events, map pin, assignments (FND-034). |

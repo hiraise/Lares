@@ -3,6 +3,7 @@ package app.familyhub.client.ui
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -10,6 +11,15 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import app.familyhub.client.auth.SessionState
 import app.familyhub.client.platform.DeepLinkHandler
+import app.familyhub.client.ui.family.AddMemberMode
+import app.familyhub.client.ui.family.AddMemberRoute
+import app.familyhub.client.ui.family.FamilyNavigation
+import app.familyhub.client.ui.family.FamilyRoute
+import app.familyhub.client.ui.family.FamilySettingsRoute
+import app.familyhub.client.ui.family.FamilyTab
+import app.familyhub.client.ui.family.GroupEditorRoute
+import app.familyhub.client.ui.family.MemberDetailRoute
+import app.familyhub.client.ui.family.PersonRoute
 import app.familyhub.client.ui.main.MainNavigation
 import app.familyhub.client.ui.main.MainScaffoldRoute
 import app.familyhub.client.ui.main.SectionPlaceholderPage
@@ -91,6 +101,41 @@ data object AboutDestination
 @Serializable
 data object LicensesDestination
 
+@Serializable
+data class FamilyDestination(
+    val tab: FamilyTab = FamilyTab.MEMBERS,
+)
+
+@Serializable
+data class MemberDestination(
+    val memberId: String,
+)
+
+@Serializable
+data class AddMemberDestination(
+    val mode: AddMemberMode,
+)
+
+/** The login QR of another member (FND-014); [name] is shown in the title. */
+@Serializable
+data class MemberLoginQrDestination(
+    val memberId: String,
+    val name: String,
+)
+
+@Serializable
+data class GroupDestination(
+    val groupId: String? = null,
+)
+
+@Serializable
+data class PersonDestination(
+    val personId: String? = null,
+)
+
+@Serializable
+data object FamilySettingsDestination
+
 /** Server → Setup | Login | InviteAccept, QR scanner; links (opened or scanned) continue on [LinkDestination]. */
 @Composable
 fun OnboardingNavHost(
@@ -171,6 +216,7 @@ fun MainNavHost() {
                     onProfile = { navController.navigate(ProfileDestination) },
                     onDevices = { navController.navigate(DevicesDestination) },
                     onSection = { navController.navigate(SectionPageDestination(it)) },
+                    onFamily = { navController.navigate(FamilyDestination(it)) },
                 ),
             )
         }
@@ -201,5 +247,50 @@ fun MainNavHost() {
             AboutRoute(onBack = { navController.popBackStack() }, onLicenses = { navController.navigate(LicensesDestination) })
         }
         composable<LicensesDestination> { LicensesRoute(onBack = { navController.popBackStack() }) }
+        familyGraph(navController)
     }
+}
+
+/** Family (plan M0-08): tabs, member detail, adding members, groups, persons, family settings. */
+private fun NavGraphBuilder.familyGraph(navController: NavHostController) {
+    val back: () -> Unit = { navController.popBackStack() }
+    composable<FamilyDestination> { entry ->
+        FamilyRoute(
+            initialTab = entry.toRoute<FamilyDestination>().tab,
+            navigation =
+                FamilyNavigation(
+                    onBack = back,
+                    onMember = { navController.navigate(MemberDestination(it)) },
+                    onAddMember = { navController.navigate(AddMemberDestination(it)) },
+                    onGroup = { navController.navigate(GroupDestination(it)) },
+                    onPerson = { navController.navigate(PersonDestination(it)) },
+                    onSettings = { navController.navigate(FamilySettingsDestination) },
+                ),
+        )
+    }
+    composable<MemberDestination> { entry ->
+        MemberDetailRoute(
+            memberId = entry.toRoute<MemberDestination>().memberId,
+            onBack = back,
+            onPerson = { navController.navigate(PersonDestination(it)) },
+            onLoginQr = { id, name -> navController.navigate(MemberLoginQrDestination(id, name)) },
+        )
+    }
+    composable<AddMemberDestination> { entry ->
+        AddMemberRoute(
+            mode = entry.toRoute<AddMemberDestination>().mode,
+            onBack = back,
+            onMemberCreated = { id, name ->
+                // The new account logs in by QR next; Back from there returns to the family.
+                navController.navigate(MemberLoginQrDestination(id, name)) { popUpTo<AddMemberDestination> { inclusive = true } }
+            },
+        )
+    }
+    composable<MemberLoginQrDestination> { entry ->
+        val route = entry.toRoute<MemberLoginQrDestination>()
+        LoginQrRoute(onBack = back, memberId = route.memberId, memberName = route.name)
+    }
+    composable<GroupDestination> { entry -> GroupEditorRoute(entry.toRoute<GroupDestination>().groupId, onBack = back) }
+    composable<PersonDestination> { entry -> PersonRoute(entry.toRoute<PersonDestination>().personId, onBack = back) }
+    composable<FamilySettingsDestination> { FamilySettingsRoute(onBack = back) }
 }

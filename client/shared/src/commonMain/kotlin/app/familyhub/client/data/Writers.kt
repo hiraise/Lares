@@ -78,6 +78,9 @@ class PersonsWriter(
 
     suspend fun delete(id: String) = writer.delete(EntityTypes.PERSON, id)
 
+    /** The color [create] picks for a new person when none is given: the least used one (FND-034). */
+    suspend fun nextColor(): PaletteColor = PaletteColors.pickLeastUsed(usedColors())
+
     private suspend fun usedColors(): List<PaletteColor> =
         localDb.read {
             personQueries.selectAll().executeAsList().map { paletteColor(it.color) ?: PaletteColors.fallbackFor(it.id) }

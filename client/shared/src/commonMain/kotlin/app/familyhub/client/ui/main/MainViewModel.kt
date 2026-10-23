@@ -5,8 +5,10 @@ import androidx.lifecycle.viewModelScope
 import app.familyhub.client.auth.SessionManager
 import app.familyhub.client.auth.SessionState
 import app.familyhub.client.data.GroupsRepository
+import app.familyhub.client.data.MembersRepository
 import app.familyhub.client.data.PermissionsRepository
 import app.familyhub.client.data.PersonsRepository
+import app.familyhub.client.data.TagsRepository
 import app.familyhub.client.sync.Rejection
 import app.familyhub.client.sync.SyncEngine
 import app.familyhub.client.sync.SyncState
@@ -45,6 +47,10 @@ data class MainUiState(
     val sync: SyncStatus = SyncStatus(SyncState.SYNCED, 0, null, null),
     val rejections: List<Rejection> = emptyList(),
     val syncingNow: Boolean = false,
+    /** Counts for the Family and Tags tiles of More. */
+    val memberCount: Int = 0,
+    val groupCount: Int = 0,
+    val tagCount: Int = 0,
 )
 
 /** State shared by the main scaffold, Today and More: who is logged in, what they may see, sync status (FND-043). */
@@ -55,6 +61,8 @@ class MainViewModel(
     groupsRepository: GroupsRepository,
     permissionsRepository: PermissionsRepository,
     private val syncEngine: SyncEngine,
+    membersRepository: MembersRepository,
+    tagsRepository: TagsRepository,
 ) : ViewModel() {
     private val syncingNow = MutableStateFlow(false)
 
@@ -83,6 +91,11 @@ class MainViewModel(
         combine(profile, myGroups, sections, syncEngine.status, syncEngine.rejections) { profile, groups, sections, sync, rejections ->
             MainUiState(profile.first, profile.second, groups, sections, sync, rejections)
         }.combine(syncingNow) { state, now -> state.copy(syncingNow = now) }
+            .combine(
+                combine(membersRepository.observeAll(), groupsRepository.observeAll(), tagsRepository.observeAll()) { m, g, t ->
+                    Triple(m.size, g.size, t.size)
+                },
+            ) { state, (members, groups, tags) -> state.copy(memberCount = members, groupCount = groups, tagCount = tags) }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), MainUiState())
 
     fun syncNow() {

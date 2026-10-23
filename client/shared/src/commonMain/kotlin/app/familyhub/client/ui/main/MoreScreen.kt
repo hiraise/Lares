@@ -36,6 +36,8 @@ import app.familyhub.client.resources.ic_notifications
 import app.familyhub.client.resources.ic_sell
 import app.familyhub.client.resources.ic_settings
 import app.familyhub.client.resources.more_devices
+import app.familyhub.client.resources.more_family_groups
+import app.familyhub.client.resources.more_family_members
 import app.familyhub.client.resources.more_help
 import app.familyhub.client.resources.more_notifications
 import app.familyhub.client.resources.more_settings
@@ -43,6 +45,8 @@ import app.familyhub.client.resources.more_settings_hint
 import app.familyhub.client.resources.more_soon
 import app.familyhub.client.resources.more_sync
 import app.familyhub.client.resources.more_sync_saved_at
+import app.familyhub.client.resources.more_tags_count
+import app.familyhub.client.resources.more_tags_none
 import app.familyhub.client.resources.nav_more
 import app.familyhub.client.resources.placeholder_coming
 import app.familyhub.client.resources.section_budget
@@ -58,12 +62,14 @@ import app.familyhub.client.ui.components.ListGroup
 import app.familyhub.client.ui.components.ListRow
 import app.familyhub.client.ui.components.ScreenHeader
 import app.familyhub.client.ui.components.initialsFor
+import app.familyhub.client.ui.family.FamilyTab
 import app.familyhub.client.ui.theme.Spacing
 import app.familyhub.client.ui.theme.tones
 import app.familyhub.contract.entities.PaletteColor
 import app.familyhub.contract.permissions.BuiltInGroup
 import app.familyhub.contract.permissions.Section
 import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 /** FND-064, mockup `More.dc.html`: profile card, section tiles the member may open, settings list. */
@@ -103,25 +109,34 @@ fun MoreScreen(
                             },
                         )
                     }
-                    // Family and Tags open in M0-08.
+                    // Family and Tags are visible to every member; editing follows permissions (plan M0-08).
                     add(
                         Tile(
                             Res.drawable.ic_group,
                             stringResource(Res.string.section_family),
-                            stringResource(Res.string.more_soon),
-                            false,
+                            listOf(
+                                pluralStringResource(Res.plurals.more_family_members, state.memberCount, state.memberCount),
+                                pluralStringResource(Res.plurals.more_family_groups, state.groupCount, state.groupCount),
+                            ).joinToString(", "),
+                            true,
                             PaletteColor.PINK,
                         ) {
+                            navigation.onFamily(FamilyTab.MEMBERS)
                         },
                     )
                     add(
                         Tile(
                             Res.drawable.ic_sell,
                             stringResource(Res.string.section_tags),
-                            stringResource(Res.string.more_soon),
-                            false,
+                            if (state.tagCount == 0) {
+                                stringResource(Res.string.more_tags_none)
+                            } else {
+                                pluralStringResource(Res.plurals.more_tags_count, state.tagCount, state.tagCount)
+                            },
+                            true,
                             PaletteColor.YELLOW,
                         ) {
+                            navigation.onFamily(FamilyTab.TAGS)
                         },
                     )
                 }

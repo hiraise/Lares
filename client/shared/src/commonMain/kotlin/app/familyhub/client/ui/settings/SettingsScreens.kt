@@ -64,6 +64,8 @@ import app.familyhub.client.resources.logout_confirm
 import app.familyhub.client.resources.logout_text
 import app.familyhub.client.resources.logout_text_pending
 import app.familyhub.client.resources.logout_title
+import app.familyhub.client.resources.member_login_qr_text
+import app.familyhub.client.resources.member_login_qr_title
 import app.familyhub.client.resources.password_changed
 import app.familyhub.client.resources.password_current
 import app.familyhub.client.resources.password_new
@@ -75,6 +77,7 @@ import app.familyhub.client.resources.profile_name
 import app.familyhub.client.resources.profile_no_login
 import app.familyhub.client.resources.profile_saved
 import app.familyhub.client.resources.profile_title
+import app.familyhub.client.resources.relative_color
 import app.familyhub.client.resources.settings_about
 import app.familyhub.client.resources.settings_appearance
 import app.familyhub.client.resources.settings_delete_account
@@ -90,6 +93,7 @@ import app.familyhub.client.ui.common.label
 import app.familyhub.client.ui.common.rememberTimeFormatter
 import app.familyhub.client.ui.components.AppPage
 import app.familyhub.client.ui.components.ChoiceDialog
+import app.familyhub.client.ui.components.ColorSwatches
 import app.familyhub.client.ui.components.ConfirmDialog
 import app.familyhub.client.ui.components.DetailTopBar
 import app.familyhub.client.ui.components.ErrorText
@@ -109,6 +113,7 @@ import app.familyhub.contract.Codes
 import io.github.alexzhirkevich.qrose.rememberQrCodePainter
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 /** Where the settings screens lead. */
 class SettingsNavigation(
@@ -294,6 +299,12 @@ fun ProfileRoute(
             }
         }
         ListGroup {
+            Column(Modifier.padding(Spacing.l), verticalArrangement = Arrangement.spacedBy(Spacing.m)) {
+                Text(stringResource(Res.string.relative_color), style = MaterialTheme.typography.labelLarge)
+                ColorSwatches(state.color, viewModel::onColor)
+            }
+        }
+        ListGroup {
             ListRow(
                 stringResource(Res.string.profile_login),
                 icon = Res.drawable.ic_person,
@@ -364,12 +375,22 @@ fun ChangePasswordRoute(
 @Composable
 fun LoginQrRoute(
     onBack: () -> Unit,
-    viewModel: LoginQrViewModel = koinViewModel(),
+    memberId: String? = null,
+    memberName: String? = null,
+    viewModel: LoginQrViewModel = koinViewModel(key = "login-qr-$memberId") { parametersOf(*listOfNotNull(memberId).toTypedArray()) },
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    AppPage(topBar = { DetailTopBar(stringResource(Res.string.login_qr_title), onBack) }) {
+    val title =
+        if (memberName !=
+            null
+        ) {
+            stringResource(Res.string.member_login_qr_title, memberName)
+        } else {
+            stringResource(Res.string.login_qr_title)
+        }
+    AppPage(topBar = { DetailTopBar(title, onBack) }) {
         Text(
-            stringResource(Res.string.login_qr_text),
+            stringResource(if (memberId != null) Res.string.member_login_qr_text else Res.string.login_qr_text),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

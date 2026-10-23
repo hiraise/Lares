@@ -4,7 +4,7 @@ Updated: 2026-10-23
 
 ## Phase
 
-**M0 Foundation — implementation in progress: M0-01…M0-07 done.**
+**M0 Foundation — implementation in progress: M0-01…M0-08 done.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
@@ -73,10 +73,24 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
   `familyhub://invite|login`, session restore on start, foreground toggle, connectivity trigger, debug-only cleartext to
   local hosts, adaptive icon. `SessionManager.deleteAccount`. 23 new client tests (ViewModels on a mock server, Compose UI
   tests incl. bottom-bar filtering, icon resources). Emulator walkthrough of all flows except live camera scanning.
+- 2026-10-23 M0-08: Family management screens — More › Family / Tags open the Family screen with tabs Members,
+  Relatives, Groups, Tags and Family settings (admins). Members: list with group chips and the Administrators badge,
+  active invites with revoke, member detail (change groups, reset password, login QR for that member, remove), "Invite"
+  → send an invitation (groups, 1/3/7 days, QR + share link) or create an account without password (→ login QR); both
+  can link an existing relative (FND-032). Groups: editor with plain-language permissions by section (action ⇒ "See …",
+  unchecking "See …" clears the section), members checklist, Administrators locked with last-member check, delete with
+  confirmation. Relatives: list with "member" badge, person form (birthday pickers day/month/optional year, relation
+  suggestions, color, contacts, notes), delete for non-members. Tags: list, archive section, create/edit sheet with
+  palette, inline duplicate check, delete. Personal color in the own profile. Admin actions are online-only ("Needs
+  internet connection") and request a sync afterwards; relatives and tags work offline. `LoginQrViewModel` takes an
+  optional member id. 13 new client tests (ViewModels on a synced mock household, Compose UI for the group editor and
+  members list) and 1 multi-device test (invite created by the admin, accepted on a new client, both see each other).
+  Emulator walkthrough RU/EN, light/dark; fixed on the way: FAB shadow artifact, contact field focus, tag sheet behind
+  the keyboard and a layout loop in it.
 
 ## Next steps
 
-1. Next plan: [M0-08 Family management screens](plans/M0/08-family-management-ui.md), in a fresh session
+1. Next plan: [M0-09 Notifications](plans/M0/09-notifications.md), in a fresh session
    (M0-10 Deploy can also start now; it depends only on M0-05).
 2. After M0-11: M0 acceptance with the customer (APK, walkthrough, Russian changelog).
 
@@ -99,6 +113,7 @@ See the table in [plans README](plans/README.md#m0-plans).
 | Sync engine complexity | Data loss or conflicts | Protocol accepted (sync.md, ADR-0008); server invariants (M0-05) and multi-device convergence tests (M0-06) run in `check` |
 | Flexible permissions make UI and testing harder | Confusing group editor, permission bugs | Templates "Adults"/"Kids", plain wording, permission matrix tests (ADR-0014) |
 | Emulator cannot reach the host's ports on this Mac (`10.0.2.2` times out) | Manual checks against the dev server | `adb reverse tcp:8080 tcp:8080` and `http://localhost:8080` (dev-setup) |
+| Emulator is slow on this Mac (software GPU, cold start ~9 s, ANR dialogs under load) | Walkthroughs are slow; real ANRs are hard to tell from emulator stalls | Check main-thread CPU (`/proc/<pid>/task/<pid>/stat`) and ANR traces before blaming the app; real phone for M0 acceptance |
 | Pre-release UI libraries (CMP Material3 alpha, navigation RC) | Possible API changes or bugs | Versions paired by JetBrains with CMP 1.12.2; upgrade when stable |
 | ktlint 1.8 parses only Kotlin ≤ 2.2 syntax | Lint failures on newest syntax | Avoid newest syntax; report instead of disabling lint |
 | Medium-effort sessions deviate from plans | Inconsistent code | Plans fix all decisions; "stop and report" rules; customer approves each commit |

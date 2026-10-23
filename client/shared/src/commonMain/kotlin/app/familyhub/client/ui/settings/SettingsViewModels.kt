@@ -26,6 +26,8 @@ import app.familyhub.contract.api.admin.CreateLoginCodeRequest
 import app.familyhub.contract.api.auth.ChangePasswordRequest
 import app.familyhub.contract.api.auth.Me
 import app.familyhub.contract.api.auth.SessionInfo
+import app.familyhub.contract.entities.PaletteColor
+import app.familyhub.contract.entities.PaletteColors
 import app.familyhub.contract.entities.PersonData
 import app.familyhub.contract.validation.Validators
 import kotlinx.coroutines.Job
@@ -112,6 +114,8 @@ data class ProfileUiState(
     val nameError: FieldError? = null,
     val login: String? = null,
     val saved: Boolean = false,
+    /** The personal color (FND-034); changing it saves at once. */
+    val color: PaletteColor? = null,
 )
 
 /** Own profile: the name is the own person, edited offline through the sync engine. */
@@ -130,16 +134,20 @@ class ProfileViewModel(
                 persons.observe(me.personId).collect { person ->
                     val name = person?.data?.name ?: me.displayName
                     mutableState.update {
-                        if (it.name ==
-                            it.savedName
-                        ) {
-                            it.copy(name = name, savedName = name)
-                        } else {
-                            it.copy(savedName = name)
-                        }
+                        val synced = it.copy(color = person?.color ?: PaletteColors.fallbackFor(me.personId))
+                        if (it.name == it.savedName) synced.copy(name = name, savedName = name) else synced.copy(savedName = name)
                     }
                 }
             }
+        }
+    }
+
+    fun onColor(value: PaletteColor) {
+        val me = me ?: return
+        mutableState.update { it.copy(color = value) }
+        viewModelScope.launch {
+            val current = persons.observe(me.personId).first()?.data ?: return@launch
+            attempt { personsWriter.update(me.personId, current.copy(color = value)) }
         }
     }
 
@@ -243,10 +251,14 @@ data class LoginQrUiState(
     val error: UiError? = null,
 )
 
-/** FND-014: a self login code as a QR, valid for five minutes, with a countdown. */
+/**
+ * FND-014: a login code as a QR, valid for five minutes, with a countdown. For the caller, or with [memberId] for
+ * another member (needs `household.manage`).
+ */
 class LoginQrViewModel(
     private val api: FamilyHubApi,
     private val clock: Clock,
+    private val memberId: String? = null,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(LoginQrUiState())
     val state: StateFlow<LoginQrUiState> = mutableState.asStateFlow()
@@ -261,7 +273,7 @@ class LoginQrViewModel(
         mutableState.value = LoginQrUiState()
         countdown =
             viewModelScope.launch {
-                val result = attempt { api.createLoginCode(CreateLoginCodeRequest()) }
+                val result = attempt { api.createLoginCode(CreateLoginCodeRequest(memberId)) }
                 val created =
                     result.getOrElse { e ->
                         mutableState.value = LoginQrUiState(error = e.toUiError())

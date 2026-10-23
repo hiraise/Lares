@@ -28,8 +28,8 @@ localization and deployment — everything feature modules depend on.
   to create the first admin and household. *Server done (M0-03); setup form in the app done (M0-07).*
 - **FND-002** `MVP` `doing` — One instance can host several households; data of different households is fully isolated.
   *Isolation of admin endpoints (M0-04) and sync (M0-05) enforced and tested; creating more households: after M0.*
-- **FND-003** `MVP` `doing` — Household settings: name, time zone, currency, default language.
-  *Server done (M0-04); app: M0-08.*
+- **FND-003** `MVP` `done` — Household settings: name, time zone, currency, default language.
+  *Server done (M0-04); Family › Family settings (M0-08).*
 
 ### Accounts and sessions
 
@@ -38,52 +38,59 @@ localization and deployment — everything feature modules depend on.
   *Server login, password change, Argon2id done (M0-03); members without login/password (M0-04); app login by password and QR code (M0-07).*
 - **FND-011** `MVP` `done` — Sessions survive app restarts; a user can see and revoke their sessions (devices).
   *Server sessions, refresh rotation, list and revoke done (M0-03); restore on start and "My devices" screen (M0-07).*
-- **FND-012** `MVP` `doing` — A member with `household.manage` can reset another member's password.
-  *Server done, revokes the member's sessions (M0-04); app: M0-08.*
+- **FND-012** `MVP` `done` — A member with `household.manage` can reset another member's password.
+  *Server done, revokes the member's sessions (M0-04); member detail › Reset password (M0-08).*
 - **FND-013** `MVP` `done` — A user can delete their account from inside the app (also a Google Play requirement).
   *Server done (M0-03); Settings › Delete account with password confirmation (M0-07).*
-- **FND-014** `MVP` `doing` — Any member can log in on a new device by scanning a QR code shown on a logged-in device
-  (their own, or one of a member with `household.manage`). *Server login codes done (M0-04); own QR code, scanner and `familyhub://login` links (M0-07); showing a code for another member: M0-08.*
+- **FND-014** `MVP` `done` — Any member can log in on a new device by scanning a QR code shown on a logged-in device
+  (their own, or one of a member with `household.manage`). *Server login codes done (M0-04); own QR code, scanner and `familyhub://login` links (M0-07); member detail › Log in by QR code for another member (M0-08).*
 - **FND-015** `later` `todo` — Login via external OpenID Connect provider (Authentik, Keycloak).
 
 ### Members, groups and permissions ([ADR-0014](../../adr/0014-group-based-permissions.md))
 
 - **FND-020** `MVP` `done` — Permissions are granted through groups; a member can be in several groups;
   effective permissions are the union of the groups' permissions.
-- **FND-021** `MVP` `doing` — Built-in group "Administrators": cannot be deleted, always has at least one member, has all permissions
+- **FND-021** `MVP` `done` — Built-in group "Administrators": cannot be deleted, always has at least one member, has all permissions
   and sees all data regardless of visibility rules. *Created at setup, all permissions, last-admin check (M0-03);
-  no rename/delete/permission change, at least one member (server, M0-04); app: M0-08.*
-- **FND-022** `MVP` `doing` — Members with `household.manage` create, rename and delete groups, edit group permissions and membership.
-  *Server done, incl. creating members directly (M0-04); app: M0-08.*
-- **FND-023** `MVP` `doing` — Household setup creates editable templates "Adults" and "Kids" with the defaults below.
-  *Created at setup (M0-03); editable through the group endpoints (M0-04); app: M0-08.*
-- **FND-024** `MVP` `doing` — Invite by link or QR code with chosen groups; invites expire.
-  *Server done: create, list, revoke, preview, accept, link payload (M0-04); app: M0-07/M0-08.*
-- **FND-025** `MVP` `doing` — Members with `household.manage` can remove members.
-  *Server done, same effect as account deletion (M0-04); app: M0-08.*
+  no rename/delete/permission change, at least one member (server, M0-04); group editor: locked permissions, membership
+  editable, last member kept (M0-08).*
+- **FND-022** `MVP` `done` — Members with `household.manage` create, rename and delete groups, edit group permissions and membership.
+  *Server done, incl. creating members directly (M0-04); Groups tab, group editor, member groups, "Create an account
+  without password" (M0-08).*
+- **FND-023** `MVP` `done` — Household setup creates editable templates "Adults" and "Kids" with the defaults below.
+  *Created at setup (M0-03); editable through the group endpoints (M0-04) and the group editor (M0-08).*
+- **FND-024** `MVP` `done` — Invite by link or QR code with chosen groups; invites expire.
+  *Server done: create, list, revoke, preview, accept, link payload (M0-04); accepting (M0-07); creating with groups and
+  expiry, QR, share link, active invites with revoke (M0-08).*
+- **FND-025** `MVP` `done` — Members with `household.manage` can remove members.
+  *Server done, same effect as account deletion (M0-04); member detail › Remove from family (M0-08).*
 - **FND-026** `MVP` `doing` — Ownership rules: creators edit their own items, assignees complete their tasks,
   everyone manages their own profile, sessions and notifications — independent of groups.
   *Own sessions, password and account need no permission (M0-03); items, profile, notifications follow in their modules.*
 - **FND-027** `MVP` `doing` — Permissions are enforced offline on the client and authoritatively on the server.
   *Server checks on admin endpoints with a permission matrix test (M0-04) and on sync mutations via shared `WriteRules` (M0-05).
   Client core (M0-06): local writes checked with the same `WriteRules`, permissions evaluated offline from synced groups
-  (`PermissionsRepository`); UI that hides actions: M0-07/M0-08.*
+  (`PermissionsRepository`); Family screens hide or disable every edit control per permission (M0-08); modules follow.*
 - **FND-028** `MVP` `doing` — Sections a member has no access to are hidden from navigation, search and tag pages.
   *Bottom bar and More tiles filtered by `*.view` (M0-07); search and tag pages come with their milestones.*
 
 ### Persons
 
-- **FND-030** `MVP` `doing` — A person is anyone relevant to the family: members and relatives without accounts.
-- **FND-031** `MVP` `doing` — Person fields: name, optional birth date (year optional), relation label, notes, contacts.
-  *Server: persons through sync with shared validators and `WriteRules` (M0-05); client core `PersonsWriter`/`PersonsRepository` (M0-06); UI: M0-08.*
+- **FND-030** `MVP` `done` — A person is anyone relevant to the family: members and relatives without accounts.
+  *Relatives tab lists both; members' profiles carry a "member" badge (M0-08).*
+- **FND-031** `MVP` `done` — Person fields: name, optional birth date (year optional), relation label, notes, contacts.
+  *Server: persons through sync with shared validators and `WriteRules` (M0-05); client core `PersonsWriter`/`PersonsRepository` (M0-06); person form with birthday pickers, relation
+  suggestions, contacts, notes (M0-08).*
 - **FND-033** `later` `todo` — Person photo, in milestone M5b ([files](files.md)). Until then avatars show initials on
   the personal color.
-- **FND-034** `MVP` `doing` — Every person has a personal color from the shared palette, assigned automatically
+- **FND-034** `MVP` `done` — Every person has a personal color from the shared palette, assigned automatically
   (least-used in the household) and changeable; it marks the person's avatar, events, map pin and assignments
   ([visual style](../../design/visual-style.md#people)).
-  *Server: `PersonData.color`, least-used color on setup, member creation and invite acceptance (M0-05); client core picks the least-used color for new relatives (`PersonsWriter`, M0-06); UI: M0-08.*
-- **FND-032** `MVP` `doing` — Every member has a person profile; a relative can later be linked to a new account.
-  *Server: linking on member creation and invite acceptance (M0-04); persons through sync (M0-05).*
+  *Server: `PersonData.color`, least-used color on setup, member creation and invite acceptance (M0-05); client core picks the least-used color for new relatives (`PersonsWriter`, M0-06); avatars in personal colors and
+  the "Color" row in the person form and own profile (M0-08). Events, pins and assignments use it in their modules.*
+- **FND-032** `MVP` `done` — Every member has a person profile; a relative can later be linked to a new account.
+  *Server: linking on member creation and invite acceptance (M0-04); persons through sync (M0-05); "This is an existing
+  relative" in both add-member flows (M0-08).*
 
 ### Offline and sync
 
@@ -118,8 +125,8 @@ localization and deployment — everything feature modules depend on.
 - **FND-063** `MVP` `doing` — Home screen "Today" summarizes the sections the member can see: overdue and today's tasks,
   upcoming events and birthdays, the active shopping list, family on the map, budget of the month. Each module adds
   its block in its milestone; in M0 it is an empty state. *Header and empty state done (M0-07).*
-- **FND-064** `MVP` `doing` — Bottom navigation: Today · Tasks · Shopping · Calendar · More; Map, Budget, Family and Tags
-  are reached from "More" and from Today blocks (Q-013). *Bar and More done (M0-07); Family and Tags open in M0-08.*
+- **FND-064** `MVP` `done` — Bottom navigation: Today · Tasks · Shopping · Calendar · More; Map, Budget, Family and Tags
+  are reached from "More" and from Today blocks (Q-013). *Bar and More done (M0-07); Family and Tags tiles open the Family screen (M0-08).*
 - **FND-065** `MVP` `doing` — The UI follows the [visual style](../../design/visual-style.md) (ADR-0016).
   *Theme, fonts, icons, components (M0-07); applies to every later screen.*
 

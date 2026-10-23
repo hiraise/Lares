@@ -124,6 +124,25 @@
     <string name="more_devices">Мои устройства</string>
     <string name="more_help">Помощь</string>
     <string name="more_soon">Скоро</string>
+    <plurals name="more_family_members">
+        <item quantity="one">%1$d участник</item>
+        <item quantity="few">%1$d участника</item>
+        <item quantity="many">%1$d участников</item>
+        <item quantity="other">%1$d участника</item>
+    </plurals>
+    <plurals name="more_family_groups">
+        <item quantity="one">%1$d группа</item>
+        <item quantity="few">%1$d группы</item>
+        <item quantity="many">%1$d групп</item>
+        <item quantity="other">%1$d группы</item>
+    </plurals>
+    <plurals name="more_tags_count">
+        <item quantity="one">%1$d метка</item>
+        <item quantity="few">%1$d метки</item>
+        <item quantity="many">%1$d меток</item>
+        <item quantity="other">%1$d метки</item>
+    </plurals>
+    <string name="more_tags_none">Меток пока нет</string>
 
     <string name="sync_synced">Всё синхронизировано</string>
     <string name="sync_syncing">Синхронизация…</string>
@@ -228,4 +247,171 @@
     <string name="about_server_address">Адрес сервера</string>
     <string name="about_licenses">Лицензии открытого ПО</string>
     <string name="licenses_text">FamilyHub — свободная программа: её можно распространять и изменять на условиях GNU Affero General Public License, опубликованной Free Software Foundation, версии 3 или (по вашему выбору) любой более поздней версии. Программа распространяется БЕЗ КАКИХ-ЛИБО ГАРАНТИЙ. Исходный код доступен в репозитории проекта.\n\nВстроенные ресурсы:\n\n• Шрифт Manrope — Copyright 2018 The Manrope Project Authors. SIL Open Font License 1.1.\n\n• Значки Material Symbols — Copyright Google LLC. Apache License 2.0.\n\nБиблиотеки: Kotlin, kotlinx, Compose Multiplatform, AndroidX, Ktor, SQLDelight, Koin, ZXing — Apache License 2.0. qrose — MIT License.</string>
+    <!-- Семья (M0-08) -->
+    <string name="action_done">Готово</string>
+    <string name="action_delete">Удалить</string>
+    <string name="action_add">Добавить</string>
+    <string name="family_tab_members">Участники</string>
+    <string name="family_tab_relatives">Родные</string>
+    <string name="family_tab_groups">Группы</string>
+    <string name="family_tab_tags">Метки</string>
+    <string name="family_tabs">Разделы семьи</string>
+    <string name="family_settings">Настройки семьи</string>
+    <string name="family_you">(вы)</string>
+    <string name="family_needs_internet">Нужно подключение к интернету</string>
+    <string name="family_no_groups">Не состоит в группах</string>
+    <string name="family_invite">Пригласить</string>
+    <string name="family_pending_invites">Ждут подключения</string>
+    <string name="family_invite_title">Приглашение</string>
+    <string name="family_invite_revoke">Отозвать</string>
+    <plurals name="family_invite_days_left">
+        <item quantity="one">действует ещё %1$d день</item>
+        <item quantity="few">действует ещё %1$d дня</item>
+        <item quantity="many">действует ещё %1$d дней</item>
+        <item quantity="other">действует ещё %1$d дня</item>
+    </plurals>
+    <plurals name="family_invite_hours_left">
+        <item quantity="one">действует ещё %1$d час</item>
+        <item quantity="few">действует ещё %1$d часа</item>
+        <item quantity="many">действует ещё %1$d часов</item>
+        <item quantity="other">действует ещё %1$d часа</item>
+    </plurals>
+    <string name="family_add_title">Добавить участника</string>
+    <string name="family_add_invite">Отправить приглашение</string>
+    <string name="family_add_invite_text">Человек сам установит приложение и войдёт по ссылке или QR-коду</string>
+    <string name="family_add_create">Создать аккаунт без пароля</string>
+    <string name="family_add_create_text">Например, для ребёнка: его телефон войдёт по QR-коду</string>
+    <string name="family_add_groups">Группы</string>
+    <string name="family_add_groups_hint">От групп зависит, что новый участник увидит и сможет делать</string>
+    <string name="family_add_expiry">Приглашение действует</string>
+    <plurals name="family_days">
+        <item quantity="one">%1$d день</item>
+        <item quantity="few">%1$d дня</item>
+        <item quantity="many">%1$d дней</item>
+        <item quantity="other">%1$d дня</item>
+    </plurals>
+    <string name="family_add_relative">Это уже добавленный родственник</string>
+    <string name="family_add_relative_none">Нет, новый человек</string>
+    <string name="family_add_relative_hint">Новый участник получит профиль этого родственника с днём рождения и контактами</string>
+    <string name="family_add_relative_pick">Какой родственник?</string>
+    <string name="family_add_name">Имя</string>
+    <string name="family_add_submit_invite">Создать приглашение</string>
+    <string name="family_add_submit_create">Создать аккаунт</string>
+    <string name="invite_result_text">Покажите этот QR-код новому участнику или отправьте ему ссылку. На его телефоне: открыть FamilyHub → «Сканировать QR-приглашение» или открыть ссылку.</string>
+    <string name="invite_share">Поделиться ссылкой</string>
+    <string name="invite_valid_until">Действует до %1$s</string>
+    <string name="invite_share_text">Присоединяйся к нашей семье в FamilyHub. Установи приложение и открой ссылку:\n%1$s\n\nИли в приложении выбери «У меня есть приглашение» и введи код %2$s.</string>
+    <string name="member_title">Участник</string>
+    <string name="member_profile">Профиль</string>
+    <string name="member_profile_hint">Имя, день рождения, цвет, контакты</string>
+    <string name="member_groups">Группы</string>
+    <string name="member_groups_change">Изменить группы</string>
+    <string name="member_login">Логин</string>
+    <string name="member_no_login">Без логина — входит по QR-коду</string>
+    <string name="member_reset_password">Сбросить пароль</string>
+    <string name="member_reset_text">Все устройства участника %1$s выйдут из аккаунта. Сообщите ему новый пароль.</string>
+    <string name="member_reset_done">Пароль изменён. %1$s входит с новым паролем.</string>
+    <string name="member_login_qr">Вход по QR-коду</string>
+    <string name="member_login_qr_hint">Войти на новом телефоне участника</string>
+    <string name="member_remove">Удалить из семьи</string>
+    <string name="member_remove_title">Удалить %1$s из семьи?</string>
+    <string name="member_remove_text">Аккаунт удалится, все устройства выйдут из него. Профиль останется среди родных, а созданное участником останется в семье.</string>
+    <string name="member_gone">Этого участника больше нет в семье.</string>
+    <string name="member_login_qr_title">Вход: %1$s</string>
+    <string name="member_login_qr_text">На новом телефоне откройте FamilyHub → «Войти по QR-коду» и отсканируйте этот код.</string>
+    <plurals name="group_members_count">
+        <item quantity="one">%1$d участник</item>
+        <item quantity="few">%1$d участника</item>
+        <item quantity="many">%1$d участников</item>
+        <item quantity="other">%1$d участника</item>
+    </plurals>
+    <string name="group_admin_text">Полный доступ ко всему, включая все данные</string>
+    <string name="group_new">Новая группа</string>
+    <string name="group_title">Группа</string>
+    <string name="group_name">Название группы</string>
+    <string name="group_rights">Что можно делать</string>
+    <string name="group_members">Участники</string>
+    <string name="group_delete">Удалить группу</string>
+    <string name="group_delete_title">Удалить группу «%1$s»?</string>
+    <string name="group_delete_text">Её участники потеряют права, которые давала эта группа.</string>
+    <string name="group_read_only">Менять группы могут только те, кто управляет семьёй.</string>
+    <string name="perm_persons_manage">Управлять родными</string>
+    <string name="perm_tags_manage">Управлять метками</string>
+    <string name="perm_household_manage">Управлять семьёй (люди, группы, права)</string>
+    <string name="perm_tasks_view">Видеть задачи</string>
+    <string name="perm_tasks_create">Создавать задачи</string>
+    <string name="perm_tasks_edit_any">Менять чужие задачи</string>
+    <string name="perm_shopping_view">Видеть списки</string>
+    <string name="perm_shopping_edit">Добавлять и отмечать покупки</string>
+    <string name="perm_shopping_manage_lists">Создавать и удалять списки</string>
+    <string name="perm_calendar_view">Видеть календарь</string>
+    <string name="perm_calendar_create">Создавать события</string>
+    <string name="perm_calendar_edit_any">Менять чужие события</string>
+    <string name="perm_location_view">Видеть карту</string>
+    <string name="perm_location_pause_own">Ставить на паузу свою геопозицию</string>
+    <string name="perm_location_manage_places">Управлять местами</string>
+    <string name="perm_budget_view">Видеть бюджет</string>
+    <string name="perm_budget_manage">Управлять бюджетом</string>
+    <string name="relative_new">Добавить</string>
+    <string name="relative_title_new">Новый родственник</string>
+    <string name="relative_title">Родственник</string>
+    <string name="relative_member_badge">участник</string>
+    <string name="relative_name">Имя</string>
+    <string name="relative_birthday">День рождения</string>
+    <string name="relative_birthday_none">Не указан</string>
+    <string name="relative_birthday_day">День</string>
+    <string name="relative_birthday_month">Месяц</string>
+    <string name="relative_birthday_year">Год</string>
+    <string name="relative_birthday_year_unknown">Не знаю</string>
+    <string name="relative_birthday_clear">Очистить</string>
+    <string name="family_birthday_incomplete">Выберите и день, и месяц</string>
+    <string name="relative_relation">Кем приходится</string>
+    <string-array name="relation_suggestions">
+        <item>мама</item>
+        <item>папа</item>
+        <item>бабушка</item>
+        <item>дедушка</item>
+        <item>брат</item>
+        <item>сестра</item>
+        <item>тётя</item>
+        <item>дядя</item>
+        <item>друг</item>
+    </string-array>
+    <string name="relative_notes">Заметки</string>
+    <string name="relative_contacts">Контакты</string>
+    <string name="relative_color">Цвет</string>
+    <string name="contact_phone">Телефон</string>
+    <string name="contact_email">Почта</string>
+    <string name="contact_address">Адрес</string>
+    <string name="contact_other">Другое</string>
+    <string name="contact_remove">Удалить контакт</string>
+    <string name="relative_delete_title">Удалить: %1$s?</string>
+    <string name="relative_delete_text">Человек будет удалён из родных на всех устройствах.</string>
+    <string name="relative_read_only">Менять это могут только те, кто управляет родными.</string>
+    <string name="relatives_empty">Родных пока нет. Добавьте бабушек, дедушек, тёть и дядь, чтобы помнить их дни рождения.</string>
+    <!-- %1$s число, %2$s месяц, %3$s год -->
+    <string name="date_day_month_year">%1$s %2$s %3$s</string>
+    <string name="tag_new">Новая метка</string>
+    <string name="tag_title">Метка</string>
+    <string name="tag_name">Название</string>
+    <string name="tag_color">Цвет</string>
+    <string name="tag_archive">В архив</string>
+    <string name="tag_unarchive">Вернуть</string>
+    <string name="tag_delete_title">Удалить метку «%1$s»?</string>
+    <string name="tag_delete_text">Метка исчезнет со всего, к чему она прикреплена.</string>
+    <string name="tags_archived">В архиве (%1$d)</string>
+    <string name="tags_empty">Меток пока нет. Метки связывают дела из разных разделов, например «Машина» или «Дача».</string>
+    <string name="tags_read_only">Менять метки могут только те, кто управляет метками.</string>
+    <string name="family_settings_saved">Сохранено</string>
+    <string name="family_settings_read_only">Менять эти настройки могут только те, кто управляет семьёй.</string>
+    <string name="color_red">Красный</string>
+    <string name="color_orange">Оранжевый</string>
+    <string name="color_yellow">Жёлтый</string>
+    <string name="color_green">Зелёный</string>
+    <string name="color_teal">Бирюзовый</string>
+    <string name="color_blue">Синий</string>
+    <string name="color_purple">Фиолетовый</string>
+    <string name="color_pink">Розовый</string>
+    <string name="color_brown">Коричневый</string>
+    <string name="color_gray">Серый</string>
 </resources>

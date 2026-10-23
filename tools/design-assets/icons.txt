@@ -61,3 +61,8 @@ content_paste
 person
 palette
 sync
+# Added in M0-08 (family management).
+share
+lock_reset
+person_remove
+expand_less

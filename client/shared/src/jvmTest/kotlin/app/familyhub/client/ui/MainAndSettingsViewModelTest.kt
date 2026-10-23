@@ -49,7 +49,16 @@ class MainAndSettingsViewModelTest {
     @Test
     fun `main state shows the own profile and permissions from login`() =
         loggedIn { core ->
-            val vm = MainViewModel(core.session, core.koin.get(), core.koin.get(), core.koin.get(), core.koin.get())
+            val vm =
+                MainViewModel(
+                    core.session,
+                    core.koin.get(),
+                    core.koin.get(),
+                    core.koin.get(),
+                    core.koin.get(),
+                    core.koin.get(),
+                    core.koin.get(),
+                )
             val state = awaitState(vm.state) { it.name.isNotEmpty() }
             assertEquals("Olga", state.name)
             assertEquals(setOf(Section.TASKS), state.sections)

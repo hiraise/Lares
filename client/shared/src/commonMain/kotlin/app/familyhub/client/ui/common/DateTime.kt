@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import app.familyhub.client.resources.Res
 import app.familyhub.client.resources.date_day_month
+import app.familyhub.client.resources.date_day_month_year
 import app.familyhub.client.resources.date_with_weekday
 import app.familyhub.client.resources.months
 import app.familyhub.client.resources.time_on_date
@@ -60,4 +61,20 @@ private fun format(
     var result = pattern
     args.forEachIndexed { index, arg -> result = result.replace("%${index + 1}\$s", arg) }
     return result
+}
+
+/** "March 8" or "March 8, 1950" / "8 марта 1950"; null when no birthday is set. */
+@Composable
+fun birthdayText(
+    day: Int?,
+    month: Int?,
+    year: Int?,
+): String? {
+    if (day == null || month == null) return null
+    val monthName = stringArrayResource(Res.array.months).getOrNull(month - 1) ?: return null
+    return if (year == null) {
+        stringResource(Res.string.date_day_month, day.toString(), monthName)
+    } else {
+        stringResource(Res.string.date_day_month_year, day.toString(), monthName, year.toString())
+    }
 }

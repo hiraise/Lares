@@ -227,7 +227,7 @@ internal fun FormCard(content: @Composable ColumnScope.() -> Unit) {
 }
 
 @Composable
-private fun TimeZoneDialog(
+internal fun TimeZoneDialog(
     selected: String,
     onSelect: (String) -> Unit,
     onDismiss: () -> Unit,
@@ -259,7 +259,7 @@ private fun TimeZoneDialog(
     )
 }
 
-private val CURRENCY_SUGGESTIONS = listOf("RUB", "EUR", "USD")
+internal val CURRENCY_SUGGESTIONS = listOf("RUB", "EUR", "USD")
 
 private val EURO_REGIONS =
     setOf("AT", "BE", "HR", "CY", "EE", "FI", "FR", "DE", "GR", "IE", "IT", "LV", "LT", "LU", "MT", "NL", "PT", "SK", "SI", "ES")

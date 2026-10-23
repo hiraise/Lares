@@ -60,7 +60,7 @@ Full documentation map: [docs/README.md](docs/README.md).
 | `docs/` | Technical documentation, see [docs/README.md](docs/README.md) | exists |
 | `docs/user/` | User manuals (en, ru) | placeholder |
 | `server/` | Ktor backend; test harness in `src/testFixtures` (shared with `integration-tests/`) | identity, administration, sync (M0-02…M0-05) |
-| `client/` | KMP client: shared code, Android app, later web/iOS/desktop | client core (M0-06); Android app shell (M0-07): onboarding, main scaffold, settings |
+| `client/` | KMP client: shared code, Android app, later web/iOS/desktop | client core (M0-06); Android app shell (M0-07): onboarding, main scaffold, settings; family management (M0-08) |
 | `contract/` | KMP module shared by server and client: DTOs, routes, sync protocol, shared domain logic | errors, protocol, instance info (M0-02) |
 | `deploy/` | Docker Compose, Caddy, example configs, scripts | dev database only (`deploy/dev/`); production in M0-10 |
 | `integration-tests/` | Multi-device sync tests: server + several clients in one JVM | sync invariants and scenarios (M0-06) |

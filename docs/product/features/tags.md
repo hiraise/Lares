@@ -19,14 +19,16 @@ Tags complement budget categories: car spending spread over "Fuel", "Insurance",
 
 ## Requirements
 
-- **TAG-001** `MVP` `doing` — Members create, rename, recolor and archive tags (name, color, optional icon).
-  *Server: tags through sync, `tags.manage` (M0-05); client core `TagsWriter`/`TagsRepository` (M0-06); UI: later plan.*
+- **TAG-001** `MVP` `done` — Members create, rename, recolor and archive tags (name, color, optional icon).
+  *Server: tags through sync, `tags.manage` (M0-05); client core `TagsWriter`/`TagsRepository` (M0-06); Family › Tags:
+  list, create/edit sheet with the palette, archive section, delete (M0-08). Icons are not offered in the UI yet.*
 - **TAG-002** `MVP` `todo` — A tag can be attached to tasks, shopping lists and items, events, transactions and debts (as each module ships).
 - **TAG-003** `MVP` `todo` — Each module list can be filtered by tag.
 - **TAG-004** `MVP` `todo` — Tag page aggregates linked items across modules, grouped by module.
 - **TAG-005** `MVP` `todo` — Tag page shows spending for the tag over a chosen period (after M5).
-- **TAG-006** `MVP` `doing` — Tag names are unique within a household, case-insensitive.
-  *Server: `TAG_NAME_TAKEN`, archived tags keep their name, deleted ones free it (M0-05); client checks local tags first (M0-06); UI: later plan.*
+- **TAG-006** `MVP` `done` — Tag names are unique within a household, case-insensitive.
+  *Server: `TAG_NAME_TAKEN`, archived tags keep their name, deleted ones free it (M0-05); client checks local tags first (M0-06); inline "already exists" error in the tag sheet, sync rejections in
+  the snackbar (M0-08).*
 - **TAG-007** `later` `todo` — Places on the map can be tagged.
 - **TAG-008** `later` `todo` — Nested tags.
 

@@ -52,6 +52,7 @@ import app.familyhub.client.resources.nav_today
 import app.familyhub.client.resources.sync_rejected_snackbar
 import app.familyhub.client.ui.common.messageRes
 import app.familyhub.client.ui.components.AppIcon
+import app.familyhub.client.ui.family.FamilyTab
 import app.familyhub.client.ui.theme.FamilyHubTheme
 import app.familyhub.contract.permissions.Section
 import kotlinx.coroutines.flow.filterNotNull
@@ -86,6 +87,7 @@ class MainNavigation(
     val onProfile: () -> Unit,
     val onDevices: () -> Unit,
     val onSection: (Section) -> Unit,
+    val onFamily: (FamilyTab) -> Unit = {},
 )
 
 @Composable
