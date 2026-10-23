@@ -113,7 +113,7 @@ ntfy_status() { curl -sk -o /dev/null -w '%{http_code}' --resolve ntfy.localhost
 [ "$(ntfy_status upSmokeTest1)" = 200 ] || fail "ntfy should accept anonymous publish to an up* topic"
 [ "$(ntfy_status smoketopic)" = 403 ] || fail "ntfy should deny other topics"
 
-step "server memory (limit 384 MiB)"
+step "server memory (limit 300 MiB)"
 docker stats --no-stream --format '{{.Name}}: {{.MemUsage}} ({{.MemPerc}})' "$(docker compose ps -q server)"
 
 step "restore from the backup"

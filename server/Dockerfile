@@ -11,8 +11,9 @@ RUN apt-get update \
 
 COPY --chown=root:root server/build/install/server /app
 
-# Small, container-aware heap (ADR-0013); M0-11 may tune.
-ENV JAVA_OPTS="-XX:+UseSerialGC -Xmx160m -Xss512k -XX:MaxMetaspaceSize=128m -XX:+ExitOnOutOfMemoryError" \
+# Small heap and code cache, fewer malloc arenas (ADR-0013); measured in M0-11, docs/architecture/perf/M0-baseline.md.
+ENV JAVA_OPTS="-XX:+UseSerialGC -Xmx128m -Xss512k -XX:MaxMetaspaceSize=128m -XX:ReservedCodeCacheSize=64m -XX:+ExitOnOutOfMemoryError" \
+    MALLOC_ARENA_MAX=2 \
     FAMILYHUB_PORT=8080
 
 USER familyhub

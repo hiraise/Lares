@@ -4,7 +4,7 @@ Updated: 2026-10-23
 
 ## Phase
 
-**M0 Foundation — implementation in progress: M0-01…M0-10 done.**
+**M0 Foundation — all plans M0-01…M0-11 done; M0 acceptance with the customer next.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
@@ -13,6 +13,9 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 
 ## Last completed
 
+- 2026-10-23 M0-11 Load simulation: `tools/loadsim` + `deploy/scripts/loadtest.sh`. Simulated family (10 devices,
+  30 min): server RSS avg 232 / max 237 MiB (target ≤ 256), p95 52 ms (≤ 100), cold start 1.9–2.7 s (≤ 10), whole
+  stack ~320 MiB — ADR-0013 targets met after JVM tuning ([baseline](architecture/perf/M0-baseline.md)).
 - 2026-10-23 M0-10 Deploy and operations: Docker Compose stack (HTTPS, optional ntfy), backup/restore, smoke test,
   release workflow (multi-arch image, APK), install manual en/ru.
 - 2026-10-23 M0-09 Notifications: local reminders, UnifiedPush (ntfy), background sync, Settings › Notifications.
@@ -22,9 +25,9 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 
 ## Next steps
 
-1. Next plan: [M0-11 Load simulation](plans/M0/11-load-simulation.md), in a fresh session: `/plan-run M0-11`.
+1. M0 acceptance with the customer (APK, walkthrough, Russian changelog).
 2. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
-3. After M0-11: M0 acceptance with the customer (APK, walkthrough, Russian changelog).
+3. M4 plan: re-run the load test with location uploads every 30 s (ADR-0015).
 
 ## Plan progress
 
@@ -42,7 +45,7 @@ See the table in [plans README](plans/README.md#m0-plans).
 | --- | --- | --- |
 | Google developer verification for sideloaded apps (rolling out from 2026, global 2027) | APK / F-Droid installs may require a verified developer | Re-check before M6; a developer account likely covers it |
 | OEM battery optimizations (Xiaomi, Huawei, Samsung) kill background location | Gaps in location tracking | In-app guide to exclude the app from battery optimization; detect and warn about stale positions |
-| JVM server memory above budget | Stack does not fit a 1 GB VPS | Measured in M0-11 (ADR-0013); tune, then GraalVM native image |
+| JVM server memory above budget | Stack does not fit a 1 GB VPS | M0-11: RSS max 237 of 256 MiB after tuning, stack ~320 MiB; re-measure in M4 with location; next lever GraalVM native image |
 | Compose Multiplatform web target is Beta | Web client (M7) may need workarounds | Re-evaluate at M7; fallback is a separate web UI |
 | Sync engine complexity | Data loss or conflicts | Protocol accepted (sync.md, ADR-0008); server invariants (M0-05) and multi-device convergence tests (M0-06) run in `check` |
 | Flexible permissions make UI and testing harder | Confusing group editor, permission bugs | Templates "Adults"/"Kids", plain wording, permission matrix tests (ADR-0014) |

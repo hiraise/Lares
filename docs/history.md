@@ -104,3 +104,11 @@ Current state and next steps: [STATUS.md](STATUS.md).
   signing; `release.yml` (multi-arch GHCR image, APK on a GitHub Release, tag/version check) and CI job
   `deploy-smoke`; actionlint and shellcheck clean. Smoke passes locally; server 160 MiB of 384 MiB after start.
   User manual `install-server.md` (en/ru).
+- 2026-10-23 **M0-11 Load simulation.** New module `tools/loadsim` (Kotlin CLI, Ktor CIO client, contract DTOs):
+  sets up a household through the public API, 10 devices (5 members × 2, login codes), WebSocket events, pushes every
+  60 s ± 20 %, pulls on events, token refresh, admin REST calls, burst phase; `latency.csv`, `summary.json`, fails above
+  1 % errors. `deploy/scripts/loadtest.sh` runs the production stack, cold start, memory sampling (`docker stats`,
+  `/proc/1/status`), summary. 30-minute baseline with M0-10 defaults: RSS max 260 MiB (over 256). Native memory
+  tracking showed an oversized heap and code cache; final `-Xmx128m -XX:ReservedCodeCacheSize=64m`,
+  `MALLOC_ARENA_MAX=2`: RSS avg 232 / max 237 MiB, p95 52 ms, cold start 1.9–2.7 s, stack ~320 MiB; server
+  `mem_limit` 384m → 300m. Results: `docs/architecture/perf/M0-baseline.md`. loadsim tests: 5.

@@ -142,7 +142,8 @@ localization and deployment — everything feature modules depend on.
 - **FND-070** `MVP` `done` — Deploy with one Docker Compose file on a VPS; HTTPS certificates obtained automatically.
 - **FND-071** `MVP` `done` — Documented backup and restore of all data.
 - **FND-072** `MVP` `done` — Server images for x86_64 and arm64.
-- **FND-073** `MVP` `todo` — Resource targets of [ADR-0013](../../adr/0013-server-resource-budget.md) are measured by a load simulation.
+- **FND-073** `MVP` `done` — Resource targets of [ADR-0013](../../adr/0013-server-resource-budget.md) are measured by a load simulation
+  ([M0 baseline](../../architecture/perf/M0-baseline.md); re-run with location in M4).
 - **FND-074** `later` `todo` — Household data export (JSON) from the app.
 
 ## Access model

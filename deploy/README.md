@@ -15,6 +15,7 @@ Installation, backups, updates and troubleshooting for admins:
 | `ntfy/server.yml` | ntfy config: anonymous access only to UnifiedPush topics `up*` |
 | `scripts/backup.sh`, `scripts/restore.sh` | Database backup (`backups/`, gitignored, newest 14 kept) and restore |
 | `scripts/smoke.sh` | End-to-end test of the whole stack on `https://localhost` (CI job `deploy-smoke`) |
+| `scripts/loadtest.sh` | Load test with a simulated family (`tools/loadsim`), memory and cold start; results in `build/loadtest/` ([baseline](../docs/architecture/perf/M0-baseline.md)) |
 | `dev/docker-compose.yml` | Development database only |
 
 Local build and smoke test, from the repository root (Docker running, ports 80 and 443 free):
@@ -23,4 +24,5 @@ Local build and smoke test, from the repository root (Docker running, ports 80 a
 ./gradlew :server:installDist
 docker build -f server/Dockerfile -t familyhub-server:dev .   # image only
 deploy/scripts/smoke.sh                                         # full stack, setup, backup, restore, ntfy
+./gradlew :tools:loadsim:installDist && deploy/scripts/loadtest.sh --duration 5m   # load test (default 30 min)
 ```

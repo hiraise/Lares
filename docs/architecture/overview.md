@@ -77,7 +77,7 @@ client/android/           Android application shell
 client/web/               M7
 integration-tests/        multi-device sync tests (server + clients in one JVM; reuses server test fixtures)
 tools/loadsim/            load simulation CLI
-deploy/                   docker-compose.yml, caddy/, ntfy/, .env.example, scripts/ (backup, restore, smoke)
+deploy/                   docker-compose.yml, caddy/, ntfy/, .env.example, scripts/ (backup, restore, smoke, loadtest)
 docs/                     documentation
 ```
 
