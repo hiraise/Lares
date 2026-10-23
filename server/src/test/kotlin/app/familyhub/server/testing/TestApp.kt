@@ -16,17 +16,23 @@ import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
 
-/** Fresh dependencies against the shared test database, with all tables emptied. */
+/** Setup code configured for tests (as if from `FAMILYHUB_SETUP_CODE`). */
+const val TEST_SETUP_CODE = "ABCDE-12345"
+
+/** Fresh dependencies against the shared test database, with all tables emptied and a [TestClock]. */
 fun testDeps(): AppDeps {
     TestDatabase.reset()
     val changeBus = HouseholdChangeBus()
     return AppDeps(
-        config = AppConfig.fromEnv(emptyMap()).copy(db = TestDatabase.dbConfig),
+        config = AppConfig.fromEnv(emptyMap()).copy(db = TestDatabase.dbConfig, setupCode = TEST_SETUP_CODE),
         db = AppDatabase(TestDatabase.database, changeBus),
         changeBus = changeBus,
         buildInfo = BuildInfo.load(),
+        clock = TestClock(),
     )
 }
+
+val AppDeps.testClock: TestClock get() = clock as TestClock
 
 /** Runs [block] against the full application module on an empty database. */
 fun testApp(block: suspend ApplicationTestBuilder.(deps: AppDeps) -> Unit) {

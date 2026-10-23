@@ -1,6 +1,7 @@
 package app.familyhub.contract.serialization
 
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -14,11 +15,13 @@ import kotlinx.serialization.encoding.Encoder
  *
  * A newer server may send values an older client does not know yet; decoding must never fail because of that.
  * Serial names (including `@SerialName`) are taken from [generated], the plugin-generated serializer of the enum.
+ * Without a [fallback], a single unknown value fails to decode; use such a serializer only as the element of a
+ * [LenientEnumSetSerializer], which drops unknown values instead.
  */
 open class LenientEnumSerializer<E : Enum<E>>(
     generated: KSerializer<E>,
     private val entries: List<E>,
-    private val fallback: E,
+    private val fallback: E?,
 ) : KSerializer<E> {
     override val descriptor: SerialDescriptor =
         PrimitiveSerialDescriptor("${generated.descriptor.serialName}.Lenient", PrimitiveKind.STRING)
@@ -37,7 +40,10 @@ open class LenientEnumSerializer<E : Enum<E>>(
         value: E,
     ) = encoder.encodeString(serialName(value))
 
-    override fun deserialize(decoder: Decoder): E = decodeOrNull(decoder.decodeString()) ?: fallback
+    override fun deserialize(decoder: Decoder): E {
+        val name = decoder.decodeString()
+        return decodeOrNull(name) ?: fallback ?: throw SerializationException("Unknown value '$name' for ${descriptor.serialName}")
+    }
 }
 
 /** Decodes a list of enum serial names into a set, dropping values this version does not know. */

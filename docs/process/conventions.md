@@ -32,8 +32,17 @@ Toolchain versions: [versions.md](../plans/M0/versions.md) and `gradle/libs.vers
 - Errors: `throw ApiException(ErrorCode.X, "English message", fields)`; HTTP status comes from `ErrorCode.httpStatus`
   ([API errors](../architecture/api.md#errors)). Other exceptions become 500 `INTERNAL` with no details in the body.
 - Routes under `/api/v1` that need the protocol header go inside `protocolChecked { … }` (everything except `/instance`).
+- Authenticated routes go inside `authenticated(deps.authService) { … }` (plugin `RequireSession`); the caller is
+  `call.memberPrincipal` (`userId`, `memberId`, `householdId`, `sessionId`).
+- Request validation: `validate { add("field", Validators.x(value)) }` with validators from `contract/`; it throws
+  `VALIDATION_FAILED` with all field errors.
+- Time: inject `kotlin.time.Clock` (from `AppDeps.clock`; tests get a `TestClock`); `clock.nowForDb()` for timestamp columns.
+- Repositories are `object`s with plain functions that run inside `dbQuery`; services own transactions and call `recordChange`.
+- Slow work (Argon2 hashing) runs outside `dbQuery` on `Dispatchers.Default`.
 - Timestamps: `timestamptz` columns, `java.time.Instant` in tables, `kotlin.time.Instant` in contract DTOs.
   UUID columns: `javaUUID(...)` (`java.util.UUID`).
+- Tests: identity helpers in `testing/IdentityFixtures.kt` (`setup()`, `login()`, `bearer()`, `assertError()`,
+  `createUserDirectly()`); the test setup code is `TEST_SETUP_CODE`; move time with `deps.testClock.advance(…)`.
 - Tests: `testApp { deps -> … }` runs the full module on an emptied Testcontainers database; `jsonClient()` sends the
   protocol header; `testDeps()` for tests without HTTP. Test functions must return `Unit` (JUnit silently skips others —
   write `fun x(): Unit = runBlocking { … }` when the block ends with an expression).

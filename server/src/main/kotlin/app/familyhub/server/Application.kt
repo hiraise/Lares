@@ -1,5 +1,16 @@
 package app.familyhub.server
 
+import app.familyhub.server.household.PermissionService
+import app.familyhub.server.identity.AccountService
+import app.familyhub.server.identity.AuthService
+import app.familyhub.server.identity.FailedAttemptLimiter
+import app.familyhub.server.identity.MeQuery
+import app.familyhub.server.identity.SetupCodeProvider
+import app.familyhub.server.identity.SetupService
+import app.familyhub.server.identity.crypto.CodeGenerator
+import app.familyhub.server.identity.crypto.PasswordHasher
+import app.familyhub.server.identity.crypto.TokenGenerator
+import app.familyhub.server.identity.identityRoutes
 import app.familyhub.server.platform.AppConfig
 import app.familyhub.server.platform.BuildInfo
 import app.familyhub.server.platform.db.AppDatabase
@@ -14,6 +25,8 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
+import kotlinx.coroutines.runBlocking
+import kotlin.time.Clock
 
 /** Everything the application needs, wired by hand (no DI framework on the server). */
 class AppDeps(
@@ -21,7 +34,20 @@ class AppDeps(
     val db: AppDatabase,
     val changeBus: HouseholdChangeBus,
     val buildInfo: BuildInfo,
-)
+    val clock: Clock = Clock.System,
+    val passwordHasher: PasswordHasher = PasswordHasher(),
+) {
+    val tokenGenerator = TokenGenerator()
+    val codeGenerator = CodeGenerator()
+    val loginLimiter = FailedAttemptLimiter.forLogin(clock)
+    val setupLimiter = FailedAttemptLimiter.forSetup(clock)
+    val setupCode = SetupCodeProvider(config.setupCode, codeGenerator)
+    val permissionService = PermissionService(db)
+    val meQuery = MeQuery(permissionService)
+    val authService = AuthService(db, clock, passwordHasher, tokenGenerator, loginLimiter, meQuery)
+    val setupService = SetupService(db, clock, passwordHasher, setupLimiter, setupCode, authService)
+    val accountService = AccountService(db, clock, passwordHasher, loginLimiter, meQuery)
+}
 
 fun main() {
     val config = AppConfig.fromEnv()
@@ -44,6 +70,8 @@ fun main() {
             buildInfo = buildInfo,
         )
 
+    runBlocking { deps.setupService.announceSetupCodeIfNeeded() }
+
     embeddedServer(Netty, port = config.port) { module(deps) }.start(wait = true)
 }
 
@@ -54,7 +82,7 @@ fun Application.module(deps: AppDeps) {
         route("/api/v1") {
             instanceRoute(deps.db, deps.buildInfo)
             protocolChecked {
-                // Feature routes (M0-03+) go here.
+                identityRoutes(deps.setupService, deps.authService, deps.accountService)
             }
         }
     }

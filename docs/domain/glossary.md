@@ -23,6 +23,9 @@ Add terms here before using them in code.
 | Relation | Кем приходится | Free-text or preset label on a person: grandmother, uncle, friend. |
 | Invite | Приглашение | One-time link/QR to join a household with a given role. |
 | Device | Устройство | A logged-in app installation (phone) or a GPS tracker. |
+| Session | Сеанс, вход на устройстве | One logged-in app installation of a user: an access token (1 h) and a rotating refresh token (90 days). Revoked, never deleted. |
+| Setup code | Код первой настройки | One-time code from the server log that protects the first-run setup of an instance. |
+| Login code | Код входа | One-time QR code (5 min) that logs a member in on a new device. |
 | Tag | Тег | Household-wide label attachable to items in any module. |
 | Tag page | Страница тега | Aggregated view of everything linked to a tag. |
 

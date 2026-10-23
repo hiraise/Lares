@@ -4,7 +4,7 @@ Updated: 2026-10-22
 
 ## Phase
 
-**M0 Foundation — implementation in progress: M0-01, M0-02 done.**
+**M0 Foundation — implementation in progress: M0-01…M0-03 done.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
@@ -30,10 +30,15 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
   (`ApiException` → `ErrorCode`), protocol header check, request ids in logs (plain/JSON), `/health/live|ready`,
   `/api/v1/instance`; contract: `ErrorCode`/`FieldErrorCode` with lenient decoding, `InstanceInfo`, `FamilyHubJson`.
   Test harness on Testcontainers PostgreSQL; dev database in `deploy/dev/docker-compose.yml`.
+- 2026-10-22 M0-03: identity — permission catalogue, evaluator, validators, codes, entity data and auth DTOs in `contract/`;
+  migration `V2__identity` (`user_account`, `person`, `member`, `group_entity` + permissions/memberships, `session`);
+  Argon2id (PHC, checked against the reference implementation and OpenSSL), opaque tokens with refresh rotation, 60 s grace
+  and reuse detection, `RequireSession` plugin, failed-attempt limiter, setup code in the log; endpoints setup, login,
+  refresh, logout, me, password, sessions, delete account. 71 server tests; manual curl walkthrough done.
 
 ## Next steps
 
-1. Next plan: [M0-03 Identity](plans/M0/03-identity.md), in a fresh session.
+1. Next plan: [M0-04 Household administration](plans/M0/04-household-admin.md), in a fresh session.
 2. After M0-11: M0 acceptance with the customer (APK, walkthrough, Russian changelog).
 
 ## Plan progress

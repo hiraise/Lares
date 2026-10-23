@@ -18,6 +18,7 @@ import io.ktor.server.plugins.callid.CallId
 import io.ktor.server.plugins.callid.callIdMdc
 import io.ktor.server.plugins.calllogging.CallLogging
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.plugins.forwardedheaders.XForwardedHeaders
 import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.request.path
 import io.ktor.server.response.respond
@@ -31,6 +32,8 @@ const val REQUEST_ID_MDC = "requestId"
 private val requestIdPattern = Regex("[A-Za-z0-9._-]{1,64}")
 
 fun Application.installHttpPlumbing() {
+    // The server always runs behind Caddy, which sets X-Forwarded-For; client IPs feed the failed-attempt limiter.
+    install(XForwardedHeaders)
     install(ContentNegotiation) {
         json(FamilyHubJson)
     }

@@ -40,6 +40,7 @@ dependencies {
     implementation(libs.ktor.server.status.pages)
     implementation(libs.ktor.server.call.logging)
     implementation(libs.ktor.server.call.id)
+    implementation(libs.ktor.server.forwarded.header)
     implementation(libs.ktor.serialization.kotlinx.json)
 
     implementation(libs.exposed.core)
@@ -49,6 +50,7 @@ dependencies {
     implementation(libs.hikaricp)
     implementation(libs.flyway.core)
     implementation(libs.flyway.database.postgresql)
+    implementation(libs.bouncycastle.bcprov)
 
     implementation(libs.logback.classic)
     implementation(libs.kotlin.logging)

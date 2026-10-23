@@ -24,34 +24,40 @@ localization and deployment — everything feature modules depend on.
 
 ### Instance and household
 
-- **FND-001** `MVP` `todo` — On first start the server offers a one-time setup, protected by a setup code from the server log,
-  to create the first admin and household.
+- **FND-001** `MVP` `doing` — On first start the server offers a one-time setup, protected by a setup code from the server log,
+  to create the first admin and household. *Server done (M0-03); setup wizard in the app: M0-07.*
 - **FND-002** `MVP` `todo` — One instance can host several households; data of different households is fully isolated.
 - **FND-003** `MVP` `todo` — Household settings: name, time zone, currency, default language.
 
 ### Accounts and sessions
 
-- **FND-010** `MVP` `todo` — A user logs in with login + password; email is not used. Members created by an admin may have
+- **FND-010** `MVP` `doing` — A user logs in with login + password; email is not used. Members created by an admin may have
   no password and log in by QR code only. Passwords are hashed with Argon2id.
-- **FND-011** `MVP` `todo` — Sessions survive app restarts; a user can see and revoke their sessions (devices).
+  *Server login, password change, Argon2id done (M0-03); members without password: M0-04; app: M0-07.*
+- **FND-011** `MVP` `doing` — Sessions survive app restarts; a user can see and revoke their sessions (devices).
+  *Server sessions, refresh rotation, list and revoke done (M0-03); app: M0-07.*
 - **FND-012** `MVP` `todo` — A member with `household.manage` can reset another member's password.
-- **FND-013** `MVP` `todo` — A user can delete their account from inside the app (also a Google Play requirement).
+- **FND-013** `MVP` `doing` — A user can delete their account from inside the app (also a Google Play requirement).
+  *Server done (M0-03); app screen: M0-07.*
 - **FND-014** `MVP` `todo` — Any member can log in on a new device by scanning a QR code shown on a logged-in device
   (their own, or one of a member with `household.manage`).
 - **FND-015** `later` `todo` — Login via external OpenID Connect provider (Authentik, Keycloak).
 
 ### Members, groups and permissions ([ADR-0014](../../adr/0014-group-based-permissions.md))
 
-- **FND-020** `MVP` `todo` — Permissions are granted through groups; a member can be in several groups;
+- **FND-020** `MVP` `done` — Permissions are granted through groups; a member can be in several groups;
   effective permissions are the union of the groups' permissions.
-- **FND-021** `MVP` `todo` — Built-in group "Administrators": cannot be deleted, always has at least one member, has all permissions
-  and sees all data regardless of visibility rules.
+- **FND-021** `MVP` `doing` — Built-in group "Administrators": cannot be deleted, always has at least one member, has all permissions
+  and sees all data regardless of visibility rules. *Created at setup, all permissions, last-admin check on account deletion (M0-03);
+  group editing rules: M0-04.*
 - **FND-022** `MVP` `todo` — Members with `household.manage` create, rename and delete groups, edit group permissions and membership.
-- **FND-023** `MVP` `todo` — Household setup creates editable templates "Adults" and "Kids" with the defaults below.
+- **FND-023** `MVP` `doing` — Household setup creates editable templates "Adults" and "Kids" with the defaults below.
+  *Created at setup (M0-03); editing: M0-04.*
 - **FND-024** `MVP` `todo` — Invite by link or QR code with chosen groups; invites expire.
 - **FND-025** `MVP` `todo` — Members with `household.manage` can remove members.
-- **FND-026** `MVP` `todo` — Ownership rules: creators edit their own items, assignees complete their tasks,
+- **FND-026** `MVP` `doing` — Ownership rules: creators edit their own items, assignees complete their tasks,
   everyone manages their own profile, sessions and notifications — independent of groups.
+  *Own sessions, password and account need no permission (M0-03); items, profile, notifications follow in their modules.*
 - **FND-027** `MVP` `todo` — Permissions are enforced offline on the client and authoritatively on the server.
 - **FND-028** `MVP` `todo` — Sections a member has no access to are hidden from navigation, search and tag pages.
 

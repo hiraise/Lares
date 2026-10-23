@@ -30,7 +30,7 @@ Non-2xx responses carry:
 
 `code` is a stable `ErrorCode` enum in `contract/`; the client maps it to localized text. `message` is English,
 for logs only. `fields` (optional) maps field names to field error codes (`REQUIRED`, `TOO_LONG`, `TOO_SHORT`,
-`INVALID_FORMAT`, `OUT_OF_RANGE`, `TAKEN`).
+`INVALID_FORMAT`, `OUT_OF_RANGE`, `TAKEN`). Nested fields use dotted names (`device.name`).
 
 | Code | HTTP | When |
 | --- | --- | --- |
@@ -80,8 +80,8 @@ Authenticated, any member:
 | POST | `/api/v1/auth/logout` | Revoke current session | FND-011 |
 | GET | `/api/v1/me` | User, member, household summary, effective permissions | FND-020 |
 | POST | `/api/v1/me/password` | Change own password | FND-010 |
-| DELETE | `/api/v1/me` | Delete own account | FND-013 |
-| GET | `/api/v1/me/sessions` | List own sessions | FND-011 |
+| DELETE | `/api/v1/me` | Delete own account; body `{password}` optional for users without a password | FND-013 |
+| GET | `/api/v1/me/sessions` | List own sessions (JSON array of `SessionInfo`) | FND-011 |
 | DELETE | `/api/v1/me/sessions/{id}` | Revoke a session | FND-011 |
 | POST | `/api/v1/login-codes` | Create a login code (self, or any member with `household.manage`) | FND-014 |
 | PUT | `/api/v1/me/push` | Register push endpoint for this session | FND-051 |
