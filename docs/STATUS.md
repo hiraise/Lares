@@ -4,7 +4,7 @@ Updated: 2026-10-23
 
 ## Phase
 
-**M0 Foundation — implementation in progress: M0-01…M0-06 done.**
+**M0 Foundation — implementation in progress: M0-01…M0-07 done.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
@@ -63,11 +63,21 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
   invariants 1–8 and 10, offline work, realtime within 2 s, resets keeping the outbox, revocation, offline permissions,
   randomized convergence. 23 client unit tests. sync.md and ADR-0008 accepted.
 
+- 2026-10-23 M0-07: Android app shell — design assets (`tools/design-assets/build.py`: Manrope 400–800, 61 Material
+  Symbols icons at weight 250, outlined + filled, pinned to commits), theme with all visual-style tokens (light/dark,
+  extra roles, palette tones, type scale, shapes, spacing), shared components; screens Server, Setup, Login (password,
+  QR, invitation code), Invite accept, link handling, QR scanner (CameraX + ZXing), main scaffold with the filtered
+  bottom bar, Today (empty state), section placeholders, More, sync indicator / sheet / rejection snackbar, Settings
+  (profile name offline, change password, login QR with countdown, devices with revoke, theme, language, about and
+  licenses, logout, delete account). Android shell: AppCompat activity with per-app language, deep links
+  `familyhub://invite|login`, session restore on start, foreground toggle, connectivity trigger, debug-only cleartext to
+  local hosts, adaptive icon. `SessionManager.deleteAccount`. 23 new client tests (ViewModels on a mock server, Compose UI
+  tests incl. bottom-bar filtering, icon resources). Emulator walkthrough of all flows except live camera scanning.
+
 ## Next steps
 
-1. Next plan: [M0-07 Android app shell](plans/M0/07-android-shell.md), in a fresh session (M0-10 Deploy can also
-   start now; it depends only on M0-05). M0-06 added to M0-07: `SessionManager.restore()` on start and an Android
-   "connectivity regained" sync trigger.
+1. Next plan: [M0-08 Family management screens](plans/M0/08-family-management-ui.md), in a fresh session
+   (M0-10 Deploy can also start now; it depends only on M0-05).
 2. After M0-11: M0 acceptance with the customer (APK, walkthrough, Russian changelog).
 
 ## Plan progress
@@ -88,6 +98,7 @@ See the table in [plans README](plans/README.md#m0-plans).
 | Compose Multiplatform web target is Beta | Web client (M7) may need workarounds | Re-evaluate at M7; fallback is a separate web UI |
 | Sync engine complexity | Data loss or conflicts | Protocol accepted (sync.md, ADR-0008); server invariants (M0-05) and multi-device convergence tests (M0-06) run in `check` |
 | Flexible permissions make UI and testing harder | Confusing group editor, permission bugs | Templates "Adults"/"Kids", plain wording, permission matrix tests (ADR-0014) |
+| Emulator cannot reach the host's ports on this Mac (`10.0.2.2` times out) | Manual checks against the dev server | `adb reverse tcp:8080 tcp:8080` and `http://localhost:8080` (dev-setup) |
 | Pre-release UI libraries (CMP Material3 alpha, navigation RC) | Possible API changes or bugs | Versions paired by JetBrains with CMP 1.12.2; upgrade when stable |
 | ktlint 1.8 parses only Kotlin ≤ 2.2 syntax | Lint failures on newest syntax | Avoid newest syntax; report instead of disabling lint |
 | Medium-effort sessions deviate from plans | Inconsistent code | Plans fix all decisions; "stop and report" rules; customer approves each commit |

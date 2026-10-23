@@ -24,8 +24,8 @@ localization and deployment — everything feature modules depend on.
 
 ### Instance and household
 
-- **FND-001** `MVP` `doing` — On first start the server offers a one-time setup, protected by a setup code from the server log,
-  to create the first admin and household. *Server done (M0-03); setup wizard in the app: M0-07.*
+- **FND-001** `MVP` `done` — On first start the server offers a one-time setup, protected by a setup code from the server log,
+  to create the first admin and household. *Server done (M0-03); setup form in the app done (M0-07).*
 - **FND-002** `MVP` `doing` — One instance can host several households; data of different households is fully isolated.
   *Isolation of admin endpoints (M0-04) and sync (M0-05) enforced and tested; creating more households: after M0.*
 - **FND-003** `MVP` `doing` — Household settings: name, time zone, currency, default language.
@@ -33,17 +33,17 @@ localization and deployment — everything feature modules depend on.
 
 ### Accounts and sessions
 
-- **FND-010** `MVP` `doing` — A user logs in with login + password; email is not used. Members created by an admin may have
+- **FND-010** `MVP` `done` — A user logs in with login + password; email is not used. Members created by an admin may have
   no password and log in by QR code only. Passwords are hashed with Argon2id.
-  *Server login, password change, Argon2id done (M0-03); members without login/password (M0-04); app: M0-07.*
-- **FND-011** `MVP` `doing` — Sessions survive app restarts; a user can see and revoke their sessions (devices).
-  *Server sessions, refresh rotation, list and revoke done (M0-03); app: M0-07.*
+  *Server login, password change, Argon2id done (M0-03); members without login/password (M0-04); app login by password and QR code (M0-07).*
+- **FND-011** `MVP` `done` — Sessions survive app restarts; a user can see and revoke their sessions (devices).
+  *Server sessions, refresh rotation, list and revoke done (M0-03); restore on start and "My devices" screen (M0-07).*
 - **FND-012** `MVP` `doing` — A member with `household.manage` can reset another member's password.
   *Server done, revokes the member's sessions (M0-04); app: M0-08.*
-- **FND-013** `MVP` `doing` — A user can delete their account from inside the app (also a Google Play requirement).
-  *Server done (M0-03); app screen: M0-07.*
+- **FND-013** `MVP` `done` — A user can delete their account from inside the app (also a Google Play requirement).
+  *Server done (M0-03); Settings › Delete account with password confirmation (M0-07).*
 - **FND-014** `MVP` `doing` — Any member can log in on a new device by scanning a QR code shown on a logged-in device
-  (their own, or one of a member with `household.manage`). *Server login codes done (M0-04); QR screens: M0-07/M0-08.*
+  (their own, or one of a member with `household.manage`). *Server login codes done (M0-04); own QR code, scanner and `familyhub://login` links (M0-07); showing a code for another member: M0-08.*
 - **FND-015** `later` `todo` — Login via external OpenID Connect provider (Authentik, Keycloak).
 
 ### Members, groups and permissions ([ADR-0014](../../adr/0014-group-based-permissions.md))
@@ -68,7 +68,8 @@ localization and deployment — everything feature modules depend on.
   *Server checks on admin endpoints with a permission matrix test (M0-04) and on sync mutations via shared `WriteRules` (M0-05).
   Client core (M0-06): local writes checked with the same `WriteRules`, permissions evaluated offline from synced groups
   (`PermissionsRepository`); UI that hides actions: M0-07/M0-08.*
-- **FND-028** `MVP` `todo` — Sections a member has no access to are hidden from navigation, search and tag pages.
+- **FND-028** `MVP` `doing` — Sections a member has no access to are hidden from navigation, search and tag pages.
+  *Bottom bar and More tiles filtered by `*.view` (M0-07); search and tag pages come with their milestones.*
 
 ### Persons
 
@@ -96,8 +97,8 @@ localization and deployment — everything feature modules depend on.
 - **FND-042** `MVP` `doing` — Changes by other members appear without manual refresh while the app is open.
   *Server: WebSocket `/api/v1/sync/events` (M0-05). Client: realtime connection while in the foreground, tested within
   2 s (M0-06); foreground toggling from the app lifecycle: M0-07.*
-- **FND-043** `MVP` `doing` — The UI shows sync state (synced, pending changes, offline, error).
-  *`SyncEngine.status` and unseen rejections exist (M0-06); indicator and sync sheet: M0-07.*
+- **FND-043** `MVP` `done` — The UI shows sync state (synced, pending changes, offline, error).
+  *`SyncEngine.status` and unseen rejections (M0-06); header indicator, sync sheet and rejection snackbar (M0-07). The in-store offline banner comes with Shopping.*
 
 ### Notifications
 
@@ -108,15 +109,19 @@ localization and deployment — everything feature modules depend on.
 
 ### Client basics
 
-- **FND-060** `MVP` `todo` — On first launch the app asks for the server URL (or reads it from the invite link/QR).
-- **FND-061** `MVP` `todo` — UI languages: English and Russian; follows the system language, overridable in settings.
-- **FND-062** `MVP` `todo` — Light and dark theme.
-- **FND-063** `MVP` `todo` — Home screen "Today" summarizes the sections the member can see: overdue and today's tasks,
+- **FND-060** `MVP` `done` — On first launch the app asks for the server URL (or reads it from the invite link/QR).
+  *Server screen, QR scanner and `familyhub://invite|login` links (M0-07).*
+- **FND-061** `MVP` `done` — UI languages: English and Russian; follows the system language, overridable in settings.
+  *Per-app language via AppCompat, also on the server screen (M0-07).*
+- **FND-062** `MVP` `done` — Light and dark theme.
+  *System, light or dark in Settings › Appearance (M0-07).*
+- **FND-063** `MVP` `doing` — Home screen "Today" summarizes the sections the member can see: overdue and today's tasks,
   upcoming events and birthdays, the active shopping list, family on the map, budget of the month. Each module adds
-  its block in its milestone; in M0 it is an empty state.
-- **FND-064** `MVP` `todo` — Bottom navigation: Today · Tasks · Shopping · Calendar · More; Map, Budget, Family and Tags
-  are reached from "More" and from Today blocks (Q-013).
-- **FND-065** `MVP` `todo` — The UI follows the [visual style](../../design/visual-style.md) (ADR-0016).
+  its block in its milestone; in M0 it is an empty state. *Header and empty state done (M0-07).*
+- **FND-064** `MVP` `doing` — Bottom navigation: Today · Tasks · Shopping · Calendar · More; Map, Budget, Family and Tags
+  are reached from "More" and from Today blocks (Q-013). *Bar and More done (M0-07); Family and Tags open in M0-08.*
+- **FND-065** `MVP` `doing` — The UI follows the [visual style](../../design/visual-style.md) (ADR-0016).
+  *Theme, fonts, icons, components (M0-07); applies to every later screen.*
 
 ### Operations
 

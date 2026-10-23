@@ -1,11 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Placeholder: a simple house shape inside the adaptive icon safe zone. -->
+<!-- White outlined house with two figures, as in the Login.dc.html mockup (88 grid, scaled into the safe zone).
+     Also used as the monochrome layer. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M54,32L32,52h7v22h12v-14h6v14h12v-22h7z" />
+    <group
+        android:scaleX="0.82"
+        android:scaleY="0.82"
+        android:translateX="17.9"
+        android:translateY="16.7">
+        <path
+            android:pathData="M24,42 L44,25 L64,42 V62 a4,4 0 0 1 -4,4 H28 a4,4 0 0 1 -4,-4 Z"
+            android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="3.5"
+            android:strokeLineJoin="round" />
+        <path
+            android:pathData="M42,50 a4,4 0 1 1 -8,0 a4,4 0 1 1 8,0 Z M54,52 a3,3 0 1 1 -6,0 a3,3 0 1 1 6,0 Z"
+            android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="3" />
+        <path
+            android:pathData="M31,66 a7,7 0 0 1 14,0 M45.5,66 a5.5,5.5 0 0 1 11,0"
+            android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="3"
+            android:strokeLineCap="round" />
+    </group>
 </vector>

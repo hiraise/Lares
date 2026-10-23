@@ -39,4 +39,5 @@ kotlin {
 dependencies {
     implementation(projects.client.shared)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.appcompat)
 }

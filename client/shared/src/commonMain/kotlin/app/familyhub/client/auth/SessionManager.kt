@@ -15,6 +15,7 @@ import app.familyhub.contract.api.admin.InvitePreview
 import app.familyhub.contract.api.admin.InvitePreviewRequest
 import app.familyhub.contract.api.admin.LoginWithCodeRequest
 import app.familyhub.contract.api.auth.AuthResult
+import app.familyhub.contract.api.auth.DeleteAccountRequest
 import app.familyhub.contract.api.auth.DeviceInfo
 import app.familyhub.contract.api.auth.LoginRequest
 import app.familyhub.contract.api.auth.Me
@@ -157,6 +158,15 @@ class SessionManager(
         } catch (_: Exception) {
             // Offline or already revoked: the local session ends anyway.
         }
+        endSession()
+    }
+
+    /**
+     * Deletes the own account on the server (FND-013), then ends the local session. Fails with `INVALID_CREDENTIALS`
+     * or `LAST_ADMIN` without touching local data.
+     */
+    suspend fun deleteAccount(password: String?) {
+        api.deleteMe(DeleteAccountRequest(password))
         endSession()
     }
 

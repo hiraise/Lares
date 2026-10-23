@@ -6,7 +6,11 @@ import app.familyhub.client.api.HttpClientCustomizer
 import app.familyhub.client.auth.InMemoryTokenStore
 import app.familyhub.client.auth.TokenStore
 import app.familyhub.client.db.FamilyHubDb
+import app.familyhub.client.platform.AppInfo
+import app.familyhub.client.platform.InMemoryPreferencesStore
 import app.familyhub.client.platform.InMemoryServerStore
+import app.familyhub.client.platform.LanguageApplier
+import app.familyhub.client.platform.PreferencesStore
 import app.familyhub.client.platform.ServerStore
 import app.familyhub.contract.api.auth.DeviceInfo
 import io.ktor.client.engine.HttpClientEngine
@@ -31,5 +35,8 @@ fun jvmPlatformModule(
         single<TokenStore> { InMemoryTokenStore() }
         single<ServerStore> { InMemoryServerStore() }
         single { device }
+        single<PreferencesStore> { InMemoryPreferencesStore() }
+        single<LanguageApplier> { LanguageApplier { } }
+        single { AppInfo(version = "dev") }
         if (customizer != null) single { customizer }
     }

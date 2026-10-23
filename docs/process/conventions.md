@@ -72,6 +72,28 @@ Toolchain versions: [versions.md](../plans/M0/versions.md) and `gradle/libs.vers
   (`familyTest { … }` gives a fresh server and three logged-in clients; `TestNetwork` switches a client offline, loses
   push responses or runs code before a pull; `assertConverged(clients)` checks invariant 8).
 
+## Client UI
+
+- Code: `client/shared/src/commonMain/kotlin/app/familyhub/client/ui/` — `theme/` (tokens), `components/` (shared
+  composables), `common/` (errors, labels, dates), one package per area (`onboarding`, `main`, `settings`, later one per
+  feature). `App()` picks the graph from `SessionManager.state`; routes are `@Serializable` objects in `ui/Navigation.kt`.
+- Pattern per screen: a `ViewModel` (JetBrains lifecycle) with an immutable `XxxUiState` in a `StateFlow` and plain
+  action functions; a stateless `XxxScreen(state, callbacks)`; a thin `XxxRoute` that gets the ViewModel with
+  `koinViewModel()` (parameters via `parametersOf`) and turns one-shot results (a `next`/`done` field) into navigation.
+  ViewModels are registered in `uiModule()`.
+- Errors: catch with `attempt { }` or `try` (rethrow `CancellationException`), map with `toUiError()`; field errors are
+  `FieldError` keyed by the request field name, so server `fields` land on the same inputs. All error text comes from
+  `ui/common/ErrorMessages.kt`.
+- Look: only theme tokens — `MaterialTheme.colorScheme`, `FamilyHubTheme.colors` (extra roles, gradient), `Spacing`,
+  `MaterialTheme.shapes`, palette tones via `PaletteColor.tones()`. Icons: `AppIcon(Res.drawable.ic_<name>)` from
+  `tools/design-assets`; never `material-icons-core`. Top-level screens use `ScreenHeader`, detail screens `AppPage` +
+  `DetailTopBar`, lists `ListGroup`/`ListRow`/`ListDivider`.
+- Strings: `composeResources/values/strings.xml` and `values-ru/strings.xml` with the same keys; plurals for counts;
+  dates through `ui/common/DateTime.kt` (no locale formatting in common code). No literal user-visible text in Kotlin.
+- Tests: ViewModels in `jvmTest` with `UiTestCore` (a real client core on a Ktor `MockEngine`; wait with `awaitState`);
+  stateless screens with `runComposeUiTest` inside `FamilyHubTheme`; `App()` with `KoinIsolatedContext(core.app)` and
+  `mainDispatcher = Dispatchers.Unconfined`. Set `Locale.setDefault(Locale.ENGLISH)` before asserting texts.
+
 ## Data and values
 
 - IDs: UUIDv7, generated on the client for syncable entities.

@@ -1,4 +1,231 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">FamilyHub</string>
+    <string name="app_logo">Значок FamilyHub</string>
+
+    <string name="action_back">Назад</string>
+    <string name="action_cancel">Отмена</string>
+    <string name="action_continue">Продолжить</string>
+    <string name="action_details">Подробнее</string>
+    <string name="action_got_it">Понятно</string>
+    <string name="action_retry">Повторить</string>
+    <string name="action_save">Сохранить</string>
+    <string name="or">или</string>
+    <string name="unknown_value">—</string>
+
+    <string name="error_validation_failed">Проверьте отмеченные поля.</string>
+    <string name="error_protocol_unsupported">Приложение не может работать с этим сервером. Обновите приложение или сервер.</string>
+    <string name="error_unauthenticated">Войдите заново.</string>
+    <string name="error_session_revoked">На этом устройстве выполнен выход.</string>
+    <string name="error_invalid_credentials">Неверный логин или пароль.</string>
+    <string name="error_forbidden">У вас нет прав на это действие.</string>
+    <string name="error_not_found">Не найдено.</string>
+    <string name="error_login_taken">Этот логин уже занят.</string>
+    <string name="error_conflict">Кто-то изменил это одновременно с вами. Попробуйте ещё раз.</string>
+    <string name="error_last_admin">Вы единственный администратор. Сначала назначьте администратором кого-то ещё.</string>
+    <string name="error_builtin_group">Встроенную группу нельзя изменить таким образом.</string>
+    <string name="error_setup_already_done">Этот сервер уже настроен. Войдите в свою учётную запись.</string>
+    <string name="error_setup_code_invalid">Неверный код настройки. Проверьте журнал сервера.</string>
+    <string name="error_invite_invalid">Приглашение недействительно или устарело. Попросите новое.</string>
+    <string name="error_login_code_invalid">QR-код недействителен или устарел. Покажите новый.</string>
+    <string name="error_rate_limited">Слишком много попыток. Подождите несколько минут и попробуйте снова.</string>
+    <string name="error_internal">Ошибка сервера. Попробуйте позже.</string>
+    <string name="error_entity_not_found">Это удалили на другом устройстве.</string>
+    <string name="error_entity_deleted">Это удалили на другом устройстве.</string>
+    <string name="error_mutation_expired">Изменение слишком старое, его не удалось сохранить.</string>
+    <string name="error_tag_name_taken">Метка с таким названием уже есть.</string>
+    <string name="error_person_is_member">Этот человек — участник семьи, его нельзя удалить.</string>
+    <string name="error_unknown">Что-то пошло не так.</string>
+    <string name="error_network">Нет связи с сервером. Проверьте интернет и попробуйте снова.</string>
+    <string name="error_not_familyhub">По этому адресу нет сервера FamilyHub.</string>
+    <string name="error_not_familyhub_qr">Это не QR-код FamilyHub.</string>
+
+    <string name="field_required">Обязательное поле</string>
+    <string name="field_too_short">Слишком коротко</string>
+    <string name="field_too_long">Слишком длинно</string>
+    <string name="field_invalid_format">Недопустимое значение</string>
+    <string name="field_out_of_range">Вне допустимого диапазона</string>
+    <string name="field_taken">Уже занято</string>
+    <string name="field_unknown">Недопустимое значение</string>
+    <string name="field_passwords_differ">Пароли не совпадают</string>
+
+    <string name="field_your_name">Ваше имя</string>
+    <string name="field_login">Логин</string>
+    <string name="field_login_hint">3–32 символа: латинские буквы, цифры и . _ -</string>
+    <string name="field_password">Пароль</string>
+    <string name="field_password_hint">Не короче 8 символов</string>
+    <string name="field_password_repeat">Повторите пароль</string>
+    <string name="password_show">Показать пароль</string>
+    <string name="password_hide">Скрыть пароль</string>
+
+    <string name="server_tagline">Задачи, покупки, календарь и бюджет семьи на вашем собственном сервере</string>
+    <string name="server_address">Адрес сервера</string>
+    <string name="server_address_hint">Его даёт тот, кто настроил сервер для вашей семьи</string>
+    <string name="server_scan_qr">Сканировать QR-приглашение</string>
+    <string name="server_privacy">Данные семьи хранятся только на вашем сервере. Без рекламы, слежки и платных подписок.</string>
+
+    <string name="setup_title">Новая семья</string>
+    <string name="setup_subtitle">Это новый сервер. Создайте семью и учётную запись администратора.</string>
+    <string name="setup_section_family">Семья</string>
+    <string name="setup_section_admin">Администратор</string>
+    <string name="setup_code">Код настройки</string>
+    <string name="setup_code_hint">Показан в журнале сервера</string>
+    <string name="setup_family_name">Название семьи</string>
+    <string name="setup_time_zone">Часовой пояс</string>
+    <string name="setup_time_zone_search">Поиск</string>
+    <string name="setup_currency">Валюта</string>
+    <string name="setup_currency_hint">Код из трёх букв, например RUB</string>
+    <string name="setup_language">Язык семьи</string>
+    <string name="setup_submit">Создать семью</string>
+
+    <string name="login_title">Вход</string>
+    <string name="login_submit">Войти</string>
+    <string name="login_with_qr">Войти по QR-коду</string>
+    <string name="login_qr_hint">На телефоне, где вы уже вошли, откройте Ещё → Настройки → Профиль → Войти на другом устройстве.</string>
+    <string name="login_have_invite">У меня есть приглашение</string>
+    <string name="login_change_server">Сменить сервер</string>
+    <string name="invite_code_hint">Введите код из приглашения или отсканируйте его QR-код.</string>
+    <string name="invite_code_label">Код приглашения</string>
+    <string name="invite_scan">Сканировать QR-код</string>
+
+    <string name="invite_title">Вступить в семью</string>
+    <string name="invite_checking">Проверяем приглашение…</string>
+    <string name="invite_preview">%1$s приглашает вас в семью «%2$s»</string>
+    <string name="invite_submit">Вступить</string>
+
+    <string name="link_title">Подключение</string>
+    <string name="link_connecting">Подключаемся к серверу…</string>
+    <string name="link_logged_in">Вы уже вошли. Чтобы воспользоваться этой ссылкой, сначала выйдите.</string>
+    <string name="qr_title">Сканирование QR-кода</string>
+    <string name="qr_hint">Наведите камеру на QR-код</string>
+    <string name="qr_camera_permission">FamilyHub использует камеру только чтобы прочитать QR-код. Ничего не записывается и не отправляется.</string>
+    <string name="qr_camera_denied">Доступ к камере выключен. Разрешите его в настройках системы или введите код вручную.</string>
+    <string name="qr_allow_camera">Разрешить камеру</string>
+    <string name="qr_paste_label">Ссылка из QR-кода</string>
+
+    <string name="nav_today">Сегодня</string>
+    <string name="nav_tasks">Задачи</string>
+    <string name="nav_shopping">Покупки</string>
+    <string name="nav_calendar">Календарь</string>
+    <string name="nav_more">Ещё</string>
+    <string name="section_map">Карта</string>
+    <string name="section_budget">Бюджет</string>
+    <string name="section_family">Семья</string>
+    <string name="section_tags">Метки</string>
+    <string name="today_empty">Здесь будет сводка дня: задачи, события, покупки</string>
+    <string name="placeholder_coming">Появится в следующих версиях</string>
+    <string name="profile_open">Профиль и настройки</string>
+    <string name="group_administrators">Администраторы</string>
+    <string name="more_settings">Настройки</string>
+    <string name="more_settings_hint">Тема, язык</string>
+    <string name="more_notifications">Уведомления</string>
+    <string name="more_sync">Синхронизация</string>
+    <string name="more_sync_saved_at">Всё сохранено на сервере в %1$s</string>
+    <string name="more_devices">Мои устройства</string>
+    <string name="more_help">Помощь</string>
+    <string name="more_soon">Скоро</string>
+
+    <string name="sync_synced">Всё синхронизировано</string>
+    <string name="sync_syncing">Синхронизация…</string>
+    <string name="sync_offline">Нет сети</string>
+    <string name="sync_error">Ошибка синхронизации</string>
+    <plurals name="sync_pending">
+        <item quantity="one">%1$d изменение ждёт отправки</item>
+        <item quantity="few">%1$d изменения ждут отправки</item>
+        <item quantity="many">%1$d изменений ждут отправки</item>
+        <item quantity="other">%1$d изменения ждут отправки</item>
+    </plurals>
+    <plurals name="sync_offline_pending">
+        <item quantity="one">Нет сети, %1$d изменение ждёт отправки</item>
+        <item quantity="few">Нет сети, %1$d изменения ждут отправки</item>
+        <item quantity="many">Нет сети, %1$d изменений ждут отправки</item>
+        <item quantity="other">Нет сети, %1$d изменения ждут отправки</item>
+    </plurals>
+    <string name="sync_sheet_title">Синхронизация</string>
+    <string name="sync_last">Последняя синхронизация: %1$s</string>
+    <string name="sync_never">Ещё не синхронизировано</string>
+    <string name="sync_now">Синхронизировать</string>
+    <string name="sync_rejected_title">Изменения не сохранены</string>
+    <string name="sync_rejected_snackbar">Изменение не сохранено: %1$s</string>
+
+    <string-array name="weekdays">
+        <item>Понедельник</item>
+        <item>Вторник</item>
+        <item>Среда</item>
+        <item>Четверг</item>
+        <item>Пятница</item>
+        <item>Суббота</item>
+        <item>Воскресенье</item>
+    </string-array>
+    <string-array name="months">
+        <item>января</item>
+        <item>февраля</item>
+        <item>марта</item>
+        <item>апреля</item>
+        <item>мая</item>
+        <item>июня</item>
+        <item>июля</item>
+        <item>августа</item>
+        <item>сентября</item>
+        <item>октября</item>
+        <item>ноября</item>
+        <item>декабря</item>
+    </string-array>
+    <string name="date_day_month">%1$s %2$s</string>
+    <string name="date_with_weekday">%1$s, %2$s</string>
+    <string name="time_on_date">%1$s, %2$s</string>
+
+    <string name="settings_title">Настройки</string>
+    <string name="settings_profile">Профиль</string>
+    <string name="settings_devices">Мои устройства</string>
+    <string name="settings_appearance">Оформление</string>
+    <string name="settings_theme">Тема</string>
+    <string name="settings_language">Язык</string>
+    <string name="settings_about">О приложении</string>
+    <string name="settings_logout">Выйти</string>
+    <string name="settings_delete_account">Удалить учётную запись</string>
+    <string name="theme_system">Как в системе</string>
+    <string name="theme_light">Светлая</string>
+    <string name="theme_dark">Тёмная</string>
+    <string name="language_title">Язык</string>
+    <string name="language_system">Как в системе</string>
+    <string name="language_en">English</string>
+    <string name="language_ru">Русский</string>
+    <string name="logout_title">Выйти?</string>
+    <string name="logout_text">Войти снова можно по логину и паролю или по QR-коду.</string>
+    <string name="logout_text_pending">Часть изменений ещё не дошла до сервера. Если выйти сейчас, они пропадут.</string>
+    <string name="logout_confirm">Выйти</string>
+    <string name="delete_title">Удалить учётную запись?</string>
+    <string name="delete_text">Учётная запись будет удалена, на всех ваших устройствах будет выполнен выход. Ваш профиль и созданное вами останутся у семьи.</string>
+    <string name="delete_confirm">Удалить</string>
+
+    <string name="profile_title">Профиль</string>
+    <string name="profile_name">Имя</string>
+    <string name="profile_saved">Сохранено</string>
+    <string name="profile_login">Логин</string>
+    <string name="profile_no_login">Нет логина</string>
+    <string name="profile_change_password">Сменить пароль</string>
+    <string name="profile_login_other">Войти на другом устройстве</string>
+    <string name="password_title">Смена пароля</string>
+    <string name="password_current">Текущий пароль</string>
+    <string name="password_new">Новый пароль</string>
+    <string name="password_changed">Пароль изменён. На других устройствах вход сохранится.</string>
+    <string name="login_qr_title">Вход на другом устройстве</string>
+    <string name="login_qr_text">На другом устройстве откройте FamilyHub, выберите «Войти по QR-коду» и отсканируйте этот код.</string>
+    <string name="login_qr_expires">Действует ещё %1$s</string>
+    <string name="login_qr_expired">Срок действия кода истёк</string>
+    <string name="login_qr_new">Новый код</string>
+    <string name="login_qr_code">Код: %1$s</string>
+
+    <string name="devices_this">Это устройство</string>
+    <string name="devices_last_seen">Был активен %1$s</string>
+    <string name="devices_revoke">Выйти</string>
+    <string name="devices_revoke_title">Выйти на устройстве %1$s?</string>
+    <string name="devices_revoke_text">На этом устройстве нужно будет войти заново.</string>
+
+    <string name="about_app_version">Версия приложения</string>
+    <string name="about_server_version">Версия сервера</string>
+    <string name="about_server_address">Адрес сервера</string>
+    <string name="about_licenses">Лицензии открытого ПО</string>
+    <string name="licenses_text">FamilyHub — свободная программа: её можно распространять и изменять на условиях GNU Affero General Public License, опубликованной Free Software Foundation, версии 3 или (по вашему выбору) любой более поздней версии. Программа распространяется БЕЗ КАКИХ-ЛИБО ГАРАНТИЙ. Исходный код доступен в репозитории проекта.\n\nВстроенные ресурсы:\n\n• Шрифт Manrope — Copyright 2018 The Manrope Project Authors. SIL Open Font License 1.1.\n\n• Значки Material Symbols — Copyright Google LLC. Apache License 2.0.\n\nБиблиотеки: Kotlin, kotlinx, Compose Multiplatform, AndroidX, Ktor, SQLDelight, Koin, ZXing — Apache License 2.0. qrose — MIT License.</string>
 </resources>

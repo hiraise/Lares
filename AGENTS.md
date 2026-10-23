@@ -60,10 +60,11 @@ Full documentation map: [docs/README.md](docs/README.md).
 | `docs/` | Technical documentation, see [docs/README.md](docs/README.md) | exists |
 | `docs/user/` | User manuals (en, ru) | placeholder |
 | `server/` | Ktor backend; test harness in `src/testFixtures` (shared with `integration-tests/`) | identity, administration, sync (M0-02…M0-05) |
-| `client/` | KMP client: shared code, Android app, later web/iOS/desktop | client core (M0-06): local DB, API client, sync engine, repositories; UI skeleton |
+| `client/` | KMP client: shared code, Android app, later web/iOS/desktop | client core (M0-06); Android app shell (M0-07): onboarding, main scaffold, settings |
 | `contract/` | KMP module shared by server and client: DTOs, routes, sync protocol, shared domain logic | errors, protocol, instance info (M0-02) |
 | `deploy/` | Docker Compose, Caddy, example configs, scripts | dev database only (`deploy/dev/`); production in M0-10 |
 | `integration-tests/` | Multi-device sync tests: server + several clients in one JVM | sync invariants and scenarios (M0-06) |
+| `tools/design-assets/` | Generates bundled fonts and icons (Python + fonttools) | exists (M0-07) |
 | `tools/loadsim/` | Load simulation CLI | planned (M0-11) |
 
 Layout is provisional until M0 scaffolding; see [architecture overview](docs/architecture/overview.md).
@@ -89,5 +90,7 @@ Run from the repo root. Gradle uses JDK 21 via `~/.gradle/gradle.properties`; se
 | Start emulator (headless) | `$ANDROID_HOME/emulator/emulator -avd familyhub -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect &` |
 | Wait for boot | `$ANDROID_HOME/platform-tools/adb wait-for-device`; poll `adb shell getprop sys.boot_completed` until `1` |
 | Install and launch app | `./gradlew :client:android:installDebug`; `adb shell am start -n app.familyhub.android.debug/app.familyhub.android.MainActivity` |
+| App → local dev server | `adb reverse tcp:8080 tcp:8080`, then server address `http://localhost:8080` in the app (the emulator cannot reach `10.0.2.2` on this Mac) |
+| Regenerate fonts/icons | `tools/design-assets/.venv/bin/python tools/design-assets/build.py` ([README](tools/design-assets/README.md)) |
 | Screenshot | `adb exec-out screencap -p > <scratchpad>/screen.png` |
 | Stop emulator | `adb emu kill` |

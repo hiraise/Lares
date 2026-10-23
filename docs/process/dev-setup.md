@@ -11,6 +11,7 @@ How the development machine (macOS, Apple Silicon, Homebrew) was prepared in M0-
 | Gradle (system, temporary) | `brew install gradle`, removed afterwards | Only used once to generate the wrapper; use `./gradlew` |
 | Android SDK | Already present from Android Studio: `~/Library/Android/sdk` | Build the Android app; shared with Android Studio |
 | SDK packages | `sdkmanager "platform-tools" "platforms;android-37.0" "build-tools;37.0.0" "emulator" "cmdline-tools;latest"` | Android 37 platform; emulator, adb and avdmanager updated to current versions |
+| Python 3 + fonttools (only for design assets) | `python3 -m venv tools/design-assets/.venv && tools/design-assets/.venv/bin/pip install fonttools` (the venv is gitignored) | Regenerate fonts and icons with `tools/design-assets/build.py` ([README](../../tools/design-assets/README.md)); not needed to build the app |
 | AOSP emulator image (~1.5 GB) | `sdkmanager "system-images;android-37.0;default;arm64-v8a"` | Visual checks; image has no Google services (ADR-0006) |
 
 SDK root: `~/Library/Android/sdk` (the Android Studio SDK; `sdkmanager` is in `cmdline-tools/latest/bin`). Do not
@@ -55,7 +56,21 @@ adb exec-out screencap -p > <scratchpad>/screen.png
 adb emu kill
 ```
 
-## Troubleshooting (seen in M0-01)
+### App against the local dev server
+
+Start the dev database and `./gradlew :server:run` (AGENTS.md "Commands"); the setup code is printed in the server log.
+On this machine the emulator cannot open TCP connections to the host (`http://10.0.2.2:8080` times out although ping
+works), so forward the port through adb and use `http://localhost:8080` as the server address in the app:
+
+```sh
+adb reverse tcp:8080 tcp:8080
+```
+
+Debug builds allow plain HTTP to `10.0.2.2`, `localhost` and `127.0.0.1` only (`client/android/src/debug/res/xml/
+network_security_config.xml`); release builds are HTTPS-only. Typing in the app: `adb shell input text "…"` (ASCII only),
+then `adb shell input keyevent 66` (Enter). A typed address without a scheme gets `https://`.
+
+## Troubleshooting (seen in M0-01 and M0-07)
 
 - **Old `cmdline-tools` in the Android Studio SDK** (`avdmanager` fails with "No device found matching --device pixel_7")
   and **old emulator** (32.x cannot run Android 37 images) — update with `sdkmanager "cmdline-tools;latest" "emulator"`.
@@ -71,3 +86,7 @@ adb emu kill
 - **`timeout` command not found** — macOS has no GNU `timeout`; use plain `adb wait-for-device`.
 - **macOS `java -version` shows another JDK** — expected if another JDK is on `PATH`; Gradle uses JDK 21 from
   `~/.gradle/gradle.properties`.
+- **Camera preview is black on the headless emulator** — the camera opens, but `-no-window` delivers no frames, so the
+  QR scanner can only be checked on a phone (or with an emulator window and a virtual scene).
+- **Opening a link on the emulator** — `adb shell am start -a android.intent.action.VIEW -d "'familyhub://login?server=…&code=…'"`
+  (the inner quotes keep `&` from the device shell).
