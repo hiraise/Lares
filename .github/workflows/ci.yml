@@ -30,6 +30,7 @@ jobs:
           name: lares-debug-apk
           path: client/android/build/outputs/apk/debug/*.apk
           if-no-files-found: error
+          retention-days: 14
 
   deploy-smoke:
     runs-on: ubuntu-latest

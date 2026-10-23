@@ -13,6 +13,9 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 
 ## Last completed
 
+- 2026-10-23 Release signing and flow (ADR-0019): permanent Lares key (GitHub secrets; original in
+  `~/.android/lares-release/`), release workflow fails without it and checks the certificate fingerprint, notes from
+  CHANGELOG, `tools/release/release.sh`, versionCode derived from the version, [release process](process/release.md).
 - 2026-10-23 Project renamed FamilyHub → **Lares** (Q-001): package and application id `app.lares`, env vars
   `LARES_*`, image `ghcr.io/hiraise/lares-server`, repository `github.com/hiraise/lares`.
 - 2026-10-23 M0-11 Load simulation: `tools/loadsim` + `deploy/scripts/loadtest.sh`. Simulated family (10 devices,
@@ -28,8 +31,9 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 ## Next steps
 
 1. M0 acceptance with the customer (APK, walkthrough, Russian changelog).
-2. First release `v0.1.0` (customer approval): publishes the server image and APK; then make the GHCR package
-   `lares-server` public or `docker login ghcr.io` on the server ([deploy/README](../deploy/README.md#releases)).
+2. First signed release `0.2.0` after M1 is accepted (customer, 2026-10-23: no `0.1.2`; [release process](process/release.md));
+   make the GHCR package `lares-server` public or `docker login ghcr.io` on the server
+   ([deploy/README](../deploy/README.md#releases)).
 3. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
 4. M4 plan: re-run the load test with location uploads every 30 s (ADR-0015).
 5. M1 Tasks: [tasks spec](product/features/tasks.md) approved (2026-10-23); execute plans [M1-01…M1-07](plans/README.md#m1-plans) (design: [architecture/tasks.md](architecture/tasks.md), ADR-0017, ADR-0018).
@@ -47,6 +51,7 @@ See the table in [plans README](plans/README.md#m0-plans).
 | Risk | Impact | Mitigation |
 | --- | --- | --- |
 | Google developer verification for sideloaded apps (rolling out from 2026, global 2027) | APK / F-Droid installs may require a verified developer | Re-check before M6; a developer account likely covers it |
+| Loss or leak of the release signing key | No updates for installed apps / fake updates | Lares-only key, backup archive kept off the machine by the customer, fingerprint checked in the release workflow (ADR-0019) |
 | OEM battery optimizations (Xiaomi, Huawei, Samsung) kill background location | Gaps in location tracking | In-app guide to exclude the app from battery optimization; detect and warn about stale positions |
 | JVM server memory above budget | Stack does not fit a 1 GB VPS | M0-11: RSS max 237 of 256 MiB after tuning, stack ~320 MiB; re-measure in M4 with location; next lever GraalVM native image |
 | Compose Multiplatform web target is Beta | Web client (M7) may need workarounds | Re-evaluate at M7; fallback is a separate web UI |

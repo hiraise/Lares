@@ -5,6 +5,14 @@ plugins {
     alias(libs.plugins.compose.compiler)
 }
 
+// Version comes from `version` in gradle.properties (bumped by tools/dev/release.sh). versionCode is derived from it
+// (MAJOR * 1_000_000 + MINOR * 1_000 + PATCH) so every release increases it without a second number to maintain.
+val appVersionName = project.version.toString()
+val appVersionCode =
+    Regex("""(\d+)\.(\d+)\.(\d+)""").matchEntire(appVersionName)?.destructured?.let { (major, minor, patch) ->
+        major.toInt() * 1_000_000 + minor.toInt() * 1_000 + patch.toInt()
+    } ?: error("version=$appVersionName in gradle.properties is not MAJOR.MINOR.PATCH")
+
 android {
     namespace = "app.lares.android"
     compileSdk = 37
@@ -13,12 +21,13 @@ android {
         applicationId = "app.lares.android"
         minSdk = 26
         targetSdk = 37
-        versionCode = 2
-        versionName = "0.1.1"
+        versionCode = appVersionCode
+        versionName = appVersionName
     }
 
-    // Release signing only when a keystore is provided through the environment (release workflow); keystores are
-    // never committed. Without it, `assembleRelease` produces an unsigned APK and releases ship the debug APK.
+    // Release signing only when a keystore is provided through the environment (release workflow, ADR-0019); the
+    // keystore is never committed. Without it, `assembleRelease` produces an unsigned APK, which the release workflow
+    // refuses to publish.
     val keystoreFile = providers.environmentVariable("ANDROID_KEYSTORE_FILE").orNull
     val releaseSigning =
         if (keystoreFile.isNullOrBlank()) {

@@ -87,7 +87,8 @@ The code is 10 letters and digits. You can also choose it yourself in advance wi
 
 ## 7. Install the app and create your family
 
-1. Install the Lares APK on your Android phone (download it from the project's releases page; allow installing
+1. Install the Lares APK on your Android phone (new versions install the same way, over the old one, and keep your
+   data; download it from the project's releases page; allow installing
    apps from this source when Android asks).
 2. Open the app, enter the **Server address** `https://family.example.com`.
 3. The app sees a new server and shows **New family**: enter the setup code, family name, time zone, currency,

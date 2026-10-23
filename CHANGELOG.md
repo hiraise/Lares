@@ -5,6 +5,14 @@ Versioning: [SemVer](https://semver.org/) from the first release.
 
 ## [Unreleased]
 
+### Changed
+
+- Android APKs in releases are signed with a permanent Lares key, so new versions install over old ones. The first
+  signed release installs as a separate app next to the 0.1.1 test build: remove 0.1.1 and sign in again (family data
+  stays on the server).
+
+## [0.1.1] - 2026-10-23
+
 ### Added
 
 - Server installation (M0-10): one Docker Compose setup for a VPS with automatic HTTPS, optional own ntfy server for

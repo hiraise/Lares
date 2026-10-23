@@ -43,8 +43,9 @@ Decided by the customer, 2026-10-22.
 - Before committing, show the customer a short Russian summary of the change (what and why, files touched,
   tests run). Commit only after explicit approval. One approval may cover one work item or a few related ones.
 - Never rewrite published history; never force-push.
-- After the MVP (M6) a release flow replaces this: feature branches, pull requests, CI gate, version tags.
-  It will be defined in an ADR at M6.
+- After the MVP (M6) a branch flow replaces this: feature branches, pull requests, CI gate. It will be defined in an
+  ADR at M6.
+- Releases (version tags, signed APK) already follow [process/release.md](release.md) (ADR-0019).
 
 ## Definition of Done
 

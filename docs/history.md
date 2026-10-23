@@ -120,3 +120,6 @@ Current state and next steps: [STATUS.md](STATUS.md).
   ADR-0017 (occurrences derived from completions), ADR-0018 (tags embedded in entities), plans M1-01…M1-07.
 - 2026-10-23 Deploy docs gaps: release → image dependency and GHCR visibility (`deploy/README.md#releases`, manual
   step 5 en/ru), `COMPOSE_PROFILES=push` in `.env.example` and the ntfy section of the manual.
+- 2026-10-23 Release signing and flow (ADR-0019): new Lares-only release key (not shared with babylog), stored in GitHub
+  secrets and `~/.android/lares-release/`; release workflow requires it and verifies the certificate; releases per
+  milestone plus patch releases, no betas (customer); `tools/release/` scripts; `v0.1.1` was a debug APK.

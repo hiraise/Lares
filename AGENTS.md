@@ -67,6 +67,7 @@ Full documentation map: [docs/README.md](docs/README.md).
 | `deploy/` | Docker Compose, Caddy, ntfy, example configs, backup/restore/smoke scripts | production stack (M0-10); dev database in `deploy/dev/` |
 | `integration-tests/` | Multi-device sync tests: server + several clients in one JVM | sync invariants and scenarios (M0-06) |
 | `tools/dev/` | Agent dev scripts: short-output build/test, local server, test family, emulator driving | exists |
+| `tools/release/` | Release script, release notes, APK signature check ([release process](docs/process/release.md)) | exists |
 | `tools/design-assets/` | Generates bundled fonts and icons (Python + fonttools) | exists (M0-07) |
 | `tools/loadsim/` | Load simulation CLI (simulated family against a running server) | exists (M0-11) |
 
@@ -112,6 +113,7 @@ troubleshooting: [dev-setup](docs/process/dev-setup.md).
 | Production stack smoke test (ports 80/443 free) | `./gradlew :server:installDist && deploy/scripts/smoke.sh` |
 | Load test: simulated family, latency, memory, cold start (ports 80/443 free, ~35 min; `--duration 5m` for a short run) | `./gradlew :server:installDist :tools:loadsim:installDist && deploy/scripts/loadtest.sh` → `build/loadtest/<time>/` |
 | Backup / restore (on the server host) | `deploy/scripts/backup.sh` / `deploy/scripts/restore.sh <file>` ([manual](docs/user/en/install-server.md)) |
+| Release (customer approval only) | `tools/release/release.sh X.Y.Z --push` ([release process](docs/process/release.md)) |
 | Build debug APK | `./gradlew :client:android:assembleDebug` → `client/android/build/outputs/apk/debug/android-debug.apk` |
 | Regenerate fonts/icons | `tools/design-assets/.venv/bin/python tools/design-assets/build.py` ([README](tools/design-assets/README.md)) |
 
