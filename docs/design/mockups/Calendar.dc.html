@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Календарь</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block">
+<style>
+body{margin:0}
+a{color:#1B45C4}a:hover{color:#2F5BEA}
+.ms{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;font-size:24px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;direction:ltr;font-feature-settings:'liga';-webkit-font-smoothing:antialiased;font-variation-settings:'FILL' 0,'wght' 250,'GRAD' 0,'opsz' 24}
+.msf{font-variation-settings:'FILL' 1,'wght' 250,'GRAD' 0,'opsz' 24}
+button{font:inherit}
+.d{height:44px;display:flex;flex-direction:column;align-items:center;gap:2px}
+.n{width:32px;height:32px;border-radius:16px;display:grid;place-items:center;font-size:15px;font-weight:600;color:#15171C}
+.o{color:#A3A8B3}
+.we{color:#5B606B}
+.dots{display:flex;gap:3px;height:5px}
+.dot{width:5px;height:5px;border-radius:3px;display:block}
+</style>
+</helmet>
+<div style="--bg:#F3F4F7;--card:#FFFFFF;--t1:#15171C;--t2:#5B606B;--sep:#ECEEF3;--ol:#D5D9E2;--p:#2F5BEA;--psoft:#E4EBFF;--pfg:#1B45C4;--teal:#0D6F93;--tealsoft:#DDF3FA;width:390px;height:844px;position:relative;overflow:hidden;box-sizing:border-box;background:var(--bg);color:var(--t1);font-family:Manrope,system-ui,sans-serif;font-variant-numeric:tabular-nums">
+
+<header style="display:flex;align-items:center;justify-content:space-between;padding:28px 8px 12px 20px">
+  <h1 style="margin:0;font-size:32px;line-height:1.15;font-weight:800;letter-spacing:-0.02em">Октябрь <span style="color:var(--t2);font-weight:600">2026</span></h1>
+  <div style="display:flex;align-items:center">
+    <button aria-label="Предыдущий месяц" style="width:44px;height:44px;border-radius:22px;border:0;background:transparent;color:var(--t1);display:grid;place-items:center;cursor:pointer"><span class="ms" aria-hidden="true">chevron_left</span></button>
+    <button aria-label="Следующий месяц" style="width:44px;height:44px;border-radius:22px;border:0;background:transparent;color:var(--t1);display:grid;place-items:center;cursor:pointer"><span class="ms" aria-hidden="true">chevron_right</span></button>
+  </div>
+</header>
+
+<main style="display:flex;flex-direction:column;gap:16px;padding:0 16px">
+  <div role="tablist" aria-label="Вид" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;background:#E7E9EE;border-radius:14px;padding:4px">
+    <button role="tab" aria-selected="true" style="height:34px;border-radius:10px;border:0;background:var(--card);color:var(--t1);font-size:14px;font-weight:700;box-shadow:0 1px 2px rgba(0,0,0,.08);cursor:pointer">Месяц</button>
+    <button role="tab" aria-selected="false" style="height:34px;border-radius:10px;border:0;background:transparent;color:var(--t2);font-size:14px;font-weight:600;cursor:pointer">Неделя</button>
+    <button role="tab" aria-selected="false" style="height:34px;border-radius:10px;border:0;background:transparent;color:var(--t2);font-size:14px;font-weight:600;cursor:pointer">Список</button>
+  </div>
+
+  <div style="background:var(--card);border-radius:20px;padding:12px 8px 6px">
+    <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));text-align:center;font-size:12px;font-weight:700;color:var(--t2);padding-bottom:6px">
+      <span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr))">
+      <div class="d"><span class="n o">28</span><span class="dots"></span></div>
+      <div class="d"><span class="n o">29</span><span class="dots"></span></div>
+      <div class="d"><span class="n o">30</span><span class="dots"></span></div>
+      <div class="d"><span class="n">1</span><span class="dots"></span></div>
+      <div class="d"><span class="n">2</span><span class="dots"><i class="dot" style="background:#4B7E39"></i></span></div>
+      <div class="d"><span class="n we">3</span><span class="dots"><i class="dot" style="background:#B75600"></i></span></div>
+      <div class="d"><span class="n we">4</span><span class="dots"></span></div>
+
+      <div class="d"><span class="n">5</span><span class="dots"></span></div>
+      <div class="d"><span class="n">6</span><span class="dots"><i class="dot" style="background:#8360BA"></i></span></div>
+      <div class="d"><span class="n">7</span><span class="dots"></span></div>
+      <div class="d"><span class="n">8</span><span class="dots"><i class="dot" style="background:#8360BA"></i></span></div>
+      <div class="d"><span class="n">9</span><span class="dots"><i class="dot" style="background:#AE5385"></i></span></div>
+      <div class="d"><span class="n we">10</span><span class="dots"></span></div>
+      <div class="d"><span class="n we">11</span><span class="dots"><i class="dot" style="background:#4B7E39"></i><i class="dot" style="background:#B75600"></i></span></div>
+
+      <div class="d"><span class="n">12</span><span class="dots"></span></div>
+      <div class="d"><span class="n">13</span><span class="dots"><i class="dot" style="background:#8360BA"></i></span></div>
+      <div class="d"><span class="n">14</span><span class="dots"></span></div>
+      <div class="d"><span class="n">15</span><span class="dots"><i class="dot" style="background:#8360BA"></i></span></div>
+      <div class="d"><span class="n">16</span><span class="dots"></span></div>
+      <div class="d"><span class="n we">17</span><span class="dots"><i class="dot" style="background:#AE5385"></i></span></div>
+      <div class="d"><span class="n we">18</span><span class="dots"></span></div>
+
+      <div class="d"><span class="n">19</span><span class="dots"></span></div>
+      <div class="d"><span class="n">20</span><span class="dots"><i class="dot" style="background:#8360BA"></i></span></div>
+      <div class="d"><span class="n">21</span><span class="dots"><i class="dot" style="background:#4B7E39"></i></span></div>
+      <div class="d"><span class="n">22</span><span class="dots"><i class="dot" style="background:#8360BA"></i></span></div>
+      <div class="d"><span class="n" aria-current="date" style="background:#2F5BEA;color:#FFFFFF;font-weight:800">23</span><span class="dots"><i class="dot" style="background:#8360BA"></i><i class="dot" style="background:#B75600"></i></span></div>
+      <div class="d"><span class="n we">24</span><span class="dots"></span></div>
+      <div class="d"><span class="n we">25</span><span class="dots"></span></div>
+
+      <div class="d"><span class="n">26</span><span class="dots"><i class="dot" style="background:#0D6F93"></i></span></div>
+      <div class="d"><span class="n">27</span><span class="dots"><i class="dot" style="background:#8360BA"></i></span></div>
+      <div class="d"><span class="n">28</span><span class="dots"><i class="dot" style="background:#AE5385"></i><i class="dot" style="background:#4B7E39"></i></span></div>
+      <div class="d"><span class="n">29</span><span class="dots"><i class="dot" style="background:#8360BA"></i></span></div>
+      <div class="d"><span class="n">30</span><span class="dots"></span></div>
+      <div class="d"><span class="n we">31</span><span class="dots"><i class="dot" style="background:#4B7E39"></i></span></div>
+      <div class="d"><span class="n o">1</span><span class="dots"></span></div>
+    </div>
+  </div>
+
+  <section style="display:flex;flex-direction:column;gap:8px">
+    <h2 style="margin:0;padding:0 4px;font-size:15px;font-weight:700">Пятница, 23 октября</h2>
+    <div style="background:var(--card);border-radius:20px;display:flex;flex-direction:column">
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 16px">
+        <span style="width:44px;flex:none;display:flex;flex-direction:column;font-size:14px;font-weight:700">Весь<span style="font-size:12px;font-weight:500;color:var(--t2)">день</span></span>
+        <span style="width:4px;height:36px;border-radius:2px;background:#B75600;flex:none"></span>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:15px;font-weight:600">Экскурсия в планетарий</span><span style="font-size:13px;color:var(--t2)">Тимур · с классом</span></div>
+      </div>
+      <div style="height:1px;background:var(--sep);margin-left:72px"></div>
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 16px">
+        <span style="width:44px;flex:none;display:flex;flex-direction:column;font-size:14px;font-weight:700">17:30<span style="font-size:12px;font-weight:500;color:var(--t2)">18:45</span></span>
+        <span style="width:4px;height:36px;border-radius:2px;background:#8360BA;flex:none"></span>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:15px;font-weight:600;display:flex;align-items:center;gap:6px">Танцы<span class="ms" aria-hidden="true" style="font-size:16px;color:var(--t2)">repeat</span></span><span style="font-size:13px;color:var(--t2)">Аня · ДК «Юность»</span></div>
+        <div style="display:flex;flex:none">
+          <span aria-label="Аня" style="width:26px;height:26px;border-radius:13px;background:#8360BA;color:#FFFFFF;display:grid;place-items:center;font-size:11px;font-weight:700;box-shadow:0 0 0 2px var(--card)">А</span>
+          <span aria-label="Ольга" style="width:26px;height:26px;border-radius:13px;background:#AE5385;color:#FFFFFF;display:grid;place-items:center;font-size:11px;font-weight:700;box-shadow:0 0 0 2px var(--card);margin-left:-6px">О</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<button aria-label="Новое событие" style="position:absolute;right:16px;bottom:100px;width:60px;height:60px;border-radius:20px;border:0;background:linear-gradient(135deg,#2F5BEA 0%,#0A7BAD 100%);color:#FFFFFF;display:grid;place-items:center;box-shadow:0 8px 20px rgba(31,110,214,.35);cursor:pointer"><span class="ms" aria-hidden="true" style="font-size:30px">add</span></button>
+
+<nav aria-label="Разделы" style="position:absolute;left:0;right:0;bottom:0;height:84px;box-sizing:border-box;background:var(--card);border-top:1px solid var(--sep);display:flex;justify-content:space-around;align-items:flex-start;padding:10px 4px 0">
+  <a href="Main.dc.html" style="width:72px;display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;color:var(--t2);font-size:12px;font-weight:600"><span style="width:56px;height:32px;border-radius:16px;display:grid;place-items:center"><span class="ms" aria-hidden="true">home</span></span>Сегодня</a>
+  <a href="Tasks.dc.html" style="width:72px;display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;color:var(--t2);font-size:12px;font-weight:600"><span style="width:56px;height:32px;border-radius:16px;display:grid;place-items:center"><span class="ms" aria-hidden="true">task_alt</span></span>Задачи</a>
+  <a href="Shopping.dc.html" style="width:72px;display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;color:var(--t2);font-size:12px;font-weight:600"><span style="width:56px;height:32px;border-radius:16px;display:grid;place-items:center"><span class="ms" aria-hidden="true">shopping_cart</span></span>Покупки</a>
+  <a href="Calendar.dc.html" aria-current="page" style="width:72px;display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;color:var(--t1);font-size:12px;font-weight:700"><span style="width:56px;height:32px;border-radius:16px;background:var(--psoft);color:var(--pfg);display:grid;place-items:center"><span class="ms msf" aria-hidden="true">calendar_month</span></span>Календарь</a>
+  <a href="More.dc.html" style="width:72px;display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;color:var(--t2);font-size:12px;font-weight:600"><span style="width:56px;height:32px;border-radius:16px;display:grid;place-items:center"><span class="ms" aria-hidden="true">apps</span></span>Ещё</a>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

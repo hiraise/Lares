@@ -28,6 +28,10 @@ Add terms here before using them in code.
 | Login code | Код входа | One-time QR code (5 min) that logs a member in on a new device. |
 | Tag | Тег | Household-wide label attachable to items in any module. |
 | Tag page | Страница тега | Aggregated view of everything linked to a tag. |
+| Palette color | Цвет | One of 10 fixed colors (`PaletteColor`) used by tags and personal colors (ADR-0016). |
+| Personal color | Личный цвет | A person's palette color: avatar, events, map pin, assignments (FND-034). |
+| Today | Сегодня | Home screen summarizing the day across sections (FND-063). |
+| More | Ещё | Last bottom-bar item: profile, sections outside the bar, settings (FND-064). |
 
 ## Tasks and lists
 

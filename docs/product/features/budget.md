@@ -55,7 +55,7 @@ real debts (loans, mortgage, money borrowed from relatives) have their own balan
 ### Later
 
 - **BUD-050** `later` `todo` — CSV import of bank statements.
-- **BUD-051** `later` `todo` — Receipt photos.
+- **BUD-051** `later` `todo` — Receipt photos (M5b, [files](files.md)).
 - **BUD-052** `later` `todo` — Multi-currency accounts. M5 uses one household currency.
 
 ## Notes

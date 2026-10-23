@@ -12,6 +12,7 @@ User-facing manuals live in [user/](user/).
 | Milestones and their scope | [product/roadmap.md](product/roadmap.md) |
 | What a feature must do (requirements with IDs) | [product/features/](product/features/) |
 | Questions waiting for the customer | [product/open-questions.md](product/open-questions.md) |
+| Look of the app: colors, fonts, icons, components | [design/visual-style.md](design/visual-style.md), [design/mockups/](design/mockups/README.md) |
 | Terms and their Russian equivalents | [domain/glossary.md](domain/glossary.md) |
 | Entities and relations | [domain/model.md](domain/model.md) |
 | System structure | [architecture/overview.md](architecture/overview.md) |
@@ -35,7 +36,7 @@ User-facing manuals live in [user/](user/).
 | `<AREA>-NNN` | Requirement in a feature spec | TSK-012 |
 
 Requirement areas: `FND` foundation (identity, household, persons, sync, notifications), `TAG` tags, `TSK` tasks,
-`SHP` shopping lists, `CAL` calendar, `LOC` location, `BUD` budget, `TRK` GPS trackers, `WEB` web client.
+`SHP` shopping lists, `CAL` calendar, `LOC` location, `BUD` budget, `FIL` files and photos, `TRK` GPS trackers, `WEB` web client.
 
 Reference IDs everywhere: in code comments, test names, commit messages, PR descriptions.
 IDs are never reused. A removed requirement keeps its ID with status `dropped`.

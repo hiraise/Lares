@@ -1,6 +1,6 @@
 # Project status
 
-Updated: 2026-10-22
+Updated: 2026-10-23
 
 ## Phase
 
@@ -35,6 +35,13 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
   Argon2id (PHC, checked against the reference implementation and OpenSSL), opaque tokens with refresh rotation, 60 s grace
   and reuse detection, `RequireSession` plugin, failed-attempt limiter, setup code in the log; endpoints setup, login,
   refresh, logout, me, password, sessions, delete account. 71 server tests; manual curl walkthrough done.
+- 2026-10-23 Visual style chosen with the customer (two option rounds, then 10 screen mockups):
+  [visual-style.md](design/visual-style.md), [ADR-0016](adr/0016-visual-design-system.md), mockups in
+  [design/mockups/](design/mockups/README.md). New requirements FND-034 (personal color), FND-063 (Today screen),
+  FND-064 (bottom bar, Q-013 answered), FND-065 (visual style). Not-yet-executed plans amended: M0-05 (`PaletteColor`
+  shared by tags and persons, `PersonData.color`), M0-06 (color on create), M0-07 (theme, fonts, icon pipeline, Today,
+  More, app icon), M0-08 (personal colors, entry from More). Mockups and bottom bar approved. File storage for photos:
+  new milestone M5b after Budget ([files spec](product/features/files.md)).
 
 ## Next steps
 

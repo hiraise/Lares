@@ -2,7 +2,7 @@
 id: M0-05
 status: ready
 depends_on: [M0-04]
-requirements: [FND-030, FND-031, FND-032, FND-041, FND-042, TAG-001, TAG-006]
+requirements: [FND-030, FND-031, FND-032, FND-034, FND-041, FND-042, TAG-001, TAG-006]
 ---
 # M0-05: Sync server — pull, push, events, persons, tags
 
@@ -21,9 +21,9 @@ Entity types: `household`, `member`, `group` (read-only via sync), `person`, `ta
 
 ## Scope
 
-- Contract: sync DTOs, `TagData`/`TagColor` (in `entities/`), tag/person validators, `EntityTypes` constants,
+- Contract: sync DTOs, `TagData`/`PaletteColor` (in `entities/`), `PersonData.color`, tag/person validators, `EntityTypes` constants,
   shared `WriteRules` (permission checks for client-writable types, used by server and client).
-- Migration `V4__sync.sql`: `tag`, `sync_mutation_log`.
+- Migration `V4__sync.sql`: `tag`, `sync_mutation_log`, `person.color` column.
 - `SyncEntityHandler` registry with handlers for the five types.
 - Endpoints `GET /api/v1/sync/changes`, `POST /api/v1/sync/mutations`, WebSocket `/api/v1/sync/events`.
 - Jobs: tombstone purge, mutation-log cleanup.
@@ -44,9 +44,16 @@ Out of scope: client (M0-06), push notifications (M0-09).
   }
   ```
   `ChangeRow(type, id, seq, deleted, data: JsonObject?)`. Read-only handlers throw `FORBIDDEN` from `apply`.
-- `TagColor` is a fixed palette enum (`RED, ORANGE, YELLOW, GREEN, TEAL, BLUE, PURPLE, PINK, BROWN, GRAY`);
-  `TagData(name, color: TagColor, icon: String? = null, archived: Boolean = false)` in `contract/…/entities/`.
-  `TagColor` uses the lenient enum serializer with fallback `GRAY`.
+- `PaletteColor` is a fixed palette enum (`RED, ORANGE, YELLOW, GREEN, TEAL, BLUE, PURPLE, PINK, BROWN, GRAY`) shared by
+  tags and persons (ADR-0016; hex values live in the client theme, not in `contract/`);
+  `TagData(name, color: PaletteColor, icon: String? = null, archived: Boolean = false)` in `contract/…/entities/`.
+  `PaletteColor` uses the lenient enum serializer with fallback `GRAY`.
+- **Personal color** (FND-034): `PersonData` gets `color: PaletteColor? = null` (last field, so older payloads decode).
+  Shared helpers in `contract/…/entities/PaletteColors.kt`: `pickLeastUsed(used: Collection<PaletteColor>): PaletteColor`
+  (fewest uses, ties by enum order, `GRAY` only when all others are used more) and `fallbackFor(personId: String): PaletteColor`
+  (stable hash of the id over the 9 non-gray colors) for persons whose color is null. The server sets
+  `pickLeastUsed(colors of the household's non-deleted persons)` whenever it creates a person (setup, create member,
+  invite accept) and keeps it unchanged otherwise; the client does the same for relatives it creates (M0-06).
 - Tag name: trimmed, 1–40 chars, unique among non-deleted tags of the household, case-insensitive
   (`TAG_NAME_TAKEN`). Enforce with a unique index on `(household_id, lower(name)) WHERE deleted = false`
   **and** a check in the handler (for a clean error).
@@ -79,13 +86,15 @@ Out of scope: client (M0-06), push notifications (M0-09).
    `@Serializable enum class MutationOp { @SerialName("upsert") UPSERT, @SerialName("delete") DELETE }`;
    `Mutation(mutationId, type, id, op, fields: JsonObject? = null, createdAt: Instant)`; `PushRequest(mutations)`;
    `MutationStatus { APPLIED, REJECTED }` (serial names lowercase); `MutationResult(mutationId, status, seq: Long? = null, error: ApiError? = null, duplicate: Boolean = false)`;
-   `PushResponse(results)`; `SyncEvent(type: String, seq: Long)`. Also `entities/TagData`, `TagColor`, `Validators.tagName`,
+   `PushResponse(results)`; `SyncEvent(type: String, seq: Long)`. Also `entities/TagData`, `PaletteColor`, `PaletteColors`, `PersonData.color`, `Validators.tagName`,
    person validators, `permissions/WriteRules` + `Viewer`.
    Round-trip serialization tests matching the JSON examples in sync.md.
 2. **Migration `V4__sync.sql`**: `tag(id, household_id, name, color, icon NULL, archived bool, seq, created_at, updated_at, deleted)`
    + `(household_id, seq)` index + the unique partial index on lower(name); `sync_mutation_log(household_id uuid,
    mutation_id uuid, member_id, status text, seq bigint NULL, error_code text NULL, processed_at timestamptz,
-   PRIMARY KEY (household_id, mutation_id))` + index on `processed_at`.
+   PRIMARY KEY (household_id, mutation_id))` + index on `processed_at`; `ALTER TABLE person ADD COLUMN color text NULL`
+   (existing persons stay null and use `fallbackFor`). Update `PersonRepository` and the person-creating services of
+   M0-03/M0-04 to read/write `color` and to assign `pickLeastUsed`.
 3. **Handlers**: `HouseholdSyncHandler`, `MemberSyncHandler`, `GroupSyncHandler` (data includes permissions and memberIds
    from the join tables), `PersonSyncHandler`, `TagSyncHandler`. Each maps rows ↔ data classes from `contract/`.
 4. **Pull service**: validate params (`after ≥ 0`, `1 ≤ limit ≤ 1000`, default 500, optional `epoch`); in one snapshot
@@ -135,7 +144,7 @@ Out of scope: client (M0-06), push notifications (M0-09).
 ## Docs to update
 
 - [sync.md](../../architecture/sync.md) if any detail had to change (explain why in the handoff).
-- Foundation spec: FND-030…032 server side done; tags spec TAG-001, TAG-006 server side done (keep `doing` until UI).
+- Foundation spec: FND-030…032 server side done; FND-034 server side done; tags spec TAG-001, TAG-006 server side done (keep `doing` until UI).
 - STATUS.md; plan status.
 
 ## Stop and report if

@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Семья</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block">
+<style>
+body{margin:0}
+a{color:#1B45C4}a:hover{color:#2F5BEA}
+.ms{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;font-size:24px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;direction:ltr;font-feature-settings:'liga';-webkit-font-smoothing:antialiased;font-variation-settings:'FILL' 0,'wght' 250,'GRAD' 0,'opsz' 24}
+button{font:inherit}
+</style>
+</helmet>
+<div style="--bg:#F3F4F7;--card:#FFFFFF;--t1:#15171C;--t2:#5B606B;--sep:#ECEEF3;--ol:#D5D9E2;--p:#2F5BEA;--psoft:#E4EBFF;--pfg:#1B45C4;width:390px;height:844px;position:relative;overflow:hidden;box-sizing:border-box;background:var(--bg);color:var(--t1);font-family:Manrope,system-ui,sans-serif">
+
+<header style="display:flex;align-items:center;gap:4px;padding:16px 8px 8px">
+  <a href="More.dc.html" aria-label="Назад" style="width:48px;height:48px;border-radius:24px;display:grid;place-items:center;color:var(--t1);text-decoration:none"><span class="ms" aria-hidden="true">arrow_back</span></a>
+  <h1 style="margin:0;flex:1;font-size:22px;font-weight:800;letter-spacing:-0.01em">Семья</h1>
+  <button aria-label="Поиск" style="width:48px;height:48px;border-radius:24px;border:0;background:transparent;color:var(--t1);display:grid;place-items:center;cursor:pointer"><span class="ms" aria-hidden="true">search</span></button>
+</header>
+
+<div role="tablist" aria-label="Разделы семьи" style="display:flex;gap:8px;padding:4px 16px 16px">
+  <button role="tab" aria-selected="true" style="height:36px;padding:0 14px;border-radius:18px;border:0;background:var(--t1);color:#FFFFFF;font-size:14px;font-weight:700;cursor:pointer">Участники</button>
+  <button role="tab" aria-selected="false" style="height:36px;padding:0 14px;border-radius:18px;border:1px solid var(--ol);background:transparent;color:var(--t1);font-size:14px;font-weight:600;cursor:pointer">Группы</button>
+  <button role="tab" aria-selected="false" style="height:36px;padding:0 14px;border-radius:18px;border:1px solid var(--ol);background:transparent;color:var(--t1);font-size:14px;font-weight:600;cursor:pointer">Родные</button>
+  <button role="tab" aria-selected="false" style="height:36px;padding:0 14px;border-radius:18px;border:1px solid var(--ol);background:transparent;color:var(--t1);font-size:14px;font-weight:600;cursor:pointer">Метки</button>
+</div>
+
+<main style="display:flex;flex-direction:column;gap:20px;padding:0 16px">
+  <div style="background:var(--card);border-radius:20px;display:flex;flex-direction:column">
+    <div style="display:flex;align-items:center;gap:14px;padding:14px 16px">
+      <span style="width:48px;height:48px;border-radius:24px;background:#AE5385;color:#FFFFFF;display:grid;place-items:center;font-size:18px;font-weight:700;flex:none">О</span>
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">
+        <span style="font-size:16px;font-weight:700">Ольга Петрова <span style="font-weight:500;color:var(--t2)">(вы)</span></span>
+        <span style="display:flex;gap:6px;flex-wrap:wrap"><span style="font-size:12px;font-weight:700;padding:2px 8px;border-radius:8px;background:#15171C;color:#FFFFFF;display:flex;align-items:center;gap:4px"><span class="ms" aria-hidden="true" style="font-size:14px">shield_person</span>Администраторы</span><span style="font-size:12px;font-weight:700;padding:2px 8px;border-radius:8px;background:var(--psoft);color:var(--pfg)">Взрослые</span></span>
+      </div>
+    </div>
+    <div style="height:1px;background:var(--sep);margin-left:78px"></div>
+    <div style="display:flex;align-items:center;gap:14px;padding:14px 16px">
+      <span style="width:48px;height:48px;border-radius:24px;background:#4B7E39;color:#FFFFFF;display:grid;place-items:center;font-size:18px;font-weight:700;flex:none">Д</span>
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">
+        <span style="font-size:16px;font-weight:700">Дмитрий Петров</span>
+        <span style="display:flex;gap:6px;flex-wrap:wrap"><span style="font-size:12px;font-weight:700;padding:2px 8px;border-radius:8px;background:var(--psoft);color:var(--pfg)">Взрослые</span></span>
+      </div>
+      <span class="ms" aria-hidden="true" style="color:var(--t2)">chevron_right</span>
+    </div>
+    <div style="height:1px;background:var(--sep);margin-left:78px"></div>
+    <div style="display:flex;align-items:center;gap:14px;padding:14px 16px">
+      <span style="width:48px;height:48px;border-radius:24px;background:#8360BA;color:#FFFFFF;display:grid;place-items:center;font-size:18px;font-weight:700;flex:none">А</span>
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">
+        <span style="font-size:16px;font-weight:700">Аня</span>
+        <span style="display:flex;gap:6px;flex-wrap:wrap"><span style="font-size:12px;font-weight:700;padding:2px 8px;border-radius:8px;background:#FFE3D4;color:#9A4800">Дети</span></span>
+      </div>
+      <span class="ms" aria-hidden="true" style="color:var(--t2)">chevron_right</span>
+    </div>
+    <div style="height:1px;background:var(--sep);margin-left:78px"></div>
+    <div style="display:flex;align-items:center;gap:14px;padding:14px 16px">
+      <span style="width:48px;height:48px;border-radius:24px;background:#B75600;color:#FFFFFF;display:grid;place-items:center;font-size:18px;font-weight:700;flex:none">Т</span>
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">
+        <span style="font-size:16px;font-weight:700">Тимур</span>
+        <span style="display:flex;gap:6px;flex-wrap:wrap"><span style="font-size:12px;font-weight:700;padding:2px 8px;border-radius:8px;background:#FFE3D4;color:#9A4800">Дети</span></span>
+      </div>
+      <span class="ms" aria-hidden="true" style="color:var(--t2)">chevron_right</span>
+    </div>
+  </div>
+
+  <section style="display:flex;flex-direction:column;gap:10px">
+    <h2 style="margin:0;padding:0 4px;font-size:15px;font-weight:700;color:var(--t2)">Ждут подключения</h2>
+    <div style="background:var(--card);border-radius:20px;display:flex;align-items:center;gap:14px;padding:14px 16px">
+      <span style="width:48px;height:48px;border-radius:24px;border:1.5px dashed var(--ol);color:var(--t2);display:grid;place-items:center;flex:none"><span class="ms" aria-hidden="true">schedule_send</span></span>
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+        <span style="font-size:16px;font-weight:700">Приглашение для бабушки</span>
+        <span style="font-size:13px;color:var(--t2)">Взрослые · действует ещё 2 дня</span>
+      </div>
+      <button style="height:36px;padding:0 12px;border-radius:18px;border:0;background:transparent;color:var(--pfg);font-size:14px;font-weight:700;cursor:pointer">Отозвать</button>
+    </div>
+  </section>
+</main>
+
+<button style="position:absolute;right:16px;bottom:28px;height:56px;padding:0 22px 0 18px;border-radius:20px;border:0;background:linear-gradient(135deg,#2F5BEA 0%,#0A7BAD 100%);color:#FFFFFF;display:flex;align-items:center;gap:10px;font-size:16px;font-weight:700;box-shadow:0 8px 20px rgba(31,110,214,.35);cursor:pointer"><span class="ms" aria-hidden="true">person_add</span>Пригласить</button>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -27,6 +27,7 @@ no dependency on Google services.
 3. [docs/adr/README.md](docs/adr/README.md) — decision index. Accepted ADRs are binding.
 4. [docs/process/workflow.md](docs/process/workflow.md) — how work is done, Definition of Done.
 5. The feature spec for the area you touch: [docs/product/features/](docs/product/features/).
+   For any client UI also [docs/design/visual-style.md](docs/design/visual-style.md) (binding look, ADR-0016).
 6. [docs/domain/glossary.md](docs/domain/glossary.md) — use these terms in code, docs and UI.
 7. If you were given a plan from [docs/plans/](docs/plans/README.md): follow it exactly; it lists what else to read.
 

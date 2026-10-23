@@ -1,6 +1,6 @@
 ---
 status: approved
-updated: 2026-10-22
+updated: 2026-10-23
 ---
 # Roadmap
 
@@ -15,6 +15,7 @@ Each milestone ends with a build the family can install (APK) and a short change
 | M3 | Calendar | [calendar](features/calendar.md) | not started |
 | M4 | Location | [location](features/location.md) | not started |
 | M5 | Budget | [budget](features/budget.md) | not started |
+| M5b | Files and photos | [files](features/files.md) | not started |
 | M6 | Public release | — | not started |
 | M7 | Web client | — | not started |
 
@@ -60,6 +61,11 @@ visibility rules by groups.
 Accounts, categories, transactions, allocation rules, category deficits, inter-category loans, debts with schedules,
 reports, tags. One currency.
 
+## M5b Files and photos
+
+Photos on the family's server: person avatars, task photos, receipt photos (customer, 2026-10-23).
+Numbered M5b so that the existing milestone numbers, referenced in accepted ADRs, stay unchanged.
+
 ## M6 Public release
 
 F-Droid listing; decision on Google Play and, if yes, its listing (developer account, demo server, closed test);
@@ -77,7 +83,7 @@ Browser access, first of all for budget and calendar on a large screen.
 - Install and update the app from the family's own server (not allowed for Play-distributed builds).
 - iOS and desktop clients (same KMP codebase).
 - Calendar export / subscription (iCal feed), CalDAV sync.
-- Budget: CSV import from banks, receipt photos, multi-currency.
+- Budget: CSV import from banks, multi-currency.
 - SOS button, low-battery alerts for members sharing location.
 
 ## Declined

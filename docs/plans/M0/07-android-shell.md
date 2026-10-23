@@ -2,7 +2,7 @@
 id: M0-07
 status: ready
 depends_on: [M0-06]
-requirements: [FND-001, FND-010, FND-011, FND-013, FND-014, FND-028, FND-043, FND-060, FND-061, FND-062]
+requirements: [FND-001, FND-010, FND-011, FND-013, FND-014, FND-028, FND-043, FND-060, FND-061, FND-062, FND-063, FND-064, FND-065]
 ---
 # M0-07: Android app — onboarding, auth, main scaffold, settings
 
@@ -15,14 +15,17 @@ a settings screen. UI in Compose Multiplatform (`client/shared/commonMain`), And
 ## Read first
 
 - [Foundation spec](../../product/features/foundation.md), [auth design](../../architecture/auth.md)
+- [Visual style](../../design/visual-style.md) (binding, ADR-0016) and [mockups](../../design/mockups/README.md):
+  `Login`, `Main` (Today), `TodayDark`, `More`
 - [ADR-0002](../../adr/0002-languages.md) (en/ru, no hardcoded strings), [ADR-0007](../../adr/0007-distribution.md) (Play-compliant from day one)
 - Client core from M0-06: `SessionManager`, repositories, `SyncEngine.status`, Koin modules
 - [versions.md](versions.md): navigation, lifecycle-viewmodel, Material3, CameraX, ZXing, appcompat
 
 ## Scope
 
-Screens: Server, Setup, Login, Invite accept, QR scanner, Main scaffold (section placeholders), Sync status sheet,
-Settings (profile, appearance, sessions, about, logout, delete account). Deep links `familyhub://invite` and `familyhub://login`.
+Screens: Server, Setup, Login, Invite accept, QR scanner, Main scaffold (Today empty state, section placeholders, More),
+Sync status sheet, Settings (profile, appearance, sessions, about, logout, delete account).
+Design assets: theme, Manrope fonts, generated Material Symbols icons, app icon. Deep links `familyhub://invite` and `familyhub://login`.
 
 Out of scope: family management (M0-08), notifications UI (M0-09), real module content (M1+).
 
@@ -34,19 +37,32 @@ Out of scope: family management (M0-08), notifications UI (M0-09), real module c
 - **Navigation**: JetBrains multiplatform `navigation-compose` with `@Serializable` route objects. Two graphs:
   `onboarding` (Server → Setup | Login | InviteAccept, QrScanner) and `main` (Sections, Settings, and later Family).
   `SessionManager.state` decides the start graph.
-- **Main layout**: Material 3 `Scaffold`; bottom `NavigationBar` shows only sections the member has `*.view` for
-  (order: Tasks, Shopping, Calendar, Map, Budget; labels "Задачи/Tasks", "Списки/Lists", "Календарь/Calendar",
-  "Карта/Map", "Бюджет/Budget"). Each section is a placeholder screen: icon + "Coming in the next versions".
-  Top app bar: title = current section, sync status icon, avatar button opening a menu with "Family" (disabled until M0-08)
-  and "Settings". If no section is allowed, show a friendly empty state.
-- **Sync indicator**: icon states SYNCED (cloud-done), PENDING/SYNCING (cloud-upload with pending count badge),
-  OFFLINE (cloud-off), ERROR (error). Tap → bottom sheet with last sync time, pending count, unseen rejections
+- **Main layout** (FND-063, FND-064): Material 3 `Scaffold`; bottom `NavigationBar` with
+  "Сегодня/Today" (always), then "Задачи/Tasks", "Покупки/Shopping", "Календарь/Calendar" — each only with its `*.view` —
+  and "Ещё/More" (always). Styling per visual-style.md § Navigation. Start destination: Today.
+  - **Today**: large header (date line + "Сегодня"), sync indicator and own avatar (→ More) on the right; body = empty
+    state "Здесь будет сводка дня: задачи, события, покупки" until modules add blocks.
+  - **Tasks / Shopping / Calendar**: placeholder screens (large title + icon + "Coming in the next versions").
+  - **More**: as in `More.dc.html`: profile card (avatar, name, groups) → Settings › Profile; tiles for Map and Budget
+    (only with `location.view` / `budget.view`; open placeholders), Family (disabled until M0-08), Tags (disabled until
+    M0-08); list: Settings, Notifications (disabled until M0-09), Sync (opens the status sheet), Devices, Help (disabled).
+  - Top-level screens use the large header, not a `TopAppBar`; detail screens use a compact top bar with back arrow.
+- **Sync indicator**: icon states SYNCED (`cloud_done` icon only), PENDING/SYNCING (chip `cloud_upload` + pending count),
+  OFFLINE (chip `cloud_off` + pending count if any), ERROR (`error` in `error` color). Tap → bottom sheet with last sync time, pending count, unseen rejections
   (localized by `ErrorCode`), "Sync now". New rejections also show a snackbar.
-- **Theme** (`ui/theme/`): Material 3, dynamic color **off**. Light: primary `#2F6F5E`, onPrimary `#FFFFFF`,
-  primaryContainer `#B4EFDB`, onPrimaryContainer `#002019`, secondary `#4C6359`, tertiary `#3F6375`,
-  background/surface `#F6FBF7`. Dark: primary `#98D3BF`, onPrimary `#00382D`, primaryContainer `#145142`,
-  onPrimaryContainer `#B4EFDB`, secondary `#B3CCC0`, tertiary `#A7CCE1`, background/surface `#0F1512`.
-  Other roles: Material defaults. Spacing tokens 4/8/12/16/24/32 dp in `Spacing` object. Typography: Material defaults.
+- **Theme** (`ui/theme/`): exactly the tokens of [visual-style.md](../../design/visual-style.md): light and dark
+  `ColorScheme` (every role listed there; unlisted roles: derive from the nearest listed one, never Material defaults),
+  extra roles in `FamilyHubColors` (`divider`, `warning*`, `success*`, `gradientStart/End`) via `CompositionLocal`,
+  `PaletteColor` → base/container/on-container colors per theme, `Typography` from the type table with Manrope,
+  `Shapes` (8/14/16/20/28 dp), `Spacing` object 4/8/12/16/24/32 dp. Dynamic color **off**.
+- **Design assets** (`tools/design-assets/`, Python 3 + `fonttools`, run by hand, outputs committed):
+  `build.py` downloads Manrope (variable, OFL, from the google/fonts GitHub repo) and Material Symbols Outlined
+  (variable, Apache 2.0, from google/material-design-icons), instantiates Manrope at 400/500/600/700/800 into
+  `composeResources/font/manrope_<weight>.ttf`, instantiates the symbols font at `wght=250, opsz=24, GRAD=0` with FILL 0
+  and FILL 1, and converts each glyph named in `icons.txt` (the list in visual-style.md § Icons) into an Android XML vector
+  drawable `composeResources/drawable/ic_<name>.xml` / `ic_<name>_filled.xml` (24 dp, viewport 960, y flipped,
+  `fillColor` black so `Icon` tints it). `README.md` there explains how to add an icon. Pin download URLs to a commit or
+  release tag; record them in the README. Do not depend on `material-icons-core` in the new UI.
 - **Strings**: Compose Multiplatform resources, `composeResources/values/strings.xml` (en) and `values-ru/strings.xml`.
   `ErrorCode` → string mapping function in one file.
 - **Language and theme override** (FND-061/062): stored in DataStore; theme applied in `App()`. Language on Android via
@@ -67,8 +83,11 @@ Out of scope: family management (M0-08), notifications UI (M0-09), real module c
 
 ## Steps
 
-1. **Theme, spacing, base components** (`ui/theme`, `ui/components`): `FamilyHubTheme`, primary/secondary buttons with
-   loading state, password field with visibility toggle, error text from `ErrorCode`, full-screen loading, empty state.
+1. **Design assets and theme**: run `tools/design-assets/build.py` (decided above); `FamilyHubTheme` with light/dark tokens;
+   base components (`ui/components`) per visual-style.md § Component patterns: large screen header, detail top bar,
+   list group with inset dividers, avatar (initials on personal color, `PaletteColors.fallbackFor`), filter chip, primary/tonal
+   buttons with loading state, gradient FAB, password field with visibility toggle, error text from `ErrorCode`,
+   full-screen loading, empty state. A JVM screenshot-free test that every listed icon resource exists.
 2. **ServerScreen**: URL field, "Connect", "Scan QR code". Calls `SessionManager.connect`. Errors: unreachable,
    not a FamilyHub server, `PROTOCOL_UNSUPPORTED` ("Update the app or the server"). Routes to Setup or Login.
 3. **SetupScreen** (one scrolling form, sections "Family" and "Administrator"): setup code (hint: "Shown in the server log"),
@@ -84,12 +103,13 @@ Out of scope: family management (M0-08), notifications UI (M0-09), real module c
      "Log in on another device" → shows a QR code for a self login code (qrose) with a 5-minute countdown.
    - Appearance: theme (System/Light/Dark), language (System/English/Русский).
    - Devices: sessions list (device, platform, last seen, "this device"), revoke with confirmation.
-   - About: app version, server version, server address; "Open-source licenses" placeholder text with AGPL notice.
+   - About: app version, server version, server address; "Open-source licenses" text with the AGPL notice and the
+     bundled assets: Manrope (SIL OFL 1.1), Material Symbols (Apache 2.0).
    - Log out; Delete account (confirmation dialog with password if the user has one; `LAST_ADMIN` explained).
 8. **Android shell** (`client/android`): `FamilyHubApplication` (Koin start with Android platform module), `MainActivity`
    (`AppCompatActivity`, edge-to-edge, `setContent { App() }`, deep link forwarding, `foreground` toggling of the sync engine
-   via lifecycle), manifest (INTERNET, CAMERA, deep links, locale config), app icon placeholder (simple vector: house shape
-   in primary color), app name "FamilyHub".
+   via lifecycle), manifest (INTERNET, CAMERA, deep links, locale config), adaptive app icon per visual-style.md § App icon
+   (gradient background layer, white house glyph foreground and monochrome layer, as in `Login.dc.html`), app name "FamilyHub".
 9. **Tests**:
    - ViewModel unit tests (jvmTest) with fake `SessionManager`/API: server URL normalization; setup validation and server
      field-error mapping; login error states; invite flow; settings actions.
@@ -110,12 +130,15 @@ Out of scope: family management (M0-08), notifications UI (M0-09), real module c
 - Foundation spec: mark UI parts of FND-001, FND-010, FND-011, FND-013, FND-014, FND-028, FND-043, FND-060…062 as `done`.
 - AGENTS.md "Commands": build/install APK, run emulator headless.
 - [conventions](../../process/conventions.md): add a "Client UI" section (ViewModel/UiState pattern, routes, theme tokens, strings).
+- [visual-style.md](../../design/visual-style.md) only if a token had to change (explain why in the handoff);
+  [dev-setup](../../process/dev-setup.md): Python + fonttools for `tools/design-assets/`.
 - STATUS.md; plan status.
 
 ## Stop and report if
 
 - CameraX + ZXing cannot be made to work without proprietary dependencies.
 - Per-app language switching cannot work with Compose resources — report options instead of hacking.
+- Glyph-to-vector conversion produces broken icons (check a few on the emulator) — report instead of switching icon sets.
 
 ## Handoff
 

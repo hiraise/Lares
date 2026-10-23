@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Задачи</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block">
+<style>
+body{margin:0}
+a{color:#1B45C4}a:hover{color:#2F5BEA}
+.ms{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;font-size:24px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;direction:ltr;font-feature-settings:'liga';-webkit-font-smoothing:antialiased;font-variation-settings:'FILL' 0,'wght' 250,'GRAD' 0,'opsz' 24}
+.msf{font-variation-settings:'FILL' 1,'wght' 250,'GRAD' 0,'opsz' 24}
+button{font:inherit}
+</style>
+</helmet>
+<div style="--bg:#F3F4F7;--card:#FFFFFF;--t1:#15171C;--t2:#5B606B;--sep:#ECEEF3;--ol:#D5D9E2;--p:#2F5BEA;--psoft:#E4EBFF;--pfg:#1B45C4;--err:#C8372B;width:390px;height:844px;position:relative;overflow:hidden;box-sizing:border-box;background:var(--bg);color:var(--t1);font-family:Manrope,system-ui,sans-serif;font-variant-numeric:tabular-nums">
+
+<header style="display:flex;align-items:center;justify-content:space-between;padding:28px 12px 12px 20px">
+  <h1 style="margin:0;font-size:32px;line-height:1.15;font-weight:800;letter-spacing:-0.02em">Задачи</h1>
+  <div style="display:flex">
+    <button aria-label="Поиск" style="width:48px;height:48px;border-radius:24px;border:0;background:transparent;color:var(--t1);display:grid;place-items:center;cursor:pointer"><span class="ms" aria-hidden="true">search</span></button>
+    <button aria-label="Сортировка и вид" style="width:48px;height:48px;border-radius:24px;border:0;background:transparent;color:var(--t1);display:grid;place-items:center;cursor:pointer"><span class="ms" aria-hidden="true">tune</span></button>
+  </div>
+</header>
+
+<div style="display:flex;gap:8px;padding:0 16px 16px;overflow:hidden">
+  <button aria-pressed="true" style="height:36px;padding:0 14px;border-radius:18px;border:0;background:var(--t1);color:#FFFFFF;font-size:14px;font-weight:700;flex:none;cursor:pointer">Все · 9</button>
+  <button aria-pressed="false" style="height:36px;padding:0 14px;border-radius:18px;border:1px solid var(--ol);background:transparent;color:var(--t1);font-size:14px;font-weight:600;flex:none;cursor:pointer">Мои · 3</button>
+  <button aria-pressed="false" style="height:36px;padding:0 14px;border-radius:18px;border:1px solid var(--ol);background:transparent;color:var(--t1);font-size:14px;font-weight:600;flex:none;cursor:pointer">Поручила я</button>
+  <button aria-pressed="false" style="height:36px;padding:0 12px;border-radius:18px;border:1px solid var(--ol);background:transparent;color:var(--t1);font-size:14px;font-weight:600;flex:none;display:flex;align-items:center;gap:6px;cursor:pointer"><span class="ms" aria-hidden="true" style="font-size:18px">sell</span>Метка</button>
+</div>
+
+<main style="display:flex;flex-direction:column;gap:18px;padding:0 16px">
+  <section style="display:flex;flex-direction:column;gap:8px">
+    <h2 style="margin:0;padding:0 4px;font-size:14px;font-weight:700;color:var(--err)">Просрочено · 1</h2>
+    <div style="background:var(--card);border-radius:20px">
+      <div style="display:flex;align-items:center;gap:12px;padding:14px 16px">
+        <button aria-label="Отметить: Оплатить интернет" style="width:24px;height:24px;border-radius:12px;border:1.5px solid var(--err);background:transparent;flex:none;cursor:pointer"></button>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:15px;font-weight:600">Оплатить интернет</span><span style="font-size:13px;color:var(--err);font-weight:600">Вчера, 21:00</span></div>
+        <span aria-label="Дмитрий" style="width:28px;height:28px;border-radius:14px;background:#4B7E39;color:#FFFFFF;display:grid;place-items:center;font-size:12px;font-weight:700;flex:none">Д</span>
+      </div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:8px">
+    <h2 style="margin:0;padding:0 4px;font-size:14px;font-weight:700;color:var(--t2)">Сегодня · 3</h2>
+    <div style="background:var(--card);border-radius:20px;display:flex;flex-direction:column">
+      <div style="display:flex;align-items:center;gap:12px;padding:14px 16px">
+        <button aria-label="Отметить: Вынести мусор" style="width:24px;height:24px;border-radius:12px;border:1.5px solid var(--t2);background:transparent;flex:none;cursor:pointer"></button>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:15px;font-weight:600">Вынести мусор</span><span style="font-size:13px;color:var(--t2);display:flex;align-items:center;gap:4px"><span class="ms" aria-hidden="true" style="font-size:16px">repeat</span>Каждый день · до 20:00</span></div>
+        <span aria-label="Тимур" style="width:28px;height:28px;border-radius:14px;background:#B75600;color:#FFFFFF;display:grid;place-items:center;font-size:12px;font-weight:700;flex:none">Т</span>
+      </div>
+      <div style="height:1px;background:var(--sep);margin-left:52px"></div>
+      <div style="display:flex;align-items:center;gap:12px;padding:14px 16px">
+        <button aria-label="Отметить: Забрать Аню с танцев" style="width:24px;height:24px;border-radius:12px;border:1.5px solid var(--t2);background:transparent;flex:none;cursor:pointer"></button>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px"><span style="font-size:15px;font-weight:600">Забрать Аню с танцев</span><span style="font-size:13px;color:var(--t2);display:flex;align-items:center;gap:6px">17:30 <span style="font-size:12px;font-weight:700;color:#8360BA;background:#F1E3FF;padding:1px 8px;border-radius:8px">Дети</span></span></div>
+        <span aria-label="Ольга" style="width:28px;height:28px;border-radius:14px;background:#AE5385;color:#FFFFFF;display:grid;place-items:center;font-size:12px;font-weight:700;flex:none">О</span>
+      </div>
+      <div style="height:1px;background:var(--sep);margin-left:52px"></div>
+      <div style="display:flex;align-items:center;gap:12px;padding:14px 16px">
+        <button aria-label="Отметить: Позвонить в управляющую компанию" style="width:24px;height:24px;border-radius:12px;border:1.5px solid var(--t2);background:transparent;flex:none;cursor:pointer"></button>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px"><span style="font-size:15px;font-weight:600">Позвонить в управляющую компанию</span><span style="font-size:13px;color:var(--t2);display:flex;align-items:center;gap:6px">Протечка на балконе <span style="font-size:12px;font-weight:700;color:#4B7E39;background:#CFF3BC;padding:1px 8px;border-radius:8px">Дом</span></span></div>
+        <span aria-label="Дмитрий" style="width:28px;height:28px;border-radius:14px;background:#4B7E39;color:#FFFFFF;display:grid;place-items:center;font-size:12px;font-weight:700;flex:none">Д</span>
+      </div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:8px">
+    <h2 style="margin:0;padding:0 4px;font-size:14px;font-weight:700;color:var(--t2)">Завтра и позже</h2>
+    <div style="background:var(--card);border-radius:20px;display:flex;flex-direction:column">
+      <div style="display:flex;align-items:center;gap:12px;padding:14px 16px">
+        <button aria-label="Отметить: Записать Тимура к врачу" style="width:24px;height:24px;border-radius:12px;border:1.5px solid var(--t2);background:transparent;flex:none;cursor:pointer"></button>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px"><span style="font-size:15px;font-weight:600">Записать Тимура к врачу</span><span style="font-size:13px;color:var(--t2);display:flex;align-items:center;gap:6px">Завтра <span style="font-size:12px;font-weight:700;color:#008074;background:#B4F5E9;padding:1px 8px;border-radius:8px">Здоровье</span></span></div>
+        <span aria-label="Ольга" style="width:28px;height:28px;border-radius:14px;background:#AE5385;color:#FFFFFF;display:grid;place-items:center;font-size:12px;font-weight:700;flex:none">О</span>
+      </div>
+      <div style="height:1px;background:var(--sep);margin-left:52px"></div>
+      <div style="display:flex;align-items:center;gap:12px;padding:14px 16px">
+        <button aria-label="Отметить: Поменять резину" style="width:24px;height:24px;border-radius:12px;border:1.5px solid var(--t2);background:transparent;flex:none;cursor:pointer"></button>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px"><span style="font-size:15px;font-weight:600">Поменять резину</span><span style="font-size:13px;color:var(--t2);display:flex;align-items:center;gap:6px">Суббота, 31 октября <span style="font-size:12px;font-weight:700;color:#6F7277;background:#E6E8EE;padding:1px 8px;border-radius:8px">Машина</span></span></div>
+        <span aria-label="Дмитрий" style="width:28px;height:28px;border-radius:14px;background:#4B7E39;color:#FFFFFF;display:grid;place-items:center;font-size:12px;font-weight:700;flex:none">Д</span>
+      </div>
+      <div style="height:1px;background:var(--sep);margin-left:52px"></div>
+      <div style="display:flex;align-items:center;gap:12px;padding:14px 16px">
+        <button aria-label="Отметить: Убрать в своей комнате" style="width:24px;height:24px;border-radius:12px;border:1.5px solid var(--t2);background:transparent;flex:none;cursor:pointer"></button>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:15px;font-weight:600">Убрать в своей комнате</span><span style="font-size:13px;color:var(--t2);display:flex;align-items:center;gap:4px"><span class="ms" aria-hidden="true" style="font-size:16px">repeat</span>По субботам</span></div>
+        <span aria-label="Аня" style="width:28px;height:28px;border-radius:14px;background:#8360BA;color:#FFFFFF;display:grid;place-items:center;font-size:12px;font-weight:700;flex:none">А</span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<button style="position:absolute;right:16px;bottom:100px;height:56px;padding:0 22px 0 18px;border-radius:20px;border:0;background:linear-gradient(135deg,#2F5BEA 0%,#0A7BAD 100%);color:#FFFFFF;display:flex;align-items:center;gap:10px;font-size:16px;font-weight:700;box-shadow:0 8px 20px rgba(31,110,214,.35);cursor:pointer"><span class="ms" aria-hidden="true">add</span>Задача</button>
+
+<nav aria-label="Разделы" style="position:absolute;left:0;right:0;bottom:0;height:84px;box-sizing:border-box;background:var(--card);border-top:1px solid var(--sep);display:flex;justify-content:space-around;align-items:flex-start;padding:10px 4px 0">
+  <a href="Main.dc.html" style="width:72px;display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;color:var(--t2);font-size:12px;font-weight:600"><span style="width:56px;height:32px;border-radius:16px;display:grid;place-items:center"><span class="ms" aria-hidden="true">home</span></span>Сегодня</a>
+  <a href="Tasks.dc.html" aria-current="page" style="width:72px;display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;color:var(--t1);font-size:12px;font-weight:700"><span style="width:56px;height:32px;border-radius:16px;background:var(--psoft);color:var(--pfg);display:grid;place-items:center"><span class="ms msf" aria-hidden="true">task_alt</span></span>Задачи</a>
+  <a href="Shopping.dc.html" style="width:72px;display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;color:var(--t2);font-size:12px;font-weight:600"><span style="width:56px;height:32px;border-radius:16px;display:grid;place-items:center"><span class="ms" aria-hidden="true">shopping_cart</span></span>Покупки</a>
+  <a href="Calendar.dc.html" style="width:72px;display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;color:var(--t2);font-size:12px;font-weight:600"><span style="width:56px;height:32px;border-radius:16px;display:grid;place-items:center"><span class="ms" aria-hidden="true">calendar_month</span></span>Календарь</a>
+  <a href="More.dc.html" style="width:72px;display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;color:var(--t2);font-size:12px;font-weight:600"><span style="width:56px;height:32px;border-radius:16px;display:grid;place-items:center"><span class="ms" aria-hidden="true">apps</span></span>Ещё</a>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

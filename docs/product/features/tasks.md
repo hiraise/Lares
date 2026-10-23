@@ -26,7 +26,7 @@ Shared to-dos and recurring chores. Anyone can create a task, assign it, and clo
 - **TSK-003** `MVP` `todo` — Task states: open, done. Completion records who and when. Reopen is possible.
 - **TSK-004** `MVP` `todo` — Checklist inside a task (sub-items with their own done flag).
 - **TSK-005** `MVP` `todo` — Edit and delete tasks; deleting a routine asks "this occurrence or the whole series".
-- **TSK-006** `later` `todo` — Comments and photo attachments on a task.
+- **TSK-006** `later` `todo` — Comments and photo attachments on a task (photos in M5b, [files](files.md); comments later).
 
 ### Recurring tasks (routines)
 

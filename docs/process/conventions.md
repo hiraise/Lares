@@ -74,6 +74,7 @@ Toolchain versions: [versions.md](../plans/M0/versions.md) and `gradle/libs.vers
 
 ## UI
 
+- Look and components follow [visual-style.md](../design/visual-style.md) (ADR-0016): use theme tokens, never literal colors.
 - All strings in resources, en and ru.
 - Every screen works offline with the data already synced, and shows sync state (FND-043).
 - Accessibility: content descriptions, scalable text, sufficient contrast.

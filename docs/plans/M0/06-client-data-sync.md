@@ -73,7 +73,7 @@ Out of scope: UI (M0-07/08), push (M0-09), WorkManager scheduling (M0-09).
    `LocalForbiddenException`), build merged data, validate (shared validators via adapter; invalid → throw `LocalValidationException(fields)`),
    write typed row, enqueue outbox (mutationId = UUIDv7, createdAt = now); then `syncEngine.request()`.
    Convenience use cases: `TagsWriter.create(name, color)`, `rename`, `recolor`, `archive`, `delete`;
-   `PersonsWriter.create(PersonData)`, `update(id, changes)`, `delete(id)`. IDs are UUIDv7 from `contract/`.
+   `PersonsWriter.create(PersonData)` (sets `color = PaletteColors.pickLeastUsed(local persons)` when null, FND-034), `update(id, changes)`, `delete(id)`. IDs are UUIDv7 from `contract/`.
 5. **API client** (`api/FamilyHubApi.kt`): functions for every endpoint in [api.md](../../architecture/api.md) used by the app
    (instance, setup, login, login-code, refresh, logout, me, password, sessions, delete me, household admin, members,
    groups, invites, login codes, sync changes/mutations) + `events()` returning a `Flow<SyncEvent>` over WebSocket.

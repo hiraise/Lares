@@ -2,7 +2,7 @@
 id: M0-08
 status: ready
 depends_on: [M0-07]
-requirements: [FND-003, FND-012, FND-014, FND-020, FND-021, FND-022, FND-023, FND-024, FND-025, FND-030, FND-031, FND-032, TAG-001, TAG-006]
+requirements: [FND-003, FND-012, FND-014, FND-020, FND-021, FND-022, FND-023, FND-024, FND-025, FND-030, FND-031, FND-032, FND-034, FND-065, TAG-001, TAG-006]
 ---
 # M0-08: Android app — family management screens
 
@@ -17,11 +17,12 @@ persons and tags are written through the sync engine (work offline).
 - [Foundation spec](../../product/features/foundation.md) — access model, permission catalogue, requirements
 - [Tags spec](../../product/features/tags.md), [ADR-0014](../../adr/0014-group-based-permissions.md)
 - [API](../../architecture/api.md) admin endpoints, [auth design](../../architecture/auth.md) invites and login codes
-- UI conventions and components from M0-07
+- UI conventions and components from M0-07; [visual style](../../design/visual-style.md) (ADR-0016) and the
+  `Family.dc.html` / `More.dc.html` mockups
 
 ## Scope
 
-- Entry: avatar menu → "Family" (enable the item disabled in M0-07). Family screen with tabs: **Members**, **Relatives**,
+- Entry: "More" → "Family" and "Tags" tiles (enable the tiles disabled in M0-07; "Tags" opens the Tags tab). Family screen with tabs: **Members**, **Relatives**,
   **Groups**, **Tags**; toolbar action "Family settings" (admins).
 - Visibility: tabs Members/Relatives/Tags visible to every member (read-only without permissions); Groups visible to
   everyone but editable only with `household.manage`; every edit control hidden or disabled per effective permissions
@@ -47,9 +48,11 @@ Out of scope: location visibility rules editor (M4), money account access editor
   a short instruction text) + expiry time. List of active invites with "Revoke".
 - **Login QR for a member** (admin): full-screen QR with 5-minute countdown and instruction
   "Open FamilyHub on the new phone → Log in with QR code".
-- **Tags**: color chosen from the `TagColor` palette (10 swatches); archived tags in a collapsible section; delete asks
+- **Tags**: color chosen from the `PaletteColor` palette (10 swatches, values in visual-style.md); archived tags in a collapsible section; delete asks
   for confirmation. Name conflicts surface as sync rejections (`TAG_NAME_TAKEN`) and as inline validation when the
   name already exists locally.
+- **Personal color** (FND-034): the person form (own profile, relatives, member detail) has a "Color" row with the
+  10 palette swatches; avatars everywhere use it.
 - **Relatives**: list sorted by name, members' profiles marked with a "member" badge; form fields: name, birthday
   (day + month required together, year optional — use pickers, not free text), relation (suggestions: mother, father,
   grandmother, grandfather, brother, sister, aunt, uncle, friend — free text allowed), notes, contacts (kind + value list).
@@ -58,7 +61,8 @@ Out of scope: location visibility rules editor (M4), money account access editor
 ## Steps
 
 1. **FamilyScreen** with tabs and permission-aware actions; navigation routes in the `main` graph.
-2. **Members tab**: list (avatar initials, name, groups as chips, "admin" badge); member detail: groups (multi-select
+2. **Members tab**: list (avatar: initials on the personal color — `PersonData.color ?: PaletteColors.fallbackFor(id)`;
+   name, groups as chips, "Administrators" chip with `shield_person` icon), layout as in `docs/design/mockups/Family.dc.html`; member detail: groups (multi-select
    dialog → `PUT /members/{id}/groups`), "Reset password" (dialog with new password + repeat), "Log in by QR" (login code
    for that member), "Remove from family" (confirmation). "Add member" FAB → choice: "Send invitation" (pick groups,
    expiry 1/3/7 days → invite QR/share) or "Create account without password" (name, groups → then show login QR). Both flows offer "This is an existing

@@ -1,7 +1,7 @@
 ---
 status: approved
 milestone: M0
-updated: 2026-10-22
+updated: 2026-10-23
 ---
 # Foundation (FND)
 
@@ -65,7 +65,11 @@ localization and deployment — everything feature modules depend on.
 
 - **FND-030** `MVP` `todo` — A person is anyone relevant to the family: members and relatives without accounts.
 - **FND-031** `MVP` `todo` — Person fields: name, optional birth date (year optional), relation label, notes, contacts.
-- **FND-033** `later` `todo` — Person photo (needs file storage).
+- **FND-033** `later` `todo` — Person photo, in milestone M5b ([files](files.md)). Until then avatars show initials on
+  the personal color.
+- **FND-034** `MVP` `todo` — Every person has a personal color from the shared palette, assigned automatically
+  (least-used in the household) and changeable; it marks the person's avatar, events, map pin and assignments
+  ([visual style](../../design/visual-style.md#people)).
 - **FND-032** `MVP` `todo` — Every member has a person profile; a relative can later be linked to a new account.
 
 ### Offline and sync
@@ -88,6 +92,12 @@ localization and deployment — everything feature modules depend on.
 - **FND-060** `MVP` `todo` — On first launch the app asks for the server URL (or reads it from the invite link/QR).
 - **FND-061** `MVP` `todo` — UI languages: English and Russian; follows the system language, overridable in settings.
 - **FND-062** `MVP` `todo` — Light and dark theme.
+- **FND-063** `MVP` `todo` — Home screen "Today" summarizes the sections the member can see: overdue and today's tasks,
+  upcoming events and birthdays, the active shopping list, family on the map, budget of the month. Each module adds
+  its block in its milestone; in M0 it is an empty state.
+- **FND-064** `MVP` `todo` — Bottom navigation: Today · Tasks · Shopping · Calendar · More; Map, Budget, Family and Tags
+  are reached from "More" and from Today blocks (Q-013).
+- **FND-065** `MVP` `todo` — The UI follows the [visual style](../../design/visual-style.md) (ADR-0016).
 
 ### Operations
 

@@ -12,7 +12,7 @@ _(none)_
 
 ## Answered
 
-All answered by the customer on 2026-10-22 during kickoff.
+Q-001…Q-012 answered by the customer on 2026-10-22 during kickoff; later answers carry their date.
 
 | Q | Topic | Answer |
 | --- | --- | --- |
@@ -28,3 +28,4 @@ All answered by the customer on 2026-10-22 during kickoff.
 | Q-010 | Children | A child is a regular user. No child role: admin-defined groups with permissions; templates "Adults" and "Kids" (ADR-0014). |
 | Q-011 | Tasks in M1 | Add overdue notification to the creator. Rotation moved to later. Parent approval not requested. |
 | Q-012 | Do administrators see private accounts | Yes: administrators see all data; nothing is hidden from them. Sections can be restricted per group (ADR-0014). |
+| Q-013 | Bottom bar (2026-10-23) | Today · Tasks · Shopping · Calendar · More; Map, Budget, Family, Tags under "More" (FND-064). |
