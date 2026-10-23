@@ -94,12 +94,15 @@ class SyncScenariosTest {
             anna.tags.delete(id)
             anna.sync()
             server.deps.syncHousekeeping.purgeTombstones(server.clock.now() + 91.days)
+            // A background cycle (e.g. the delayed trigger after Anna's local writes) may run the reset instead of the
+            // explicit sync below. Wait for running cycles, then count every pull after the restore.
+            all.forEach { it.sync() }
+            val marks = all.associateWith { it.network.pullCursors.size }
             sql("UPDATE household_sync_state SET sync_epoch = gen_random_uuid()")
 
             for (client in all) {
-                val mark = client.network.pullCursors.size
                 client.sync()
-                val cursors = client.network.pullCursors.drop(mark)
+                val cursors = client.network.pullCursors.drop(marks.getValue(client))
                 assertTrue(cursors.first() > 0 && 0L in cursors, "expected a reset and a full sync, got $cursors")
             }
             assertConverged(all)

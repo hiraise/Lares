@@ -13,8 +13,8 @@ android {
         applicationId = "app.lares.android"
         minSdk = 26
         targetSdk = 37
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.1.1"
     }
 
     // Release signing only when a keystore is provided through the environment (release workflow); keystores are
