@@ -23,6 +23,7 @@ no dependency on Google services.
 ## Read order
 
 1. [docs/STATUS.md](docs/STATUS.md) — current state, active milestone, next steps, blockers.
+   Past work is in [docs/history.md](docs/history.md); read it only when you need a detail from it.
 2. [docs/product/roadmap.md](docs/product/roadmap.md) — milestones and scope.
 3. [docs/adr/README.md](docs/adr/README.md) — decision index. Accepted ADRs are binding.
 4. [docs/process/workflow.md](docs/process/workflow.md) — how work is done, Definition of Done.
@@ -56,6 +57,7 @@ Full documentation map: [docs/README.md](docs/README.md).
 | Path | Content | State |
 | --- | --- | --- |
 | `AGENTS.md`, `CLAUDE.md` | Agent entry point | exists |
+| `.claude/skills/`, `.claude/agents/` | Project skills and the `emulator-tester` agent (see below) | exists |
 | `README.md`, `README.ru.md` | Human-facing overview (en, ru) | exists |
 | `docs/` | Technical documentation, see [docs/README.md](docs/README.md) | exists |
 | `docs/user/` | User manuals (en, ru) | placeholder |
@@ -64,33 +66,50 @@ Full documentation map: [docs/README.md](docs/README.md).
 | `contract/` | KMP module shared by server and client: DTOs, routes, sync protocol, shared domain logic | errors, protocol, instance info (M0-02) |
 | `deploy/` | Docker Compose, Caddy, example configs, scripts | dev database only (`deploy/dev/`); production in M0-10 |
 | `integration-tests/` | Multi-device sync tests: server + several clients in one JVM | sync invariants and scenarios (M0-06) |
+| `tools/dev/` | Agent dev scripts: short-output build/test, local server, test family, emulator driving | exists |
 | `tools/design-assets/` | Generates bundled fonts and icons (Python + fonttools) | exists (M0-07) |
 | `tools/loadsim/` | Load simulation CLI | planned (M0-11) |
 
 Layout is provisional until M0 scaffolding; see [architecture overview](docs/architecture/overview.md).
 
+## Skills
+
+| Skill / agent | Use |
+| --- | --- |
+| `/plan-run M0-09` | Execute a plan from `docs/plans/` (replaces the long executor prompt) |
+| `plan-finish` | End of a plan or work item: DoD, docs, STATUS + history, Russian handoff, commit after approval |
+| `build-check` | Build and tests via `tools/dev/verify.sh` with short output |
+| `emulator` | Local server, test family, emulator, tap-by-text, small screenshots |
+| `emulator-tester` agent | Manual walkthrough in its own context; returns a short report with screenshot paths |
+
+## Working economically
+
+Every step re-reads the whole session, so a long session makes each later step expensive.
+
+- Read sections and line ranges (`grep -n`, `sed -n`), not whole files; do not re-read a file you just edited.
+- Build and test through `tools/dev/verify.sh`: narrow tasks while iterating, the full gate once at the end.
+- Long commands go to the background (`run_in_background`); never wait with `sleep N; cat …`.
+- Manual emulator checks go to the `emulator-tester` agent, never into the main implementation session.
+- Navigate the app by `tools/dev/ui.sh dump` (text); take screenshots only for visual checks and the handoff.
+
 ## Commands
 
-Run from the repo root. Gradle uses JDK 21 via `~/.gradle/gradle.properties`; setup and troubleshooting:
-[dev-setup](docs/process/dev-setup.md). Shell commands below assume
-`export ANDROID_HOME=$HOME/Library/Android/sdk`.
+Run from the repo root. Gradle uses JDK 21 via `~/.gradle/gradle.properties`; setup, raw `adb` commands and
+troubleshooting: [dev-setup](docs/process/dev-setup.md).
 
 | Task | Command |
 | --- | --- |
-| Format (run before `check`) | `./gradlew spotlessApply` |
-| Lint + all tests | `./gradlew check` (server tests need Docker running: Testcontainers PostgreSQL) |
-| Server tests only | `./gradlew :server:test` |
-| Multi-device sync tests | `./gradlew :integration-tests:test` (Docker running; real server + several client cores) |
-| Client core tests | `./gradlew :client:shared:jvmTest` |
-| Full verification (as CI) | `./gradlew spotlessApply check :client:android:assembleDebug` |
-| Start dev database | `docker compose -f deploy/dev/docker-compose.yml up -d --wait` (port 5432; if taken: `FAMILYHUB_DEV_DB_PORT=5434 …` and run the server with `FAMILYHUB_DB_URL=jdbc:postgresql://localhost:5434/familyhub`) |
-| Run server (port 8080) | `./gradlew :server:run`, then `curl localhost:8080/health/ready` and `curl localhost:8080/api/v1/instance` |
-| Stop dev database | `docker compose -f deploy/dev/docker-compose.yml down` (add `-v` to delete its data) |
+| Full verification (as CI): format, lint, all tests, debug APK | `tools/dev/verify.sh` (Docker running: Testcontainers PostgreSQL) |
+| One module or test class | `tools/dev/verify.sh :server:test`, `tools/dev/verify.sh :client:shared:jvmTest --tests '*Name*'` |
+| Multi-device sync tests | `tools/dev/verify.sh :integration-tests:test` (real server + several client cores) |
+| Local server for manual checks (port 8080, database `familyhub_e2e`) | `tools/dev/server.sh start` / `stop` / `reset` / `log` |
+| Test family and API calls | `tools/dev/seed.py family`, `seed.py token`, `seed.py invite`, `seed.py login-code Аня`, `seed.py call GET /me` |
+| Emulator: boot, install + launch, clear data, deep link, stop | `tools/dev/emu.sh start` / `install` / `fresh` / `link URL` / `stop` |
+| Drive the app by text, screenshot | `tools/dev/ui.sh dump` / `tap TEXT` / `field N` / `type TEXT` / `shot NAME` / `crash` |
+| Start dev database only | `docker compose -f deploy/dev/docker-compose.yml up -d --wait` (port taken: `FAMILYHUB_DEV_DB_PORT=5434 …`) |
+| Run server with Gradle (main dev DB) | `./gradlew :server:run`, then `curl localhost:8080/health/ready` |
 | Build debug APK | `./gradlew :client:android:assembleDebug` → `client/android/build/outputs/apk/debug/android-debug.apk` |
-| Start emulator (headless) | `$ANDROID_HOME/emulator/emulator -avd familyhub -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect &` |
-| Wait for boot | `$ANDROID_HOME/platform-tools/adb wait-for-device`; poll `adb shell getprop sys.boot_completed` until `1` |
-| Install and launch app | `./gradlew :client:android:installDebug`; `adb shell am start -n app.familyhub.android.debug/app.familyhub.android.MainActivity` |
-| App → local dev server | `adb reverse tcp:8080 tcp:8080`, then server address `http://localhost:8080` in the app (the emulator cannot reach `10.0.2.2` on this Mac) |
 | Regenerate fonts/icons | `tools/design-assets/.venv/bin/python tools/design-assets/build.py` ([README](tools/design-assets/README.md)) |
-| Screenshot | `adb exec-out screencap -p > <scratchpad>/screen.png` |
-| Stop emulator | `adb emu kill` |
+
+In the app the local server address is `http://localhost:8080` (adb reverse; the emulator cannot reach `10.0.2.2` on
+this Mac). Fresh server setup code from `tools/dev/server.sh`: `DEVSETUP01`.

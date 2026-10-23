@@ -8,6 +8,7 @@ User-facing manuals live in [user/](user/).
 | Need to know | Go to |
 | --- | --- |
 | What is happening right now | [STATUS.md](STATUS.md) |
+| What was done so far, by date | [history.md](history.md) |
 | Why the product exists, goals, non-goals | [product/vision.md](product/vision.md) |
 | Milestones and their scope | [product/roadmap.md](product/roadmap.md) |
 | What a feature must do (requirements with IDs) | [product/features/](product/features/) |
@@ -23,7 +24,7 @@ User-facing manuals live in [user/](user/).
 | Why something is the way it is | [adr/](adr/README.md) |
 | How to work: lifecycle, DoD, escalation | [process/workflow.md](process/workflow.md) |
 | Code conventions | [process/conventions.md](process/conventions.md) |
-| Developer machine setup | [process/dev-setup.md](process/dev-setup.md) |
+| Developer machine setup, agent dev scripts | [process/dev-setup.md](process/dev-setup.md) |
 | Testing strategy | [process/testing.md](process/testing.md) |
 
 ## Identifiers
@@ -48,5 +49,5 @@ IDs are never reused. A removed requirement keeps its ID with status `dropped`.
 - **Short and structured.** Lists and tables over prose. No filler.
 - **Mark uncertainty.** `ASSUMPTION:` for reversible defaults not confirmed by the customer, `TBD:` for unknowns.
 - **ADRs are immutable once accepted**, except for the status line and a "Superseded by" link.
-- **STATUS.md is updated at the end of every work session.**
+- **STATUS.md is updated at the end of every work session** and stays short; completed work goes to history.md.
 - Diagrams: Mermaid in Markdown, so they diff and render on GitHub.

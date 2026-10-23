@@ -43,6 +43,21 @@ The plan's Homebrew path `/opt/homebrew/share/android-commandlinetools` is not u
 Created with `gradle wrapper --gradle-version 9.7.0 --distribution-type bin`. `gradle/wrapper/gradle-wrapper.jar` is
 committed. Do not regenerate with a different version (versions.md upgrade rule).
 
+## Agent dev scripts (`tools/dev/`)
+
+Wrappers that keep output short for agents; each prints its usage when run without arguments. Outputs and logs go
+to `build/dev/` (ignored by git).
+
+| Script | Does |
+| --- | --- |
+| `verify.sh [tasks]` | `spotlessApply` + tasks (default: `check :client:android:assembleDebug`); prints errors, failed tests, totals |
+| `server.sh start\|stop\|restart\|reset\|status\|log` | Dev DB + server in background on `FAMILYHUB_PORT` (8080), own database `familyhub_e2e`, setup code `DEVSETUP01` |
+| `seed.py family\|token\|invite\|login-code\|call` | Test family Петровы via the API (`olga / olga-password` admin, `dima`, kids Аня and Тимур) |
+| `emu.sh start [--window]\|install\|launch\|fresh\|link URL\|stop` | Emulator lifecycle, `adb reverse`, deep links |
+| `ui.sh dump\|tap\|wait\|has\|field\|type\|shot\|crash …` | Drive the app by visible text; screenshots downscaled to 540×1200 |
+
+The dev DB port is detected from the running container (5432, or 5434 when 5432 is taken by another PostgreSQL).
+
 ## Emulator
 
 ```sh

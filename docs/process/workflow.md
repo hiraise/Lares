@@ -4,8 +4,10 @@ How agents work on this project. The customer sets goals and accepts results; ag
 
 ## Session start
 
-1. Read [AGENTS.md](../../AGENTS.md) → [STATUS.md](../STATUS.md).
-2. Read the spec and ADRs for the area you touch; check [open questions](../product/open-questions.md) affecting it.
+1. [AGENTS.md](../../AGENTS.md) is loaded automatically (via `CLAUDE.md`); read [STATUS.md](../STATUS.md).
+   For a plan, start with `/plan-run <plan id>` (skill in `.claude/skills/`).
+2. Read the spec sections and ADRs for the area you touch; check [open questions](../product/open-questions.md)
+   affecting it. Read sections, not whole documents (see AGENTS.md "Working economically").
 3. Confirm the build and tests pass before changing anything (once code exists).
 
 ## Milestone lifecycle
@@ -25,10 +27,12 @@ How agents work on this project. The customer sets goals and accepts results; ag
 
 1. Write or update tests first where practical; reference requirement IDs.
 2. Implement; keep the change focused.
-3. Run build, lint and tests locally.
+3. Run build, lint and tests locally with `tools/dev/verify.sh` (skill `build-check`). Manual app checks go to the
+   `emulator-tester` agent (skill `emulator`) so screenshots stay out of the implementation session.
 4. Self-review the diff (correctness, security, privacy, boundaries); run `/code-review` for non-trivial changes.
 5. Update docs in the same change (see DoD).
-6. Commit per [Git until MVP](#git-until-mvp), Conventional Commits with requirement IDs:
+6. Close the item with the `plan-finish` skill; commit per [Git until MVP](#git-until-mvp), Conventional Commits
+   with requirement IDs:
    `feat(tasks): overdue notification (TSK-033)`.
 
 ## Git until MVP
@@ -50,7 +54,8 @@ Decided by the customer, 2026-10-22.
 - [ ] UI strings in en and ru; no hardcoded strings.
 - [ ] No personal data in logs; no new third-party network calls.
 - [ ] New dependencies are AGPL-compatible and justified.
-- [ ] Docs updated: STATUS.md, spec, ADR (if a decision was made), glossary (if new terms), CHANGELOG (user-visible changes).
+- [ ] Docs updated: STATUS.md, [history.md](../history.md), spec, ADR (if a decision was made), glossary (if new terms),
+  CHANGELOG (user-visible changes).
 
 ## Escalation
 
@@ -73,4 +78,5 @@ When blocked on a product question: choose a reversible default, mark it `ASSUMP
 
 ## Session end
 
-Update STATUS.md: done, in progress, next steps, blockers, new risks.
+Update STATUS.md (last completed, in progress, next steps, blockers, new risks) and add a short entry to
+[history.md](../history.md). Keep STATUS.md short; the log of past work lives in history.md.

@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tools/dev/verify.sh:*)",
+      "Bash(tools/dev/server.sh:*)",
+      "Bash(tools/dev/seed.py:*)",
+      "Bash(tools/dev/emu.sh:*)",
+      "Bash(tools/dev/ui.sh:*)"
+    ]
+  }
+}

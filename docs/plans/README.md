@@ -5,28 +5,29 @@ with a clean context (medium effort). One plan = one session = one approved comm
 
 ## How to execute a plan
 
-Start a new session in the repository root and give it this prompt (replace the plan path):
+Start a new session in the repository root and type `/plan-run M0-09` (or just "делаем M0-09"). The skill
+[`plan-run`](../../.claude/skills/plan-run/SKILL.md) holds the executor instructions; without skills, use this prompt:
 
 ```text
-Ты исполнитель в проекте FamilyHub. Прочитай AGENTS.md и docs/STATUS.md, затем выполни план
-docs/plans/M0/NN-name.md от начала до конца. Работай строго по плану и по принятым ADR.
-Если шаг невозможно выполнить или план противоречит ADR — остановись и опиши проблему, не импровизируй.
-Не делай коммит. В конце обнови документацию по разделу "Docs to update" и выдай сводку для заказчика
-на русском по разделу "Handoff". Коммит — только после одобрения заказчика.
+Ты исполнитель в проекте FamilyHub. Выполни план docs/plans/M0/NN-name.md по правилам скила
+.claude/skills/plan-run/SKILL.md. Коммит — только после одобрения заказчика.
 ```
 
 The session:
 
-1. Reads AGENTS.md → STATUS.md → the plan → the documents listed in its "Read first".
+1. Reads STATUS.md → the plan → the sections listed in its "Read first" (AGENTS.md is already loaded).
 2. Sets the plan status to `in-progress` in this README.
-3. Implements the steps, runs the acceptance commands.
-4. Updates docs, sets the plan status to `done` (or `blocked` with a reason), updates STATUS.md.
+3. Implements the steps, runs the acceptance commands (`tools/dev/verify.sh`); hands manual emulator checks to the
+   `emulator-tester` agent.
+4. Closes with the [`plan-finish`](../../.claude/skills/plan-finish/SKILL.md) skill: docs, plan status `done` (or
+   `blocked` with a reason), STATUS.md and history.md.
 5. Presents the Russian handoff summary and waits for the customer's approval; then commits
    (Conventional Commit, plan id in the subject, e.g. `feat(server): foundation (M0-02)`).
 
 ## Plan format
 
-Every plan has: front matter (`id`, `status`, `depends_on`, `requirements`), Goal, Read first, Scope / Out of scope,
+Every plan has: front matter (`id`, `status`, `depends_on`, `requirements`), Goal, Read first (name sections, not just
+files), Scope / Out of scope,
 Decisions (already made — do not revisit), Steps, Tests, Acceptance, Docs to update, Stop and report if, Handoff.
 
 Rules for executors:
@@ -34,7 +35,8 @@ Rules for executors:
 - Do not change decisions listed in a plan or in accepted ADRs. If one is wrong, stop and report.
 - Use only dependencies from `gradle/libs.versions.toml`. Adding one requires a license check (ADR-0003, ADR-0006)
   and a note in the handoff.
-- Keep the build green: `./gradlew check` must pass before the handoff.
+- Keep the build green: `tools/dev/verify.sh` (= `spotlessApply check :client:android:assembleDebug`) must pass
+  before the handoff.
 - Prefer small, readable code over clever abstractions. Follow [conventions](../process/conventions.md).
 
 ## M0 plans
