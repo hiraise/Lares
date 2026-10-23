@@ -4,7 +4,7 @@ Updated: 2026-10-23
 
 ## Phase
 
-**M0 Foundation — implementation in progress: M0-01…M0-05 done.**
+**M0 Foundation — implementation in progress: M0-01…M0-06 done.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
@@ -54,11 +54,20 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
   transactions, WebSocket events (hello/changed, 500 ms debounce), daily tombstone purge and log cleanup. Also: password
   changes now give the member a new seq (`hasPassword` is synced); persons referenced by invites are not purged.
   121 server tests (invariants 1–7, 9, 10 at server level); manual walkthrough on the real server incl. WebSocket.
+- 2026-10-23 M0-06: client core in `client/shared` — SQLDelight `FamilyHubDb` (typed tables, sync tables, `local_session`),
+  entity adapters and materializer, `LocalWriter` with shared `WriteRules` and validators, Ktor API client for all M0
+  endpoints with single-flight token refresh, `SyncEngine` (push → pull → full resync, backoff, realtime WebSocket,
+  `SyncStatus`, rejections), repositories and writers for tags and persons, `SessionManager`, Koin modules; Android
+  platform: Keystore-encrypted tokens in DataStore, OkHttp; JVM: in-memory. New module `integration-tests/` (server test
+  harness moved to `server/src/testFixtures`): 15 multi-device tests with the real server and three client cores —
+  invariants 1–8 and 10, offline work, realtime within 2 s, resets keeping the outbox, revocation, offline permissions,
+  randomized convergence. 23 client unit tests. sync.md and ADR-0008 accepted.
 
 ## Next steps
 
-1. Next plan: [M0-06 Client data layer and sync engine](plans/M0/06-client-data-sync.md), in a fresh session
-   (M0-10 Deploy can also start now; it depends only on M0-05).
+1. Next plan: [M0-07 Android app shell](plans/M0/07-android-shell.md), in a fresh session (M0-10 Deploy can also
+   start now; it depends only on M0-05). M0-06 added to M0-07: `SessionManager.restore()` on start and an Android
+   "connectivity regained" sync trigger.
 2. After M0-11: M0 acceptance with the customer (APK, walkthrough, Russian changelog).
 
 ## Plan progress
@@ -77,7 +86,7 @@ See the table in [plans README](plans/README.md#m0-plans).
 | OEM battery optimizations (Xiaomi, Huawei, Samsung) kill background location | Gaps in location tracking | In-app guide to exclude the app from battery optimization; detect and warn about stale positions |
 | JVM server memory above budget | Stack does not fit a 1 GB VPS | Measured in M0-11 (ADR-0013); tune, then GraalVM native image |
 | Compose Multiplatform web target is Beta | Web client (M7) may need workarounds | Re-evaluate at M7; fallback is a separate web UI |
-| Sync engine complexity | Data loss or conflicts | Protocol fixed in sync.md; server invariant tests done (M0-05), convergence in M0-06 |
+| Sync engine complexity | Data loss or conflicts | Protocol accepted (sync.md, ADR-0008); server invariants (M0-05) and multi-device convergence tests (M0-06) run in `check` |
 | Flexible permissions make UI and testing harder | Confusing group editor, permission bugs | Templates "Adults"/"Kids", plain wording, permission matrix tests (ADR-0014) |
 | Pre-release UI libraries (CMP Material3 alpha, navigation RC) | Possible API changes or bugs | Versions paired by JetBrains with CMP 1.12.2; upgrade when stable |
 | ktlint 1.8 parses only Kotlin ≤ 2.2 syntax | Lint failures on newest syntax | Avoid newest syntax; report instead of disabling lint |

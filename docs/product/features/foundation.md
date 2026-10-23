@@ -65,32 +65,39 @@ localization and deployment — everything feature modules depend on.
   everyone manages their own profile, sessions and notifications — independent of groups.
   *Own sessions, password and account need no permission (M0-03); items, profile, notifications follow in their modules.*
 - **FND-027** `MVP` `doing` — Permissions are enforced offline on the client and authoritatively on the server.
-  *Server checks on admin endpoints with a permission matrix test (M0-04) and on sync mutations via shared `WriteRules` (M0-05); client: M0-06/M0-07.*
+  *Server checks on admin endpoints with a permission matrix test (M0-04) and on sync mutations via shared `WriteRules` (M0-05).
+  Client core (M0-06): local writes checked with the same `WriteRules`, permissions evaluated offline from synced groups
+  (`PermissionsRepository`); UI that hides actions: M0-07/M0-08.*
 - **FND-028** `MVP` `todo` — Sections a member has no access to are hidden from navigation, search and tag pages.
 
 ### Persons
 
 - **FND-030** `MVP` `doing` — A person is anyone relevant to the family: members and relatives without accounts.
 - **FND-031** `MVP` `doing` — Person fields: name, optional birth date (year optional), relation label, notes, contacts.
-  *Server: persons through sync with shared validators and `WriteRules` (M0-05); UI: M0-08.*
+  *Server: persons through sync with shared validators and `WriteRules` (M0-05); client core `PersonsWriter`/`PersonsRepository` (M0-06); UI: M0-08.*
 - **FND-033** `later` `todo` — Person photo, in milestone M5b ([files](files.md)). Until then avatars show initials on
   the personal color.
 - **FND-034** `MVP` `doing` — Every person has a personal color from the shared palette, assigned automatically
   (least-used in the household) and changeable; it marks the person's avatar, events, map pin and assignments
   ([visual style](../../design/visual-style.md#people)).
-  *Server: `PersonData.color`, least-used color on setup, member creation and invite acceptance (M0-05); client: M0-06/M0-08.*
+  *Server: `PersonData.color`, least-used color on setup, member creation and invite acceptance (M0-05); client core picks the least-used color for new relatives (`PersonsWriter`, M0-06); UI: M0-08.*
 - **FND-032** `MVP` `doing` — Every member has a person profile; a relative can later be linked to a new account.
   *Server: linking on member creation and invite acceptance (M0-04); persons through sync (M0-05).*
 
 ### Offline and sync
 
-- **FND-040** `MVP` `todo` — All module data except live location is readable and editable offline.
+- **FND-040** `MVP` `doing` — All module data except live location is readable and editable offline.
+  *Client core (M0-06): local SQLite, outbox, repositories as `Flow`s — persons and tags work offline; each module
+  reuses it as it is built.*
 - **FND-041** `MVP` `doing` — Offline changes sync automatically when connectivity returns; no data is lost on conflict
   (design in [ADR-0008](../../adr/0008-offline-first-sync.md)).
-  *Server: pull, push with idempotency and field-level merge, housekeeping (M0-05); client: M0-06.*
+  *Server: pull, push with idempotency and field-level merge, housekeeping (M0-05). Client sync engine with retry and
+  backoff, proven by multi-device tests (M0-06). Remaining: the Android "connectivity regained" trigger (M0-07).*
 - **FND-042** `MVP` `doing` — Changes by other members appear without manual refresh while the app is open.
-  *Server: WebSocket `/api/v1/sync/events` (M0-05); client: M0-06.*
-- **FND-043** `MVP` `todo` — The UI shows sync state (synced, pending changes, offline, error).
+  *Server: WebSocket `/api/v1/sync/events` (M0-05). Client: realtime connection while in the foreground, tested within
+  2 s (M0-06); foreground toggling from the app lifecycle: M0-07.*
+- **FND-043** `MVP` `doing` — The UI shows sync state (synced, pending changes, offline, error).
+  *`SyncEngine.status` and unseen rejections exist (M0-06); indicator and sync sheet: M0-07.*
 
 ### Notifications
 

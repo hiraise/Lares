@@ -1,0 +1,34 @@
+CREATE TABLE member (
+    id TEXT NOT NULL PRIMARY KEY,
+    person_id TEXT NOT NULL,
+    user_id TEXT,
+    login TEXT,
+    has_password INTEGER NOT NULL
+);
+
+selectAll:
+SELECT * FROM member;
+
+selectById:
+SELECT * FROM member WHERE id = ?;
+
+-- Members with the name and color of their person, for display.
+selectAllWithPerson:
+SELECT member.id, member.person_id, member.user_id, member.login, member.has_password,
+       person.name AS person_name, person.color AS person_color
+FROM member
+LEFT JOIN person ON person.id = member.person_id
+ORDER BY person.name COLLATE NOCASE, member.id;
+
+countByPerson:
+SELECT count(*) FROM member WHERE person_id = ?;
+
+upsert:
+INSERT OR REPLACE INTO member (id, person_id, user_id, login, has_password)
+VALUES (?, ?, ?, ?, ?);
+
+deleteById:
+DELETE FROM member WHERE id = ?;
+
+deleteAll:
+DELETE FROM member;

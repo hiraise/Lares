@@ -59,11 +59,11 @@ Full documentation map: [docs/README.md](docs/README.md).
 | `README.md`, `README.ru.md` | Human-facing overview (en, ru) | exists |
 | `docs/` | Technical documentation, see [docs/README.md](docs/README.md) | exists |
 | `docs/user/` | User manuals (en, ru) | placeholder |
-| `server/` | Ktor backend | foundation (M0-02): config, DB, errors, health, change sequence |
-| `client/` | KMP client: shared code, Android app, later web/iOS/desktop | skeleton (M0-01) |
+| `server/` | Ktor backend; test harness in `src/testFixtures` (shared with `integration-tests/`) | identity, administration, sync (M0-02…M0-05) |
+| `client/` | KMP client: shared code, Android app, later web/iOS/desktop | client core (M0-06): local DB, API client, sync engine, repositories; UI skeleton |
 | `contract/` | KMP module shared by server and client: DTOs, routes, sync protocol, shared domain logic | errors, protocol, instance info (M0-02) |
 | `deploy/` | Docker Compose, Caddy, example configs, scripts | dev database only (`deploy/dev/`); production in M0-10 |
-| `integration-tests/` | Multi-device sync tests: server + several clients in one JVM | planned (M0-06) |
+| `integration-tests/` | Multi-device sync tests: server + several clients in one JVM | sync invariants and scenarios (M0-06) |
 | `tools/loadsim/` | Load simulation CLI | planned (M0-11) |
 
 Layout is provisional until M0 scaffolding; see [architecture overview](docs/architecture/overview.md).
@@ -79,6 +79,8 @@ Run from the repo root. Gradle uses JDK 21 via `~/.gradle/gradle.properties`; se
 | Format (run before `check`) | `./gradlew spotlessApply` |
 | Lint + all tests | `./gradlew check` (server tests need Docker running: Testcontainers PostgreSQL) |
 | Server tests only | `./gradlew :server:test` |
+| Multi-device sync tests | `./gradlew :integration-tests:test` (Docker running; real server + several client cores) |
+| Client core tests | `./gradlew :client:shared:jvmTest` |
 | Full verification (as CI) | `./gradlew spotlessApply check :client:android:assembleDebug` |
 | Start dev database | `docker compose -f deploy/dev/docker-compose.yml up -d --wait` (port 5432; if taken: `FAMILYHUB_DEV_DB_PORT=5434 …` and run the server with `FAMILYHUB_DB_URL=jdbc:postgresql://localhost:5434/familyhub`) |
 | Run server (port 8080) | `./gradlew :server:run`, then `curl localhost:8080/health/ready` and `curl localhost:8080/api/v1/instance` |

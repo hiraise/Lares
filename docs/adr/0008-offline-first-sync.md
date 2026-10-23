@@ -1,6 +1,6 @@
 ---
-status: proposed  # direction chosen; protocol details finalized by an M0 prototype
-date: 2026-10-22
+status: accepted  # protocol finalized in architecture/sync.md, proven by the M0-06 multi-device tests
+date: 2026-10-23
 ---
 # ADR-0008: Offline-first client with server-authoritative sync
 
@@ -25,12 +25,17 @@ other members' changes must appear without manual refresh. Several phones edit t
 7. **Realtime:** the server notifies connected clients that new changes exist; clients then pull.
 8. **Out of scope of this mechanism:** live location (append-only upload of positions, server-side queries).
 
-## To finalize in M0
+## Finalized in M0
 
-- Wire format and paging; batching of outbox pushes.
-- App/server version skew: protocol version negotiation, schema migrations on the client.
-- Permission changes: purging local data a member may no longer see.
-- Prototype with multi-device conflict tests before building feature modules on top.
+All points left open by the direction above are settled in [sync protocol v1](../architecture/sync.md):
+
+- Wire format and paging: pull pages of at most 1000 changes in one snapshot; pushes of at most 100 mutations.
+- Version skew: `X-FamilyHub-Protocol` header with a supported range; lenient decoding of unknown fields, types and
+  enum values; client `dataSchemaVersion` forces a full resync after an app update that stores data differently.
+- Permission changes: `member.access_version` makes the next pull a reset; the full resync replaces all local data.
+- Restores: a new `sync_epoch` resets every client.
+- Multi-device conflict tests: server invariants in M0-05, end-to-end convergence with several clients in M0-06
+  (`integration-tests/`).
 
 ## Consequences
 

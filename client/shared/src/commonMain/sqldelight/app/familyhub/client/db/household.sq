@@ -1,0 +1,24 @@
+-- Typed table of the synced household (one row). Materialized from sync_shadow ⊕ outbox (architecture/sync.md).
+CREATE TABLE household (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    time_zone TEXT NOT NULL,
+    currency TEXT NOT NULL,
+    default_language TEXT NOT NULL
+);
+
+selectAll:
+SELECT * FROM household;
+
+selectById:
+SELECT * FROM household WHERE id = ?;
+
+upsert:
+INSERT OR REPLACE INTO household (id, name, time_zone, currency, default_language)
+VALUES (?, ?, ?, ?, ?);
+
+deleteById:
+DELETE FROM household WHERE id = ?;
+
+deleteAll:
+DELETE FROM household;

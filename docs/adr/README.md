@@ -14,7 +14,7 @@ Status values: `proposed` (direction chosen, details or customer confirmation pe
 | [0005](0005-postgresql-docker-vps.md) | PostgreSQL, Docker Compose, VPS as primary target | accepted | 2026-10-22 |
 | [0006](0006-no-proprietary-dependencies.md) | No proprietary dependencies: maps, location, push | accepted | 2026-10-22 |
 | [0007](0007-distribution.md) | Distribution: APK first, Google Play and F-Droid after MVP | accepted | 2026-10-22 |
-| [0008](0008-offline-first-sync.md) | Offline-first client with server-authoritative sync | proposed | 2026-10-22 |
+| [0008](0008-offline-first-sync.md) | Offline-first client with server-authoritative sync | accepted | 2026-10-23 |
 | [0009](0009-gps-trackers-via-traccar.md) | GPS trackers via Traccar compatibility | proposed | 2026-10-22 |
 | [0010](0010-household-tenancy.md) | Household is the tenant boundary | accepted | 2026-10-22 |
 | [0011](0011-no-e2ee-initially.md) | No end-to-end encryption in initial versions | accepted | 2026-10-22 |

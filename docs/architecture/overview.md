@@ -1,6 +1,6 @@
 ---
 status: draft
-updated: 2026-10-22
+updated: 2026-10-23
 ---
 # Architecture overview
 
@@ -54,6 +54,9 @@ flowchart LR
 - Kotlin Multiplatform; Compose Multiplatform UI. Details: [sync.md](sync.md), [auth.md](auth.md), [api.md](api.md).
 - Layers: UI (screens, view models, unidirectional data flow) → repositories → local DB + sync engine → HTTP client.
 - UI reads from the local DB only; the sync engine pushes the outbox and pulls changes (ADR-0008).
+- Client core (`client/shared`, package `app.familyhub.client`, M0-06): `db` (SQLDelight `FamilyHubDb`), `api`
+  (Ktor client, token refresh), `auth` (`SessionManager`, token storage), `sync` (entity adapters, materializer,
+  `LocalWriter`, `SyncEngine`), `data` (repositories and writers), `di` (Koin), platform modules in `androidMain`/`jvmMain`.
 - Android-specific: location foreground service, notification scheduling, UnifiedPush receiver, battery optimization guidance.
 
 ## Contract
@@ -69,7 +72,7 @@ server/                   Ktor app; feature modules as Gradle subprojects or pac
 client/shared/            KMP shared client code (data, sync, domain, UI)
 client/android/           Android application shell
 client/web/               M7
-integration-tests/        multi-device sync tests (server + clients in one JVM)
+integration-tests/        multi-device sync tests (server + clients in one JVM; reuses server test fixtures)
 tools/loadsim/            load simulation CLI
 deploy/                   docker-compose.yml, Caddyfile, .env.example, scripts
 docs/                     documentation

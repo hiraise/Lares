@@ -1,0 +1,27 @@
+-- `color` is a PaletteColor wire name.
+CREATE TABLE tag (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    color TEXT NOT NULL,
+    icon TEXT,
+    archived INTEGER NOT NULL
+);
+
+selectAll:
+SELECT * FROM tag ORDER BY name COLLATE NOCASE, id;
+
+selectActive:
+SELECT * FROM tag WHERE archived = 0 ORDER BY name COLLATE NOCASE, id;
+
+selectById:
+SELECT * FROM tag WHERE id = ?;
+
+upsert:
+INSERT OR REPLACE INTO tag (id, name, color, icon, archived)
+VALUES (?, ?, ?, ?, ?);
+
+deleteById:
+DELETE FROM tag WHERE id = ?;
+
+deleteAll:
+DELETE FROM tag;

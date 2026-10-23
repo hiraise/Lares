@@ -1,0 +1,28 @@
+-- `contacts` is a JSON array of ContactData; `color` is a PaletteColor wire name or NULL (FND-034).
+CREATE TABLE person (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    birth_year INTEGER,
+    birth_month INTEGER,
+    birth_day INTEGER,
+    relation TEXT,
+    notes TEXT,
+    contacts TEXT NOT NULL,
+    color TEXT
+);
+
+selectAll:
+SELECT * FROM person ORDER BY name COLLATE NOCASE, id;
+
+selectById:
+SELECT * FROM person WHERE id = ?;
+
+upsert:
+INSERT OR REPLACE INTO person (id, name, birth_year, birth_month, birth_day, relation, notes, contacts, color)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+deleteById:
+DELETE FROM person WHERE id = ?;
+
+deleteAll:
+DELETE FROM person;

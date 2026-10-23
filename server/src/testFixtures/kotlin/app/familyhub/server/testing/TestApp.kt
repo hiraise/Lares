@@ -19,8 +19,11 @@ import io.ktor.server.testing.testApplication
 /** Setup code configured for tests (as if from `FAMILYHUB_SETUP_CODE`). */
 const val TEST_SETUP_CODE = "ABCDE-12345"
 
-/** Fresh dependencies against the shared test database, with all tables emptied and a [TestClock]. */
-fun testDeps(): AppDeps {
+/**
+ * Fresh dependencies against the shared test database, with all tables emptied and a [TestClock].
+ * Integration tests pass a clock near the real time, because clients stamp mutations with their own clock.
+ */
+fun testDeps(clock: TestClock = TestClock()): AppDeps {
     TestDatabase.reset()
     val changeBus = HouseholdChangeBus()
     return AppDeps(
@@ -28,7 +31,7 @@ fun testDeps(): AppDeps {
         db = AppDatabase(TestDatabase.database, changeBus),
         changeBus = changeBus,
         buildInfo = BuildInfo.load(),
-        clock = TestClock(),
+        clock = clock,
         backgroundJobs = false,
     )
 }

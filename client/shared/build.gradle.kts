@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.compose.multiplatform)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.sqldelight)
 }
 
 // Compose UI tests on the JVM need the desktop runtime for the host OS.
@@ -44,7 +45,17 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(projects.contract)
+            // Contract types are part of the client core's public API (repositories, session, sync).
+            api(projects.contract)
+            api(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.serialization.json)
+            implementation(libs.kotlinx.datetime)
+            api(libs.ktor.client.core)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.client.websockets)
+            implementation(libs.ktor.serialization.kotlinx.json)
+            implementation(libs.sqldelight.coroutines)
+            api(libs.koin.core)
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
             implementation(libs.compose.ui)
@@ -52,8 +63,19 @@ kotlin {
             implementation(libs.compose.components.resources)
             implementation(libs.compose.ui.tooling.preview)
         }
+        androidMain.dependencies {
+            implementation(libs.sqldelight.android.driver)
+            implementation(libs.ktor.client.okhttp)
+            implementation(libs.androidx.datastore.preferences.core)
+        }
+        jvmMain.dependencies {
+            implementation(libs.sqldelight.sqlite.driver)
+            implementation(libs.ktor.client.cio)
+        }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.ktor.client.mock)
         }
         jvmTest.dependencies {
             implementation(libs.kotlin.test.junit5)
@@ -61,6 +83,14 @@ kotlin {
             runtimeOnly(libs.junit.platform.launcher)
             implementation(libs.compose.ui.test)
             implementation(composeDesktopRuntime)
+        }
+    }
+}
+
+sqldelight {
+    databases {
+        create("FamilyHubDb") {
+            packageName.set("app.familyhub.client.db")
         }
     }
 }

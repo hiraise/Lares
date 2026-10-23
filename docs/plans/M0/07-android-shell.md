@@ -108,7 +108,9 @@ Out of scope: family management (M0-08), notifications UI (M0-09), real module c
    - Log out; Delete account (confirmation dialog with password if the user has one; `LAST_ADMIN` explained).
 8. **Android shell** (`client/android`): `FamilyHubApplication` (Koin start with Android platform module), `MainActivity`
    (`AppCompatActivity`, edge-to-edge, `setContent { App() }`, deep link forwarding, `foreground` toggling of the sync engine
-   via lifecycle), manifest (INTERNET, CAMERA, deep links, locale config), adaptive app icon per visual-style.md § App icon
+   via lifecycle — `SyncEngine.setForeground(true/false)`), `SessionManager.restore()` on app start, a `ConnectivityManager`
+   network callback that calls `SyncEngine.request()` when a network becomes available (sync.md trigger "connectivity
+   regained"; added by M0-06, which built the engine without platform triggers), manifest (INTERNET, CAMERA, deep links, locale config), adaptive app icon per visual-style.md § App icon
    (gradient background layer, white house glyph foreground and monochrome layer, as in `Login.dc.html`), app name "FamilyHub".
 9. **Tests**:
    - ViewModel unit tests (jvmTest) with fake `SessionManager`/API: server URL normalization; setup validation and server

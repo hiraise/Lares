@@ -41,7 +41,8 @@ Toolchain versions: [versions.md](../plans/M0/versions.md) and `gradle/libs.vers
 - Slow work (Argon2 hashing) runs outside `dbQuery` on `Dispatchers.Default`.
 - Timestamps: `timestamptz` columns, `java.time.Instant` in tables, `kotlin.time.Instant` in contract DTOs.
   UUID columns: `javaUUID(...)` (`java.util.UUID`).
-- Tests: identity helpers in `testing/IdentityFixtures.kt` (`setup()`, `login()`, `bearer()`, `assertError()`,
+- Tests: the harness lives in `server/src/testFixtures/kotlin/app/familyhub/server/testing/` (test fixtures, also used by
+  `integration-tests/`). Identity helpers in `testing/IdentityFixtures.kt` (`setup()`, `login()`, `bearer()`, `assertError()`,
   `createUserDirectly()`); the test setup code is `TEST_SETUP_CODE`; move time with `deps.testClock.advance(…)`.
   Administration helpers in `testing/AdminFixtures.kt` (`memberSession()`, `createMember()`, `loginCodeFor()`, `send()`,
   `createSecondHousehold()` for isolation tests, `createRelative()`). Sync helpers in `testing/SyncFixtures.kt`
@@ -53,6 +54,23 @@ Toolchain versions: [versions.md](../plans/M0/versions.md) and `gradle/libs.vers
 - Tests: `testApp { deps -> … }` runs the full module on an emptied Testcontainers database; `jsonClient()` sends the
   protocol header; `testDeps()` for tests without HTTP. Test functions must return `Unit` (JUnit silently skips others —
   write `fun x(): Unit = runBlocking { … }` when the block ends with an expression).
+
+## Client
+
+- Packages under `app.familyhub.client`: `db`, `api`, `auth`, `sync`, `data`, `di`, `platform` (see
+  [overview](../architecture/overview.md#client)). No Android-only APIs in `commonMain`; platform code lives in
+  `androidMain`/`jvmMain` and reaches common code through Koin.
+- DI: Koin. `sharedModule(platformModule)` builds a complete client core; modules are created by functions, never
+  shared `val`s, because Koin keeps singletons inside the module object (integration tests run several cores in one JVM).
+  No global singletons outside Koin.
+- Database work goes through `LocalDb.transaction { }` / `read { }` (its dispatcher); UI reads `Flow`s from repositories.
+- Synced data is changed only through `LocalWriter` (or the `TagsWriter`/`PersonsWriter` use cases), never by writing
+  typed tables directly; admin-only types change through REST endpoints, then `SyncEngine.request()`.
+- New syncable type on the client: a `.sq` table, an `EntityAdapter` registered in `defaultEntityAdapters`, a
+  repository; raise `DATA_SCHEMA_VERSION` so existing installations do a full resync.
+- Tests: unit tests in `jvmTest` (in-memory SQLite, Ktor `MockEngine`); multi-device behavior in `integration-tests/`
+  (`familyTest { … }` gives a fresh server and three logged-in clients; `TestNetwork` switches a client offline, loses
+  push responses or runs code before a pull; `assertConverged(clients)` checks invariant 8).
 
 ## Data and values
 

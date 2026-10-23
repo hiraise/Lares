@@ -1,0 +1,14 @@
+-- The logged-in member (`Me` as JSON), so permissions and ownership checks work offline. At most one row.
+CREATE TABLE local_session (
+    id INTEGER NOT NULL PRIMARY KEY CHECK (id = 1),
+    me TEXT NOT NULL
+);
+
+get:
+SELECT me FROM local_session WHERE id = 1;
+
+put:
+INSERT OR REPLACE INTO local_session (id, me) VALUES (1, ?);
+
+deleteAll:
+DELETE FROM local_session;

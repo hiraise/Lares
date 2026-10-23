@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
     application
+    `java-test-fixtures`
 }
 
 kotlin {
@@ -56,11 +57,18 @@ dependencies {
     implementation(libs.logback.classic)
     implementation(libs.kotlin.logging)
 
-    testImplementation(libs.kotlin.test.junit5)
-    testImplementation(platform(libs.junit.bom))
-    testImplementation(libs.ktor.server.test.host)
-    testImplementation(libs.ktor.client.content.negotiation)
-    testImplementation(libs.testcontainers.postgresql)
+    // The test harness (testing/) is shared with :integration-tests as test fixtures.
+    testFixturesApi(projects.contract)
+    testFixturesApi(libs.kotlin.test.junit5)
+    testFixturesApi(platform(libs.junit.bom))
+    testFixturesApi(libs.ktor.server.test.host)
+    testFixturesApi(libs.ktor.client.content.negotiation)
+    testFixturesApi(libs.ktor.serialization.kotlinx.json)
+    testFixturesApi(libs.testcontainers.postgresql)
+    testFixturesImplementation(libs.exposed.core)
+    testFixturesImplementation(libs.exposed.jdbc)
+    testFixturesImplementation(libs.hikaricp)
+
     testRuntimeOnly(libs.junit.platform.launcher)
 }
 

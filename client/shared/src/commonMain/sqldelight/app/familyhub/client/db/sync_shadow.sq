@@ -1,0 +1,21 @@
+-- Last known server state of every synced entity, as the JSON of its contract data class (architecture/sync.md).
+CREATE TABLE sync_shadow (
+    type TEXT NOT NULL,
+    id TEXT NOT NULL,
+    seq INTEGER NOT NULL,
+    deleted INTEGER NOT NULL,
+    data TEXT,
+    PRIMARY KEY (type, id)
+);
+
+get:
+SELECT * FROM sync_shadow WHERE type = ? AND id = ?;
+
+selectAllKeys:
+SELECT type, id FROM sync_shadow;
+
+upsert:
+INSERT OR REPLACE INTO sync_shadow (type, id, seq, deleted, data) VALUES (?, ?, ?, ?, ?);
+
+deleteAll:
+DELETE FROM sync_shadow;

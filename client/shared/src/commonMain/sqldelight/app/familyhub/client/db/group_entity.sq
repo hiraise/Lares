@@ -1,0 +1,24 @@
+-- `permissions` and `member_ids` are JSON arrays (permission keys, member ids).
+CREATE TABLE group_entity (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    built_in TEXT,
+    permissions TEXT NOT NULL,
+    member_ids TEXT NOT NULL
+);
+
+selectAll:
+SELECT * FROM group_entity ORDER BY built_in IS NULL, name COLLATE NOCASE, id;
+
+selectById:
+SELECT * FROM group_entity WHERE id = ?;
+
+upsert:
+INSERT OR REPLACE INTO group_entity (id, name, built_in, permissions, member_ids)
+VALUES (?, ?, ?, ?, ?);
+
+deleteById:
+DELETE FROM group_entity WHERE id = ?;
+
+deleteAll:
+DELETE FROM group_entity;

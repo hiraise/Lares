@@ -1,0 +1,17 @@
+-- Sync bookkeeping: cursor, accessVersion, epoch, dataSchemaVersion, lastSuccessAt, lastError.
+CREATE TABLE sync_state (
+    key TEXT NOT NULL PRIMARY KEY,
+    value TEXT NOT NULL
+);
+
+get:
+SELECT value FROM sync_state WHERE key = ?;
+
+put:
+INSERT OR REPLACE INTO sync_state (key, value) VALUES (?, ?);
+
+remove:
+DELETE FROM sync_state WHERE key = ?;
+
+deleteAll:
+DELETE FROM sync_state;

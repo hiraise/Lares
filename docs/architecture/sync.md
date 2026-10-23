@@ -1,5 +1,5 @@
 ---
-status: draft  # becomes "accepted" together with ADR-0008 when the M0 multi-device tests pass
+status: accepted  # M0-06: invariants 1–8 and 10 pass end to end in integration-tests/, 9 at server level (M0-05)
 updated: 2026-10-23
 ---
 # Sync protocol v1
@@ -208,6 +208,27 @@ invalid → error to the UI, nothing stored), write the typed row, append the mu
 
 Triggers: app start, local write, WebSocket `changed`, connectivity regained, push tickle, periodic background work.
 Backoff after failures: 2 s doubling to 5 min; reset on success.
+
+### Client implementation notes (M0-06)
+
+Code: `client/shared/src/commonMain/kotlin/app/familyhub/client/` (`sync`, `db`, `api`, `auth`, `data`).
+
+- Besides the tables above, `local_session` holds the logged-in member (`Me`), so `WriteRules` and the permission
+  evaluator work offline. Until the first sync brings groups, the permissions from login are used.
+- A local write merges the change into the **typed row** (what the user sees), not into shadow ⊕ pending: after an
+  `applied` push and before the pull, the typed row already contains the applied change while the shadow does not.
+- Local writes are coalesced: the sync starts `localWriteDelay` (1 s) after the first write. Failed cycles retry with
+  backoff (2 s doubling to 5 min); a new trigger ends the wait early.
+- `SyncStatus.state`: `SYNCING` while a cycle runs; `OFFLINE` after a network failure; `ERROR` after a server answer
+  (`lastError` holds the code, also for 5xx); otherwise `PENDING` if the outbox is not empty, else `SYNCED`.
+- A realtime event triggers a sync only if its `seq` is above the local cursor. `SyncEngine.realtimeConnected` tells
+  whether the socket is open. The access token is refreshed before connecting if it expires within a minute, because a
+  failed WebSocket upgrade carries no error body.
+- Full resync restarts (up to 3 times) if the server answers `reset` while the pages are being loaded.
+- Platform triggers (foreground, connectivity regained, push tickle, periodic work) are wired by the app shell
+  (M0-07) and notifications (M0-09); the engine exposes `request()`, `setForeground()` and `syncNow()`.
+- Multi-device tests: `integration-tests/` (`SyncInvariantsTest`, `SyncScenariosTest`) run the real server and several
+  client cores, each with its own in-memory SQLite and simulated network.
 
 ## Versioning
 
