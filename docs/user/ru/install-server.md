@@ -1,10 +1,10 @@
 # Установка семейного сервера
 
-FamilyHub хранит данные семьи на вашем собственном сервере. Эта инструкция поможет поднять его на арендованном
+Lares хранит данные семьи на вашем собственном сервере. Эта инструкция поможет поднять его на арендованном
 виртуальном сервере (VPS) с помощью Docker Compose. Понадобится около часа и умение выполнять команды в терминале
 Linux по SSH (достаточно копировать их отсюда).
 
-На сервере работают четыре части: сам сервер FamilyHub, база данных PostgreSQL, **Caddy** (сам получает и продлевает
+На сервере работают четыре части: сам сервер Lares, база данных PostgreSQL, **Caddy** (сам получает и продлевает
 HTTPS-сертификат) и, по желанию, **ntfy** — для мгновенных уведомлений.
 
 ## Что понадобится
@@ -40,11 +40,11 @@ docker compose version
 
 ## 3. Файлы конфигурации
 
-Положите на сервер папку `deploy` из репозитория проекта, например в `/opt/familyhub`:
+Положите на сервер папку `deploy` из репозитория проекта, например в `/opt/lares`:
 
 ```sh
-sudo git clone <адрес репозитория проекта> /opt/familyhub
-cd /opt/familyhub/deploy
+sudo git clone <адрес репозитория проекта> /opt/lares
+cd /opt/lares/deploy
 ```
 
 ## 4. Настройка
@@ -58,8 +58,8 @@ nano .env
 
 В файле `.env` укажите:
 
-- `FAMILYHUB_DOMAIN` — домен сервера, например `family.example.com`;
-- `POSTGRES_PASSWORD` и `FAMILYHUB_DB_PASSWORD` — сгенерированный пароль, **одинаковый в обеих строках**.
+- `LARES_DOMAIN` — домен сервера, например `family.example.com`;
+- `POSTGRES_PASSWORD` и `LARES_DB_PASSWORD` — сгенерированный пароль, **одинаковый в обеих строках**.
 
 Остальные настройки необязательны, они описаны в самом файле. Никому не показывайте `.env`: в нём пароль от базы.
 
@@ -81,11 +81,11 @@ docker compose ps
 docker compose logs server | grep "Setup code"
 ```
 
-Код состоит из 10 букв и цифр. Можно заранее задать свой — строкой `FAMILYHUB_SETUP_CODE` в `.env`.
+Код состоит из 10 букв и цифр. Можно заранее задать свой — строкой `LARES_SETUP_CODE` в `.env`.
 
 ## 7. Приложение и создание семьи
 
-1. Установите APK FamilyHub на Android-телефон (скачайте его со страницы релизов проекта; когда Android спросит,
+1. Установите APK Lares на Android-телефон (скачайте его со страницы релизов проекта; когда Android спросит,
    разрешите установку приложений из этого источника).
 2. Откройте приложение и введите **Адрес сервера**: `https://family.example.com`.
 3. Приложение увидит, что сервер новый, и откроет экран **Новая семья**. Введите код настройки, название семьи,
@@ -101,21 +101,21 @@ docker compose logs server | grep "Setup code"
 Сделать копию прямо сейчас:
 
 ```sh
-/opt/familyhub/deploy/scripts/backup.sh
+/opt/lares/deploy/scripts/backup.sh
 ```
 
-Скрипт создаёт файл `deploy/backups/familyhub-ГГГГММДД-ЧЧММСС.dump` и хранит 14 последних копий.
+Скрипт создаёт файл `deploy/backups/lares-ГГГГММДД-ЧЧММСС.dump` и хранит 14 последних копий.
 
 Чтобы копия делалась каждый день в 03:00, добавьте строку через `sudo crontab -e`:
 
 ```
-0 3 * * * /opt/familyhub/deploy/scripts/backup.sh >> /var/log/familyhub-backup.log 2>&1
+0 3 * * * /opt/lares/deploy/scripts/backup.sh >> /var/log/lares-backup.log 2>&1
 ```
 
 Регулярно забирайте копии к себе, например на домашний компьютер:
 
 ```sh
-rsync -av root@family.example.com:/opt/familyhub/deploy/backups/ ~/familyhub-backups/
+rsync -av root@family.example.com:/opt/lares/deploy/backups/ ~/lares-backups/
 ```
 
 В копиях все данные семьи, включая местоположение и финансы, — берегите их так же, как сам сервер.
@@ -123,7 +123,7 @@ rsync -av root@family.example.com:/opt/familyhub/deploy/backups/ ~/familyhub-bac
 ## Восстановление
 
 ```sh
-/opt/familyhub/deploy/scripts/restore.sh /opt/familyhub/deploy/backups/familyhub-20261023-030000.dump
+/opt/lares/deploy/scripts/restore.sh /opt/lares/deploy/backups/lares-20261023-030000.dump
 ```
 
 Скрипт попросит подтверждение, заменит **все** текущие данные данными из копии и перезапустит сервер. Телефоны заметят
@@ -137,14 +137,14 @@ rsync -av root@family.example.com:/opt/familyhub/deploy/backups/ ~/familyhub-bac
 Сначала сделайте резервную копию, затем:
 
 ```sh
-cd /opt/familyhub/deploy
+cd /opt/lares/deploy
 git pull
 docker compose pull
 docker compose up -d
 ```
 
 При запуске сервер сам обновит структуру базы. Если хотите обновляться только тогда, когда сами решите, укажите
-версию в `.env` (`FAMILYHUB_VERSION=0.1.0`) и меняйте её вручную.
+версию в `.env` (`LARES_VERSION=0.1.0`) и меняйте её вручную.
 
 ## Мгновенные уведомления (по желанию)
 
@@ -152,8 +152,8 @@ docker compose up -d
 и по-прежнему без сервисов Google.
 
 1. Создайте DNS-запись `ntfy.family.example.com` (шаг 1).
-2. В `.env` укажите `FAMILYHUB_CADDYFILE=Caddyfile.push`. Если адрес ntfy не совпадает с `ntfy.` + ваш домен,
-   задайте ещё `FAMILYHUB_NTFY_DOMAIN`.
+2. В `.env` укажите `LARES_CADDYFILE=Caddyfile.push`. Если адрес ntfy не совпадает с `ntfy.` + ваш домен,
+   задайте ещё `LARES_NTFY_DOMAIN`.
 3. Запустите с профилем `push` и один раз откройте анонимный доступ только к темам для push-уведомлений:
 
    ```sh
@@ -181,9 +181,9 @@ docker compose up -d
 - **DNS ещё не обновился.** Подождите и попробуйте снова — Caddy повторяет попытки сам. Ускорить можно командой
   `docker compose restart caddy`.
 - **Приложение пишет, что код настройки неверный.** Скопируйте его заново из `docker compose logs server | grep "Setup code"`:
-  без `FAMILYHUB_SETUP_CODE` код меняется при каждом перезапуске.
+  без `LARES_SETUP_CODE` код меняется при каждом перезапуске.
 - **Сервер постоянно перезапускается.** Смотрите `docker compose logs server`. Чаще всего причина — разные значения
-  `POSTGRES_PASSWORD` и `FAMILYHUB_DB_PASSWORD`. Учтите: если поменять `POSTGRES_PASSWORD` позже, пароль уже созданной
+  `POSTGRES_PASSWORD` и `LARES_DB_PASSWORD`. Учтите: если поменять `POSTGRES_PASSWORD` позже, пароль уже созданной
   базы не изменится.
 - **Мгновенные уведомления не приходят.** Проверьте, что `https://ntfy.family.example.com` открывается в браузере, что
   команда `ntfy access` была выполнена, и пройдите шаги на телефоне из [инструкции по ntfy](instant-notifications.md).

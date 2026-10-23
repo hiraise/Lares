@@ -23,7 +23,7 @@ a blue → teal **"lake gradient"** reserved for the few main elements; thin out
 ## Color tokens
 
 Dynamic color (Material You wallpaper colors) is **off**: the brand look is fixed.
-Tokens map to Material 3 `ColorScheme` roles; extra roles live in a `FamilyHubColors` object provided via
+Tokens map to Material 3 `ColorScheme` roles; extra roles live in a `LaresColors` object provided via
 `CompositionLocal`.
 
 | Token (M3 role or extra) | Light | Dark | Use |

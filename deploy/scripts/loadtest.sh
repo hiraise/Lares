@@ -2,7 +2,7 @@
 # Load test of the production stack on this machine (plan M0-11, ADR-0013, ADR-0015). Builds the server image from
 # `installDist`, starts the full stack (with ntfy) as https://localhost, measures the cold start, runs loadsim (a
 # simulated family), samples container memory every 10 s, restarts the server once more for a warm-data cold start,
-# removes everything (compose project "familyhub-loadtest") and prints a summary. Needs Docker and free ports 80/443.
+# removes everything (compose project "lares-loadtest") and prints a summary. Needs Docker and free ports 80/443.
 #
 #   ./gradlew :server:installDist :tools:loadsim:installDist
 #   deploy/scripts/loadtest.sh                     # the 30-minute "family" scenario
@@ -39,14 +39,14 @@ OUT=${LOADTEST_OUT:-$REPO_DIR/build/loadtest/$(date +%Y%m%d-%H%M%S)}
 mkdir -p "$OUT"
 WORK=$(mktemp -d)
 password=$(od -An -tx1 -N16 /dev/urandom | tr -d ' \n')
-grep -v -E '^(FAMILYHUB_DOMAIN|POSTGRES_PASSWORD|FAMILYHUB_DB_PASSWORD)=' "$DEPLOY_DIR/.env.example" >"$WORK/env"
+grep -v -E '^(LARES_DOMAIN|POSTGRES_PASSWORD|LARES_DB_PASSWORD)=' "$DEPLOY_DIR/.env.example" >"$WORK/env"
 cat >>"$WORK/env" <<ENV
-FAMILYHUB_DOMAIN=localhost
+LARES_DOMAIN=localhost
 POSTGRES_PASSWORD=$password
-FAMILYHUB_DB_PASSWORD=$password
-FAMILYHUB_SETUP_CODE=$SETUP_CODE
-FAMILYHUB_CADDYFILE=Caddyfile.push
-FAMILYHUB_NTFY_DOMAIN=ntfy.localhost
+LARES_DB_PASSWORD=$password
+LARES_SETUP_CODE=$SETUP_CODE
+LARES_CADDYFILE=Caddyfile.push
+LARES_NTFY_DOMAIN=ntfy.localhost
 ENV
 
 # Tuning settings go into an extra compose file; production files stay unchanged.
@@ -60,7 +60,7 @@ else
     echo "services: {}" >"$WORK/override.yml"
 fi
 
-export COMPOSE_PROJECT_NAME=familyhub-loadtest
+export COMPOSE_PROJECT_NAME=lares-loadtest
 export COMPOSE_FILE="$DEPLOY_DIR/docker-compose.yml:$DEPLOY_DIR/docker-compose.build.yml:$WORK/override.yml"
 export COMPOSE_ENV_FILES="$WORK/env"
 export COMPOSE_PROFILES=push

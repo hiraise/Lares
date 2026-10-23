@@ -18,7 +18,7 @@ Current state and next steps: [STATUS.md](STATUS.md).
 - 2026-10-22 M0-02: server foundation — env config, HikariCP + Flyway (`V1__foundation`: `household`,
   `household_sync_state`), Exposed DSL, `dbQuery`/`recordChange` with after-commit `HouseholdChangeBus`, JSON errors
   (`ApiException` → `ErrorCode`), protocol header check, request ids in logs (plain/JSON), `/health/live|ready`,
-  `/api/v1/instance`; contract: `ErrorCode`/`FieldErrorCode` with lenient decoding, `InstanceInfo`, `FamilyHubJson`.
+  `/api/v1/instance`; contract: `ErrorCode`/`FieldErrorCode` with lenient decoding, `InstanceInfo`, `LaresJson`.
   Test harness on Testcontainers PostgreSQL; dev database in `deploy/dev/docker-compose.yml`.
 - 2026-10-22 M0-03: identity — permission catalogue, evaluator, validators, codes, entity data and auth DTOs in `contract/`;
   migration `V2__identity` (`user_account`, `person`, `member`, `group_entity` + permissions/memberships, `session`);
@@ -44,7 +44,7 @@ Current state and next steps: [STATUS.md](STATUS.md).
   transactions, WebSocket events (hello/changed, 500 ms debounce), daily tombstone purge and log cleanup. Also: password
   changes now give the member a new seq (`hasPassword` is synced); persons referenced by invites are not purged.
   121 server tests (invariants 1–7, 9, 10 at server level); manual walkthrough on the real server incl. WebSocket.
-- 2026-10-23 M0-06: client core in `client/shared` — SQLDelight `FamilyHubDb` (typed tables, sync tables, `local_session`),
+- 2026-10-23 M0-06: client core in `client/shared` — SQLDelight `LaresDb` (typed tables, sync tables, `local_session`),
   entity adapters and materializer, `LocalWriter` with shared `WriteRules` and validators, Ktor API client for all M0
   endpoints with single-flight token refresh, `SyncEngine` (push → pull → full resync, backoff, realtime WebSocket,
   `SyncStatus`, rejections), repositories and writers for tags and persons, `SessionManager`, Koin modules; Android
@@ -59,7 +59,7 @@ Current state and next steps: [STATUS.md](STATUS.md).
   bottom bar, Today (empty state), section placeholders, More, sync indicator / sheet / rejection snackbar, Settings
   (profile name offline, change password, login QR with countdown, devices with revoke, theme, language, about and
   licenses, logout, delete account). Android shell: AppCompat activity with per-app language, deep links
-  `familyhub://invite|login`, session restore on start, foreground toggle, connectivity trigger, debug-only cleartext to
+  `lares://invite|login`, session restore on start, foreground toggle, connectivity trigger, debug-only cleartext to
   local hosts, adaptive icon. `SessionManager.deleteAccount`. 23 new client tests (ViewModels on a mock server, Compose UI
   tests incl. bottom-bar filtering, icon resources). Emulator walkthrough of all flows except live camera scanning.
 - 2026-10-23 M0-08: Family management screens — More › Family / Tags open the Family screen with tabs Members,
@@ -85,7 +85,7 @@ Current state and next steps: [STATUS.md](STATUS.md).
 - 2026-10-23 M0-09 Notifications. Contract: `NotificationType` (stable wire names, channel per type), `PushPayload`,
   push registration, test result and notification settings DTOs. Server: migration V5 (`push_registration` per session,
   `instance_secret` with the VAPID keys, `notification_setting`), `WebPushSender` on `com.interaso:webpush` (own HTTP
-  call so any 2xx counts; 404/410 deletes the registration), SSRF guard with `FAMILYHUB_PUSH_ALLOWED_HOSTS`,
+  call so any 2xx counts; 404/410 deletes the registration), SSRF guard with `LARES_PUSH_ALLOWED_HOSTS`,
   `NotificationService` (mutes respected, revoked sessions lose their registration), sync tickles throttled to one per
   30 s per household with a trailing send, endpoints `/me/push`, `/me/push/test`, `/me/notification-settings`.
   Client: local `reminder`, `notification_mute`, `push_endpoint` tables (SQLDelight migration 1 → 2), `Reminders`,
@@ -112,3 +112,7 @@ Current state and next steps: [STATUS.md](STATUS.md).
   tracking showed an oversized heap and code cache; final `-Xmx128m -XX:ReservedCodeCacheSize=64m`,
   `MALLOC_ARENA_MAX=2`: RSS avg 232 / max 237 MiB, p95 52 ms, cold start 1.9–2.7 s, stack ~320 MiB; server
   `mem_limit` 384m → 300m. Results: `docs/architecture/perf/M0-baseline.md`. loadsim tests: 5.
+- 2026-10-23 **Rename to Lares** (Q-001, customer's choice). Working name FamilyHub replaced everywhere: Kotlin packages
+  `app.familyhub` → `app.lares` (also Android application id), classes `FamilyHub*` → `Lares*`, env vars
+  `FAMILYHUB_*` → `LARES_*`, database, volume and image names `familyhub*` → `lares*`, protocol header
+  `Lares-Protocol`, UI strings. Image default `ghcr.io/hiraise/lares-server`. Remote: `github.com/hiraise/lares`.

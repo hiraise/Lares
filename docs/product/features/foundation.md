@@ -43,7 +43,7 @@ localization and deployment — everything feature modules depend on.
 - **FND-013** `MVP` `done` — A user can delete their account from inside the app (also a Google Play requirement).
   *Server done (M0-03); Settings › Delete account with password confirmation (M0-07).*
 - **FND-014** `MVP` `done` — Any member can log in on a new device by scanning a QR code shown on a logged-in device
-  (their own, or one of a member with `household.manage`). *Server login codes done (M0-04); own QR code, scanner and `familyhub://login` links (M0-07); member detail › Log in by QR code for another member (M0-08).*
+  (their own, or one of a member with `household.manage`). *Server login codes done (M0-04); own QR code, scanner and `lares://login` links (M0-07); member detail › Log in by QR code for another member (M0-08).*
 - **FND-015** `later` `todo` — Login via external OpenID Connect provider (Authentik, Keycloak).
 
 ### Members, groups and permissions ([ADR-0014](../../adr/0014-group-based-permissions.md))
@@ -124,7 +124,7 @@ localization and deployment — everything feature modules depend on.
 ### Client basics
 
 - **FND-060** `MVP` `done` — On first launch the app asks for the server URL (or reads it from the invite link/QR).
-  *Server screen, QR scanner and `familyhub://invite|login` links (M0-07).*
+  *Server screen, QR scanner and `lares://invite|login` links (M0-07).*
 - **FND-061** `MVP` `done` — UI languages: English and Russian; follows the system language, overridable in settings.
   *Per-app language via AppCompat, also on the server screen (M0-07).*
 - **FND-062** `MVP` `done` — Light and dark theme.

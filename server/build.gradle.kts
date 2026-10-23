@@ -10,7 +10,7 @@ kotlin {
 }
 
 application {
-    mainClass.set("app.familyhub.server.ApplicationKt")
+    mainClass.set("app.lares.server.ApplicationKt")
 }
 
 // The server version comes from Gradle `version` (gradle.properties) and is read at runtime from a generated resource.
@@ -20,7 +20,7 @@ val generateBuildInfo by tasks.registering {
     inputs.property("version", serverVersion)
     outputs.dir(outputDir)
     doLast {
-        val file = outputDir.get().file("familyhub-build.properties").asFile
+        val file = outputDir.get().file("lares-build.properties").asFile
         file.parentFile.mkdirs()
         file.writeText("version=$serverVersion\n")
     }

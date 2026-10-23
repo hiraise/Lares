@@ -1,4 +1,4 @@
-<!-- Plain text logs (default). JSON logs: FAMILYHUB_LOG_FORMAT=json selects logback-json.xml. -->
+<!-- Plain text logs (default). JSON logs: LARES_LOG_FORMAT=json selects logback-json.xml. -->
 <configuration>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>

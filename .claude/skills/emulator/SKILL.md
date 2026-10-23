@@ -1,6 +1,6 @@
 ---
 name: emulator
-description: Run and drive the FamilyHub Android app on the local emulator against a local server — boot, install, test family, tap by text, screenshots. Use for any manual app check or when the customer asks to start the emulator or see the app. In plan sessions, hand the check to the emulator-tester agent instead of doing it yourself.
+description: Run and drive the Lares Android app on the local emulator against a local server — boot, install, test family, tap by text, screenshots. Use for any manual app check or when the customer asks to start the emulator or see the app. In plan sessions, hand the check to the emulator-tester agent instead of doing it yourself.
 ---
 
 # Emulator and local server
@@ -18,13 +18,13 @@ Scripts in `tools/dev/` (run from the repo root; each prints its usage when call
 ## Setup (once per session)
 
 ```sh
-tools/dev/server.sh start          # dev DB + server on :8080, own database familyhub_e2e; `reset` = empty server
+tools/dev/server.sh start          # dev DB + server on :8080, own database lares_e2e; `reset` = empty server
 tools/dev/seed.py family           # test family Петровы (olga / olga-password is the admin)
 tools/dev/emu.sh start             # headless; run in background, boot takes about a minute
 tools/dev/emu.sh install           # build + install debug APK + launch (after every code change)
 ```
 
-Port 8080 busy (another server running)? Use `FAMILYHUB_PORT=8081` for all scripts in this list.
+Port 8080 busy (another server running)? Use `LARES_PORT=8081` for all scripts in this list.
 In the app the server address is `http://localhost:8080` (adb reverse is set by `emu.sh start`).
 First run on an empty server: setup code `DEVSETUP01`.
 

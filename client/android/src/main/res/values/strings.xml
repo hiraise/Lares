@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Launcher label; the product name is the same in every language. -->
-    <string name="app_label" translatable="false">FamilyHub</string>
+    <string name="app_label" translatable="false">Lares</string>
 
     <!-- Notification channels (M0-09); names and descriptions show in the system notification settings. -->
     <string name="channel_reminders">Reminders</string>

@@ -25,7 +25,7 @@ a settings screen. UI in Compose Multiplatform (`client/shared/commonMain`), And
 
 Screens: Server, Setup, Login, Invite accept, QR scanner, Main scaffold (Today empty state, section placeholders, More),
 Sync status sheet, Settings (profile, appearance, sessions, about, logout, delete account).
-Design assets: theme, Manrope fonts, generated Material Symbols icons, app icon. Deep links `familyhub://invite` and `familyhub://login`.
+Design assets: theme, Manrope fonts, generated Material Symbols icons, app icon. Deep links `lares://invite` and `lares://login`.
 
 Out of scope: family management (M0-08), notifications UI (M0-09), real module content (M1+).
 
@@ -52,7 +52,7 @@ Out of scope: family management (M0-08), notifications UI (M0-09), real module c
   (localized by `ErrorCode`), "Sync now". New rejections also show a snackbar.
 - **Theme** (`ui/theme/`): exactly the tokens of [visual-style.md](../../design/visual-style.md): light and dark
   `ColorScheme` (every role listed there; unlisted roles: derive from the nearest listed one, never Material defaults),
-  extra roles in `FamilyHubColors` (`divider`, `warning*`, `success*`, `gradientStart/End`) via `CompositionLocal`,
+  extra roles in `LaresColors` (`divider`, `warning*`, `success*`, `gradientStart/End`) via `CompositionLocal`,
   `PaletteColor` → base/container/on-container colors per theme, `Typography` from the type table with Manrope,
   `Shapes` (8/14/16/20/28 dp), `Spacing` object 4/8/12/16/24/32 dp. Dynamic color **off**.
 - **Design assets** (`tools/design-assets/`, Python 3 + `fonttools`, run by hand, outputs committed):
@@ -67,29 +67,29 @@ Out of scope: family management (M0-08), notifications UI (M0-09), real module c
   `ErrorCode` → string mapping function in one file.
 - **Language and theme override** (FND-061/062): stored in DataStore; theme applied in `App()`. Language on Android via
   `AppCompatDelegate.setApplicationLocales` (MainActivity extends `AppCompatActivity` — it **requires an AppCompat theme**:
-  add `client/android/src/main/res/values/themes.xml` with `Theme.FamilyHub` (parent `Theme.AppCompat.DayNight.NoActionBar`,
-  window background matching the surface colors) and set `android:theme="@style/Theme.FamilyHub"` on the application;
+  add `client/android/src/main/res/values/themes.xml` with `Theme.Lares` (parent `Theme.AppCompat.DayNight.NoActionBar`,
+  window background matching the surface colors) and set `android:theme="@style/Theme.Lares"` on the application;
   add `locales_config.xml` and
   `AppLocalesMetadataHolderService` with `autoStoreLocales=true`). Options: System, English, Русский.
 - **QR scanner**: `expect @Composable fun QrScanner(onResult: (String) -> Unit, onCancel: () -> Unit)` in `commonMain`;
   Android actual = CameraX preview + ZXing `QRCodeReader` analyzer (no ML Kit — ADR-0006), camera permission requested
   with an explanation; JVM actual = text field to paste the payload (tests/desktop). Results are parsed with `DeepLinks.parse`.
-- **Deep links**: intent filters for `familyhub://invite` and `familyhub://login` in `client/android`; MainActivity forwards
+- **Deep links**: intent filters for `lares://invite` and `lares://login` in `client/android`; MainActivity forwards
   URIs to a shared `DeepLinkHandler` (StateFlow); onboarding consumes it (server URL + code prefilled).
 - **Network security**: release builds HTTPS only. Debug builds allow cleartext to `10.0.2.2` and `localhost` via
   `src/debug/res/xml/network_security_config.xml` (for the emulator → local dev server).
 - Server URL input: trim; prepend `https://` if no scheme; strip trailing `/`.
-- Android: `minSdk 26`, target/compile SDK per versions.md, `applicationId app.familyhub.android`, debug suffix `.debug`.
+- Android: `minSdk 26`, target/compile SDK per versions.md, `applicationId app.lares.android`, debug suffix `.debug`.
 
 ## Steps
 
-1. **Design assets and theme**: run `tools/design-assets/build.py` (decided above); `FamilyHubTheme` with light/dark tokens;
+1. **Design assets and theme**: run `tools/design-assets/build.py` (decided above); `LaresTheme` with light/dark tokens;
    base components (`ui/components`) per visual-style.md § Component patterns: large screen header, detail top bar,
    list group with inset dividers, avatar (initials on personal color, `PaletteColors.fallbackFor`), filter chip, primary/tonal
    buttons with loading state, gradient FAB, password field with visibility toggle, error text from `ErrorCode`,
    full-screen loading, empty state. A JVM screenshot-free test that every listed icon resource exists.
 2. **ServerScreen**: URL field, "Connect", "Scan QR code". Calls `SessionManager.connect`. Errors: unreachable,
-   not a FamilyHub server, `PROTOCOL_UNSUPPORTED` ("Update the app or the server"). Routes to Setup or Login.
+   not a Lares server, `PROTOCOL_UNSUPPORTED` ("Update the app or the server"). Routes to Setup or Login.
 3. **SetupScreen** (one scrolling form, sections "Family" and "Administrator"): setup code (hint: "Shown in the server log"),
    family name, time zone (searchable picker, default = device zone), currency (text field, default by locale, suggestions
    RUB/EUR/USD), language (Русский/English), your name, login, password + repeat. Inline validation with contract validators;
@@ -106,12 +106,12 @@ Out of scope: family management (M0-08), notifications UI (M0-09), real module c
    - About: app version, server version, server address; "Open-source licenses" text with the AGPL notice and the
      bundled assets: Manrope (SIL OFL 1.1), Material Symbols (Apache 2.0).
    - Log out; Delete account (confirmation dialog with password if the user has one; `LAST_ADMIN` explained).
-8. **Android shell** (`client/android`): `FamilyHubApplication` (Koin start with Android platform module), `MainActivity`
+8. **Android shell** (`client/android`): `LaresApplication` (Koin start with Android platform module), `MainActivity`
    (`AppCompatActivity`, edge-to-edge, `setContent { App() }`, deep link forwarding, `foreground` toggling of the sync engine
    via lifecycle — `SyncEngine.setForeground(true/false)`), `SessionManager.restore()` on app start, a `ConnectivityManager`
    network callback that calls `SyncEngine.request()` when a network becomes available (sync.md trigger "connectivity
    regained"; added by M0-06, which built the engine without platform triggers), manifest (INTERNET, CAMERA, deep links, locale config), adaptive app icon per visual-style.md § App icon
-   (gradient background layer, white house glyph foreground and monochrome layer, as in `Login.dc.html`), app name "FamilyHub".
+   (gradient background layer, white house glyph foreground and monochrome layer, as in `Login.dc.html`), app name "Lares".
 9. **Tests**:
    - ViewModel unit tests (jvmTest) with fake `SessionManager`/API: server URL normalization; setup validation and server
      field-error mapping; login error states; invite flow; settings actions.

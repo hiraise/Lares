@@ -9,7 +9,7 @@ Start a new session in the repository root and type `/plan-run M0-09` (or just "
 [`plan-run`](../../.claude/skills/plan-run/SKILL.md) holds the executor instructions; without skills, use this prompt:
 
 ```text
-Ты исполнитель в проекте FamilyHub. Выполни план docs/plans/M0/NN-name.md по правилам скила
+Ты исполнитель в проекте Lares. Выполни план docs/plans/M0/NN-name.md по правилам скила
 .claude/skills/plan-run/SKILL.md. Коммит — только после одобрения заказчика.
 ```
 

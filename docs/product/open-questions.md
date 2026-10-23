@@ -16,7 +16,7 @@ Q-001…Q-012 answered by the customer on 2026-10-22 during kickoff; later answe
 
 | Q | Topic | Answer |
 | --- | --- | --- |
-| Q-001 | Project name | Keep `FamilyHub` as the working name; decide before public release (M6). |
+| Q-001 | Project name | 2026-10-23: the project is named **Lares**. Package and application id `app.lares`; repository `github.com/hiraise/lares`. (Earlier working name: FamilyHub.) |
 | Q-002 | Milestone order after Tasks | Shopping → Calendar → Location → Budget. |
 | Q-003 | Google Play | App complies with Play policies from day one; APKs until MVP; whether to publish on Play is decided at M6. |
 | Q-004 | Income allocation | Ordered rules: fixed amounts and percents of the remainder; remainder manual or to a chosen category; rule set per income source. |

@@ -10,7 +10,7 @@ Toolchain versions: [versions.md](../plans/M0/versions.md) and `gradle/libs.vers
 - Format before checking: `./gradlew spotlessApply`. Never disable ktlint globally; if it cannot parse valid code
   (it embeds the Kotlin 2.2 parser), avoid the newer syntax or report the problem.
 - Modules: `:contract` (KMP), `:server` (Ktor), `:client:shared` (KMP + Compose), `:client:android` (app). Packages
-  `app.familyhub.contract`, `app.familyhub.server`, `app.familyhub.client`; refer to modules via typesafe accessors
+  `app.lares.contract`, `app.lares.server`, `app.lares.client`; refer to modules via typesafe accessors
   (`projects.contract`).
 - New ids: `Ids.newId()` from `contract` (UUIDv7); do not call the UUID API directly.
 - Package / module per feature (ADR-0012); no cross-feature access to internals.
@@ -20,9 +20,9 @@ Toolchain versions: [versions.md](../plans/M0/versions.md) and `gradle/libs.vers
 
 ## Server
 
-- Packages: `app.familyhub.server.<feature>` per feature module (ADR-0012); infrastructure in
-  `app.familyhub.server.platform` (`db`, `http`, `sync`, `AppConfig`). A feature defines its own Exposed tables in its package.
-- Configuration only from `FAMILYHUB_*` environment variables (`AppConfig.fromEnv`); no HOCON/YAML files.
+- Packages: `app.lares.server.<feature>` per feature module (ADR-0012); infrastructure in
+  `app.lares.server.platform` (`db`, `http`, `sync`, `AppConfig`). A feature defines its own Exposed tables in its package.
+- Configuration only from `LARES_*` environment variables (`AppConfig.fromEnv`); no HOCON/YAML files.
 - No DI framework: dependencies are passed by constructor; `AppDeps` is the hand-wired container,
   `fun Application.module(deps: AppDeps)` installs plugins and routes.
 - Database access only through `AppDatabase.dbQuery { … }` (one transaction, Exposed DSL, `Dispatchers.IO`).
@@ -41,7 +41,7 @@ Toolchain versions: [versions.md](../plans/M0/versions.md) and `gradle/libs.vers
 - Slow work (Argon2 hashing) runs outside `dbQuery` on `Dispatchers.Default`.
 - Timestamps: `timestamptz` columns, `java.time.Instant` in tables, `kotlin.time.Instant` in contract DTOs.
   UUID columns: `javaUUID(...)` (`java.util.UUID`).
-- Tests: the harness lives in `server/src/testFixtures/kotlin/app/familyhub/server/testing/` (test fixtures, also used by
+- Tests: the harness lives in `server/src/testFixtures/kotlin/app/lares/server/testing/` (test fixtures, also used by
   `integration-tests/`). Identity helpers in `testing/IdentityFixtures.kt` (`setup()`, `login()`, `bearer()`, `assertError()`,
   `createUserDirectly()`); the test setup code is `TEST_SETUP_CODE`; move time with `deps.testClock.advance(…)`.
   Administration helpers in `testing/AdminFixtures.kt` (`memberSession()`, `createMember()`, `loginCodeFor()`, `send()`,
@@ -57,7 +57,7 @@ Toolchain versions: [versions.md](../plans/M0/versions.md) and `gradle/libs.vers
 
 ## Client
 
-- Packages under `app.familyhub.client`: `db`, `api`, `auth`, `sync`, `data`, `di`, `platform` (see
+- Packages under `app.lares.client`: `db`, `api`, `auth`, `sync`, `data`, `di`, `platform` (see
   [overview](../architecture/overview.md#client)). No Android-only APIs in `commonMain`; platform code lives in
   `androidMain`/`jvmMain` and reaches common code through Koin.
 - DI: Koin. `sharedModule(platformModule)` builds a complete client core; modules are created by functions, never
@@ -74,7 +74,7 @@ Toolchain versions: [versions.md](../plans/M0/versions.md) and `gradle/libs.vers
 
 ## Client UI
 
-- Code: `client/shared/src/commonMain/kotlin/app/familyhub/client/ui/` — `theme/` (tokens), `components/` (shared
+- Code: `client/shared/src/commonMain/kotlin/app/lares/client/ui/` — `theme/` (tokens), `components/` (shared
   composables), `common/` (errors, labels, dates), one package per area (`onboarding`, `main`, `settings`, later one per
   feature). `App()` picks the graph from `SessionManager.state`; routes are `@Serializable` objects in `ui/Navigation.kt`.
 - Pattern per screen: a `ViewModel` (JetBrains lifecycle) with an immutable `XxxUiState` in a `StateFlow` and plain
@@ -84,14 +84,14 @@ Toolchain versions: [versions.md](../plans/M0/versions.md) and `gradle/libs.vers
 - Errors: catch with `attempt { }` or `try` (rethrow `CancellationException`), map with `toUiError()`; field errors are
   `FieldError` keyed by the request field name, so server `fields` land on the same inputs. All error text comes from
   `ui/common/ErrorMessages.kt`.
-- Look: only theme tokens — `MaterialTheme.colorScheme`, `FamilyHubTheme.colors` (extra roles, gradient), `Spacing`,
+- Look: only theme tokens — `MaterialTheme.colorScheme`, `LaresTheme.colors` (extra roles, gradient), `Spacing`,
   `MaterialTheme.shapes`, palette tones via `PaletteColor.tones()`. Icons: `AppIcon(Res.drawable.ic_<name>)` from
   `tools/design-assets`; never `material-icons-core`. Top-level screens use `ScreenHeader`, detail screens `AppPage` +
   `DetailTopBar`, lists `ListGroup`/`ListRow`/`ListDivider`.
 - Strings: `composeResources/values/strings.xml` and `values-ru/strings.xml` with the same keys; plurals for counts;
   dates through `ui/common/DateTime.kt` (no locale formatting in common code). No literal user-visible text in Kotlin.
 - Tests: ViewModels in `jvmTest` with `UiTestCore` (a real client core on a Ktor `MockEngine`; wait with `awaitState`);
-  stateless screens with `runComposeUiTest` inside `FamilyHubTheme`; `App()` with `KoinIsolatedContext(core.app)` and
+  stateless screens with `runComposeUiTest` inside `LaresTheme`; `App()` with `KoinIsolatedContext(core.app)` and
   `mainDispatcher = Dispatchers.Unconfined`. Set `Locale.setDefault(Locale.ENGLISH)` before asserting texts.
 
 ## Data and values

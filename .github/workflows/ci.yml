@@ -27,7 +27,7 @@ jobs:
       - name: Upload debug APK
         uses: actions/upload-artifact@v7
         with:
-          name: familyhub-debug-apk
+          name: lares-debug-apk
           path: client/android/build/outputs/apk/debug/*.apk
           if-no-files-found: error
 

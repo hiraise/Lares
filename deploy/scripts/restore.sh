@@ -1,6 +1,6 @@
 #!/bin/sh
-# Restores the FamilyHub database from a backup made by backup.sh. Replaces ALL current data.
-#   deploy/scripts/restore.sh deploy/backups/familyhub-20261023-031500.dump
+# Restores the Lares database from a backup made by backup.sh. Replaces ALL current data.
+#   deploy/scripts/restore.sh deploy/backups/lares-20261023-031500.dump
 # Stops the server, recreates the database, restores the dump, starts a new sync epoch (every app resyncs fully,
 # see docs/architecture/sync.md, reset rule 4) and starts the server again.
 set -eu
@@ -32,12 +32,12 @@ echo "stopping the server"
 docker compose stop server
 
 echo "recreating the database"
-pg dropdb -U familyhub --if-exists --force familyhub
-pg createdb -U familyhub -O familyhub familyhub
+pg dropdb -U lares --if-exists --force lares
+pg createdb -U lares -O lares lares
 
 echo "restoring $BACKUP"
-pg pg_restore -U familyhub -d familyhub --no-owner --exit-on-error <"$BACKUP"
-pg psql -U familyhub -d familyhub -v ON_ERROR_STOP=1 -q \
+pg pg_restore -U lares -d lares --no-owner --exit-on-error <"$BACKUP"
+pg psql -U lares -d lares -v ON_ERROR_STOP=1 -q \
     -c "UPDATE household_sync_state SET sync_epoch = gen_random_uuid();"
 
 echo "starting the server"

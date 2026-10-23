@@ -35,8 +35,8 @@ Out of scope: database, real endpoints (M0-02), SQLDelight (M0-06), UI beyond a 
 - Versions exactly as in [versions.md](versions.md); copy its TOML block verbatim into `gradle/libs.versions.toml`.
 - Module paths: `:contract`, `:server`, `:client:shared`, `:client:android` (folders `contract/`, `server/`,
   `client/shared/`, `client/android/`). Typesafe project accessors on (`projects.contract`, `projects.client.shared`).
-- Packages / namespaces: `app.familyhub.contract`, `app.familyhub.server`, `app.familyhub.client`
-  (+ Compose resources class package `app.familyhub.client.resources`), Android `applicationId = "app.familyhub.android"`
+- Packages / namespaces: `app.lares.contract`, `app.lares.server`, `app.lares.client`
+  (+ Compose resources class package `app.lares.client.resources`), Android `applicationId = "app.lares.android"`
   with debug suffix `.debug`. (The working name will be renamed before M6 — keep names centralized.)
 - JDK toolchain 21 everywhere (`kotlin { jvmToolchain(21) }`). Bytecode: server 21; KMP `jvm()` and Android targets 17
   (`compilerOptions { jvmTarget.set(JvmTarget.JVM_17) }`).
@@ -64,15 +64,15 @@ Out of scope: database, real endpoints (M0-02), SQLDelight (M0-06), UI beyond a 
    Create `local.properties` (gitignored) with `sdk.dir=/opt/homebrew/share/android-commandlinetools`.
 4. **Emulator (recommended, ~3 GB)**: `sdkmanager "emulator" "system-images;android-37.0;default;arm64-v8a"`
    (AOSP image without Google services; if unavailable, pick the newest `default` arm64 image from `sdkmanager --list`).
-   `avdmanager create avd -n familyhub -k "<that image>" -d pixel_7`. Headless start:
-   `$ANDROID_HOME/emulator/emulator -avd familyhub -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect &`,
+   `avdmanager create avd -n lares -k "<that image>" -d pixel_7`. Headless start:
+   `$ANDROID_HOME/emulator/emulator -avd lares -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect &`,
    wait with `adb wait-for-device` and `adb shell getprop sys.boot_completed` = 1. Stop: `adb emu kill`.
    If the emulator cannot run, continue and report.
 5. **Settings and root build**:
    - `settings.gradle.kts`: `pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }`,
      `plugins { id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0" }`,
      `dependencyResolutionManagement { repositories { google(); mavenCentral() } }`,
-     `enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")`, `rootProject.name = "familyhub"`, includes.
+     `enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")`, `rootProject.name = "lares"`, includes.
    - `gradle.properties`: `org.gradle.jvmargs=-Xmx4g -Dfile.encoding=UTF-8`, `org.gradle.caching=true`,
      `org.gradle.configuration-cache=true`, `org.gradle.parallel=true`, `kotlin.code.style=official`, `android.useAndroidX=true`,
      `version=0.1.0` (project version for all modules; the server reports it as `serverVersion`).
@@ -82,35 +82,35 @@ Out of scope: database, real endpoints (M0-02), SQLDelight (M0-06), UI beyond a 
    - `.editorconfig`: add a `[*.{kt,kts}]` section: `ktlint_code_style = ktlint_official`, `max_line_length = 140`,
      `ktlint_function_naming_ignore_when_annotated_with = Composable`.
 6. **`contract`**: plugins `kotlin-multiplatform`, `android-kmp-library`, `kotlin-serialization`. Targets per Decisions,
-   `android { namespace = "app.familyhub.contract"; compileSdk = 37; minSdk = 26 }`. Dependencies: commonMain
+   `android { namespace = "app.lares.contract"; compileSdk = 37; minSdk = 26 }`. Dependencies: commonMain
    `kotlinx-serialization-json`, `kotlinx-datetime`; commonTest `kotlin-test`; jvmTest `kotlin-test-junit5`,
    `platform(junit-bom)`, runtimeOnly `junit-platform-launcher`; `tasks.withType<Test>().configureEach { useJUnitPlatform() }`.
-   Code: `app/familyhub/contract/Ids.kt` — `object Ids { fun newId(): String }` using `Uuid.generateV7()` with the opt-in.
+   Code: `app/lares/contract/Ids.kt` — `object Ids { fun newId(): String }` using `Uuid.generateV7()` with the opt-in.
    Test: generated id parses as UUID, version nibble = 7, two ids generated in sequence sort ascending as strings.
-7. **`server`**: plugins `kotlin-jvm`, `kotlin-serialization`, `application`; `application { mainClass.set("app.familyhub.server.ApplicationKt") }`.
+7. **`server`**: plugins `kotlin-jvm`, `kotlin-serialization`, `application`; `application { mainClass.set("app.lares.server.ApplicationKt") }`.
    Dependencies: `projects.contract`, ktor server core/netty/content-negotiation, `ktor-serialization-kotlinx-json`,
    `logback-classic`; tests: `kotlin-test-junit5`, `platform(junit-bom)`, `ktor-server-test-host`, `junit-platform-launcher`.
    Code: `main()` starting Netty on port 8080 with `GET /health/live` → `{"status":"ok"}` (a `fun Application.module()` used by
    tests). Test with `testApplication { application { module() } }`.
 8. **`client:shared`**: plugins `kotlin-multiplatform`, `android-kmp-library`, `compose-multiplatform`, `compose-compiler`,
-   `kotlin-serialization`. `android { namespace = "app.familyhub.client"; compileSdk = 37; minSdk = 26;
+   `kotlin-serialization`. `android { namespace = "app.lares.client"; compileSdk = 37; minSdk = 26;
    androidResources { enable = true }; withHostTest { } }`; `jvm()`. commonMain: compose runtime/foundation/ui/material3/
    components-resources/ui-tooling-preview, `projects.contract`. jvmTest: `kotlin-test-junit5`, `platform(junit-bom)`,
    `junit-platform-launcher` (runtime), `compose-ui-test`, desktop runtime for the host OS (see versions.md build notes).
-   `compose.resources { packageOfResClass = "app.familyhub.client.resources"; publicResClass = false }`.
+   `compose.resources { packageOfResClass = "app.lares.client.resources"; publicResClass = false }`.
    Code: `@Composable fun App()` → `MaterialTheme { Surface { Text(stringResource(Res.string.app_name)) } }`;
-   `composeResources/values/strings.xml` (`app_name` = "FamilyHub") and `values-ru/strings.xml` (same value).
-   JVM UI test (`runComposeUiTest`) asserting the text "FamilyHub" is displayed.
-9. **`client:android`**: plugins `android-application`, `compose-compiler`. `android { namespace = "app.familyhub.android";
-   compileSdk = 37; defaultConfig { applicationId = "app.familyhub.android"; minSdk = 26; targetSdk = 37; versionCode = 1;
+   `composeResources/values/strings.xml` (`app_name` = "Lares") and `values-ru/strings.xml` (same value).
+   JVM UI test (`runComposeUiTest`) asserting the text "Lares" is displayed.
+9. **`client:android`**: plugins `android-application`, `compose-compiler`. `android { namespace = "app.lares.android";
+   compileSdk = 37; defaultConfig { applicationId = "app.lares.android"; minSdk = 26; targetSdk = 37; versionCode = 1;
    versionName = "0.1.0" }; buildTypes { debug { applicationIdSuffix = ".debug" } }; compileOptions { 17 } }`,
    `kotlin { compilerOptions { jvmTarget.set(JvmTarget.JVM_17) } }`. Dependencies: `projects.client.shared`,
    `androidx-activity-compose`. `MainActivity : ComponentActivity` with `enableEdgeToEdge()` and `setContent { App() }`;
-   manifest with label "FamilyHub" and the launcher activity; placeholder adaptive icon (vector). If the build says Compose
+   manifest with label "Lares" and the launcher activity; placeholder adaptive icon (vector). If the build says Compose
    is not enabled, add `buildFeatures { compose = true }`.
 10. **Run**: `./gradlew spotlessApply check :client:android:assembleDebug`. If the emulator runs:
-    `./gradlew :client:android:installDebug`, `adb shell am start -n app.familyhub.android.debug/app.familyhub.android.MainActivity`,
-    `adb exec-out screencap -p > <scratchpad>/m0-01.png`, inspect that "FamilyHub" is visible.
+    `./gradlew :client:android:installDebug`, `adb shell am start -n app.lares.android.debug/app.lares.android.MainActivity`,
+    `adb exec-out screencap -p > <scratchpad>/m0-01.png`, inspect that "Lares" is visible.
 11. **CI** `.github/workflows/ci.yml`: on `push` to `main` and `pull_request`; job `build` on `ubuntu-latest`:
     checkout v7, setup-java v6 (temurin 21), setup-gradle v6, `./gradlew check :client:android:assembleDebug --stacktrace`,
     upload the debug APK as an artifact. (The repo has no remote yet; just keep the file valid.)
@@ -122,7 +122,7 @@ Out of scope: database, real endpoints (M0-02), SQLDelight (M0-06), UI beyond a 
 
 - `./gradlew check :client:android:assembleDebug` passes from a clean checkout (`git clean -xfd` excluding `local.properties` is not required).
 - `./gradlew :server:run` → `curl localhost:8080/health/live` returns `{"status":"ok"}`.
-- APK exists; emulator screenshot shows "FamilyHub" (or the emulator step is reported as skipped with the reason).
+- APK exists; emulator screenshot shows "Lares" (or the emulator step is reported as skipped with the reason).
 - `git status` shows no build outputs or `local.properties`; the wrapper jar is included.
 
 ## Docs to update

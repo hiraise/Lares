@@ -44,10 +44,10 @@ Out of scope: location visibility rules editor (M4), money account access editor
   unchecks that section's actions.
 - **Administrators group**: shown first with a lock icon and the text "Full access to everything, including all data";
   permissions not editable; membership editable (cannot remove the last member — show the `LAST_ADMIN` message).
-- **Invite sharing**: show QR (qrose) + "Share link" (Android share sheet with the `familyhub://invite?...` payload and
+- **Invite sharing**: show QR (qrose) + "Share link" (Android share sheet with the `lares://invite?...` payload and
   a short instruction text) + expiry time. List of active invites with "Revoke".
 - **Login QR for a member** (admin): full-screen QR with 5-minute countdown and instruction
-  "Open FamilyHub on the new phone → Log in with QR code".
+  "Open Lares on the new phone → Log in with QR code".
 - **Tags**: color chosen from the `PaletteColor` palette (10 swatches, values in visual-style.md); archived tags in a collapsible section; delete asks
   for confirmation. Name conflicts surface as sync rejections (`TAG_NAME_TAKEN`) and as inline validation when the
   name already exists locally.

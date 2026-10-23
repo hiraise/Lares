@@ -9,7 +9,7 @@ All request/response types live in `contract/` as `@Serializable` classes; serve
 ## Conventions
 
 - Base path `/api/v1`. JSON only, UTF-8. Field names camelCase.
-- Header `X-FamilyHub-Protocol: 1` on every request (see [sync.md § versioning](sync.md#versioning)).
+- Header `X-Lares-Protocol: 1` on every request (see [sync.md § versioning](sync.md#versioning)).
 - Secrets (setup code, invite code, login code, passwords, tokens) travel only in request bodies or headers, never in URLs.
 - Every id referenced in a request body or path (group, member, person, invite ids) must belong to the caller's household;
   otherwise the server answers `NOT_FOUND` (never `FORBIDDEN`, to avoid revealing existence).
@@ -138,7 +138,7 @@ DTOs live in `contract/…/api/notifications/NotificationDtos.kt` (FND-051, FND-
   values fall back to `en`); the server renders notification texts in it. `VALIDATION_FAILED` with field errors for a
   bad key, an endpoint longer than 2048 characters, or an endpoint that is not http(s) or whose host resolves to a
   non-global address (loopback, RFC 1918, RFC 4193, link-local, CGNAT) unless the host is listed in
-  `FAMILYHUB_PUSH_ALLOWED_HOSTS` (comma-separated). The same check runs again before every send.
+  `LARES_PUSH_ALLOWED_HOSTS` (comma-separated). The same check runs again before every send.
 - `DELETE /me/push` → **204**. Logout and every session revocation also delete the session's registration.
 - `POST /me/push/test` → **200** `PushTestResponse {result}`: `sent`, `muted` (the member muted `system.test`),
   `not_registered`, `expired` (the push service answered 404/410; the registration was deleted), `failed`.

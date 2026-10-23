@@ -30,7 +30,7 @@ other members' changes must appear without manual refresh. Several phones edit t
 All points left open by the direction above are settled in [sync protocol v1](../architecture/sync.md):
 
 - Wire format and paging: pull pages of at most 1000 changes in one snapshot; pushes of at most 100 mutations.
-- Version skew: `X-FamilyHub-Protocol` header with a supported range; lenient decoding of unknown fields, types and
+- Version skew: `X-Lares-Protocol` header with a supported range; lenient decoding of unknown fields, types and
   enum values; client `dataSchemaVersion` forces a full resync after an app update that stores data differently.
 - Permission changes: `member.access_version` makes the next pull a reset; the full resync replaces all local data.
 - Restores: a new `sync_epoch` resets every client.

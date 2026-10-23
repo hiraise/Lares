@@ -25,7 +25,7 @@ kotlin {
     jvmToolchain(21)
 
     android {
-        namespace = "app.familyhub.client"
+        namespace = "app.lares.client"
         compileSdk = 37
         minSdk = 26
         androidResources {
@@ -101,14 +101,14 @@ kotlin {
 
 sqldelight {
     databases {
-        create("FamilyHubDb") {
-            packageName.set("app.familyhub.client.db")
+        create("LaresDb") {
+            packageName.set("app.lares.client.db")
         }
     }
 }
 
 compose.resources {
-    packageOfResClass = "app.familyhub.client.resources"
+    packageOfResClass = "app.lares.client.resources"
     publicResClass = false
 }
 

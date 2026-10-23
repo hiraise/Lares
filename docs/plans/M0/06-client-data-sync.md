@@ -22,7 +22,7 @@ exposing `Flow`s, and permission evaluation. Prove convergence with multi-device
 
 ## Scope
 
-- `client/shared` packages under `app.familyhub.client`: `db` (SQLDelight), `api`, `auth`, `sync`, `data` (repositories),
+- `client/shared` packages under `app.lares.client`: `db` (SQLDelight), `api`, `auth`, `sync`, `data` (repositories),
   `di` (Koin modules), `platform` (expect/actual).
 - New JVM module `integration-tests/` with multi-device sync tests (server + several client instances in one JVM).
 
@@ -30,20 +30,20 @@ Out of scope: UI (M0-07/08), push (M0-09), WorkManager scheduling (M0-09).
 
 ## Decisions (do not revisit)
 
-- **SQLDelight** database `FamilyHubDb`, schema files in `client/shared/src/commonMain/sqldelight/app/familyhub/client/db/`.
+- **SQLDelight** database `LaresDb`, schema files in `client/shared/src/commonMain/sqldelight/app/lares/client/db/`.
   Drivers: Android `AndroidSqliteDriver`, JVM `JdbcSqliteDriver` (in-memory for tests, file for desktop later).
 - Typed tables: `household`, `member`, `group_entity`, `person`, `tag`; lists (`permissions`, `memberIds`, `contacts`)
   stored as JSON text columns. Sync tables exactly as in sync.md (`sync_shadow`, `sync_outbox`, `sync_state`, `sync_rejection`).
 - Generic materialization via JSON: entity data = `shadow.data` (JsonObject) merged with pending `fields` in outbox order,
   decoded with the contract data class serializer. One `EntityAdapter<T>` per type:
   `type`, `serializer: KSerializer<T>`, `upsertTyped(db, id, data: T)`, `deleteTyped(db, id)`, `validate(data: T): Map<String, FieldErrorCode>`.
-- **API client**: Ktor client with `FamilyHubJson`, header `X-FamilyHub-Protocol`, bearer access token. On
+- **API client**: Ktor client with `LaresJson`, header `X-Lares-Protocol`, bearer access token. On
   `SESSION_EXPIRED` or `UNAUTHENTICATED` (for a request that carried a token) → single-flight refresh (Mutex) → retry once.
   On `SESSION_REVOKED`, or if the refresh fails with any 401 → emit `AuthEvent.LoggedOut`, clear tokens and local database.
   Persist the new token pair **before** using it (refresh grace window, auth.md). Non-2xx → `ApiException(ErrorCode, fields)` decoded from the body.
   Engines: OkHttp on Android, CIO on JVM.
 - **Token storage**: `expect interface`-style abstraction `TokenStore { suspend fun load(): Tokens?; suspend fun save(t: Tokens); suspend fun clear() }`.
-  Android: DataStore Preferences with values encrypted by an AES-GCM key from Android Keystore (alias `familyhub_tokens`).
+  Android: DataStore Preferences with values encrypted by an AES-GCM key from Android Keystore (alias `lares_tokens`).
   JVM: in-memory implementation. (No `EncryptedSharedPreferences` — deprecated.)
 - `ServerStore` (DataStore on Android, in-memory on JVM): server base URL, device id (UUIDv7 generated once).
 - **Sync engine**: one instance per logged-in session; single-flight `syncNow()` guarded by a Mutex; triggers sent to a
@@ -74,7 +74,7 @@ Out of scope: UI (M0-07/08), push (M0-09), WorkManager scheduling (M0-09).
    write typed row, enqueue outbox (mutationId = UUIDv7, createdAt = now); then `syncEngine.request()`.
    Convenience use cases: `TagsWriter.create(name, color)`, `rename`, `recolor`, `archive`, `delete`;
    `PersonsWriter.create(PersonData)` (sets `color = PaletteColors.pickLeastUsed(local persons)` when null, FND-034), `update(id, changes)`, `delete(id)`. IDs are UUIDv7 from `contract/`.
-5. **API client** (`api/FamilyHubApi.kt`): functions for every endpoint in [api.md](../../architecture/api.md) used by the app
+5. **API client** (`api/LaresApi.kt`): functions for every endpoint in [api.md](../../architecture/api.md) used by the app
    (instance, setup, login, login-code, refresh, logout, me, password, sessions, delete me, household admin, members,
    groups, invites, login codes, sync changes/mutations) + `events()` returning a `Flow<SyncEvent>` over WebSocket.
    Mock-engine unit tests: protocol header present; refresh-on-expired retries once; revoked → LoggedOut; error decoding.

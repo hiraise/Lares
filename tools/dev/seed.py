@@ -12,7 +12,7 @@ Test family "Петровы" (setup code DEVSETUP01):
   Дмитрий Петров dima / dima-password  Взрослые
   Аня, Тимур     no login              Дети
 A payload is a deep link; open it on the emulator with: tools/dev/emu.sh link '<payload>'.
-State (member ids) is kept in build/dev/seed.json. Env: FAMILYHUB_PORT (default 8080).
+State (member ids) is kept in build/dev/seed.json. Env: LARES_PORT (default 8080).
 """
 import json
 import os
@@ -22,7 +22,7 @@ import urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 STATE = os.path.join(ROOT, "build", "dev", "seed.json")
-BASE = f"http://localhost:{os.environ.get('FAMILYHUB_PORT', '8080')}/api/v1"
+BASE = f"http://localhost:{os.environ.get('LARES_PORT', '8080')}/api/v1"
 DEVICE = {"name": "seed script", "platform": "cli"}
 
 
@@ -30,7 +30,7 @@ def call(method, path, body=None, token=None):
     data = json.dumps(body).encode() if body is not None else None
     req = urllib.request.Request(BASE + path, method=method, data=data)
     req.add_header("Content-Type", "application/json")
-    req.add_header("X-FamilyHub-Protocol", "1")
+    req.add_header("X-Lares-Protocol", "1")
     if token:
         req.add_header("Authorization", "Bearer " + token)
     try:

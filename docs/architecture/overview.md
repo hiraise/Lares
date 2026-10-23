@@ -18,7 +18,7 @@ flowchart LR
     end
     subgraph VPS["VPS (Docker Compose)"]
         C[Caddy<br/>HTTPS]
-        S[FamilyHub server<br/>Ktor]
+        S[Lares server<br/>Ktor]
         P[(PostgreSQL)]
         N[ntfy<br/>UnifiedPush, optional]
         TR[Traccar<br/>optional, later]
@@ -57,7 +57,7 @@ requests and the phones' ntfy connections both go through Caddy. Files and scrip
 - Kotlin Multiplatform; Compose Multiplatform UI. Details: [sync.md](sync.md), [auth.md](auth.md), [api.md](api.md).
 - Layers: UI (screens, view models, unidirectional data flow) → repositories → local DB + sync engine → HTTP client.
 - UI reads from the local DB only; the sync engine pushes the outbox and pulls changes (ADR-0008).
-- Client core (`client/shared`, package `app.familyhub.client`, M0-06): `db` (SQLDelight `FamilyHubDb`), `api`
+- Client core (`client/shared`, package `app.lares.client`, M0-06): `db` (SQLDelight `LaresDb`), `api`
   (Ktor client, token refresh), `auth` (`SessionManager`, token storage), `sync` (entity adapters, materializer,
   `LocalWriter`, `SyncEngine`), `data` (repositories and writers), `di` (Koin), platform modules in `androidMain`/`jvmMain`.
 - Android-specific: location foreground service, notification scheduling, UnifiedPush receiver, battery optimization guidance.

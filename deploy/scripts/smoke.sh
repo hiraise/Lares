@@ -2,7 +2,7 @@
 # End-to-end smoke test of the production stack on this machine (CI job deploy-smoke, or locally with Docker):
 # builds the server image from `./gradlew :server:installDist`, starts the full stack (with ntfy) as
 # https://localhost, performs setup, backs up, writes a tag, restores, and checks that the tag is gone.
-# Needs free ports 80 and 443. Everything is removed at the end (separate compose project "familyhub-smoke").
+# Needs free ports 80 and 443. Everything is removed at the end (separate compose project "lares-smoke").
 #   ./gradlew :server:installDist && deploy/scripts/smoke.sh
 set -eu
 
@@ -20,21 +20,21 @@ fi
 
 WORK=$(mktemp -d)
 password=$(od -An -tx1 -N16 /dev/urandom | tr -d ' \n')
-grep -v -E '^(FAMILYHUB_DOMAIN|POSTGRES_PASSWORD|FAMILYHUB_DB_PASSWORD)=' "$DEPLOY_DIR/.env.example" >"$WORK/env"
+grep -v -E '^(LARES_DOMAIN|POSTGRES_PASSWORD|LARES_DB_PASSWORD)=' "$DEPLOY_DIR/.env.example" >"$WORK/env"
 cat >>"$WORK/env" <<ENV
-FAMILYHUB_DOMAIN=localhost
+LARES_DOMAIN=localhost
 POSTGRES_PASSWORD=$password
-FAMILYHUB_DB_PASSWORD=$password
-FAMILYHUB_SETUP_CODE=$SETUP_CODE
-FAMILYHUB_CADDYFILE=Caddyfile.push
-FAMILYHUB_NTFY_DOMAIN=ntfy.localhost
+LARES_DB_PASSWORD=$password
+LARES_SETUP_CODE=$SETUP_CODE
+LARES_CADDYFILE=Caddyfile.push
+LARES_NTFY_DOMAIN=ntfy.localhost
 ENV
 
-export COMPOSE_PROJECT_NAME=familyhub-smoke
+export COMPOSE_PROJECT_NAME=lares-smoke
 export COMPOSE_FILE="$DEPLOY_DIR/docker-compose.yml:$DEPLOY_DIR/docker-compose.build.yml"
 export COMPOSE_ENV_FILES="$WORK/env"
 export COMPOSE_PROFILES=push
-export FAMILYHUB_BACKUP_DIR="$WORK/backups"
+export LARES_BACKUP_DIR="$WORK/backups"
 
 passed=no
 cleanup() {
@@ -58,10 +58,10 @@ fail() {
 api() { # METHOD PATH [BODY] [TOKEN]
     set -- "$1" "$2" "${3:-}" "${4:-}"
     if [ -n "$4" ]; then
-        curl -fsSk -X "$1" -H 'Content-Type: application/json' -H 'X-FamilyHub-Protocol: 1' \
+        curl -fsSk -X "$1" -H 'Content-Type: application/json' -H 'X-Lares-Protocol: 1' \
             -H "Authorization: Bearer $4" ${3:+--data "$3"} "$BASE/api/v1$2"
     else
-        curl -fsSk -X "$1" -H 'Content-Type: application/json' -H 'X-FamilyHub-Protocol: 1' \
+        curl -fsSk -X "$1" -H 'Content-Type: application/json' -H 'X-Lares-Protocol: 1' \
             ${3:+--data "$3"} "$BASE/api/v1$2"
     fi
 }
@@ -97,7 +97,7 @@ epoch_before=$(api GET '/sync/changes?after=0' '' "$token" | json_string epoch)
 
 step "backup"
 "$SCRIPTS_DIR/backup.sh"
-for backup in "$FAMILYHUB_BACKUP_DIR"/familyhub-*.dump; do :; done
+for backup in "$LARES_BACKUP_DIR"/lares-*.dump; do :; done
 [ -f "$backup" ] || fail "no backup file written"
 
 step "creating a tag through the sync API"

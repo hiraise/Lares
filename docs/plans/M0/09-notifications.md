@@ -67,7 +67,7 @@ Out of scope: concrete module notifications (task assigned/overdue come in M1 us
    notifications, 600 for sync tickles), `Content-Encoding: aes128gcm`. Handle results: expired (404/410) → delete the
    registration; other failures → log and drop (no retry queue in M0).
    **SSRF guard** (UnifiedPush recommendation): refuse endpoints whose host resolves to a non-global IP (loopback,
-   RFC 1918, RFC 4193, link-local) unless the host is listed in `FAMILYHUB_PUSH_ALLOWED_HOSTS` (comma-separated);
+   RFC 1918, RFC 4193, link-local) unless the host is listed in `LARES_PUSH_ALLOWED_HOSTS` (comma-separated);
    validate on `PUT /me/push` and again before sending.
 4. **Server service + endpoints**: `PUT /api/v1/me/push`, `DELETE /api/v1/me/push`, `POST /api/v1/me/push/test`
    (sends `SYSTEM_TEST` to the caller's session), `GET` and `PUT /api/v1/me/notification-settings`;
@@ -102,7 +102,7 @@ Out of scope: concrete module notifications (task assigned/overdue come in M1 us
       reminder store re-registration logic.
 11. **Device check** (emulator, if available): install ntfy from F-Droid is not possible on a stock emulator image without
     network policies — instead verify: local test reminder fires; WorkManager periodic work is enqueued
-    (`adb shell dumpsys jobscheduler | grep familyhub`); notification permission flow; settings screen states.
+    (`adb shell dumpsys jobscheduler | grep lares`); notification permission flow; settings screen states.
     Report UnifiedPush end-to-end as "requires a phone with ntfy" if it cannot be checked.
 
 ## Acceptance

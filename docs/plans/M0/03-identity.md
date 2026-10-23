@@ -117,7 +117,7 @@ Out of scope: invites, login codes, member/group administration (M0-04); sync en
    spaces, lowercase), generated codes use only the alphabet.
 7. **Limiter** (`identity/FailedAttemptLimiter.kt`): in-memory, keys with sliding window (10 per 15 min for login,
    5 per 15 min for setup), `ensureAllowed(key)`, `recordFailure(key)`, `reset(key)`. Unit tests with the test clock.
-8. **Setup code** (`identity/SetupCodeProvider.kt`): on startup, if no household exists, use `FAMILYHUB_SETUP_CODE` or
+8. **Setup code** (`identity/SetupCodeProvider.kt`): on startup, if no household exists, use `LARES_SETUP_CODE` or
    generate one; log at WARN: `Setup code: XXXXX-XXXXX (enter it in the app to create your family)`.
    After successful setup, forget it.
 9. **Repositories** (`identity/…`, `household/…` packages per ADR-0012): Exposed table objects and functions for

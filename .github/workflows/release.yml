@@ -33,7 +33,7 @@ jobs:
           fi
           owner="$(echo "$GITHUB_REPOSITORY_OWNER" | tr '[:upper:]' '[:lower:]')"
           echo "version=$version" >> "$GITHUB_OUTPUT"
-          echo "image=ghcr.io/$owner/familyhub-server" >> "$GITHUB_OUTPUT"
+          echo "image=ghcr.io/$owner/lares-server" >> "$GITHUB_OUTPUT"
 
       - name: Check, test and build the server distribution
         run: ./gradlew check :server:installDist --stacktrace
@@ -62,10 +62,10 @@ jobs:
         run: |
           if [ "$VARIANT" = release ]; then
             ./gradlew :client:android:assembleRelease --stacktrace
-            cp client/android/build/outputs/apk/release/android-release.apk "$RUNNER_TEMP/familyhub-$VERSION.apk"
+            cp client/android/build/outputs/apk/release/android-release.apk "$RUNNER_TEMP/lares-$VERSION.apk"
           else
             ./gradlew :client:android:assembleDebug --stacktrace
-            cp client/android/build/outputs/apk/debug/android-debug.apk "$RUNNER_TEMP/familyhub-$VERSION-debug.apk"
+            cp client/android/build/outputs/apk/debug/android-debug.apk "$RUNNER_TEMP/lares-$VERSION-debug.apk"
           fi
           rm -f "$RUNNER_TEMP/release.jks"
 
@@ -97,4 +97,4 @@ jobs:
       - name: GitHub Release with the APK
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release create "$GITHUB_REF_NAME" "$RUNNER_TEMP"/familyhub-*.apk --title "FamilyHub $GITHUB_REF_NAME" --generate-notes
+        run: gh release create "$GITHUB_REF_NAME" "$RUNNER_TEMP"/lares-*.apk --title "Lares $GITHUB_REF_NAME" --generate-notes

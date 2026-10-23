@@ -4,7 +4,7 @@ Entry point for AI agents working on this repository. Read this file first, then
 
 ## Project in one paragraph
 
-**FamilyHub** (working name, see Q-001) is a self-hosted, open-source (AGPL-3.0-or-later) family organizer.
+**Lares** (named after the Roman guardian spirits of the home; see Q-001) is a self-hosted, open-source (AGPL-3.0-or-later) family organizer.
 Modules: shared tasks and recurring chores, shopping lists, family calendar (events, birthdays of relatives),
 location of family members on a map (phones; geofences), family budget (envelope-style income allocation,
 category deficits and loans, real debts), and tags that cut across all modules. Access is controlled by
@@ -102,13 +102,13 @@ troubleshooting: [dev-setup](docs/process/dev-setup.md).
 | Full verification (as CI): format, lint, all tests, debug APK | `tools/dev/verify.sh` (Docker running: Testcontainers PostgreSQL) |
 | One module or test class | `tools/dev/verify.sh :server:test`, `tools/dev/verify.sh :client:shared:jvmTest --tests '*Name*'` |
 | Multi-device sync tests | `tools/dev/verify.sh :integration-tests:test` (real server + several client cores) |
-| Local server for manual checks (port 8080, database `familyhub_e2e`) | `tools/dev/server.sh start` / `stop` / `reset` / `log` |
+| Local server for manual checks (port 8080, database `lares_e2e`) | `tools/dev/server.sh start` / `stop` / `reset` / `log` |
 | Test family and API calls | `tools/dev/seed.py family`, `seed.py token`, `seed.py invite`, `seed.py login-code Аня`, `seed.py call GET /me` |
 | Emulator: boot, install + launch, clear data, deep link, stop | `tools/dev/emu.sh start` / `install` / `fresh` / `link URL` / `stop` |
 | Drive the app by text, screenshot | `tools/dev/ui.sh dump` / `tap TEXT` / `field N` / `type TEXT` / `shot NAME` / `crash` |
-| Start dev database only | `docker compose -f deploy/dev/docker-compose.yml up -d --wait` (port taken: `FAMILYHUB_DEV_DB_PORT=5434 …`) |
+| Start dev database only | `docker compose -f deploy/dev/docker-compose.yml up -d --wait` (port taken: `LARES_DEV_DB_PORT=5434 …`) |
 | Run server with Gradle (main dev DB) | `./gradlew :server:run`, then `curl localhost:8080/health/ready` |
-| Server image (local) | `./gradlew :server:installDist && docker build -f server/Dockerfile -t familyhub-server:dev .` |
+| Server image (local) | `./gradlew :server:installDist && docker build -f server/Dockerfile -t lares-server:dev .` |
 | Production stack smoke test (ports 80/443 free) | `./gradlew :server:installDist && deploy/scripts/smoke.sh` |
 | Load test: simulated family, latency, memory, cold start (ports 80/443 free, ~35 min; `--duration 5m` for a short run) | `./gradlew :server:installDist :tools:loadsim:installDist && deploy/scripts/loadtest.sh` → `build/loadtest/<time>/` |
 | Backup / restore (on the server host) | `deploy/scripts/backup.sh` / `deploy/scripts/restore.sh <file>` ([manual](docs/user/en/install-server.md)) |

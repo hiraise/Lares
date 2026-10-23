@@ -19,7 +19,7 @@ dependencyResolutionManagement {
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
-rootProject.name = "familyhub"
+rootProject.name = "lares"
 
 include(":contract")
 include(":server")

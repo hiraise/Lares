@@ -2,7 +2,7 @@
 <resources>
     <!-- MainActivity is an AppCompatActivity (per-app language), so the theme must be an AppCompat one.
          Compose draws everything; the window background only shows before the first frame. -->
-    <style name="Theme.FamilyHub" parent="Theme.AppCompat.DayNight.NoActionBar">
+    <style name="Theme.Lares" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="android:windowBackground">@color/window_background</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>

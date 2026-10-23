@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Local server for manual checks (emulator walkthroughs, curl). Uses its own database `familyhub_e2e`
+# Local server for manual checks (emulator walkthroughs, curl). Uses its own database `lares_e2e`
 # in the dev PostgreSQL container, so it never touches the main dev database.
 #
 #   tools/dev/server.sh start     # dev DB up, build, start in background, wait until ready
@@ -7,7 +7,7 @@
 #   tools/dev/server.sh reset     # stop, drop the e2e database, start fresh (setup code DEVSETUP01)
 #   tools/dev/server.sh stop | status | log
 #
-# Env: FAMILYHUB_PORT (default 8080), FAMILYHUB_E2E_DB (default familyhub_e2e).
+# Env: LARES_PORT (default 8080), LARES_E2E_DB (default lares_e2e).
 # Log: build/dev/server.log. Setup code is fixed: DEVSETUP01 (shown in the app as DEVSE-TUP01).
 set -uo pipefail
 
@@ -15,8 +15,8 @@ ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 OUT="$ROOT/build/dev"
 LOG="$OUT/server.log"
 PIDF="$OUT/server.pid"
-PORT="${FAMILYHUB_PORT:-8080}"
-DB="${FAMILYHUB_E2E_DB:-familyhub_e2e}"
+PORT="${LARES_PORT:-8080}"
+DB="${LARES_E2E_DB:-lares_e2e}"
 COMPOSE=(docker compose -f "$ROOT/deploy/dev/docker-compose.yml")
 mkdir -p "$OUT"
 
@@ -32,16 +32,16 @@ db_port() {
   local p
   p="$("${COMPOSE[@]}" port postgres 5432 2>/dev/null | sed 's/.*://')"
   if [ -z "$p" ]; then
-    p="${FAMILYHUB_DEV_DB_PORT:-}"
+    p="${LARES_DEV_DB_PORT:-}"
     if [ -z "$p" ]; then
       if lsof -iTCP:5432 -sTCP:LISTEN >/dev/null 2>&1; then p=5434; else p=5432; fi
     fi
-    FAMILYHUB_DEV_DB_PORT=$p "${COMPOSE[@]}" up -d --wait >/dev/null 2>&1 || { echo "dev DB failed to start"; exit 1; }
+    LARES_DEV_DB_PORT=$p "${COMPOSE[@]}" up -d --wait >/dev/null 2>&1 || { echo "dev DB failed to start"; exit 1; }
   fi
   echo "$p"
 }
 
-psql_dev() { "${COMPOSE[@]}" exec -T postgres psql -U familyhub -d postgres -qAt -c "$1"; }
+psql_dev() { "${COMPOSE[@]}" exec -T postgres psql -U lares -d postgres -qAt -c "$1"; }
 
 running_pid() {
   local pid
@@ -69,9 +69,9 @@ start() {
   port="$(db_port)"
   [ "$(psql_dev "select 1 from pg_database where datname='$DB'")" = "1" ] || psql_dev "create database $DB" >/dev/null
   (cd "$ROOT" && ./gradlew :server:installDist -q --console=plain 2>&1 | grep -E '^e: |FAILED|wrong' | head -20)
-  JAVA_HOME="$(java_home)" FAMILYHUB_PORT="$PORT" FAMILYHUB_SETUP_CODE=DEVSETUP01 \
-    FAMILYHUB_PUBLIC_URL="http://localhost:$PORT" \
-    FAMILYHUB_DB_URL="jdbc:postgresql://localhost:$port/$DB" \
+  JAVA_HOME="$(java_home)" LARES_PORT="$PORT" LARES_SETUP_CODE=DEVSETUP01 \
+    LARES_PUBLIC_URL="http://localhost:$PORT" \
+    LARES_DB_URL="jdbc:postgresql://localhost:$port/$DB" \
     nohup "$ROOT/server/build/install/server/bin/server" >"$LOG" 2>&1 &
   echo $! >"$PIDF"
   for _ in $(seq 1 60); do

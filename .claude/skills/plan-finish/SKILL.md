@@ -1,6 +1,6 @@
 ---
 name: plan-finish
-description: Close a FamilyHub work item or plan — Definition of Done check, docs, STATUS and history, Russian handoff for the customer, commit only after approval. Use at the end of every plan or work item, before presenting results to the customer.
+description: Close a Lares work item or plan — Definition of Done check, docs, STATUS and history, Russian handoff for the customer, commit only after approval. Use at the end of every plan or work item, before presenting results to the customer.
 ---
 
 # Finish a work item

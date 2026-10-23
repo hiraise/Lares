@@ -1,6 +1,6 @@
 ---
 name: build-check
-description: Format, compile, lint and test FamilyHub with short output (tools/dev/verify.sh). Use whenever you need to build or run tests in this repo instead of calling ./gradlew directly.
+description: Format, compile, lint and test Lares with short output (tools/dev/verify.sh). Use whenever you need to build or run tests in this repo instead of calling ./gradlew directly.
 ---
 
 # Build and test

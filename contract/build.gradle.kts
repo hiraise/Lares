@@ -16,7 +16,7 @@ kotlin {
     }
 
     android {
-        namespace = "app.familyhub.contract"
+        namespace = "app.lares.contract"
         compileSdk = 37
         minSdk = 26
         compilerOptions {

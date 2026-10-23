@@ -33,35 +33,35 @@ Out of scope: load testing (M0-11), store publishing (M6), automatic updates.
 
 - **Image**: runtime base `eclipse-temurin:21-jre-noble` (multi-arch; pin the distro suffix — plain `21-jre` moved to a newer Ubuntu). The image copies the output of
   `./gradlew :server:installDist` (built before `docker build`, in CI and locally) — no Gradle inside Docker.
-  Runs as a non-root user `familyhub` (uid 10001). `EXPOSE 8080`. Installs `curl` for the healthcheck.
+  Runs as a non-root user `lares` (uid 10001). `EXPOSE 8080`. Installs `curl` for the healthcheck.
   Default `JAVA_OPTS="-XX:+UseSerialGC -Xmx160m -Xss512k -XX:MaxMetaspaceSize=128m -XX:+ExitOnOutOfMemoryError"`
   (M0-11 may tune). `HEALTHCHECK` → `curl -fsS http://localhost:8080/health/ready`.
 - **Pinned image tags**: `postgres:18-alpine`, `caddy:2.11.7-alpine`, `binwiederhier/ntfy:v2.32.0`,
   base `eclipse-temurin:21-jre-noble` (see [versions.md](versions.md)).
-- **Image name**: `ghcr.io/<github-owner>/familyhub-server` — owner from `${{ github.repository_owner }}` in CI;
-  compose uses `${FAMILYHUB_IMAGE:-ghcr.io/OWNER/familyhub-server}:${FAMILYHUB_VERSION:-latest}` with a build fallback
+- **Image name**: `ghcr.io/<github-owner>/lares-server` — owner from `${{ github.repository_owner }}` in CI;
+  compose uses `${LARES_IMAGE:-ghcr.io/hiraise/lares-server}:${LARES_VERSION:-latest}` with a build fallback
   documented for local use (`docker compose build`).
 - **Compose services**: `postgres` (`postgres:18-alpine`, healthcheck `pg_isready`, volume `pgdata` mounted at
   **`/var/lib/postgresql`** — the PostgreSQL 18 image data path), `server` (depends on healthy
   postgres; env from `.env`; `mem_limit: 384m`), `caddy` (ports 80/443, volumes `caddy_data`, `caddy_config`,
   `mem_limit: 64m`), `ntfy` (profile `push`, `mem_limit: 64m`). Restart `unless-stopped`. Only Caddy publishes ports.
-- **Caddy config**: two files in `deploy/caddy/`: `Caddyfile` (site `{$FAMILYHUB_DOMAIN}` → `reverse_proxy server:8080`) and
-  `Caddyfile.push` (the same plus site `{$FAMILYHUB_NTFY_DOMAIN}` → `reverse_proxy ntfy:80`). The caddy service runs
-  `caddy run --config /etc/caddy/${FAMILYHUB_CADDYFILE:-Caddyfile} --adapter caddyfile`; enabling push = start with
-  `--profile push` and set `FAMILYHUB_CADDYFILE=Caddyfile.push` and `FAMILYHUB_NTFY_DOMAIN`. If `FAMILYHUB_DOMAIN=localhost`,
+- **Caddy config**: two files in `deploy/caddy/`: `Caddyfile` (site `{$LARES_DOMAIN}` → `reverse_proxy server:8080`) and
+  `Caddyfile.push` (the same plus site `{$LARES_NTFY_DOMAIN}` → `reverse_proxy ntfy:80`). The caddy service runs
+  `caddy run --config /etc/caddy/${LARES_CADDYFILE:-Caddyfile} --adapter caddyfile`; enabling push = start with
+  `--profile push` and set `LARES_CADDYFILE=Caddyfile.push` and `LARES_NTFY_DOMAIN`. If `LARES_DOMAIN=localhost`,
   Caddy uses its internal CA (local smoke tests).
 - **ntfy** (`binwiederhier/ntfy:v2.32.0`, `command: serve`): config `base-url: https://ntfy.<domain>`,
   `listen-http: ":80"`, `behind-proxy: true`, `cache-file`, `auth-file`, `auth-default-access: "deny-all"`; an init step
   (documented one-time command in the manual and done automatically by `smoke.sh`) grants anonymous access only to
   UnifiedPush topics: `docker compose exec ntfy ntfy access '*' 'up*' read-write`. Result: family phones need no ntfy
   account, and the server cannot be used for arbitrary topics. `upstream-base-url` is **not** needed (iOS only).
-  Set `FAMILYHUB_PUSH_ALLOWED_HOSTS=ntfy.<domain>` only if the server resolves the ntfy host to a private IP.
-- **.env.example** documents every variable: `FAMILYHUB_DOMAIN`, `FAMILYHUB_PUBLIC_URL` (derived default
-  `https://${FAMILYHUB_DOMAIN}`), `POSTGRES_PASSWORD`, `FAMILYHUB_DB_PASSWORD` (same value), `FAMILYHUB_SETUP_CODE` (optional),
-  `FAMILYHUB_VERSION`, `FAMILYHUB_LOG_FORMAT=json`, `FAMILYHUB_IMAGE`, `FAMILYHUB_CADDYFILE`, `FAMILYHUB_NTFY_DOMAIN`,
-  `FAMILYHUB_PUSH_ALLOWED_HOSTS`. Compose sets for the server `FAMILYHUB_DB_URL=jdbc:postgresql://postgres:5432/familyhub`,
-  `FAMILYHUB_DB_USER=familyhub`, and for postgres `POSTGRES_USER=familyhub`, `POSTGRES_DB=familyhub`.
-- **Backups**: `backup.sh` runs `pg_dump -Fc` inside the postgres container to `deploy/backups/familyhub-YYYYMMDD-HHMMSS.dump`,
+  Set `LARES_PUSH_ALLOWED_HOSTS=ntfy.<domain>` only if the server resolves the ntfy host to a private IP.
+- **.env.example** documents every variable: `LARES_DOMAIN`, `LARES_PUBLIC_URL` (derived default
+  `https://${LARES_DOMAIN}`), `POSTGRES_PASSWORD`, `LARES_DB_PASSWORD` (same value), `LARES_SETUP_CODE` (optional),
+  `LARES_VERSION`, `LARES_LOG_FORMAT=json`, `LARES_IMAGE`, `LARES_CADDYFILE`, `LARES_NTFY_DOMAIN`,
+  `LARES_PUSH_ALLOWED_HOSTS`. Compose sets for the server `LARES_DB_URL=jdbc:postgresql://postgres:5432/lares`,
+  `LARES_DB_USER=lares`, and for postgres `POSTGRES_USER=lares`, `POSTGRES_DB=lares`.
+- **Backups**: `backup.sh` runs `pg_dump -Fc` inside the postgres container to `deploy/backups/lares-YYYYMMDD-HHMMSS.dump`,
   keeps the last 14 files. `restore.sh <file>` stops `server`, recreates the database, `pg_restore`, then runs
   `UPDATE household_sync_state SET sync_epoch = gen_random_uuid();` (forces every client to resync — sync.md reset rule 4),
   starts `server`. Backups go to `deploy/backups/` (gitignored — family data must never be committed).
@@ -73,10 +73,10 @@ Out of scope: load testing (M0-11), store publishing (M6), automatic updates.
 
 ## Steps
 
-1. Dockerfile + `.dockerignore`; build locally: `./gradlew :server:installDist && docker build -f server/Dockerfile -t familyhub-server:dev .`
+1. Dockerfile + `.dockerignore`; build locally: `./gradlew :server:installDist && docker build -f server/Dockerfile -t lares-server:dev .`
 2. Compose file, Caddyfile, ntfy config, `.env.example`; `deploy/README.md` (short, links to the manual).
-3. `smoke.sh`: copies `.env.example` to a temp env with `FAMILYHUB_DOMAIN=localhost`, a generated DB password and
-   `FAMILYHUB_SETUP_CODE=SMK7E5T1AB` (valid Crockford base32), runs `docker compose up -d --build` (with a compose override that builds the image
+3. `smoke.sh`: copies `.env.example` to a temp env with `LARES_DOMAIN=localhost`, a generated DB password and
+   `LARES_SETUP_CODE=SMK7E5T1AB` (valid Crockford base32), runs `docker compose up -d --build` (with a compose override that builds the image
    from the local `installDist`), waits for health, checks `https://localhost/health/ready` (with `-k`) and
    `/api/v1/instance`, performs setup with the known code, runs `backup.sh`, creates a tag via the sync API,
    runs `restore.sh` with the backup, verifies the tag is gone and the household exists, then `docker compose down -v`.

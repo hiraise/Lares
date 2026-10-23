@@ -1,6 +1,6 @@
 # Deployment
 
-Production stack for one family server (ADR-0005): FamilyHub server, PostgreSQL, Caddy (automatic HTTPS) and optional
+Production stack for one family server (ADR-0005): Lares server, PostgreSQL, Caddy (automatic HTTPS) and optional
 ntfy (instant notifications, profile `push`).
 
 Installation, backups, updates and troubleshooting for admins:
@@ -22,7 +22,7 @@ Local build and smoke test, from the repository root (Docker running, ports 80 a
 
 ```sh
 ./gradlew :server:installDist
-docker build -f server/Dockerfile -t familyhub-server:dev .   # image only
+docker build -f server/Dockerfile -t lares-server:dev .   # image only
 deploy/scripts/smoke.sh                                         # full stack, setup, backup, restore, ntfy
 ./gradlew :tools:loadsim:installDist && deploy/scripts/loadtest.sh --duration 5m   # load test (default 30 min)
 ```

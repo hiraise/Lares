@@ -46,7 +46,7 @@ Out of scope: sync endpoints (M0-05) — but every write here must already alloc
 - **Every referenced id must belong to the caller's household** (`groupIds`, `memberIds`, `personId`, invite ids, the member of a
   login code). `group_membership` has no `household_id`, so services must check explicitly. Violations → 404 `NOT_FOUND`.
 - Invite, setup and login codes are normalized with `Codes.normalize` (contract) before hashing and comparison.
-- Invite and login code formats, lifetimes and hashing exactly as in auth.md. Payload URLs use `FAMILYHUB_PUBLIC_URL`.
+- Invite and login code formats, lifetimes and hashing exactly as in auth.md. Payload URLs use `LARES_PUBLIC_URL`.
 - Login code for another member requires `household.manage`; for oneself, any member.
 
 ## Steps

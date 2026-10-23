@@ -1,6 +1,6 @@
 ---
 name: plan-run
-description: Execute one implementation plan from docs/plans/ end to end as the executor (FamilyHub). Use when the customer says "делаем M0-09", "приступаем к шагу M0-10" or runs /plan-run M0-09.
+description: Execute one implementation plan from docs/plans/ end to end as the executor (Lares). Use when the customer says "делаем M0-09", "приступаем к шагу M0-10" or runs /plan-run M0-09.
 argument-hint: "[plan id, e.g. M0-09]"
 ---
 

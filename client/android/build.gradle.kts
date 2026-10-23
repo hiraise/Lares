@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "app.familyhub.android"
+    namespace = "app.lares.android"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "app.familyhub.android"
+        applicationId = "app.lares.android"
         minSdk = 26
         targetSdk = 37
         versionCode = 1

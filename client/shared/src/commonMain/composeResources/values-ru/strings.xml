@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">FamilyHub</string>
-    <string name="app_logo">Значок FamilyHub</string>
+    <string name="app_name">Lares</string>
+    <string name="app_logo">Значок Lares</string>
 
     <string name="action_back">Назад</string>
     <string name="action_cancel">Отмена</string>
@@ -37,8 +37,8 @@
     <string name="error_person_is_member">Этот человек — участник семьи, его нельзя удалить.</string>
     <string name="error_unknown">Что-то пошло не так.</string>
     <string name="error_network">Нет связи с сервером. Проверьте интернет и попробуйте снова.</string>
-    <string name="error_not_familyhub">По этому адресу нет сервера FamilyHub.</string>
-    <string name="error_not_familyhub_qr">Это не QR-код FamilyHub.</string>
+    <string name="error_not_lares">По этому адресу нет сервера Lares.</string>
+    <string name="error_not_lares_qr">Это не QR-код Lares.</string>
 
     <string name="field_required">Обязательное поле</string>
     <string name="field_too_short">Слишком коротко</string>
@@ -98,7 +98,7 @@
     <string name="link_logged_in">Вы уже вошли. Чтобы воспользоваться этой ссылкой, сначала выйдите.</string>
     <string name="qr_title">Сканирование QR-кода</string>
     <string name="qr_hint">Наведите камеру на QR-код</string>
-    <string name="qr_camera_permission">FamilyHub использует камеру только чтобы прочитать QR-код. Ничего не записывается и не отправляется.</string>
+    <string name="qr_camera_permission">Lares использует камеру только чтобы прочитать QR-код. Ничего не записывается и не отправляется.</string>
     <string name="qr_camera_denied">Доступ к камере выключен. Разрешите его в настройках системы или введите код вручную.</string>
     <string name="qr_allow_camera">Разрешить камеру</string>
     <string name="qr_paste_label">Ссылка из QR-кода</string>
@@ -230,7 +230,7 @@
     <string name="password_new">Новый пароль</string>
     <string name="password_changed">Пароль изменён. На других устройствах вход сохранится.</string>
     <string name="login_qr_title">Вход на другом устройстве</string>
-    <string name="login_qr_text">На другом устройстве откройте FamilyHub, выберите «Войти по QR-коду» и отсканируйте этот код.</string>
+    <string name="login_qr_text">На другом устройстве откройте Lares, выберите «Войти по QR-коду» и отсканируйте этот код.</string>
     <string name="login_qr_expires">Действует ещё %1$s</string>
     <string name="login_qr_expired">Срок действия кода истёк</string>
     <string name="login_qr_new">Новый код</string>
@@ -246,7 +246,7 @@
     <string name="about_server_version">Версия сервера</string>
     <string name="about_server_address">Адрес сервера</string>
     <string name="about_licenses">Лицензии открытого ПО</string>
-    <string name="licenses_text">FamilyHub — свободная программа: её можно распространять и изменять на условиях GNU Affero General Public License, опубликованной Free Software Foundation, версии 3 или (по вашему выбору) любой более поздней версии. Программа распространяется БЕЗ КАКИХ-ЛИБО ГАРАНТИЙ. Исходный код доступен в репозитории проекта.\n\nВстроенные ресурсы:\n\n• Шрифт Manrope — Copyright 2018 The Manrope Project Authors. SIL Open Font License 1.1.\n\n• Значки Material Symbols — Copyright Google LLC. Apache License 2.0.\n\nБиблиотеки: Kotlin, kotlinx, Compose Multiplatform, AndroidX, Ktor, SQLDelight, Koin, ZXing — Apache License 2.0. qrose — MIT License.</string>
+    <string name="licenses_text">Lares — свободная программа: её можно распространять и изменять на условиях GNU Affero General Public License, опубликованной Free Software Foundation, версии 3 или (по вашему выбору) любой более поздней версии. Программа распространяется БЕЗ КАКИХ-ЛИБО ГАРАНТИЙ. Исходный код доступен в репозитории проекта.\n\nВстроенные ресурсы:\n\n• Шрифт Manrope — Copyright 2018 The Manrope Project Authors. SIL Open Font License 1.1.\n\n• Значки Material Symbols — Copyright Google LLC. Apache License 2.0.\n\nБиблиотеки: Kotlin, kotlinx, Compose Multiplatform, AndroidX, Ktor, SQLDelight, Koin, ZXing — Apache License 2.0. qrose — MIT License.</string>
     <!-- Семья (M0-08) -->
     <string name="action_done">Готово</string>
     <string name="action_delete">Удалить</string>
@@ -297,10 +297,10 @@
     <string name="family_add_name">Имя</string>
     <string name="family_add_submit_invite">Создать приглашение</string>
     <string name="family_add_submit_create">Создать аккаунт</string>
-    <string name="invite_result_text">Покажите этот QR-код новому участнику или отправьте ему ссылку. На его телефоне: открыть FamilyHub → «Сканировать QR-приглашение» или открыть ссылку.</string>
+    <string name="invite_result_text">Покажите этот QR-код новому участнику или отправьте ему ссылку. На его телефоне: открыть Lares → «Сканировать QR-приглашение» или открыть ссылку.</string>
     <string name="invite_share">Поделиться ссылкой</string>
     <string name="invite_valid_until">Действует до %1$s</string>
-    <string name="invite_share_text">Присоединяйся к нашей семье в FamilyHub. Установи приложение и открой ссылку:\n%1$s\n\nИли в приложении выбери «У меня есть приглашение» и введи код %2$s.</string>
+    <string name="invite_share_text">Присоединяйся к нашей семье в Lares. Установи приложение и открой ссылку:\n%1$s\n\nИли в приложении выбери «У меня есть приглашение» и введи код %2$s.</string>
     <string name="member_title">Участник</string>
     <string name="member_profile">Профиль</string>
     <string name="member_profile_hint">Имя, день рождения, цвет, контакты</string>
@@ -318,7 +318,7 @@
     <string name="member_remove_text">Аккаунт удалится, все устройства выйдут из него. Профиль останется среди родных, а созданное участником останется в семье.</string>
     <string name="member_gone">Этого участника больше нет в семье.</string>
     <string name="member_login_qr_title">Вход: %1$s</string>
-    <string name="member_login_qr_text">На новом телефоне откройте FamilyHub → «Войти по QR-коду» и отсканируйте этот код.</string>
+    <string name="member_login_qr_text">На новом телефоне откройте Lares → «Войти по QR-коду» и отсканируйте этот код.</string>
     <plurals name="group_members_count">
         <item quantity="one">%1$d участник</item>
         <item quantity="few">%1$d участника</item>
@@ -448,6 +448,6 @@
     <string name="notif_test_reminder_title">Тестовое напоминание</string>
     <string name="notif_test_reminder_body">Напоминания на этом телефоне работают.</string>
     <string name="notif_prompt_title">Разрешить уведомления?</string>
-    <string name="notif_prompt_text">FamilyHub показывает напоминания и новости семьи в виде уведомлений. Это можно изменить позже в Настройках › Уведомления.</string>
+    <string name="notif_prompt_text">Lares показывает напоминания и новости семьи в виде уведомлений. Это можно изменить позже в Настройках › Уведомления.</string>
     <string name="notif_prompt_later">Не сейчас</string>
 </resources>

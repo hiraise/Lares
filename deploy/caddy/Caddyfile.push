@@ -1,9 +1,9 @@
-# Same as Caddyfile plus the ntfy push server (start with `--profile push`, FAMILYHUB_CADDYFILE=Caddyfile.push).
-{$FAMILYHUB_DOMAIN} {
+# Same as Caddyfile plus the ntfy push server (start with `--profile push`, LARES_CADDYFILE=Caddyfile.push).
+{$LARES_DOMAIN} {
 	encode zstd gzip
 	reverse_proxy server:8080
 }
 
-{$FAMILYHUB_NTFY_DOMAIN} {
+{$LARES_NTFY_DOMAIN} {
 	reverse_proxy ntfy:80
 }

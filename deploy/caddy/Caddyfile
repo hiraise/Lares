@@ -1,5 +1,5 @@
-# FamilyHub server behind automatic HTTPS (Let's Encrypt). With FAMILYHUB_DOMAIN=localhost Caddy uses its own local CA.
-{$FAMILYHUB_DOMAIN} {
+# Lares server behind automatic HTTPS (Let's Encrypt). With LARES_DOMAIN=localhost Caddy uses its own local CA.
+{$LARES_DOMAIN} {
 	encode zstd gzip
 	reverse_proxy server:8080
 }

@@ -25,7 +25,7 @@ Exposed, error handling, JSON, protocol header check, logging, health checks, th
 - Config, DB pool, Flyway, Exposed, JSON, StatusPages, CallId + CallLogging, protocol header plugin, health endpoints.
 - Migration `V1__foundation.sql`: `household`, `household_sync_state`.
 - `ChangeRecorder` + `HouseholdChangeBus`.
-- Contract: `ErrorCode`, `ApiError`, `FieldError`, `InstanceInfo`, `Protocol` constants, shared `FamilyHubJson`.
+- Contract: `ErrorCode`, `ApiError`, `FieldError`, `InstanceInfo`, `Protocol` constants, shared `LaresJson`.
 - Test harness: Testcontainers PostgreSQL, `testApp {}` helper, DB cleanup between tests.
 - Local dev database via Docker Compose.
 
@@ -40,20 +40,20 @@ Out of scope: authentication (M0-03), any household/member logic, Dockerfile for
 - Timestamps in DB: `timestamptz`, mapped to `java.time.Instant` (exposed-java-time). Convert to `kotlin.time.Instant`
   at the API boundary.
 - UUID columns use PostgreSQL `uuid`.
-- Package root: `app.familyhub.server`; infrastructure under `app.familyhub.server.platform`.
+- Package root: `app.lares.server`; infrastructure under `app.lares.server.platform`.
 - Errors: throw `ApiException(code: ErrorCode, message: String, fields: Map<String, FieldErrorCode> = emptyMap())`;
   StatusPages maps it to HTTP status per [API errors table](../../architecture/api.md#errors) and the JSON body.
   Unknown exceptions → 500 `INTERNAL`, logged with stack trace, body without details.
 - Logging: SLF4J + Logback + kotlin-logging. Two config files: `logback.xml` (plain pattern, default) and
   `logback-json.xml` (Logback's built-in `ch.qos.logback.classic.encoder.JsonEncoder` — **no logstash encoder**).
-  `main()` sets `System.setProperty("logback.configurationFile", "logback-json.xml")` when `FAMILYHUB_LOG_FORMAT=json`,
+  `main()` sets `System.setProperty("logback.configurationFile", "logback-json.xml")` when `LARES_LOG_FORMAT=json`,
   **before** the first logger is created. Logback 1.6 has no Janino conditionals — do not use `<if>` in configs.
   Never log request bodies, tokens, passwords, coordinates or amounts.
 
 ## Steps
 
-1. **Contract additions** (`contract/src/commonMain/kotlin/app/familyhub/contract/`):
-   - `api/Protocol.kt`: `object Protocol { const val VERSION = 1; const val MIN_SUPPORTED = 1; const val HEADER = "X-FamilyHub-Protocol" }`.
+1. **Contract additions** (`contract/src/commonMain/kotlin/app/lares/contract/`):
+   - `api/Protocol.kt`: `object Protocol { const val VERSION = 1; const val MIN_SUPPORTED = 1; const val HEADER = "X-Lares-Protocol" }`.
    - `api/ErrorCode.kt`: `@Serializable enum class ErrorCode` with every code from the API errors table plus the sync
      codes (`ENTITY_NOT_FOUND`, `ENTITY_DELETED`, `MUTATION_EXPIRED`, `TAG_NAME_TAKEN`, `PERSON_IS_MEMBER`).
      `@Serializable enum class FieldErrorCode { REQUIRED, TOO_LONG, TOO_SHORT, INVALID_FORMAT, OUT_OF_RANGE, TAKEN }`.
@@ -66,12 +66,12 @@ Out of scope: authentication (M0-03), any household/member logic, Dockerfile for
      `@Serializable data class ApiError(val code: ErrorCode, val message: String, val fields: Map<String, FieldErrorCode> = emptyMap())`.
    - `api/InstanceInfo.kt`: `@Serializable data class InstanceInfo(val initialized: Boolean, val serverVersion: String, val protocol: ProtocolRange)`,
      `@Serializable data class ProtocolRange(val min: Int, val max: Int)`.
-   - `api/Json.kt`: `val FamilyHubJson = Json { ignoreUnknownKeys = true; explicitNulls = false; encodeDefaults = true }`.
-   - Unit test: `ApiErrorBody` round-trips through `FamilyHubJson`.
+   - `api/Json.kt`: `val LaresJson = Json { ignoreUnknownKeys = true; explicitNulls = false; encodeDefaults = true }`.
+   - Unit test: `ApiErrorBody` round-trips through `LaresJson`.
 2. **Config** (`platform/AppConfig.kt`): data class loaded from env with defaults for local dev:
-   `FAMILYHUB_PORT` (8080), `FAMILYHUB_DB_URL` (`jdbc:postgresql://localhost:5432/familyhub`), `FAMILYHUB_DB_USER`
-   (`familyhub`), `FAMILYHUB_DB_PASSWORD` (`familyhub`), `FAMILYHUB_PUBLIC_URL` (`http://localhost:8080`),
-   `FAMILYHUB_LOG_FORMAT` (`plain`), `FAMILYHUB_SETUP_CODE` (optional, used in M0-03).
+   `LARES_PORT` (8080), `LARES_DB_URL` (`jdbc:postgresql://localhost:5432/lares`), `LARES_DB_USER`
+   (`lares`), `LARES_DB_PASSWORD` (`lares`), `LARES_PUBLIC_URL` (`http://localhost:8080`),
+   `LARES_LOG_FORMAT` (`plain`), `LARES_SETUP_CODE` (optional, used in M0-03).
    `fun AppConfig.Companion.fromEnv(env: Map<String, String> = System.getenv())`. Validate: port range, URL formats.
 3. **Database** (`platform/db/`):
    - `Database.kt`: create `HikariDataSource`, run Flyway `migrate()` (needs both `flyway-core` and
@@ -118,7 +118,7 @@ Out of scope: authentication (M0-03), any household/member logic, Dockerfile for
    - Unit/integration tests: concurrent `nextSeq` calls from 20 coroutines in one household produce 1..20 without gaps
      or duplicates; rollback emits nothing; commit emits once.
 5. **HTTP plumbing** (`platform/http/`):
-   - ContentNegotiation with `FamilyHubJson`.
+   - ContentNegotiation with `LaresJson`.
    - StatusPages: `ApiException` → status + `ApiErrorBody`; `BadRequestException`/`ContentTransformationException`
      → 400 `VALIDATION_FAILED`; `NotFoundException` → 404 `NOT_FOUND`; others → 500 `INTERNAL`.
    - CallId (generate UUID, header `X-Request-Id`) + CallLogging including the call id; exclude `/health/*`.
@@ -133,10 +133,10 @@ Out of scope: authentication (M0-03), any household/member logic, Dockerfile for
 7. **Logging**: `logback.xml` (plain pattern) and `logback-json.xml` (`JsonEncoder`) selected in `main()` as decided;
    level INFO; Exposed/Hikari at WARN.
 8. **Dev database**: `deploy/dev/docker-compose.yml` with `postgres:18-alpine`, user/password/db
-   `familyhub`, port `5432:5432`, named volume mounted at **`/var/lib/postgresql`** (PostgreSQL 18 images changed
+   `lares`, port `5432:5432`, named volume mounted at **`/var/lib/postgresql`** (PostgreSQL 18 images changed
    the data path; mounting `/var/lib/postgresql/data` would lose data). Document in AGENTS.md "Commands":
    `docker compose -f deploy/dev/docker-compose.yml up -d` and `./gradlew :server:run`.
-9. **Test harness** (`server/src/test/kotlin/app/familyhub/server/testing/`):
+9. **Test harness** (`server/src/test/kotlin/app/lares/server/testing/`):
    - `TestDatabase`: one PostgreSQL Testcontainer per test JVM (lazy singleton; Testcontainers 2.x class
      `org.testcontainers.postgresql.PostgreSQLContainer`, image `postgres:18-alpine`), Flyway migrate once.
    - `fun testApp(block: suspend ApplicationTestBuilder.() -> Unit)`: builds `AppDeps` against the container,

@@ -51,7 +51,7 @@ to `build/dev/` (ignored by git).
 | Script | Does |
 | --- | --- |
 | `verify.sh [tasks]` | `spotlessApply` + tasks (default: `check :client:android:assembleDebug`); prints errors, failed tests, totals |
-| `server.sh start\|stop\|restart\|reset\|status\|log` | Dev DB + server in background on `FAMILYHUB_PORT` (8080), own database `familyhub_e2e`, setup code `DEVSETUP01` |
+| `server.sh start\|stop\|restart\|reset\|status\|log` | Dev DB + server in background on `LARES_PORT` (8080), own database `lares_e2e`, setup code `DEVSETUP01` |
 | `seed.py family\|token\|invite\|login-code\|call` | Test family Петровы via the API (`olga / olga-password` admin, `dima`, kids Аня and Тимур) |
 | `emu.sh start [--window]\|install\|launch\|fresh\|link URL\|stop` | Emulator lifecycle, `adb reverse`, deep links |
 | `ui.sh dump\|tap\|wait\|has\|field\|type\|shot\|crash …` | Drive the app by visible text; screenshots downscaled to 540×1200 |
@@ -61,12 +61,12 @@ The dev DB port is detected from the running container (5432, or 5434 when 5432 
 ## Emulator
 
 ```sh
-avdmanager create avd -n familyhub -k "system-images;android-37.0;default;arm64-v8a" -d pixel_7   # once
-$ANDROID_HOME/emulator/emulator -avd familyhub -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect &
+avdmanager create avd -n lares -k "system-images;android-37.0;default;arm64-v8a" -d pixel_7   # once
+$ANDROID_HOME/emulator/emulator -avd lares -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect &
 adb wait-for-device
 adb shell getprop sys.boot_completed      # repeat until it prints 1 (about a minute)
 ./gradlew :client:android:installDebug
-adb shell am start -n app.familyhub.android.debug/app.familyhub.android.MainActivity
+adb shell am start -n app.lares.android.debug/app.lares.android.MainActivity
 adb exec-out screencap -p > <scratchpad>/screen.png
 adb emu kill
 ```
@@ -103,5 +103,5 @@ then `adb shell input keyevent 66` (Enter). A typed address without a scheme get
   `~/.gradle/gradle.properties`.
 - **Camera preview is black on the headless emulator** — the camera opens, but `-no-window` delivers no frames, so the
   QR scanner can only be checked on a phone (or with an emulator window and a virtual scene).
-- **Opening a link on the emulator** — `adb shell am start -a android.intent.action.VIEW -d "'familyhub://login?server=…&code=…'"`
+- **Opening a link on the emulator** — `adb shell am start -a android.intent.action.VIEW -d "'lares://login?server=…&code=…'"`
   (the inner quotes keep `&` from the device shell).

@@ -33,7 +33,7 @@ Out of scope: client (M0-06), push notifications (M0-09).
 ## Decisions (do not revisit)
 
 - Wire format, processing order, reset rules, limits, statuses and error codes exactly as in sync.md.
-- **Handler interface** (server, package `app.familyhub.server.sync`):
+- **Handler interface** (server, package `app.lares.server.sync`):
   ```kotlin
   interface SyncEntityHandler {
       val type: String                                   // wire name, e.g. "tag"

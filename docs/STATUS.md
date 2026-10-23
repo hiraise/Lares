@@ -13,6 +13,8 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 
 ## Last completed
 
+- 2026-10-23 Project renamed FamilyHub → **Lares** (Q-001): package and application id `app.lares`, env vars
+  `LARES_*`, image `ghcr.io/hiraise/lares-server`, repository `github.com/hiraise/lares`.
 - 2026-10-23 M0-11 Load simulation: `tools/loadsim` + `deploy/scripts/loadtest.sh`. Simulated family (10 devices,
   30 min): server RSS avg 232 / max 237 MiB (target ≤ 256), p95 52 ms (≤ 100), cold start 1.9–2.7 s (≤ 10), whole
   stack ~320 MiB — ADR-0013 targets met after JVM tuning ([baseline](architecture/perf/M0-baseline.md)).
@@ -35,8 +37,6 @@ See the table in [plans README](plans/README.md#m0-plans).
 
 ## Waiting for the customer
 
-- GitHub repository: the customer will create it later; until then work is local. Release images and the
-  `ghcr.io/OWNER/...` default in `deploy/docker-compose.yml` need the owner name then.
 - For a real installation: a VPS (1 vCPU / 2 GB / 20 GB) and a domain with DNS access.
 
 ## Risks
@@ -58,8 +58,8 @@ See the table in [plans README](plans/README.md#m0-plans).
 ## Dev environment notes
 
 - Host: macOS (Apple Silicon), Homebrew, Docker. JDK 21 (Homebrew), Android SDK from Android Studio
-  (`~/Library/Android/sdk`) and the `familyhub` AOSP emulator;
+  (`~/Library/Android/sdk`) and the `lares` AOSP emulator;
   see [dev-setup](process/dev-setup.md).
 - The shell's default `java` may be older than 21; Gradle uses JDK 21 from `~/.gradle/gradle.properties`. To run
   `server/build/install/server/bin/server` directly, set `JAVA_HOME` to that JDK.
-- Host port 5432 may be taken by another local PostgreSQL; the dev compose file accepts `FAMILYHUB_DEV_DB_PORT`.
+- Host port 5432 may be taken by another local PostgreSQL; the dev compose file accepts `LARES_DEV_DB_PORT`.

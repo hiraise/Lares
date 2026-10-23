@@ -1,6 +1,6 @@
 # User manuals
 
-Manuals for people who install and use FamilyHub, in English (`en/`) and Russian (`ru/`).
+Manuals for people who install and use Lares, in English (`en/`) and Russian (`ru/`).
 Written as features ship.
 
 Available:

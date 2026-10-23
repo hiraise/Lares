@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">FamilyHub</string>
-    <string name="app_logo">FamilyHub icon</string>
+    <string name="app_name">Lares</string>
+    <string name="app_logo">Lares icon</string>
 
     <!-- Common actions -->
     <string name="action_back">Back</string>
@@ -39,8 +39,8 @@
     <string name="error_person_is_member">This person is a family member and can’t be deleted.</string>
     <string name="error_unknown">Something went wrong.</string>
     <string name="error_network">No connection to the server. Check the internet and try again.</string>
-    <string name="error_not_familyhub">This address doesn’t look like a FamilyHub server.</string>
-    <string name="error_not_familyhub_qr">This is not a FamilyHub QR code.</string>
+    <string name="error_not_lares">This address doesn’t look like a Lares server.</string>
+    <string name="error_not_lares_qr">This is not a Lares QR code.</string>
 
     <!-- Field errors -->
     <string name="field_required">Required</string>
@@ -107,7 +107,7 @@
     <string name="link_logged_in">You are already logged in. To use this link, log out first.</string>
     <string name="qr_title">Scan QR code</string>
     <string name="qr_hint">Point the camera at the QR code</string>
-    <string name="qr_camera_permission">FamilyHub uses the camera only to read the QR code. Nothing is recorded or sent.</string>
+    <string name="qr_camera_permission">Lares uses the camera only to read the QR code. Nothing is recorded or sent.</string>
     <string name="qr_camera_denied">Camera access is off. Allow it in the system settings, or type the code instead.</string>
     <string name="qr_allow_camera">Allow camera</string>
     <string name="qr_paste_label">Link from the QR code</string>
@@ -237,7 +237,7 @@
     <string name="password_new">New password</string>
     <string name="password_changed">Password changed. Your other devices stay logged in.</string>
     <string name="login_qr_title">Log in on another device</string>
-    <string name="login_qr_text">On the other device, open FamilyHub, choose “Log in with QR code” and scan this code.</string>
+    <string name="login_qr_text">On the other device, open Lares, choose “Log in with QR code” and scan this code.</string>
     <string name="login_qr_expires">Valid for %1$s</string>
     <string name="login_qr_expired">The code has expired</string>
     <string name="login_qr_new">New code</string>
@@ -255,7 +255,7 @@
     <string name="about_server_version">Server version</string>
     <string name="about_server_address">Server address</string>
     <string name="about_licenses">Open-source licenses</string>
-    <string name="licenses_text">FamilyHub is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, version 3 or (at your option) any later version. It is distributed WITHOUT ANY WARRANTY. The source code is available from the project repository.\n\nBundled assets:\n\n• Manrope font — Copyright 2018 The Manrope Project Authors. SIL Open Font License 1.1.\n\n• Material Symbols icons — Copyright Google LLC. Apache License 2.0.\n\nLibraries: Kotlin, kotlinx, Compose Multiplatform, AndroidX, Ktor, SQLDelight, Koin, ZXing — Apache License 2.0. qrose — MIT License.</string>
+    <string name="licenses_text">Lares is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, version 3 or (at your option) any later version. It is distributed WITHOUT ANY WARRANTY. The source code is available from the project repository.\n\nBundled assets:\n\n• Manrope font — Copyright 2018 The Manrope Project Authors. SIL Open Font License 1.1.\n\n• Material Symbols icons — Copyright Google LLC. Apache License 2.0.\n\nLibraries: Kotlin, kotlinx, Compose Multiplatform, AndroidX, Ktor, SQLDelight, Koin, ZXing — Apache License 2.0. qrose — MIT License.</string>
     <!-- Family (M0-08) -->
     <string name="action_done">Done</string>
     <string name="action_delete">Delete</string>
@@ -300,10 +300,10 @@
     <string name="family_add_name">Name</string>
     <string name="family_add_submit_invite">Create invitation</string>
     <string name="family_add_submit_create">Create account</string>
-    <string name="invite_result_text">Show this QR code to the new member, or send them the link. On their phone: open FamilyHub → “Scan QR invitation”, or open the link.</string>
+    <string name="invite_result_text">Show this QR code to the new member, or send them the link. On their phone: open Lares → “Scan QR invitation”, or open the link.</string>
     <string name="invite_share">Share link</string>
     <string name="invite_valid_until">Valid until %1$s</string>
-    <string name="invite_share_text">Join our family in FamilyHub. Install the app and open this link:\n%1$s\n\nOr in the app choose “I have an invitation” and enter the code %2$s.</string>
+    <string name="invite_share_text">Join our family in Lares. Install the app and open this link:\n%1$s\n\nOr in the app choose “I have an invitation” and enter the code %2$s.</string>
     <string name="member_title">Member</string>
     <string name="member_profile">Profile</string>
     <string name="member_profile_hint">Name, birthday, color, contacts</string>
@@ -321,7 +321,7 @@
     <string name="member_remove_text">Their account is deleted and all their devices are logged out. Their profile stays among the relatives, and what they created stays in the family.</string>
     <string name="member_gone">This member is no longer in the family.</string>
     <string name="member_login_qr_title">Log in: %1$s</string>
-    <string name="member_login_qr_text">Open FamilyHub on the new phone → “Log in with QR code”, and scan this code.</string>
+    <string name="member_login_qr_text">Open Lares on the new phone → “Log in with QR code”, and scan this code.</string>
     <plurals name="group_members_count">
         <item quantity="one">%1$d member</item>
         <item quantity="other">%1$d members</item>
@@ -449,6 +449,6 @@
     <string name="notif_test_reminder_title">Test reminder</string>
     <string name="notif_test_reminder_body">Reminders on this phone work.</string>
     <string name="notif_prompt_title">Allow notifications?</string>
-    <string name="notif_prompt_text">FamilyHub shows reminders and family news as notifications. You can change this later in Settings › Notifications.</string>
+    <string name="notif_prompt_text">Lares shows reminders and family news as notifications. You can change this later in Settings › Notifications.</string>
     <string name="notif_prompt_later">Not now</string>
 </resources>

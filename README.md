@@ -1,6 +1,6 @@
-# FamilyHub
+# Lares
 
-*Working name.* [Русская версия](README.ru.md)
+*Lares* were the Roman guardian spirits of the home. [Русская версия](README.ru.md)
 
 A private space for your family, on your own server. Shared tasks and chores, shopping lists, a family calendar
 with relatives' birthdays, a map showing where everyone is, and a family budget — all connected by tags.

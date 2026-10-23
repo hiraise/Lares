@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Emulator lifecycle for manual checks of the Android app.
 #
-#   tools/dev/emu.sh start        # boot the headless `familyhub` AVD if needed, wait for boot, adb reverse
+#   tools/dev/emu.sh start        # boot the headless `lares` AVD if needed, wait for boot, adb reverse
 #   tools/dev/emu.sh start --window   # same with a visible window (for the customer to look at)
 #   tools/dev/emu.sh install      # build + install the debug APK, then launch
 #   tools/dev/emu.sh launch       # (re)start the app (force-stop first)
@@ -16,9 +16,9 @@ ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 OUT="$ROOT/build/dev"
 export ANDROID_HOME="${ANDROID_HOME:-$HOME/Library/Android/sdk}"
 ADB="$ANDROID_HOME/platform-tools/adb"
-PKG=app.familyhub.android.debug
-ACT=app.familyhub.android.MainActivity
-PORT="${FAMILYHUB_PORT:-8080}"
+PKG=app.lares.android.debug
+ACT=app.lares.android.MainActivity
+PORT="${LARES_PORT:-8080}"
 mkdir -p "$OUT"
 
 booted() { [ "$("$ADB" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; }
@@ -27,7 +27,7 @@ start() {
   if ! "$ADB" devices | grep -q 'emulator-.*device$'; then
     local view=(-no-window -gpu swiftshader_indirect)
     [ "${1:-}" = "--window" ] && view=(-gpu auto)
-    nohup "$ANDROID_HOME/emulator/emulator" -avd familyhub "${view[@]}" -no-audio -no-boot-anim \
+    nohup "$ANDROID_HOME/emulator/emulator" -avd lares "${view[@]}" -no-audio -no-boot-anim \
       >"$OUT/emulator.log" 2>&1 &
     echo "booting emulator (log build/dev/emulator.log)"
   fi

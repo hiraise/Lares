@@ -214,7 +214,7 @@ Backoff after failures: 2 s doubling to 5 min; reset on success.
 
 ### Client implementation notes (M0-06)
 
-Code: `client/shared/src/commonMain/kotlin/app/familyhub/client/` (`sync`, `db`, `api`, `auth`, `data`).
+Code: `client/shared/src/commonMain/kotlin/app/lares/client/` (`sync`, `db`, `api`, `auth`, `data`).
 
 - Besides the tables above, `local_session` holds the logged-in member (`Me`), so `WriteRules` and the permission
   evaluator work offline. Until the first sync brings groups, the permissions from login are used.
@@ -235,7 +235,7 @@ Code: `client/shared/src/commonMain/kotlin/app/familyhub/client/` (`sync`, `db`,
 
 ## Versioning
 
-- Every request carries `X-FamilyHub-Protocol: 1`. `GET /api/v1/instance` returns the supported range.
+- Every request carries `X-Lares-Protocol: 1`. `GET /api/v1/instance` returns the supported range.
   Outside the range the server answers HTTP 426 / `PROTOCOL_UNSUPPORTED`.
 - Clients ignore unknown JSON fields, unknown entity types and unknown enum values (lenient serializers in `contract/`:
   unknown values are dropped from sets or mapped to a fallback), so a newer server never breaks an older client's sync.

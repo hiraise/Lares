@@ -53,8 +53,8 @@ Out of scope: location load (M4 re-run), web load.
 2. `loadtest.sh`: starts the stack (reusing the smoke override that builds the local image), records cold start, runs loadsim,
    samples memory, stops the stack, prints a summary table.
 3. Run it. If server RSS steady state > 256 MB or p95 > 100 ms, tune in this order, re-running each time and recording
-   every attempt: (a) heap/metaspace sizes, thread stack size, Netty worker threads (`FAMILYHUB_NETTY_WORKERS`, default 2)
-   and Hikari pool; (b) Ktor CIO engine instead of Netty (config switch `FAMILYHUB_ENGINE=netty|cio`);
+   every attempt: (a) heap/metaspace sizes, thread stack size, Netty worker threads (`LARES_NETTY_WORKERS`, default 2)
+   and Hikari pool; (b) Ktor CIO engine instead of Netty (config switch `LARES_ENGINE=netty|cio`);
    (c) runtime JRE 25 with `-XX:+UseCompactObjectHeaders` (bytecode stays 21). Stop after targets are met.
    GraalVM native image is **not** attempted in this plan — report if needed.
 4. Write `docs/architecture/perf/M0-baseline.md`: environment (host CPU/RAM, Docker version), scenario, results table

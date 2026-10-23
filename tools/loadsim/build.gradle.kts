@@ -11,7 +11,7 @@ kotlin {
 }
 
 application {
-    mainClass.set("app.familyhub.tools.loadsim.MainKt")
+    mainClass.set("app.lares.tools.loadsim.MainKt")
     applicationName = "loadsim"
 }
 

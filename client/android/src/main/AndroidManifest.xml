@@ -16,7 +16,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
 
     <application
-        android:name=".FamilyHubApplication"
+        android:name=".LaresApplication"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_label"
@@ -24,7 +24,7 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
-        android:theme="@style/Theme.FamilyHub"
+        android:theme="@style/Theme.Lares"
         tools:targetApi="33">
         <activity
             android:name=".MainActivity"
@@ -35,19 +35,19 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <!-- familyhub://invite?server=…&code=… and familyhub://login?… (QR codes, architecture/auth.md) -->
+            <!-- lares://invite?server=…&code=… and lares://login?… (QR codes, architecture/auth.md) -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="familyhub" android:host="invite" />
-                <data android:scheme="familyhub" android:host="login" />
+                <data android:scheme="lares" android:host="invite" />
+                <data android:scheme="lares" android:host="login" />
             </intent-filter>
         </activity>
 
         <!-- UnifiedPush events from the distributor (ntfy), decrypted by the connector. -->
         <service
-            android:name=".notifications.FamilyHubPushService"
+            android:name=".notifications.LaresPushService"
             android:exported="false">
             <intent-filter>
                 <action android:name="org.unifiedpush.android.connector.PUSH_EVENT" />

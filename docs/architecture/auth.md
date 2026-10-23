@@ -10,7 +10,7 @@ Design for FND-001, FND-010…015, FND-024. Endpoints are listed in [api.md](api
 
 Problem: a freshly started server on a public VPS could be claimed by anyone who finds it first.
 
-1. On start, if no household exists, the server needs a **setup code**: taken from env `FAMILYHUB_SETUP_CODE`,
+1. On start, if no household exists, the server needs a **setup code**: taken from env `LARES_SETUP_CODE`,
    otherwise generated (10 characters, Crockford base32) and printed to the log at WARN level on every start
    until setup is done. It is never stored in plain text after setup.
 2. The admin installs the app, enters the server URL; the app calls `GET /api/v1/instance` and sees `initialized: false`.
@@ -58,7 +58,7 @@ Rate limit: 5 attempts per IP per 15 minutes on `/setup`.
 
 - A member with `household.manage` creates an invite: chosen groups, expiry (default 72 h, max 30 days).
 - Invite code: 12 characters Crockford base32, single use, stored hashed (SHA-256); invites are listed and revoked by id.
-- Shared as a link/QR payload: `familyhub://invite?server=<urlencoded public URL>&code=<code>`.
+- Shared as a link/QR payload: `lares://invite?server=<urlencoded public URL>&code=<code>`.
 - `POST /api/v1/invites/preview` (public, code in body) returns household name and inviter name, or `INVITE_INVALID`.
 - Accepting creates user + person + member in the invite's groups + session, returns tokens. The invite row is locked
   (`SELECT … FOR UPDATE`) during acceptance, so it is used at most once. Groups deleted since the invite was created are
@@ -70,7 +70,7 @@ Rate limit: 5 attempts per IP per 15 minutes on `/setup`.
 - A logged-in member creates a **login code** for themselves; a member with `household.manage` can create one for
   any member (e.g. a child without a password).
 - Code: 8 characters Crockford base32, valid 5 minutes, single use, stored hashed.
-- Payload: `familyhub://login?server=<urlencoded public URL>&code=<code>`.
+- Payload: `lares://login?server=<urlencoded public URL>&code=<code>`.
 - `POST /api/v1/auth/login-code` exchanges it for tokens and a new session. Rate limited like login.
 
 ## Account and member management
@@ -96,5 +96,5 @@ Input is normalized before comparison: uppercase, remove spaces and `-`, map `O�
 
 ## Public URL
 
-`FAMILYHUB_PUBLIC_URL` (e.g. `https://family.example.com`) is required in production; it is embedded in invite and
+`LARES_PUBLIC_URL` (e.g. `https://family.example.com`) is required in production; it is embedded in invite and
 login QR payloads. The app stores the server URL it connected with.
