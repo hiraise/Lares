@@ -12,4 +12,9 @@ class CodeGenerator(
         buildString(length) {
             repeat(length) { append(Codes.ALPHABET[random.nextInt(Codes.ALPHABET.length)]) }
         }
+
+    companion object {
+        /** Invite and login codes are stored and compared as the SHA-256 of their normalized form. */
+        fun hash(code: String): ByteArray = TokenGenerator.sha256(Codes.normalize(code))
+    }
 }

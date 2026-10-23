@@ -43,6 +43,8 @@ Toolchain versions: [versions.md](../plans/M0/versions.md) and `gradle/libs.vers
   UUID columns: `javaUUID(...)` (`java.util.UUID`).
 - Tests: identity helpers in `testing/IdentityFixtures.kt` (`setup()`, `login()`, `bearer()`, `assertError()`,
   `createUserDirectly()`); the test setup code is `TEST_SETUP_CODE`; move time with `deps.testClock.advance(…)`.
+  Administration helpers in `testing/AdminFixtures.kt` (`memberSession()`, `createMember()`, `loginCodeFor()`, `send()`,
+  `createSecondHousehold()` for isolation tests, `createRelative()`).
 - Tests: `testApp { deps -> … }` runs the full module on an emptied Testcontainers database; `jsonClient()` sends the
   protocol header; `testDeps()` for tests without HTTP. Test functions must return `Unit` (JUnit silently skips others —
   write `fun x(): Unit = runBlocking { … }` when the block ends with an expression).

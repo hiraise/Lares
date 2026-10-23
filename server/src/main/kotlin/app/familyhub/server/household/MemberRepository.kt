@@ -5,6 +5,7 @@ import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.core.plus
 import org.jetbrains.exposed.v1.jdbc.insert
+import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.update
 import java.time.Instant
@@ -76,6 +77,29 @@ object MemberRepository {
             it[updatedAt] = now
         }
     }
+
+    /** The subset of [ids] that are non-deleted members of the household. */
+    fun activeIds(
+        householdId: UUID,
+        ids: Collection<UUID>,
+    ): Set<UUID> {
+        if (ids.isEmpty()) return emptySet()
+        return MemberTable
+            .select(MemberTable.id)
+            .where { (MemberTable.householdId eq householdId) and (MemberTable.id inList ids) and (MemberTable.deleted eq false) }
+            .mapTo(mutableSetOf()) { it[MemberTable.id] }
+    }
+
+    /** True if a non-deleted member already has this person as their profile. */
+    fun isPersonLinked(
+        householdId: UUID,
+        personId: UUID,
+    ): Boolean =
+        MemberTable
+            .selectAll()
+            .where { (MemberTable.householdId eq householdId) and (MemberTable.personId eq personId) and (MemberTable.deleted eq false) }
+            .limit(1)
+            .any()
 
     fun bumpAccessVersion(
         householdId: UUID,

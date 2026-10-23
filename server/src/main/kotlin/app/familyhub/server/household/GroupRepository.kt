@@ -16,6 +16,14 @@ import org.jetbrains.exposed.v1.jdbc.update
 import java.time.Instant
 import java.util.UUID
 
+data class GroupRow(
+    val id: UUID,
+    val householdId: UUID,
+    val name: String,
+    val builtIn: BuiltInGroup?,
+    val deleted: Boolean,
+)
+
 object GroupRepository {
     fun create(
         householdId: UUID,
@@ -130,5 +138,109 @@ object GroupRepository {
             .selectAll()
             .where { condition }
             .count()
+    }
+
+    fun get(
+        householdId: UUID,
+        id: UUID,
+    ): GroupRow? =
+        GroupTable
+            .selectAll()
+            .where { (GroupTable.householdId eq householdId) and (GroupTable.id eq id) }
+            .singleOrNull()
+            ?.let {
+                GroupRow(
+                    id = it[GroupTable.id],
+                    householdId = it[GroupTable.householdId],
+                    name = it[GroupTable.name],
+                    builtIn = it[GroupTable.builtIn]?.let { name -> BuiltInGroup.entries.firstOrNull { e -> e.name == name } },
+                    deleted = it[GroupTable.deleted],
+                )
+            }
+
+    /** The subset of [ids] that are non-deleted groups of the household. */
+    fun activeIds(
+        householdId: UUID,
+        ids: Collection<UUID>,
+    ): Set<UUID> {
+        if (ids.isEmpty()) return emptySet()
+        return GroupTable
+            .select(GroupTable.id)
+            .where { (GroupTable.householdId eq householdId) and (GroupTable.id inList ids) and (GroupTable.deleted eq false) }
+            .mapTo(mutableSetOf()) { it[GroupTable.id] }
+    }
+
+    fun administratorsId(householdId: UUID): UUID =
+        GroupTable
+            .select(GroupTable.id)
+            .where { (GroupTable.householdId eq householdId) and (GroupTable.builtIn eq BuiltInGroup.ADMINISTRATORS.name) }
+            .single()[GroupTable.id]
+
+    /** Members of the group. Memberships of removed members are deleted with them, so all are active. */
+    fun memberIdsOf(groupId: UUID): Set<UUID> =
+        GroupMembershipTable
+            .select(GroupMembershipTable.memberId)
+            .where { GroupMembershipTable.groupId eq groupId }
+            .mapTo(mutableSetOf()) { it[GroupMembershipTable.memberId] }
+
+    fun permissionsOf(groupId: UUID): Set<Permission> =
+        GroupPermissionTable
+            .select(GroupPermissionTable.permission)
+            .where { GroupPermissionTable.groupId eq groupId }
+            .mapNotNullTo(mutableSetOf()) { Permission.fromKey(it[GroupPermissionTable.permission]) }
+
+    /** Replaces the stored permissions; implied section access is never stored (ADR-0014). */
+    fun setPermissions(
+        groupId: UUID,
+        permissions: Set<Permission>,
+    ) {
+        GroupPermissionTable.deleteWhere { GroupPermissionTable.groupId eq groupId }
+        GroupPermissionTable.batchInsert(permissions) { permission ->
+            this[GroupPermissionTable.groupId] = groupId
+            this[GroupPermissionTable.permission] = permission.key
+        }
+    }
+
+    /** Memberships are part of the group: the caller stamps the group with a new seq. */
+    fun addMembers(
+        groupId: UUID,
+        memberIds: Collection<UUID>,
+    ) {
+        GroupMembershipTable.batchInsert(memberIds) { memberId ->
+            this[GroupMembershipTable.groupId] = groupId
+            this[GroupMembershipTable.memberId] = memberId
+        }
+    }
+
+    fun removeMembers(
+        groupId: UUID,
+        memberIds: Collection<UUID>,
+    ) {
+        if (memberIds.isEmpty()) return
+        GroupMembershipTable.deleteWhere {
+            (GroupMembershipTable.groupId eq groupId) and (GroupMembershipTable.memberId inList memberIds)
+        }
+    }
+
+    fun rename(
+        householdId: UUID,
+        groupId: UUID,
+        name: String,
+    ) {
+        GroupTable.update({ (GroupTable.householdId eq householdId) and (GroupTable.id eq groupId) }) { it[GroupTable.name] = name }
+    }
+
+    /** Marks the group deleted with the caller's [seq]; the tombstone travels through sync. */
+    fun tombstone(
+        householdId: UUID,
+        groupId: UUID,
+        seq: Long,
+        now: Instant,
+    ) {
+        GroupTable.update({ (GroupTable.householdId eq householdId) and (GroupTable.id eq groupId) }) {
+            it[deleted] = true
+            it[GroupTable.seq] = seq
+            it[updatedAt] = now
+        }
     }
 }

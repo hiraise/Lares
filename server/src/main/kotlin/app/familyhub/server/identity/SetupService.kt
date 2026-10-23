@@ -76,7 +76,8 @@ class SetupService(
         return result
     }
 
-    private fun JdbcTransaction.createHousehold(
+    /** Also used by tests to create additional households, bypassing the one-household rule of [setup]. */
+    internal fun JdbcTransaction.createHousehold(
         request: SetupRequest,
         passwordHash: String,
     ): AuthResult {

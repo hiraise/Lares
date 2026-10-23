@@ -61,6 +61,23 @@ object HouseholdRepository {
         }
     }
 
+    /** Writes new settings with the caller's [seq]. */
+    fun update(
+        householdId: UUID,
+        data: HouseholdData,
+        seq: Long,
+        now: Instant,
+    ) {
+        HouseholdTable.update({ HouseholdTable.id eq householdId }) {
+            it[name] = data.name
+            it[timeZone] = data.timeZone
+            it[currency] = data.currency
+            it[defaultLanguage] = data.defaultLanguage
+            it[HouseholdTable.seq] = seq
+            it[updatedAt] = now
+        }
+    }
+
     fun get(householdId: UUID): HouseholdRow? =
         HouseholdTable
             .selectAll()

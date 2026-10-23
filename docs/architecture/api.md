@@ -110,3 +110,20 @@ Authenticated, requires `household.manage`:
 | DELETE | `/api/v1/invites/{id}` | Revoke invite | FND-024 |
 
 Persons and tags have no REST endpoints: they are written through sync mutations only.
+
+### Administration endpoint details (M0-04)
+
+DTOs live in `contract/…/api/admin/AdminDtos.kt`; QR/link payloads are built and parsed by `DeepLinks` in `contract/`.
+
+- Status codes: creating endpoints (`POST /members`, `/groups`, `/invites`, `/login-codes`) answer **201** with the created
+  ids; updates and deletions answer **204**; `GET /invites` answers a JSON array of `InviteInfo`; invite accept and
+  login-code exchange answer **200** with `AuthResult`, like login.
+- `PATCH` requests change only the fields that are present; `permissions` and `memberIds` of a group replace the whole set.
+  Writing the current values again changes nothing (no new seq).
+- Returned `code` values are normalized (no dash); clients display them with `Codes.format`.
+- Malformed ids (not a UUID) answer `NOT_FOUND`, like ids of other households.
+- `personId` (create member, create invite): unknown or another household's person → `NOT_FOUND`; deleted person →
+  `VALIDATION_FAILED` with `personId: INVALID_FORMAT`; person already linked to a member → `personId: TAKEN`.
+- Taken logins answer `LOGIN_TAKEN` with `fields.login = TAKEN`.
+- `POST /login-codes` with another member's id checks `household.manage` first (403 without it, even for unknown ids),
+  then the id (404).

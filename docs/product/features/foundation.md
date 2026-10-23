@@ -26,21 +26,24 @@ localization and deployment — everything feature modules depend on.
 
 - **FND-001** `MVP` `doing` — On first start the server offers a one-time setup, protected by a setup code from the server log,
   to create the first admin and household. *Server done (M0-03); setup wizard in the app: M0-07.*
-- **FND-002** `MVP` `todo` — One instance can host several households; data of different households is fully isolated.
-- **FND-003** `MVP` `todo` — Household settings: name, time zone, currency, default language.
+- **FND-002** `MVP` `doing` — One instance can host several households; data of different households is fully isolated.
+  *Isolation of admin endpoints enforced and tested (M0-04); sync isolation: M0-05; creating more households: after M0.*
+- **FND-003** `MVP` `doing` — Household settings: name, time zone, currency, default language.
+  *Server done (M0-04); app: M0-08.*
 
 ### Accounts and sessions
 
 - **FND-010** `MVP` `doing` — A user logs in with login + password; email is not used. Members created by an admin may have
   no password and log in by QR code only. Passwords are hashed with Argon2id.
-  *Server login, password change, Argon2id done (M0-03); members without password: M0-04; app: M0-07.*
+  *Server login, password change, Argon2id done (M0-03); members without login/password (M0-04); app: M0-07.*
 - **FND-011** `MVP` `doing` — Sessions survive app restarts; a user can see and revoke their sessions (devices).
   *Server sessions, refresh rotation, list and revoke done (M0-03); app: M0-07.*
-- **FND-012** `MVP` `todo` — A member with `household.manage` can reset another member's password.
+- **FND-012** `MVP` `doing` — A member with `household.manage` can reset another member's password.
+  *Server done, revokes the member's sessions (M0-04); app: M0-08.*
 - **FND-013** `MVP` `doing` — A user can delete their account from inside the app (also a Google Play requirement).
   *Server done (M0-03); app screen: M0-07.*
-- **FND-014** `MVP` `todo` — Any member can log in on a new device by scanning a QR code shown on a logged-in device
-  (their own, or one of a member with `household.manage`).
+- **FND-014** `MVP` `doing` — Any member can log in on a new device by scanning a QR code shown on a logged-in device
+  (their own, or one of a member with `household.manage`). *Server login codes done (M0-04); QR screens: M0-07/M0-08.*
 - **FND-015** `later` `todo` — Login via external OpenID Connect provider (Authentik, Keycloak).
 
 ### Members, groups and permissions ([ADR-0014](../../adr/0014-group-based-permissions.md))
@@ -48,17 +51,21 @@ localization and deployment — everything feature modules depend on.
 - **FND-020** `MVP` `done` — Permissions are granted through groups; a member can be in several groups;
   effective permissions are the union of the groups' permissions.
 - **FND-021** `MVP` `doing` — Built-in group "Administrators": cannot be deleted, always has at least one member, has all permissions
-  and sees all data regardless of visibility rules. *Created at setup, all permissions, last-admin check on account deletion (M0-03);
-  group editing rules: M0-04.*
-- **FND-022** `MVP` `todo` — Members with `household.manage` create, rename and delete groups, edit group permissions and membership.
+  and sees all data regardless of visibility rules. *Created at setup, all permissions, last-admin check (M0-03);
+  no rename/delete/permission change, at least one member (server, M0-04); app: M0-08.*
+- **FND-022** `MVP` `doing` — Members with `household.manage` create, rename and delete groups, edit group permissions and membership.
+  *Server done, incl. creating members directly (M0-04); app: M0-08.*
 - **FND-023** `MVP` `doing` — Household setup creates editable templates "Adults" and "Kids" with the defaults below.
-  *Created at setup (M0-03); editing: M0-04.*
-- **FND-024** `MVP` `todo` — Invite by link or QR code with chosen groups; invites expire.
-- **FND-025** `MVP` `todo` — Members with `household.manage` can remove members.
+  *Created at setup (M0-03); editable through the group endpoints (M0-04); app: M0-08.*
+- **FND-024** `MVP` `doing` — Invite by link or QR code with chosen groups; invites expire.
+  *Server done: create, list, revoke, preview, accept, link payload (M0-04); app: M0-07/M0-08.*
+- **FND-025** `MVP` `doing` — Members with `household.manage` can remove members.
+  *Server done, same effect as account deletion (M0-04); app: M0-08.*
 - **FND-026** `MVP` `doing` — Ownership rules: creators edit their own items, assignees complete their tasks,
   everyone manages their own profile, sessions and notifications — independent of groups.
   *Own sessions, password and account need no permission (M0-03); items, profile, notifications follow in their modules.*
-- **FND-027** `MVP` `todo` — Permissions are enforced offline on the client and authoritatively on the server.
+- **FND-027** `MVP` `doing` — Permissions are enforced offline on the client and authoritatively on the server.
+  *Server checks on admin endpoints with a permission matrix test (M0-04); sync mutations: M0-05; client: M0-06/M0-07.*
 - **FND-028** `MVP` `todo` — Sections a member has no access to are hidden from navigation, search and tag pages.
 
 ### Persons
@@ -70,7 +77,8 @@ localization and deployment — everything feature modules depend on.
 - **FND-034** `MVP` `todo` — Every person has a personal color from the shared palette, assigned automatically
   (least-used in the household) and changeable; it marks the person's avatar, events, map pin and assignments
   ([visual style](../../design/visual-style.md#people)).
-- **FND-032** `MVP` `todo` — Every member has a person profile; a relative can later be linked to a new account.
+- **FND-032** `MVP` `doing` — Every member has a person profile; a relative can later be linked to a new account.
+  *Server: linking on member creation and invite acceptance (M0-04); persons through sync: M0-05.*
 
 ### Offline and sync
 

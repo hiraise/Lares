@@ -11,7 +11,7 @@ import java.util.UUID
 
 data class UserRow(
     val id: UUID,
-    val login: String,
+    val login: String?,
     val passwordHash: String?,
     val deleted: Boolean,
 )
@@ -19,7 +19,7 @@ data class UserRow(
 object UserRepository {
     fun create(
         id: UUID,
-        login: String,
+        login: String?,
         passwordHash: String?,
         now: Instant,
     ) {
@@ -44,6 +44,14 @@ object UserRepository {
             .where { (UserAccountTable.login eq login) and UserAccountTable.deletedAt.isNull() }
             .singleOrNull()
             ?.let(::toRow)
+
+    /** True if any user, active or not, holds this (normalized) login. */
+    fun loginExists(login: String): Boolean =
+        UserAccountTable
+            .selectAll()
+            .where { UserAccountTable.login eq login }
+            .limit(1)
+            .any()
 
     fun setPasswordHash(
         id: UUID,

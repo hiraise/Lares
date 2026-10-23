@@ -46,7 +46,7 @@ Statuses: `ready` → `in-progress` → `done` | `blocked`.
 | [M0-01](M0/01-dev-env-and-skeleton.md) | Dev environment and Gradle monorepo skeleton | — | done |
 | [M0-02](M0/02-server-foundation.md) | Server foundation | M0-01 | done |
 | [M0-03](M0/03-identity.md) | Identity: setup, login, sessions, permissions catalogue | M0-02 | done |
-| [M0-04](M0/04-household-admin.md) | Household administration: groups, members, invites, login codes | M0-03 | ready |
+| [M0-04](M0/04-household-admin.md) | Household administration: groups, members, invites, login codes | M0-03 | done |
 | [M0-05](M0/05-sync-server.md) | Sync server: pull, push, events, persons, tags | M0-04 | ready |
 | [M0-06](M0/06-client-data-sync.md) | Client data layer and sync engine | M0-05 | ready |
 | [M0-07](M0/07-android-shell.md) | Android app: onboarding, auth, main scaffold, settings | M0-06 | ready |

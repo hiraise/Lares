@@ -28,7 +28,7 @@ class MeQuery(
             householdName = household.data.name,
             personId = person.id.toString(),
             displayName = person.data.name,
-            login = user.login.takeUnless { user.deleted },
+            login = user.login?.takeUnless { user.deleted },
             hasPassword = user.passwordHash != null,
             isAdmin = effective.isAdmin,
             permissions = effective.permissions,

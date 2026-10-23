@@ -1,16 +1,24 @@
 package app.familyhub.server
 
+import app.familyhub.server.household.GroupAdminService
+import app.familyhub.server.household.HouseholdAdminService
 import app.familyhub.server.household.PermissionService
+import app.familyhub.server.household.householdRoutes
+import app.familyhub.server.household.installPermissionChecks
 import app.familyhub.server.identity.AccountService
 import app.familyhub.server.identity.AuthService
 import app.familyhub.server.identity.FailedAttemptLimiter
+import app.familyhub.server.identity.InviteService
+import app.familyhub.server.identity.LoginCodeService
 import app.familyhub.server.identity.MeQuery
+import app.familyhub.server.identity.MemberAdminService
 import app.familyhub.server.identity.SetupCodeProvider
 import app.familyhub.server.identity.SetupService
 import app.familyhub.server.identity.crypto.CodeGenerator
 import app.familyhub.server.identity.crypto.PasswordHasher
 import app.familyhub.server.identity.crypto.TokenGenerator
 import app.familyhub.server.identity.identityRoutes
+import app.familyhub.server.identity.memberAdminRoutes
 import app.familyhub.server.platform.AppConfig
 import app.familyhub.server.platform.BuildInfo
 import app.familyhub.server.platform.db.AppDatabase
@@ -47,6 +55,13 @@ class AppDeps(
     val authService = AuthService(db, clock, passwordHasher, tokenGenerator, loginLimiter, meQuery)
     val setupService = SetupService(db, clock, passwordHasher, setupLimiter, setupCode, authService)
     val accountService = AccountService(db, clock, passwordHasher, loginLimiter, meQuery)
+    val householdAdminService = HouseholdAdminService(db, clock)
+    val groupAdminService = GroupAdminService(db, clock)
+    val memberAdminService = MemberAdminService(db, clock, passwordHasher)
+
+    /** Wrong invite and login codes count per IP like failed logins (10 per 15 minutes); keys have their own prefixes. */
+    val inviteService = InviteService(db, clock, passwordHasher, codeGenerator, authService, loginLimiter, config.publicUrl)
+    val loginCodeService = LoginCodeService(db, clock, codeGenerator, authService, permissionService, loginLimiter, config.publicUrl)
 }
 
 fun main() {
@@ -77,12 +92,15 @@ fun main() {
 
 fun Application.module(deps: AppDeps) {
     installHttpPlumbing()
+    installPermissionChecks(deps.permissionService)
     routing {
         healthRoutes(deps.db)
         route("/api/v1") {
             instanceRoute(deps.db, deps.buildInfo)
             protocolChecked {
                 identityRoutes(deps.setupService, deps.authService, deps.accountService)
+                memberAdminRoutes(deps.authService, deps.memberAdminService, deps.inviteService, deps.loginCodeService)
+                householdRoutes(deps.authService, deps.householdAdminService, deps.groupAdminService)
             }
         }
     }

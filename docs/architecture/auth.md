@@ -60,7 +60,10 @@ Rate limit: 5 attempts per IP per 15 minutes on `/setup`.
 - Invite code: 12 characters Crockford base32, single use, stored hashed (SHA-256); invites are listed and revoked by id.
 - Shared as a link/QR payload: `familyhub://invite?server=<urlencoded public URL>&code=<code>`.
 - `POST /api/v1/invites/preview` (public, code in body) returns household name and inviter name, or `INVITE_INVALID`.
-- Accepting creates user + person + member in the invite's groups + session, returns tokens.
+- Accepting creates user + person + member in the invite's groups + session, returns tokens. The invite row is locked
+  (`SELECT … FOR UPDATE`) during acceptance, so it is used at most once. Groups deleted since the invite was created are
+  skipped; if the invite's relative was deleted or linked meanwhile, the invite is `INVITE_INVALID`.
+- Wrong codes on preview and accept count per IP (10 per 15 minutes → `RATE_LIMITED`), like failed logins.
 
 ## QR login on a new device (FND-014)
 
@@ -79,8 +82,11 @@ Rate limit: 5 attempts per IP per 15 minutes on `/setup`.
   relative-type person (history keeps a name).
 - Remove member (FND-025): same effect, performed by an admin; cannot remove the last administrator.
 - Create member (admin, FND-022): always creates a `user_account` — `login` and password optional (no login → QR login only).
+  `user_account.login` is nullable (unique when set, migration `V3__admin`); a password requires a login. An administrator
+  can set the password later with a reset.
   Optional `personId` links an existing relative to the new account (FND-032); invites accept the same optional `personId`.
-  The person must belong to the household, not be deleted and not be linked to another member.
+  The person must belong to the household, not be deleted and not be linked to another member. The linked person takes the
+  `displayName` of the request as its name (the client pre-fills it with the relative's name).
 
 ## Codes
 

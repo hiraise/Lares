@@ -7,7 +7,6 @@ import app.familyhub.contract.api.auth.DeleteAccountRequest
 import app.familyhub.contract.api.auth.Me
 import app.familyhub.contract.api.auth.SessionInfo
 import app.familyhub.contract.validation.Validators
-import app.familyhub.server.household.GroupRepository
 import app.familyhub.server.household.MemberRepository
 import app.familyhub.server.identity.crypto.PasswordHasher
 import app.familyhub.server.platform.db.AppDatabase
@@ -15,7 +14,6 @@ import app.familyhub.server.platform.http.ApiException
 import app.familyhub.server.platform.http.validate
 import app.familyhub.server.platform.nowForDb
 import app.familyhub.server.platform.sync.lockHousehold
-import app.familyhub.server.platform.sync.recordChange
 import app.familyhub.server.platform.toContract
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -85,19 +83,7 @@ class AccountService(
             lockHousehold(householdId)
             val member = MemberRepository.get(householdId, principal.memberId)
             check(member != null && !member.deleted) { "Member ${principal.memberId} not active" }
-            val otherAdmins = GroupRepository.countAdministrators(householdId, exceptMemberId = member.id)
-            val isAdmin = GroupRepository.countAdministrators(householdId) > otherAdmins
-            if (isAdmin && otherAdmins == 0L) {
-                throw ApiException(ErrorCode.LAST_ADMIN, "The last administrator cannot delete their account")
-            }
-            val now = clock.nowForDb()
-            UserRepository.markDeleted(principal.userId, now)
-            SessionRepository.revokeAllOfUser(principal.userId, now)
-            MemberRepository.tombstone(householdId, member.id, recordChange(householdId), now)
-            val groupIds = GroupRepository.removeMemberFromAll(householdId, member.id)
-            groupIds.forEach { groupId -> GroupRepository.stampSeq(householdId, groupId, recordChange(householdId), now) }
-            // What the member may see changed; M0-04 extends this to every affected member.
-            MemberRepository.bumpAccessVersion(householdId, listOf(member.id))
+            removeMember(member, clock.nowForDb())
         }
     }
 

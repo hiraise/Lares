@@ -4,7 +4,7 @@ Updated: 2026-10-23
 
 ## Phase
 
-**M0 Foundation — implementation in progress: M0-01…M0-03 done.**
+**M0 Foundation — implementation in progress: M0-01…M0-04 done.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
@@ -42,10 +42,15 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
   shared by tags and persons, `PersonData.color`), M0-06 (color on create), M0-07 (theme, fonts, icon pipeline, Today,
   More, app icon), M0-08 (personal colors, entry from More). Mockups and bottom bar approved. File storage for photos:
   new milestone M5b after Budget ([files spec](product/features/files.md)).
+- 2026-10-23 M0-04: household administration (server) — household settings, groups (built-in and last-admin rules,
+  `AccessVersionService`), members created directly (login/password optional, linking a relative), password reset,
+  removal (shared with account deletion), invites (create/list/revoke/preview/accept, single use under row lock),
+  QR login codes; migration `V3__admin`; contract `api/admin` DTOs and `DeepLinks`. 99 server tests incl. permission
+  matrix and cross-household isolation; manual curl walkthrough done.
 
 ## Next steps
 
-1. Next plan: [M0-04 Household administration](plans/M0/04-household-admin.md), in a fresh session.
+1. Next plan: [M0-05 Sync server](plans/M0/05-sync-server.md), in a fresh session.
 2. After M0-11: M0 acceptance with the customer (APK, walkthrough, Russian changelog).
 
 ## Plan progress
