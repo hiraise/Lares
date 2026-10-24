@@ -74,9 +74,16 @@ class TodayActions(
     /** «Все» and «Ещё N»: the Tasks tab, scope Mine. */
     val onAllTasks: () -> Unit = {},
     val onCreate: () -> Unit = {},
+    /** «Открыть» on the shopping card: the list page. */
+    val onShoppingList: (String) -> Unit = {},
+    /** «Ещё N списка»: the Shopping tab. */
+    val onAllShopping: () -> Unit = {},
 )
 
-/** FND-063: date line and title, sync indicator and own avatar (→ More), the tasks block (TSK-023) and the FAB. */
+/**
+ * FND-063: date line and title, sync indicator and own avatar (→ More), the active shopping list (SHP-013), the tasks
+ * block (TSK-023) and the FAB.
+ */
 @Composable
 fun TodayScreen(
     state: MainUiState,
@@ -97,10 +104,18 @@ fun TodayScreen(
                     Avatar(initialsFor(state.name), state.color, size = 32.dp, ring = true)
                 }
             }
-            if (today.showTasks) {
-                TodayTasks(today, actions, Modifier.padding(horizontal = Spacing.screen).padding(bottom = 104.dp))
-            } else if (today.loaded) {
+            if (today.empty) {
                 EmptyState(Res.drawable.ic_home, stringResource(Res.string.today_empty))
+            } else if (today.loaded) {
+                Column(
+                    Modifier.padding(horizontal = Spacing.screen).padding(bottom = 104.dp),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.xl),
+                ) {
+                    today.shopping?.let { card ->
+                        TodayShoppingBlock(card, onOpen = { actions.onShoppingList(card.listId) }, onOthers = actions.onAllShopping)
+                    }
+                    if (today.showTasks) TodayTasks(today, actions)
+                }
             }
         }
         if (today.canCreate) {

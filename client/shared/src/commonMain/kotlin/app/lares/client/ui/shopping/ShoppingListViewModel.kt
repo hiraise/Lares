@@ -41,6 +41,8 @@ import kotlinx.coroutines.launch
 /** Parameters of [ShoppingListViewModel] (Koin `parametersOf`). */
 data class ShoppingListArgs(
     val id: String,
+    /** Open filtered by this tag (from the tag page); dropped when no item of the list has it. */
+    val tagId: String? = null,
 )
 
 /** Dialogs of the list page. */
@@ -142,7 +144,7 @@ class ShoppingListViewModel(
 ) : ViewModel() {
     private val id = args.id
     private val eventChannel = Channel<ShoppingEvent>(Channel.BUFFERED)
-    private val local = MutableStateFlow(Local())
+    private val local = MutableStateFlow(Local(tagId = args.tagId))
     private val query = MutableStateFlow("")
 
     val events: Flow<ShoppingEvent> = eventChannel.receiveAsFlow()

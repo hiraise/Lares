@@ -121,7 +121,9 @@ class ShoppingListActions(
 fun ShoppingListRoute(
     id: String,
     onBack: () -> Unit,
-    viewModel: ShoppingListViewModel = koinViewModel(key = "shopping-$id") { parametersOf(ShoppingListArgs(id)) },
+    tagId: String? = null,
+    viewModel: ShoppingListViewModel =
+        koinViewModel(key = "shopping-$id-${tagId.orEmpty()}") { parametersOf(ShoppingListArgs(id, tagId)) },
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val tagSheet by viewModel.tagSheet.collectAsStateWithLifecycle()

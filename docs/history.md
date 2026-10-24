@@ -235,3 +235,13 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   5 rows) under the field; «Метки списка» menu item, tags on cards and rows, tag filter chips (adding and clearing follow
   the filter; resets when the tag is no longer in use); `ChoiceDialog` scrolls long lists; 13 new tests (9 view model,
   4 Compose UI).
+
+- 2026-10-24 **M2-06** Today shopping card, tag page section, manual: `TodayViewModel` combines task inputs with
+  `ShoppingRepository.observeActive()` (`TodayUiState.shopping: TodayShoppingUi`, only with `shopping.view`;
+  `empty` when neither block shows); `TodayShoppingBlock` — lake gradient hero card (radius 24, padding 18, count pill,
+  white progress, shopper avatar with a white ring, white «Открыть» pill), all text 100 % white for contrast, «Ещё N
+  списка» → Shopping tab; `TagViewModel` adds `observeForTag` — «Покупки · N» with item rows (→ list page filtered by
+  the tag through the new `tagId` of `ShoppingListDestination`/`ShoppingListArgs`) and list rows, the tasks empty state
+  hidden when shopping rows exist; manuals `docs/user/{en,ru}/shopping.md`; all shopping MVP requirements `done`;
+  9 new tests (5 Today and 2 tag view model, 2 Compose UI); emulator walkthrough (spec scenarios 1–7, ru/en,
+  light/dark) without bugs.

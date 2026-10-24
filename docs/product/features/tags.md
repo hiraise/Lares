@@ -26,13 +26,16 @@ Tags complement budget categories: car spending spread over "Fuel", "Insurance",
   *Tasks: done (M1-02, M1-06). Other modules add theirs.*
   *Tasks done: tags in the task editor, «+ Новая метка» for `tags.manage` (M1-06).*
   *Shopping done: tags on lists («Метки списка») and items (item sheet), «+ Новая метка» for `tags.manage` (M2-05).*
+  *Calendar and budget add theirs in M3 and M5.*
 - **TAG-003** `MVP` `doing` — Each module list can be filtered by tag.
   *Tasks: the «Метка» chip (M1-05). Other modules add theirs.*
   *Tasks done: «Метка» chip with a tag picker in the Tasks tab (M1-05).*
-  *Shopping done: tag chips «Все» / one per tag in use on the list page (M2-05).*
+  *Shopping done: tag chips «Все» / one per tag in use on the list page (M2-05); the tag page opens a list filtered by
+  the tag (M2-06).*
 - **TAG-004** `MVP` `doing` — Tag page aggregates linked items across modules, grouped by module.
   *Page with the tasks section «Задачи · N» (archived tags too), opened from Family › Tags and from a tag chip on the
-  task page; editing the tag moved to its top bar (M1-07). Other modules add their sections.*
+  task page; editing the tag moved to its top bar (M1-07). Shopping section «Покупки · N»: items to buy and tagged
+  lists; the tasks empty state is hidden when the page has shopping rows (M2-06). Other modules add their sections.*
 - **TAG-005** `MVP` `todo` — Tag page shows spending for the tag over a chosen period (after M5).
 - **TAG-006** `MVP` `done` — Tag names are unique within a household, case-insensitive.
   *Server: `TAG_NAME_TAKEN`, archived tags keep their name, deleted ones free it (M0-05); client checks local tags first (M0-06); inline "already exists" error in the tag sheet, sync rejections in

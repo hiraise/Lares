@@ -826,4 +826,14 @@
     <string name="shopping_forget_confirm">Не предлагать</string>
     <string name="shopping_list_tags">Метки списка</string>
     <string name="shopping_filter_all">Все</string>
+    <string name="today_shopping_title">Список покупок</string>
+    <string name="today_shopping_open">Открыть</string>
+    <plurals name="today_shopping_others">
+        <item quantity="one">Ещё %1$d список</item>
+        <item quantity="few">Ещё %1$d списка</item>
+        <item quantity="many">Ещё %1$d списков</item>
+        <item quantity="other">Ещё %1$d списка</item>
+    </plurals>
+    <string name="tag_shopping_section">Покупки · %1$s</string>
+    <string name="tag_shopping_left">Осталось %1$d</string>
 </resources>

@@ -6,7 +6,7 @@ Updated: 2026-10-24
 
 **M0 Foundation — all plans M0-01…M0-11 done; M0 acceptance with the customer pending.
 M1 Tasks — all plans M1-01…M1-07 done; M1 acceptance with the customer next.
-M2 Shopping lists — in progress: M2-01…M2-05 done; next: `/plan-run M2-06`.**
+M2 Shopping lists — all plans M2-01…M2-06 done; M2 acceptance with the customer next.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
@@ -21,6 +21,10 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 
 ## Last completed
 
+- 2026-10-24 M2-06 Shopping everywhere: the active list as the gradient hero card first on Today (count, what is left,
+  who is in the store, «Открыть», «Ещё N списка»), the «Покупки» section on the tag page (an item opens its list
+  filtered by the tag), user manual "Shopping lists" (en, ru); all shopping MVP requirements done; 9 new tests,
+  emulator walkthrough of spec scenarios 1–7 without bugs.
 - 2026-10-24 M2-05 Shopping item sheet, suggestions, tags: long press opens the item sheet (name, quantity, note,
   department remembered for all lists, tags, who added and bought, «Убрать из списка» with undo); «+ Яйца» chips with
   «Больше не предлагать»; autocomplete while typing; list tags, tags on cards and rows, tag filter; 13 new tests.
@@ -83,7 +87,8 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 2. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
 3. M4 plan: re-run the load test with location uploads every 30 s (ADR-0015).
 4. After the M1 acceptance: set the tasks spec to `implemented`.
-5. Execute M2-06 (`/plan-run M2-06`), then the M2 acceptance.
+5. M2 acceptance with the customer (checklist in the M2-06 handoff); after it set the shopping spec to `implemented`
+   and write the M3 Calendar plans.
 
 ## Plan progress
 

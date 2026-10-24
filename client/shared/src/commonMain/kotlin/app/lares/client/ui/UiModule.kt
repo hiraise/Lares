@@ -80,8 +80,8 @@ fun uiModule(): Module =
         }
         viewModel { FamilySettingsViewModel(get(), get(), get(), get()) }
         viewModel { TasksViewModel(get(), get(), get()) }
-        viewModel { TodayViewModel(get(), get()) }
-        viewModel { params -> TagViewModel(get(), get(), get(), get(), params.get()) }
+        viewModel { TodayViewModel(get(), get(), get()) }
+        viewModel { params -> TagViewModel(get(), get(), get(), get(), get(), params.get()) }
         viewModel { params -> TaskDetailViewModel(get(), get(), params.get()) }
         viewModel { params -> TaskEditorViewModel(get(), get(), get(), get(), get(), params.get()) }
         viewModel { ShoppingListsViewModel(get(), get()) }

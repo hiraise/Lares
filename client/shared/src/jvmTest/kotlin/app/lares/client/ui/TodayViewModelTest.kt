@@ -1,12 +1,19 @@
 package app.lares.client.ui
 
+import app.lares.client.data.shopping.ShoppingRepository
+import app.lares.client.data.shopping.ShoppingViews
+import app.lares.client.data.tasks.TaskInputs
 import app.lares.client.data.tasks.TasksRepository
 import app.lares.client.ui.FamilyFixture.change
 import app.lares.client.ui.main.TodayViewModel
 import app.lares.client.ui.tasks.TaskEvent
+import app.lares.contract.entities.ProductCategory
+import app.lares.contract.entities.ShoppingItemData
+import app.lares.contract.entities.ShoppingListData
 import app.lares.contract.entities.TaskData
 import app.lares.contract.permissions.EffectivePermissions
 import app.lares.contract.permissions.Permission
+import app.lares.contract.sync.Change
 import app.lares.contract.sync.EntityTypes
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -16,9 +23,13 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.minutes
 
-/** The Today tasks block (TSK-023, FND-063). */
+/** The Today blocks: the active shopping list (SHP-013) and the tasks (TSK-023, FND-063). */
 class TodayViewModelTest {
     private val today = TaskUiFixture.today
 
@@ -90,6 +101,102 @@ class TodayViewModelTest {
             assertFalse(state.showTasks)
             assertFalse(state.canCreate)
             assertTrue(state.rows.isEmpty())
+        }
+    }
+
+    private fun shoppingCore(vararg extra: Change) = FamilyFixture.core(FamilyFixture.olga, ShoppingUiFixture.changes + extra)
+
+    private fun UiTestCore.taskInputs(): TaskInputs =
+        runBlocking { koin.get<TasksRepository>().observeInputs().first { it.viewer != null } }
+
+    private fun UiTestCore.shoppingInputs() =
+        runBlocking { koin.get<ShoppingRepository>().observeInputs().first { it.viewer != null && it.lists.isNotEmpty() } }
+
+    @Test
+    fun `no shopping card without lists to buy`() {
+        core().use { core ->
+            val state = awaitState(core.koin.get<TodayViewModel>().state) { it.loaded && it.showTasks }
+            assertNull(state.shopping)
+            assertFalse(state.empty)
+        }
+    }
+
+    @Test
+    fun `the card shows the list with items to buy and who is shopping`() {
+        shoppingCore().use { core ->
+            val card = assertNotNull(awaitState(core.koin.get<TodayViewModel>().state) { it.shopping != null }.shopping)
+            assertEquals("l1", card.listId)
+            assertEquals("Groceries", card.name)
+            assertEquals(1, card.bought)
+            assertEquals(4, card.total)
+            assertEquals(listOf("Apples", "Bread", "Milk"), card.remaining)
+            assertEquals(0, card.more)
+            assertEquals("m2", card.shopper?.id, "Boris ticked Eggs 5 minutes ago")
+            assertEquals(0, card.othersToBuy, "Pharmacy has nothing to buy")
+        }
+    }
+
+    @Test
+    fun `the most recently changed list wins and the others are counted`() {
+        val now = Clock.System.now()
+        shoppingCore(
+            change(EntityTypes.SHOPPING_LIST, "l3", ShoppingListData.serializer(), ShoppingListData("Hardware", "m1")),
+            change(
+                EntityTypes.SHOPPING_ITEM,
+                "i-nails",
+                ShoppingItemData.serializer(),
+                ShoppingItemData("l3", "Nails", "m1", now - 1.minutes, category = ProductCategory.HOUSEHOLD),
+            ),
+        ).use { core ->
+            val card = assertNotNull(awaitState(core.koin.get<TodayViewModel>().state) { it.shopping?.listId == "l3" }.shopping)
+            assertEquals(listOf("Nails"), card.remaining)
+            assertNull(card.shopper)
+            assertEquals(1, card.othersToBuy, "Groceries still has items to buy")
+        }
+    }
+
+    @Test
+    fun `who is shopping expires after 15 minutes`() {
+        shoppingCore().use { core ->
+            val tasks = core.taskInputs()
+            val shopping = core.shoppingInputs()
+            assertEquals(
+                "m2",
+                TodayViewModel
+                    .build(tasks, ShoppingViews.active(shopping))
+                    .shopping
+                    ?.shopper
+                    ?.id,
+            )
+            val later = TodayViewModel.build(tasks, ShoppingViews.active(shopping.copy(now = shopping.now + 11.minutes)))
+            assertNotNull(later.shopping, "the list still has items to buy")
+            assertNull(later.shopping.shopper, "Eggs were ticked 16 minutes ago")
+        }
+    }
+
+    @Test
+    fun `no card without shopping view, empty state only when nothing is shown`() {
+        shoppingCore().use { core ->
+            val tasks = core.taskInputs()
+            val active = ShoppingViews.active(core.shoppingInputs())
+            val viewer = tasks.viewer!!
+
+            fun with(vararg permissions: Permission) =
+                TodayViewModel.build(
+                    tasks.copy(viewer = viewer.copy(permissions = EffectivePermissions(false, permissions.toSet()))),
+                    active,
+                )
+
+            val tasksOnly = with(Permission.TASKS_VIEW)
+            assertNull(tasksOnly.shopping)
+            assertFalse(tasksOnly.empty)
+
+            val shoppingOnly = with(Permission.SHOPPING_VIEW)
+            assertNotNull(shoppingOnly.shopping)
+            assertFalse(shoppingOnly.showTasks)
+            assertFalse(shoppingOnly.empty, "the card alone is enough")
+
+            assertTrue(with(Permission.CALENDAR_VIEW).empty)
         }
     }
 }

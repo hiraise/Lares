@@ -88,23 +88,26 @@ Technical design: [architecture/shopping.md](../../architecture/shopping.md).
 - **SHP-011** `MVP` `done` — Without network the list shows a banner «Нет сети. Отметки сохранены и отправятся, когда
   связь появится.» (or «Нет сети. Список может быть не самым свежим.» when nothing is waiting to be sent) (FND-043).
   *UI: banner on the list page from the sync state (M2-04).*
-- **SHP-012** `MVP` `doing` — "Who is shopping": if another member ticked an item in a list during the last 15 minutes,
+- **SHP-012** `MVP` `done` — "Who is shopping": if another member ticked an item in a list during the last 15 minutes,
   its card and the Today block show «Дмитрий сейчас в магазине», the list page the short «Дмитрий в магазине»
   (Q-020). Derived from the ticks; nothing extra is sent or stored.
   *Client core: computed from ticks, expires with the minute ticker (M2-03).*
-  *UI: list cards and the list page (M2-04); Today block in M2-06.*
+  *UI: list cards and the list page (M2-04); the Today card with the shopper's avatar (M2-06).*
 
 ### Elsewhere in the app
 
-- **SHP-013** `MVP` `doing` — Today block (FND-063): the active list — the list with items to buy that changed most
+- **SHP-013** `MVP` `done` — Today block (FND-063): the active list — the list with items to buy that changed most
   recently — as the hero card: name, «6 из 9» (bought of all), «Осталось: Молоко, Хлеб, Яблоки», progress, who is
   shopping, «Открыть»; «Ещё N списка» when other lists have items to buy. No card when nothing is to buy.
   *Client core: active list and other lists with items to buy computed (M2-03).*
-- **SHP-014** `MVP` `doing` — Tags: lists and items can carry tags (TAG-002). The list page can be filtered by a tag used
+  *UI: the gradient hero card first on Today, «Открыть» opens the list, «Ещё N списка» opens the Shopping tab; only for
+  `shopping.view` (M2-06).*
+- **SHP-014** `MVP` `done` — Tags: lists and items can carry tags (TAG-002). The list page can be filtered by a tag used
   in it (TAG-003). The tag page shows the items to buy with this tag and the tagged lists (TAG-004).
   *Server: tags on lists and items stored; added tag ids checked (M2-02).*
   *Client core: list page tag filter, tags in use and the tag page section computed (M2-03).*
-  *UI: list page part done — «Метки списка» in the menu, tags on cards and rows, the tag filter chips; adding while filtered tags the item (M2-05); tag page in M2-06.*
+  *UI: list page part done — «Метки списка» in the menu, tags on cards and rows, the tag filter chips; adding while filtered tags the item (M2-05); the tag page section «Покупки · N»: items to buy (a tap opens the list
+  filtered by the tag) and tagged lists (M2-06).*
 
 ### Later
 

@@ -9,6 +9,7 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
@@ -26,6 +27,11 @@ import app.lares.client.data.shopping.Suggestion
 import app.lares.client.resources.Res
 import app.lares.client.resources.shopping_offline_pending
 import app.lares.client.ui.common.uiText
+import app.lares.client.ui.main.MainUiState
+import app.lares.client.ui.main.TodayActions
+import app.lares.client.ui.main.TodayScreen
+import app.lares.client.ui.main.TodayShoppingUi
+import app.lares.client.ui.main.TodayUiState
 import app.lares.client.ui.shopping.ItemForm
 import app.lares.client.ui.shopping.ItemSheetState
 import app.lares.client.ui.shopping.ShoppingItemSheet
@@ -260,5 +266,48 @@ class ShoppingUiTest {
             onNodeWithTag("shopping_filter_all").assertIsDisplayed()
             onNodeWithTag("shopping_filter_t1").assertIsDisplayed()
             onAllNodesWithText("Car").assertCountEquals(2)
+        }
+
+    @Test
+    fun `Today card - name, count, remaining, who is shopping, open and other lists (SHP-013)`() =
+        runComposeUiTest {
+            val card = TodayShoppingUi("l1", "Groceries", 6, 9, listOf("Milk", "Bread", "Apples"), 0, members[1], othersToBuy = 2)
+            var opened: String? = null
+            var others = 0
+            setContent {
+                LaresTheme(darkTheme = false) {
+                    TodayScreen(
+                        MainUiState(name = "Olga"),
+                        {},
+                        {},
+                        TodayUiState(loaded = true, shopping = card),
+                        TodayActions(onShoppingList = { opened = it }, onAllShopping = { others++ }),
+                    )
+                }
+            }
+            onNodeWithText("Groceries", useUnmergedTree = true).assertExists()
+            onNodeWithTag("today_shopping_count", useUnmergedTree = true).assertTextEquals("6 of 9")
+            onNodeWithText("Left: Milk, Bread, Apples", useUnmergedTree = true).assertExists()
+            onNodeWithText("Boris is shopping now", useUnmergedTree = true).assertExists()
+            onNodeWithText("Open", useUnmergedTree = true).performClick()
+            assertEquals("l1", opened)
+            onNodeWithText("2 more lists", useUnmergedTree = true).performClick()
+            assertEquals(1, others)
+            onNodeWithText("Here will be the day summary", substring = true, useUnmergedTree = true).assertDoesNotExist()
+        }
+
+    @Test
+    fun `Today card - more names and no shopper`() =
+        runComposeUiTest {
+            val card = TodayShoppingUi("l1", "Groceries", 0, 5, listOf("Milk", "Bread", "Apples"), 2, null, othersToBuy = 0)
+            setContent {
+                LaresTheme(
+                    darkTheme = true,
+                ) { TodayScreen(MainUiState(name = "Olga"), {}, {}, TodayUiState(loaded = true, shopping = card)) }
+            }
+            onNodeWithText("Left: Milk, Bread, Apples and 2 more", useUnmergedTree = true).assertExists()
+            onNodeWithTag("today_shopping_shopper", useUnmergedTree = true).assertDoesNotExist()
+            onNodeWithTag("today_shopping_others", useUnmergedTree = true).assertDoesNotExist()
+            onNodeWithTag("today_tasks", useUnmergedTree = true).assertDoesNotExist()
         }
 }

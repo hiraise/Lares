@@ -16,6 +16,10 @@ Versioning: [SemVer](https://semver.org/) from the first release.
   names from all lists while typing; a long press opens the item sheet (name, quantity, note, department, tags, who
   added and bought) with «Убрать из списка» and undo; a department you correct is remembered for that product in all
   lists; tags on lists and items and a tag filter on the list page.
+- Shopping everywhere (M2-06): the Today screen starts with the list you need now — its name, «6 из 9», what is left,
+  who is in the store right now and «Открыть», plus «Ещё 2 списка» when other lists have something to buy. Each tag's
+  page shows the items to buy and the lists with that tag; an item opens its list filtered by the tag. New user manual
+  "Shopping lists" in English and Russian.
 
 ## [0.2.0] - 2026-10-24
 

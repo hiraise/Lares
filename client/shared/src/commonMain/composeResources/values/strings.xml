@@ -792,4 +792,12 @@
     <string name="shopping_forget_confirm">Stop suggesting</string>
     <string name="shopping_list_tags">List tags</string>
     <string name="shopping_filter_all">All</string>
+    <string name="today_shopping_title">Shopping list</string>
+    <string name="today_shopping_open">Open</string>
+    <plurals name="today_shopping_others">
+        <item quantity="one">%1$d more list</item>
+        <item quantity="other">%1$d more lists</item>
+    </plurals>
+    <string name="tag_shopping_section">Shopping · %1$s</string>
+    <string name="tag_shopping_left">%1$d left</string>
 </resources>

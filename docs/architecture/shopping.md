@@ -319,13 +319,16 @@ category; none → `ShoppingCategories.guess(name)`. `data class AddResult(val a
 
 - **Shopping tab** (`ui/shopping/`): lists as cards (name, «6 из 9», progress, «Осталось: …», who is shopping, tags),
   extended FAB «Список» for `shopping.manage_lists`, empty state. A tap opens the list page.
-- **List page** (`ShoppingListDestination(id)`): top bar with the list name and a menu (rename, list tags, grouping,
+- **List page** (`ShoppingListDestination(id, tagId?)`; `tagId` opens it filtered, from the tag page): top bar with the list name and a menu (rename, list tags, grouping,
   clear bought, delete); offline banner; progress line; quick-add field with suggestion chips and autocomplete; items to
   buy by department; collapsed «Куплено · N»; a tap ticks, a long press opens the item sheet.
 - People are shown by first name (first word of `MemberView.name`); times of adds and ticks with the existing
   `rememberTimeFormatter` (device zone: «18:40» today, «23 октября, 18:40» otherwise); item names as stored.
 - **Item sheet:** name, quantity, note, department picker («Запомним для всех списков»), tags, who added / bought;
   «Сохранить», «Убрать из списка».
-- **Today:** the active list as the gradient hero card above the tasks block (mockup `Main.dc.html`).
-- **Tag page:** a «Покупки» section (items to buy with the tag, tagged lists).
+- **Today:** the active list as the gradient hero card above the tasks block (mockup `Main.dc.html`;
+  `TodayViewModel` combines task inputs with `observeActive()`, `TodayUiState.shopping`, only with `shopping.view`);
+  all text 100 % white for contrast; «Ещё N списка» under it opens the Shopping tab.
+- **Tag page:** a «Покупки · N» section after the tasks (items to buy with the tag → the list filtered by the tag;
+  tagged lists → the list), only when it has rows (`TagViewModel` adds `observeForTag`).
 - Shopping checkbox: rounded square 26 dp, radius 8 (visual-style § Component patterns).

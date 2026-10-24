@@ -159,6 +159,8 @@ data class TagDestination(
 @Serializable
 data class ShoppingListDestination(
     val id: String,
+    /** Open filtered by this tag (from the tag page). */
+    val tagId: String? = null,
 )
 
 @Serializable
@@ -269,7 +271,8 @@ fun MainNavHost() {
             )
         }
         composable<ShoppingListDestination> { entry ->
-            ShoppingListRoute(entry.toRoute<ShoppingListDestination>().id, onBack = { navController.popBackStack() })
+            val route = entry.toRoute<ShoppingListDestination>()
+            ShoppingListRoute(route.id, onBack = { navController.popBackStack() }, tagId = route.tagId)
         }
         composable<TaskDetailDestination> { entry ->
             val id = entry.toRoute<TaskDetailDestination>().id
@@ -369,6 +372,7 @@ private fun NavGraphBuilder.familyGraph(navController: NavHostController) {
             entry.toRoute<TagDestination>().id,
             onBack = back,
             onTask = { navController.navigate(TaskDetailDestination(it)) },
+            onShoppingList = { id, tagId -> navController.navigate(ShoppingListDestination(id, tagId)) },
         )
     }
     composable<MemberDestination> { entry ->

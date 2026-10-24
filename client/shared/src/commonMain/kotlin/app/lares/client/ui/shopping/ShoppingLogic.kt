@@ -36,11 +36,14 @@ import app.lares.client.resources.shopping_progress
 import app.lares.client.resources.shopping_remaining
 import app.lares.client.resources.shopping_shopper_now
 import app.lares.client.resources.shopping_shopper_short
+import app.lares.client.resources.tag_shopping_left
+import app.lares.client.resources.today_shopping_others
 import app.lares.client.sync.SyncState
 import app.lares.client.sync.SyncStatus
 import app.lares.client.ui.common.UiText
 import app.lares.client.ui.common.raw
 import app.lares.client.ui.common.uiText
+import app.lares.client.ui.main.TodayShoppingUi
 import app.lares.contract.entities.ProductCategory
 import org.jetbrains.compose.resources.StringResource
 import kotlin.time.Instant
@@ -87,6 +90,23 @@ object ShoppingLogic {
 
     /** «Дмитрий сейчас в магазине» (cards, Today); null when nobody is shopping. */
     fun shopperNow(list: ShoppingListView): UiText? = list.shopper?.let { uiText(Res.string.shopping_shopper_now, raw(firstName(it))) }
+
+    /** «6 из 9» on the Today card. */
+    fun countOf(card: TodayShoppingUi): UiText =
+        uiText(Res.string.shopping_count_of, raw(card.bought.toString()), raw(card.total.toString()))
+
+    /** «Осталось: Молоко, Хлеб, Яблоки и ещё 2» on the Today card. */
+    fun remaining(card: TodayShoppingUi): UiText =
+        uiText(Res.string.shopping_remaining, names(card.remaining, card.remaining.size + card.more))
+
+    /** «Дмитрий сейчас в магазине» on the Today card. */
+    fun shopperNow(member: MemberView): UiText = uiText(Res.string.shopping_shopper_now, raw(firstName(member)))
+
+    /** «Ещё 2 списка» under the Today card. */
+    fun others(count: Int): UiText = UiText.Plural(Res.plurals.today_shopping_others, count, listOf(raw(count.toString())))
+
+    /** «Осталось 3» on a list row of the tag page. */
+    fun left(list: ShoppingListView): UiText = uiText(Res.string.tag_shopping_left, raw(list.needed.toString()))
 
     /** «Дмитрий в магазине» (the narrow progress row of the list page). */
     fun shopperShort(list: ShoppingListView): UiText? = list.shopper?.let { uiText(Res.string.shopping_shopper_short, raw(firstName(it))) }

@@ -165,6 +165,8 @@ fun MainScaffoldRoute(
                     tab.value = MainTab.TASKS
                 },
                 onCreate = { navigation.onTaskEditor(TaskEditorArgs(assignToMe = true)) },
+                onShoppingList = navigation.onShoppingList,
+                onAllShopping = { tab.value = MainTab.SHOPPING },
             ),
     )
     if (sheetOpen) {
