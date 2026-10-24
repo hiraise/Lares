@@ -13,8 +13,15 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 [M1 Tasks](product/roadmap.md#m1-tasks): implemented, customer acceptance pending (together with M0). Specs
 `foundation`, `tags` and `tasks` approved.
 
+**Active release branch: `release/0.2.0`** (M0 + M1). Commit approved work here; `main` is protected
+([release process](process/release.md), ADR-0020).
+
 ## Last completed
 
+- 2026-10-24 Release branches (ADR-0020): `main` protected by rulesets (no push, only a release pull request with
+  green CI, merge commits), work on `release/X.Y.Z`, `tools/release/release.sh start|finish`, CI job `release-pr`
+  (`tools/release/check.sh`), a merge into `main` tags `vX.Y.Z` and publishes the APK and images automatically;
+  rulesets in `.github/rulesets/` applied by `tools/release/rulesets.sh`.
 - 2026-10-24 M1-07 Tasks everywhere: Today block «Задачи на сегодня» with ticking and «Добавить», tag page (from
   Family › Tags and tag chips), four task switches in Settings › Notifications, a tap on a task notification or
   reminder opens the task; user manual "Tasks" (en, ru); 11 new tests, emulator walkthrough.
@@ -52,7 +59,8 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 
 1. M0 and M1 acceptance with the customer (APK, walkthrough on real phones, Russian changelog; checklist in the M1-07
    handoff).
-2. First signed release `0.2.0` after M1 is accepted (customer, 2026-10-23: no `0.1.2`; [release process](process/release.md));
+2. First signed release `0.2.0` from `release/0.2.0` (`release.sh finish`, merge after the customer's approval;
+   [release process](process/release.md));
    make the GHCR package `lares-server` public or `docker login ghcr.io` on the server
    ([deploy/README](../deploy/README.md#releases)).
 3. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).

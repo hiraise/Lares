@@ -1,25 +1,59 @@
 # Release process
 
-Decision: [ADR-0019](../adr/0019-release-signing-and-flow.md). Releases need the customer's approval.
+Decisions: [ADR-0019](../adr/0019-release-signing-and-flow.md) (signing, when to release),
+[ADR-0020](../adr/0020-release-branches.md) (branches). Releases need the customer's approval.
+
+## Branches
+
+| Branch | What | Who pushes |
+| --- | --- | --- |
+| `main` | Released code only. Protected: no direct push, only a release pull request with green CI | nobody; the release merge |
+| `release/X.Y.Z` | The next release. Work items are committed here after the customer's approval | agents |
+| `feature/<id>` (optional) | Parallel or risky work, pull request into the release branch | agents |
+
+The active release branch is named in [STATUS.md](../STATUS.md). Every push to a release branch and every pull request
+runs CI (checks, smoke test, debug APK kept 14 days).
 
 ## When
 
 - After each milestone is accepted: minor version (`0.2.0`, `0.3.0`, …). `1.0.0` is the MVP.
-- Bug fixes between milestones: patch version (`0.2.1`).
-- Commits to `main` are never releases; CI only checks them.
+- Bug fixes between milestones: patch version (`0.2.1`), on its own branch `release/0.2.1`.
 
 ## Steps
 
-1. Make sure `CHANGELOG.md` `[Unreleased]` lists the user-visible changes (English, short, for users).
-2. The working tree is clean, `main` is committed, the customer approved the release.
-3. `tools/release/release.sh X.Y.Z --push` (without `--push` it only commits and tags locally; then
-   `git push origin main vX.Y.Z`).
-4. Watch `gh run list --workflow release.yml`. The workflow runs all checks, builds and verifies the signed APK, pushes
-   `ghcr.io/hiraise/lares-server:X.Y.Z` and `:latest`, and creates the GitHub release with the CHANGELOG notes.
-5. Tell the customer in Russian what was released, with the release link.
+1. **Start** (once per release): `tools/release/release.sh start X.Y.Z` creates `release/X.Y.Z` from `origin/main` and
+   pushes it. Write the branch into STATUS.md.
+2. **Work**: commit approved work items on the branch, `git push`. Keep `CHANGELOG.md` `[Unreleased]` up to date
+   (English, short, for users).
+3. **Finish**: when the customer approved the release, on the branch run `tools/release/release.sh finish`. It moves
+   `[Unreleased]` to `X.Y.Z`, sets the version, commits `chore: release X.Y.Z`, pushes and opens the pull request
+   `Release X.Y.Z` into `main`. CI job `release-pr` checks branch name, version, tag and notes.
+4. **Merge**: when CI is green, `gh pr merge <url> --merge` (or the customer presses "Merge" on GitHub). Only merge
+   commits are allowed into `main`.
+5. **Watch** `gh run list --workflow release.yml`. The workflow runs all checks, builds and verifies the signed APK,
+   pushes `ghcr.io/hiraise/lares-server:X.Y.Z` and `:latest`, then creates the tag `vX.Y.Z` and the GitHub release with
+   the CHANGELOG notes. The release branch is deleted automatically after the merge.
+6. Tell the customer in Russian what was released, with the release link. Start the next release branch.
 
-If the workflow fails after the tag was pushed: fix on `main` and release the next patch version. Do not move or
-delete published tags.
+If the release workflow fails: nothing is tagged yet; fix the cause (secrets, registry) and re-run the failed run
+(`gh run rerun <id> --failed`). If the code itself is broken, release the next patch version from a new
+`release/X.Y.Z` branch. Published tags cannot be moved or deleted.
+
+**Two release branches at once** (a patch during a milestone): after the patch is released, merge `main` into the
+milestone branch (`git merge origin/main`, resolve `CHANGELOG.md` by hand). `finish` refuses to run otherwise.
+
+## Repository rules
+
+Rulesets are files in [.github/rulesets/](../../.github/rulesets/) and are applied with `tools/release/rulesets.sh`
+(gh logged in as an admin; also after moving the repository).
+
+| Ruleset | Applies to | Rules |
+| --- | --- | --- |
+| `main` | default branch | no push, no force push, no deletion; pull request with merge commit; checks `build`, `deploy-smoke`, `release-pr` green on an up-to-date branch; no bypass |
+| `release branches` | `release/**` | no force push |
+| `version tags` | `v*` | no move, no deletion |
+
+Renaming a CI job means updating `main.json` and re-running the script.
 
 ## Signing key
 

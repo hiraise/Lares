@@ -27,7 +27,7 @@ User-facing manuals live in [user/](user/).
 | Code conventions | [process/conventions.md](process/conventions.md) |
 | Developer machine setup, agent dev scripts | [process/dev-setup.md](process/dev-setup.md) |
 | Testing strategy | [process/testing.md](process/testing.md) |
-| Releases: when, how, signing key | [process/release.md](process/release.md) |
+| Releases and branches: when, how, signing key | [process/release.md](process/release.md) |
 
 ## Identifiers
 

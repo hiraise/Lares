@@ -1,10 +1,16 @@
 name: Release
 
-# On a version tag (v0.2.0, created by tools/release/release.sh): build and test, push the multi-arch server image to
-# GHCR, attach the signed APK to a GitHub Release with notes from CHANGELOG.md. Process: docs/process/release.md.
+# Every push to main is a release (ADR-0020): main is protected and changes only through a merged release/X.Y.Z pull
+# request, already checked by CI (job release-pr). This workflow builds and tests, pushes the multi-arch server image to
+# GHCR, then creates the tag vX.Y.Z and the GitHub Release with the signed APK and notes from CHANGELOG.md. The tag is
+# created last, so a failed run can simply be re-run. Process: docs/process/release.md.
 on:
   push:
-    tags: ["v*"]
+    branches: [main]
+
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -23,13 +29,12 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v6
 
-      - name: Version from tag
+      - name: Version from gradle.properties
         id: meta
         run: |
-          version="${GITHUB_REF_NAME#v}"
-          gradle_version="$(sed -n 's/^version=//p' gradle.properties)"
-          if [ "$version" != "$gradle_version" ]; then
-            echo "::error::Tag $GITHUB_REF_NAME does not match version=$gradle_version in gradle.properties"
+          version="$(sed -n 's/^version=//p' gradle.properties)"
+          if git ls-remote --exit-code --tags origin "refs/tags/v$version" > /dev/null; then
+            echo "::error::v$version is already released; main must change only through a release/X.Y.Z pull request"
             exit 1
           fi
           owner="$(echo "$GITHUB_REPOSITORY_OWNER" | tr '[:upper:]' '[:lower:]')"
@@ -88,9 +93,10 @@ jobs:
             org.opencontainers.image.version=${{ steps.meta.outputs.version }}
             org.opencontainers.image.licenses=AGPL-3.0-or-later
 
-      - name: GitHub Release with the APK
+      - name: Tag and GitHub Release with the APK
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.meta.outputs.version }}
         run: |
-          gh release create "$GITHUB_REF_NAME" "$RUNNER_TEMP/lares-${{ steps.meta.outputs.version }}.apk" \
-            --title "Lares $GITHUB_REF_NAME" --notes-file "$RUNNER_TEMP/notes.md"
+          gh release create "v$VERSION" "$RUNNER_TEMP/lares-$VERSION.apk" --target "$GITHUB_SHA" \
+            --title "Lares v$VERSION" --notes-file "$RUNNER_TEMP/notes.md"

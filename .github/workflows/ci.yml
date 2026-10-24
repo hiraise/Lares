@@ -1,8 +1,11 @@
 name: CI
 
+# Checks every release branch push and every pull request (ADR-0020). main itself changes only through a release pull
+# request; the merge starts release.yml. The jobs build, deploy-smoke and release-pr are required by the main ruleset
+# (.github/rulesets/main.json), so renaming a job means updating the ruleset too.
 on:
   push:
-    branches: [main]
+    branches: ["release/**"]
   pull_request:
 
 permissions:
@@ -31,6 +34,16 @@ jobs:
           path: client/android/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 14
+
+  # Only release/X.Y.Z branches with a bumped version and CHANGELOG notes may be merged into main.
+  release-pr:
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check the release branch, version and notes
+        run: tools/release/check.sh "$GITHUB_HEAD_REF"
 
   deploy-smoke:
     runs-on: ubuntu-latest

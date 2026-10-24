@@ -197,3 +197,6 @@ into `TaskRows` / `TaskTicker`. User manual "Tasks" (en, ru), CHANGELOG. Tests: 
 Customer decision after M1-07: choosing a reminder in the task editor while notifications are off shows «Разрешить
 уведомления?»; «Разрешить» runs the system request, or opens the app's notification settings when the system no
 longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the emulator.
+- 2026-10-24 Release branches (ADR-0020, customer request): direct pushes to `main` closed by GitHub rulesets; work
+  lands on `release/X.Y.Z`; the release pull request is checked by CI (`release-pr`) and its merge tags and publishes the
+  release (`release.yml` on push to `main`). The eleven unpushed M1 commits became `release/0.2.0`.

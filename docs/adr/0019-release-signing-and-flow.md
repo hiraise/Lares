@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: accepted  # §4, §7 superseded by ADR-0020
 date: 2026-10-23
 ---
 # ADR-0019: Releases are signed with one permanent Lares key and cut per milestone
