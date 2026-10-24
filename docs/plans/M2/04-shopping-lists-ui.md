@@ -1,6 +1,6 @@
 ---
 id: M2-04
-status: ready
+status: done
 depends_on: [M2-03]
 requirements: [SHP-001, SHP-002, SHP-003, SHP-004, SHP-005, SHP-006, SHP-009, SHP-011, SHP-012, FND-043, FND-065]
 ---

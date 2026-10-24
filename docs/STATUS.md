@@ -6,7 +6,7 @@ Updated: 2026-10-24
 
 **M0 Foundation — all plans M0-01…M0-11 done; M0 acceptance with the customer pending.
 M1 Tasks — all plans M1-01…M1-07 done; M1 acceptance with the customer next.
-M2 Shopping lists — in progress: M2-01…M2-03 done; next: `/plan-run M2-04`.**
+M2 Shopping lists — in progress: M2-01…M2-04 done; next: `/plan-run M2-05`.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
@@ -21,6 +21,9 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 
 ## Last completed
 
+- 2026-10-24 M2-04 Shopping UI: the Shopping tab with list cards and creating a list; the list page with offline banner,
+  progress and "who is shopping", quick add, departments, ticking, «Куплено» with clear and undo, rename, grouping,
+  delete; 21 new tests.
 - 2026-10-24 M2-03 Shopping in the client core: local tables (schema 4, data schema 3), adapters with the server's
   checks, pure views (departments, bought, suggestions, autocomplete, active list, who is shopping, tag page), repository,
   writer (quick add with matching and department memory), `seed.py shopping` / `tick`; 36 unit and 7 multi-device tests.
@@ -77,7 +80,7 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 2. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
 3. M4 plan: re-run the load test with location uploads every 30 s (ADR-0015).
 4. After the M1 acceptance: set the tasks spec to `implemented`.
-5. Execute M2-04…M2-06 in order (`/plan-run M2-04`).
+5. Execute M2-05…M2-06 in order (`/plan-run M2-05`).
 
 ## Plan progress
 

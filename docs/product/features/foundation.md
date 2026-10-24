@@ -105,7 +105,7 @@ localization and deployment — everything feature modules depend on.
   *Server: WebSocket `/api/v1/sync/events` (M0-05). Client: realtime connection while in the foreground, tested within
   2 s (M0-06); foreground toggling from the app lifecycle: M0-07.*
 - **FND-043** `MVP` `done` — The UI shows sync state (synced, pending changes, offline, error).
-  *`SyncEngine.status` and unseen rejections (M0-06); header indicator, sync sheet and rejection snackbar (M0-07). The in-store offline banner comes with Shopping.*
+  *`SyncEngine.status` and unseen rejections (M0-06); header indicator, sync sheet and rejection snackbar (M0-07). The in-store offline banner on the shopping list page (M2-04).*
 
 ### Notifications
 

@@ -221,3 +221,9 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   shopper, tag page), `ShoppingRepository`, `ShoppingWriter` (quick add with name-key matching and department memory,
   best-effort department correction across lists); `minuteTicks` and the viewer flow moved to `data/`; `seed.py shopping`
   and `seed.py tick`; 36 unit tests, 7 multi-device tests (offline ticks, realtime within 2 s, cascade, stale rights).
+- 2026-10-24 M2-04 Shopping UI: the Shopping tab (`ShoppingListsScreen`: list cards with «6 из 9», progress, remaining
+  names, who is shopping; «Список» FAB and «Новый список» dialog; empty state) and the list page
+  (`ShoppingListScreen`, route `ShoppingListDestination`: offline banner from the sync state, progress, quick-add field,
+  items by department, tap to tick, collapsed «Куплено · N», clear with undo, menu with rename, grouping, delete);
+  `ShoppingLogic` texts via `UiText`; icons `category`, `remove_shopping_cart`, `add_shopping_cart`, `remove_done`;
+  21 new tests (6 logic, 10 view model, 5 Compose UI).

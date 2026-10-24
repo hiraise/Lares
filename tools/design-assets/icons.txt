@@ -73,3 +73,8 @@ skip_next
 alarm
 undo
 notes
+# Added in M2-04 (shopping lists).
+category
+remove_shopping_cart
+add_shopping_cart
+remove_done

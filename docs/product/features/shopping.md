@@ -32,10 +32,11 @@ Technical design: [architecture/shopping.md](../../architecture/shopping.md).
 
 ### Lists
 
-- **SHP-001** `MVP` `doing` — Several lists per household (e.g. «Продукты», «Аптека», «Хозтовары»). Create, rename, delete.
+- **SHP-001** `MVP` `done` — Several lists per household (e.g. «Продукты», «Аптека», «Хозтовары»). Create, rename, delete.
   Deleting a list asks for confirmation and removes its items and suggestions for everybody.
   *Server: lists stored and synced, `shopping.manage_lists` checked, delete tombstones the items (M2-02).*
   *Client core: lists offline in creation order, Kids cannot create lists locally either (M2-03).*
+  *UI: the Shopping tab with list cards, «Список» to create, rename and delete with confirmation in the list menu (M2-04).*
 - **SHP-006** `MVP` `doing` — Items to buy are grouped by store department in a fixed store order (fruit and vegetables,
   bread, dairy and eggs, meat and fish, pantry, sweets, drinks, frozen, household, personal care, baby, pets, pharmacy,
   other). The department is chosen automatically from a built-in dictionary (Russian and English names); unknown items
@@ -43,6 +44,7 @@ Technical design: [architecture/shopping.md](../../architecture/shopping.md).
   name in all lists (Q-019). Grouping can be turned off per list (e.g. «Подарки»).
   *Server: department and per-list grouping stored and synced; unknown departments rejected (M2-02).*
   *Client core: sections in store order when a list spans ≥ 2 departments; new rows take the family's department for the name, else the dictionary; a correction rewrites the same name in all lists (M2-03).*
+  *UI: sections with department headers and the «Группировать по отделам» switch (M2-04); correction in M2-05.*
 
 ### Items
 
@@ -50,38 +52,45 @@ Technical design: [architecture/shopping.md](../../architecture/shopping.md).
   optional note, tags, department. The list shows who added an item (if not me) and who bought it and when.
   *Server: items stored and synced, `shopping.edit` checked, author fields must be the writer (M2-02).*
   *Client core: items offline with who added and who bought (M2-03).*
-- **SHP-003** `MVP` `doing` — Quick add: one input at the top of the list; one entry per line, several entries at once
+  *UI: rows show quantity, note, who added (if not me), and in «Куплено» who bought and when (M2-04); editing in M2-05.*
+- **SHP-003** `MVP` `done` — Quick add: one input at the top of the list; one entry per line, several entries at once
   separated by commas or line breaks («молоко, хлеб, яйца»); a quantity at the end of an entry is recognized
   («Молоко 2 л», «Яйца 10», «Хлеб x2»). A comma inside a number does not split («Молоко 2,5%»).
   *Client core: quick add parses, merges repeated names and adds each one (M2-03).*
+  *UI: the «Добавить товар» field on the list page; a pasted line break adds at once (M2-04).*
 - **SHP-008** `MVP` `doing` — Suggestions from history: under the empty input, chips with items bought in this list
   before and not in it now (most often bought first, at most 8); while typing, up to 5 matching names from this list and
   the family's other lists. A tap adds the item with its department and note. A suggestion can be removed for good
   («Больше не предлагать»).
   *Client core: suggestions (cleared rows by purchases, at most 8), autocomplete (this list first, at most 5), forget (M2-03).*
-- **SHP-009** `MVP` `doing` — No duplicates: adding a name that is already to buy in this list does not create a second
+- **SHP-009** `MVP` `done` — No duplicates: adding a name that is already to buy in this list does not create a second
   item («Уже в списке»; a new quantity replaces the old one). Adding a name that was bought or removed earlier brings
   that item back to the list (with its department and note).
   *Client core: matching by name key, «already in the list» reported, cleared and bought rows brought back (M2-03).*
+  *UI: «Уже в списке: …» snackbar (M2-04).*
 - **SHP-010** `MVP` `doing` — Edit an item (name, quantity, note, department, tags) from its sheet (long press);
   «Убрать из списка» removes it from the list but keeps it as a suggestion; undo right after.
   *Client core: changed fields only; remove and restore for undo (M2-03).*
 
 ### In the store
 
-- **SHP-004** `MVP` `doing` — Tick items off offline: a tap on the row marks it bought; bought items move to a collapsed
+- **SHP-004** `MVP` `done` — Tick items off offline: a tap on the row marks it bought; bought items move to a collapsed
   «Куплено · N» section at the bottom (expandable; a tap there returns an item to the list). «Убрать купленные» clears
   them (they stay as suggestions), with undo. Bought items stay until somebody clears them.
   *Server: tick, clear and re-add round trip; times more than a day ahead rejected (M2-02).*
   *Client core: tick, untick, clear bought (also by tag) and undo offline; offline ticks of two phones merge (M2-03).*
-- **SHP-005** `MVP` `doing` — Two people shopping at once see each other's check-offs within seconds when online.
+  *UI: tap to tick, collapsed «Куплено · N», untick there, «Убрать купленные» with undo (M2-04).*
+- **SHP-005** `MVP` `done` — Two people shopping at once see each other's check-offs within seconds when online.
   *Client core: proven by a multi-device test, tick seen within 2 s (M2-03).*
-- **SHP-011** `MVP` `todo` — Without network the list shows a banner «Нет сети. Отметки сохранены и отправятся, когда
+  *UI: the open list page and cards update live (M2-04).*
+- **SHP-011** `MVP` `done` — Without network the list shows a banner «Нет сети. Отметки сохранены и отправятся, когда
   связь появится.» (or «Нет сети. Список может быть не самым свежим.» when nothing is waiting to be sent) (FND-043).
+  *UI: banner on the list page from the sync state (M2-04).*
 - **SHP-012** `MVP` `doing` — "Who is shopping": if another member ticked an item in a list during the last 15 minutes,
   its card and the Today block show «Дмитрий сейчас в магазине», the list page the short «Дмитрий в магазине»
   (Q-020). Derived from the ticks; nothing extra is sent or stored.
   *Client core: computed from ticks, expires with the minute ticker (M2-03).*
+  *UI: list cards and the list page (M2-04); Today block in M2-06.*
 
 ### Elsewhere in the app
 

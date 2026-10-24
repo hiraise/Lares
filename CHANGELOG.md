@@ -9,6 +9,9 @@ Versioning: [SemVer](https://semver.org/) from the first release.
 
 - Each release now includes `lares-X.Y.Z.apk.sha256`, and the release notes show the APK file SHA-256, so you can check
   that the download is complete and unchanged.
+- Shopping lists (M2-04): the Shopping tab with the family's lists and progress; on a list add several items in one line,
+  items grouped by store department, tick them off in the store even without network, «Куплено» with clearing and
+  undo; rename, grouping and delete in the list menu.
 
 ## [0.2.0] - 2026-10-24
 
