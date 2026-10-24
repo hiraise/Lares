@@ -6,9 +6,13 @@ import app.lares.contract.entities.PersonData
 import app.lares.contract.entities.Recurrence
 import app.lares.contract.entities.RecurrenceMode
 import app.lares.contract.entities.RecurrenceUnit
+import app.lares.contract.entities.ShoppingItemData
+import app.lares.contract.entities.ShoppingItemStatus
+import app.lares.contract.entities.ShoppingListData
 import app.lares.contract.entities.TagData
 import app.lares.contract.entities.TaskCompletionData
 import app.lares.contract.entities.TaskData
+import app.lares.contract.shopping.ShoppingNames
 import kotlinx.datetime.IllegalTimeZoneException
 import kotlinx.datetime.TimeZone
 
@@ -40,6 +44,12 @@ object Validators {
     const val RECURRENCE_INTERVAL_MAX = 999
     const val REMINDER_MINUTES_MAX = 43200
     const val CHECKLIST_POSITION_MAX = 1_000_000
+    const val SHOPPING_LIST_NAME_MAX = 100
+    const val SHOPPING_ITEM_NAME_MAX = 200
+    const val SHOPPING_QUANTITY_MAX = 30
+    const val SHOPPING_NOTE_MAX = 500
+    const val SHOPPING_MAX_TAGS = 20
+    const val SHOPPING_BOUGHT_COUNT_MAX = 100_000
 
     val LANGUAGES: Set<String> = setOf("en", "ru")
 
@@ -156,6 +166,40 @@ object Validators {
         ValidationErrors()
             .add("skipped", if (data.skipped && task.recurrence == null) FieldErrorCode.INVALID_FORMAT else null)
             .fields
+
+    /** Trims the list name. Server and client normalize before validating and storing. */
+    fun normalizeShoppingList(data: ShoppingListData): ShoppingListData = data.copy(name = data.name.trim())
+
+    /** Normalizes the item name (ShoppingNames.normalize); quantity and note trimmed, blank ones become null. */
+    fun normalizeShoppingItem(data: ShoppingItemData): ShoppingItemData =
+        data.copy(
+            name = ShoppingNames.normalize(data.name),
+            quantity = data.quantity?.trim()?.ifEmpty { null },
+            note = data.note?.trim()?.ifEmpty { null },
+        )
+
+    /** Field rules of a shopping list (architecture/shopping.md § Validation); creator and tags are checked by the server. */
+    fun shoppingList(data: ShoppingListData): Map<String, FieldErrorCode> {
+        val errors = ValidationErrors().add("name", requiredText(data.name, SHOPPING_LIST_NAME_MAX))
+        if (data.tagIds.size > SHOPPING_MAX_TAGS) errors.add("tagIds", FieldErrorCode.OUT_OF_RANGE)
+        return errors.fields
+    }
+
+    /** Field rules of a shopping item; the parent list, tags and times are checked by the server. */
+    fun shoppingItem(data: ShoppingItemData): Map<String, FieldErrorCode> {
+        val errors =
+            ValidationErrors()
+                .add("name", requiredText(data.name, SHOPPING_ITEM_NAME_MAX))
+                .add("quantity", optionalText(data.quantity, SHOPPING_QUANTITY_MAX))
+                .add("note", optionalText(data.note, SHOPPING_NOTE_MAX))
+        if (data.tagIds.size > SHOPPING_MAX_TAGS) errors.add("tagIds", FieldErrorCode.OUT_OF_RANGE)
+        if (data.boughtCount !in 0..SHOPPING_BOUGHT_COUNT_MAX) errors.add("boughtCount", FieldErrorCode.OUT_OF_RANGE)
+        if (data.status == ShoppingItemStatus.BOUGHT) {
+            if (data.boughtBy == null) errors.add("boughtBy", FieldErrorCode.REQUIRED)
+            if (data.boughtAt == null) errors.add("boughtAt", FieldErrorCode.REQUIRED)
+        }
+        return errors.fields
+    }
 
     fun deviceName(value: String): FieldErrorCode? = requiredText(value, DEVICE_NAME_MAX)
 

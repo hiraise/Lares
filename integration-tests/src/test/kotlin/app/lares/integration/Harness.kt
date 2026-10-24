@@ -12,6 +12,8 @@ import app.lares.client.data.PersonsRepository
 import app.lares.client.data.PersonsWriter
 import app.lares.client.data.TagsRepository
 import app.lares.client.data.TagsWriter
+import app.lares.client.data.shopping.ShoppingRepository
+import app.lares.client.data.shopping.ShoppingWriter
 import app.lares.client.data.tasks.TasksRepository
 import app.lares.client.data.tasks.TasksWriter
 import app.lares.client.db.LaresDb
@@ -32,6 +34,8 @@ import app.lares.contract.entities.GroupData
 import app.lares.contract.entities.HouseholdData
 import app.lares.contract.entities.MemberData
 import app.lares.contract.entities.PersonData
+import app.lares.contract.entities.ShoppingItemData
+import app.lares.contract.entities.ShoppingListData
 import app.lares.contract.entities.TagData
 import app.lares.contract.entities.TaskCompletionData
 import app.lares.contract.entities.TaskData
@@ -163,6 +167,8 @@ class TestClient(
     private val adapters: EntityAdapters = koin.get()
     val tasks: TasksRepository = koin.get()
     val tasksWriter: TasksWriter = koin.get()
+    val shopping: ShoppingRepository = koin.get()
+    val shoppingWriter: ShoppingWriter = koin.get()
 
     suspend fun connect() = session.connect(serverUrl)
 
@@ -195,6 +201,8 @@ class TestClient(
             tasks = typedRows(EntityTypes.TASK) { taskQueries.selectAll().executeAsList().map { it.id } },
             checklistItems = typedRows(EntityTypes.CHECKLIST_ITEM) { checklist_itemQueries.selectAll().executeAsList().map { it.id } },
             taskCompletions = typedRows(EntityTypes.TASK_COMPLETION) { task_completionQueries.selectAll().executeAsList().map { it.id } },
+            shoppingLists = typedRows(EntityTypes.SHOPPING_LIST) { shopping_listQueries.selectAll().executeAsList().map { it.id } },
+            shoppingItems = typedRows(EntityTypes.SHOPPING_ITEM) { shopping_itemQueries.selectAll().executeAsList().map { it.id } },
         )
 
     @Suppress("UNCHECKED_CAST")
@@ -232,6 +240,8 @@ class TestClient(
             tasks = of(EntityTypes.TASK, TaskData.serializer()),
             checklistItems = of(EntityTypes.CHECKLIST_ITEM, ChecklistItemData.serializer()),
             taskCompletions = of(EntityTypes.TASK_COMPLETION, TaskCompletionData.serializer()),
+            shoppingLists = of(EntityTypes.SHOPPING_LIST, ShoppingListData.serializer()),
+            shoppingItems = of(EntityTypes.SHOPPING_ITEM, ShoppingItemData.serializer()),
         )
     }
 
@@ -253,11 +263,14 @@ data class Snapshot(
     val tasks: Map<String, TaskData>,
     val checklistItems: Map<String, ChecklistItemData>,
     val taskCompletions: Map<String, TaskCompletionData>,
+    val shoppingLists: Map<String, ShoppingListData>,
+    val shoppingItems: Map<String, ShoppingItemData>,
 ) {
     val isEmpty: Boolean
         get() =
             households.isEmpty() && members.isEmpty() && groups.isEmpty() && persons.isEmpty() && tags.isEmpty() &&
-                tasks.isEmpty() && checklistItems.isEmpty() && taskCompletions.isEmpty()
+                tasks.isEmpty() && checklistItems.isEmpty() && taskCompletions.isEmpty() && shoppingLists.isEmpty() &&
+                shoppingItems.isEmpty()
 }
 
 /**

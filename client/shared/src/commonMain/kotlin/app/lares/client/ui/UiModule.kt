@@ -33,6 +33,8 @@ import app.lares.client.ui.settings.NotificationPromptViewModel
 import app.lares.client.ui.settings.NotificationSettingsViewModel
 import app.lares.client.ui.settings.ProfileViewModel
 import app.lares.client.ui.settings.SettingsViewModel
+import app.lares.client.ui.shopping.ShoppingListViewModel
+import app.lares.client.ui.shopping.ShoppingListsViewModel
 import app.lares.client.ui.tasks.TaskDetailViewModel
 import app.lares.client.ui.tasks.TaskEditorViewModel
 import app.lares.client.ui.tasks.TasksViewModel
@@ -78,8 +80,10 @@ fun uiModule(): Module =
         }
         viewModel { FamilySettingsViewModel(get(), get(), get(), get()) }
         viewModel { TasksViewModel(get(), get(), get()) }
-        viewModel { TodayViewModel(get(), get()) }
-        viewModel { params -> TagViewModel(get(), get(), get(), get(), params.get()) }
+        viewModel { TodayViewModel(get(), get(), get()) }
+        viewModel { params -> TagViewModel(get(), get(), get(), get(), get(), params.get()) }
         viewModel { params -> TaskDetailViewModel(get(), get(), params.get()) }
         viewModel { params -> TaskEditorViewModel(get(), get(), get(), get(), get(), params.get()) }
+        viewModel { ShoppingListsViewModel(get(), get()) }
+        viewModel { params -> ShoppingListViewModel(get(), get(), get(), get(), get(), params.get()) }
     }

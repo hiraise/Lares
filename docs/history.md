@@ -200,3 +200,49 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
 - 2026-10-24 Release branches (ADR-0020, customer request): direct pushes to `main` closed by GitHub rulesets; work
   lands on `release/X.Y.Z`; the release pull request is checked by CI (`release-pr`) and its merge tags and publishes the
   release (`release.yml` on push to `main`). The eleven unpushed M1 commits became `release/0.2.0`.
+- 2026-10-24 Release v0.2.0 (M0 + M1), the first through release branches: PR #1, signed APK, public multi-arch server
+  image. Notification switch race fixed on the way (found as a CI flake).
+- 2026-10-24 M2 planning: shopping spec detailed (SHP-001…SHP-018) and approved, customer answered Q-018 (all lists visible to
+  everyone with Shopping), Q-019 (automatic store departments, corrections remembered), Q-020 (no shopping
+  notifications; "who is shopping" from recent ticks). Design in [architecture/shopping.md](architecture/shopping.md),
+  ADR-0021 (an item is "this product in this list", kept after purchase as the list's memory), six plans M2-01…M2-06.
+- 2026-10-24 M2-01 Shopping contract: `ShoppingListData`, `ShoppingItemData`, lenient `ShoppingItemStatus` (→ `cleared`) and
+  `ProductCategory` (→ `other`, store order), entity types `shopping_list`/`shopping_item`; `ShoppingNames` (normalize,
+  match key, display name), `QuickAdd` parser (splitting, trailing quantities with units, `x2`), department dictionary
+  (≥ 20 Russian and ≥ 15 English stems per department, phrases, modifiers) with `ShoppingCategories.guess`, `ShoppingRules`
+  and `WriteRules` gates, validators and normalizers; 25 contract tests, all rows of the design's department table pass.
+- 2026-10-24 M2-02 Shopping on the server: `V7__shopping.sql`, `ShoppingListSyncHandler` (`shopping.manage_lists`, creator
+  is the writer and never changes, delete tombstones the list's items each with its own seq) and `ShoppingItemSyncHandler`
+  (live parent list, `shopping.edit`, `addedBy`/`boughtBy` set by a write must be the writer, `listId` immutable, times
+  more than a day ahead rejected), added tag ids checked, `shopping.view` visibility, housekeeping purges items then
+  lists; `invalidField`/`requireAddedTags` moved to `sync/ReferenceChecks.kt`; `ShoppingFixtures`; 13 server tests.
+- 2026-10-24 M2-03 Shopping in the client core: `shopping_list` / `shopping_item` tables (`3.sqm`, `DATA_SCHEMA_VERSION`
+  3), adapters mirroring the M2-02 handlers, `ShoppingViews` (sections, bought, suggestions, autocomplete, active list,
+  shopper, tag page), `ShoppingRepository`, `ShoppingWriter` (quick add with name-key matching and department memory,
+  best-effort department correction across lists); `minuteTicks` and the viewer flow moved to `data/`; `seed.py shopping`
+  and `seed.py tick`; 36 unit tests, 7 multi-device tests (offline ticks, realtime within 2 s, cascade, stale rights).
+- 2026-10-24 M2-04 Shopping UI: the Shopping tab (`ShoppingListsScreen`: list cards with «6 из 9», progress, remaining
+  names, who is shopping; «Список» FAB and «Новый список» dialog; empty state) and the list page
+  (`ShoppingListScreen`, route `ShoppingListDestination`: offline banner from the sync state, progress, quick-add field,
+  items by department, tap to tick, collapsed «Куплено · N», clear with undo, menu with rename, grouping, delete);
+  `ShoppingLogic` texts via `UiText`; icons `category`, `remove_shopping_cart`, `add_shopping_cart`, `remove_done`;
+  21 new tests (6 logic, 10 view model, 5 Compose UI).
+- 2026-10-24 M2-05 Item sheet, suggestions, autocomplete and tags: `ShoppingItemSheet` on a long press of a row to buy
+  or bought (name, quantity, note, «Отдел» with `ChoiceDialog` and «Запомним для всех списков», «Метки» via the shared
+  `TagsSheet` and `TagEditor`, who added / bought, «Покупали N раз»; «Сохранить» sends only changed fields, then
+  `setCategory`; «Убрать из списка» with undo; «Не сохранять изменения?» through a new `canClose` of `EditorSheet`);
+  «+ Яйца» suggestion chips under the empty field with «Больше не предлагать»; autocomplete (debounced 150 ms, at most
+  5 rows) under the field; «Метки списка» menu item, tags on cards and rows, tag filter chips (adding and clearing follow
+  the filter; resets when the tag is no longer in use); `ChoiceDialog` scrolls long lists; 13 new tests (9 view model,
+  4 Compose UI).
+
+- 2026-10-24 **M2-06** Today shopping card, tag page section, manual: `TodayViewModel` combines task inputs with
+  `ShoppingRepository.observeActive()` (`TodayUiState.shopping: TodayShoppingUi`, only with `shopping.view`;
+  `empty` when neither block shows); `TodayShoppingBlock` — lake gradient hero card (radius 24, padding 18, count pill,
+  white progress, shopper avatar with a white ring, white «Открыть» pill), all text 100 % white for contrast, «Ещё N
+  списка» → Shopping tab; `TagViewModel` adds `observeForTag` — «Покупки · N» with item rows (→ list page filtered by
+  the tag through the new `tagId` of `ShoppingListDestination`/`ShoppingListArgs`) and list rows, the tasks empty state
+  hidden when shopping rows exist; manuals `docs/user/{en,ru}/shopping.md`; all shopping MVP requirements `done`;
+  9 new tests (5 Today and 2 tag view model, 2 Compose UI); emulator walkthrough (spec scenarios 1–7, ru/en,
+  light/dark) without bugs. Fixed on the way: CI flake in `ShoppingListViewModelTest` (quick add writes each entry
+  separately; the test now waits for both).

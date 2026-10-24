@@ -1,0 +1,30 @@
+-- Schema 3 → 4 (M2-03): shopping lists and items (DATA_SCHEMA_VERSION 3 makes the next sync a full resync).
+CREATE TABLE shopping_list (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    created_by TEXT NOT NULL,
+    tag_ids TEXT NOT NULL,
+    group_by_category INTEGER NOT NULL
+);
+
+CREATE TABLE shopping_item (
+    id TEXT NOT NULL PRIMARY KEY,
+    list_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    name_key TEXT NOT NULL,
+    status TEXT NOT NULL,
+    category TEXT NOT NULL,
+    quantity TEXT,
+    note TEXT,
+    tag_ids TEXT NOT NULL,
+    added_by TEXT NOT NULL,
+    added_at INTEGER NOT NULL,
+    bought_by TEXT,
+    bought_at INTEGER,
+    bought_count INTEGER NOT NULL
+);
+
+CREATE INDEX shopping_item_list ON shopping_item (list_id);
+
+CREATE INDEX shopping_item_key ON shopping_item (name_key);
+

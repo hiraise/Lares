@@ -12,6 +12,8 @@ import app.lares.client.data.PersonsRepository
 import app.lares.client.data.PersonsWriter
 import app.lares.client.data.TagsRepository
 import app.lares.client.data.TagsWriter
+import app.lares.client.data.shopping.ShoppingRepository
+import app.lares.client.data.shopping.ShoppingWriter
 import app.lares.client.data.tasks.EnglishTaskReminderTexts
 import app.lares.client.data.tasks.TaskReminderPlanner
 import app.lares.client.data.tasks.TaskReminderTexts
@@ -69,6 +71,8 @@ private fun coreModule() =
         single { PersonsWriter(get(), get()) }
         single { TasksRepository(get(), get(), get(), get(), get(), clock()) }
         single { TasksWriter(get(), get(), clock()) }
+        single { ShoppingRepository(get(), get(), get(), get(), clock()) }
+        single { ShoppingWriter(get(), get(), clock()) }
         // Overridden by the app UI with resource texts (uiModule).
         single<TaskReminderTexts> { EnglishTaskReminderTexts(clock()) }
         // Needs the notification core (notificationsModule) for the scheduler and the mute settings.

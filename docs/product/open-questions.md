@@ -33,3 +33,6 @@ Q-001…Q-012 answered by the customer on 2026-10-22 during kickoff; later answe
 | Q-015 | Who gets a task reminder (2026-10-23) | Assignees; for "anyone" tasks everybody with access to tasks. |
 | Q-016 | Tasks without a time (2026-10-23) | Reminder at 09:00 on the day; overdue notice to the creator at 09:00 the next morning. |
 | Q-017 | Who can tick a task off (2026-10-23) | Assignees, the creator and members with "Edit others' tasks". |
+| Q-018 | Who sees shopping lists (2026-10-24) | Everybody with access to Shopping sees all lists. Hidden lists (e.g. gifts) later (SHP-016). |
+| Q-019 | Store departments (2026-10-24) | Chosen automatically from a built-in dictionary; a correction is remembered by the family for that name (SHP-006). |
+| Q-020 | Shopping notifications (2026-10-24) | None in M2; lists and Today show who is shopping right now from recent ticks (SHP-012). «Иду в магазин» later (SHP-017). |

@@ -1,0 +1,50 @@
+-- Shopping items, "this product in this list" (ADR-0021). `name_key` is ShoppingNames.key(name), written by the adapter
+-- and never sent. `status` and `category` hold wire names; times are epoch milliseconds; `tag_ids` is a JSON array.
+-- Rows of a list deleted locally stay until the server's cascade arrives; readers ignore items of missing lists.
+CREATE TABLE shopping_item (
+    id TEXT NOT NULL PRIMARY KEY,
+    list_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    name_key TEXT NOT NULL,
+    status TEXT NOT NULL,
+    category TEXT NOT NULL,
+    quantity TEXT,
+    note TEXT,
+    tag_ids TEXT NOT NULL,
+    added_by TEXT NOT NULL,
+    added_at INTEGER NOT NULL,
+    bought_by TEXT,
+    bought_at INTEGER,
+    bought_count INTEGER NOT NULL
+);
+
+CREATE INDEX shopping_item_list ON shopping_item (list_id);
+
+CREATE INDEX shopping_item_key ON shopping_item (name_key);
+
+selectAll:
+SELECT * FROM shopping_item ORDER BY list_id, id;
+
+selectById:
+SELECT * FROM shopping_item WHERE id = ?;
+
+selectByList:
+SELECT * FROM shopping_item WHERE list_id = ? ORDER BY id;
+
+selectByListAndKey:
+SELECT * FROM shopping_item WHERE list_id = ? AND name_key = ? ORDER BY id;
+
+selectByKey:
+SELECT * FROM shopping_item WHERE name_key = ? ORDER BY id;
+
+upsert:
+INSERT OR REPLACE INTO shopping_item (
+    id, list_id, name, name_key, status, category, quantity, note, tag_ids, added_by, added_at, bought_by, bought_at,
+    bought_count
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+deleteById:
+DELETE FROM shopping_item WHERE id = ?;
+
+deleteAll:
+DELETE FROM shopping_item;

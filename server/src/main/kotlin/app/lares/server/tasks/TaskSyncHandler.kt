@@ -17,6 +17,8 @@ import app.lares.server.sync.ChangeRow
 import app.lares.server.sync.MutationContext
 import app.lares.server.sync.StoredEntity
 import app.lares.server.sync.WritableSyncHandler
+import app.lares.server.sync.invalidField
+import app.lares.server.sync.requireAddedTags
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.JdbcTransaction

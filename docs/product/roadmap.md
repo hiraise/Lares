@@ -1,6 +1,6 @@
 ---
 status: approved
-updated: 2026-10-23
+updated: 2026-10-24
 ---
 # Roadmap
 
@@ -11,7 +11,7 @@ Each milestone ends with a build the family can install (APK) and a short change
 | --- | --- | --- | --- |
 | M0 | Foundation | [foundation](features/foundation.md), [tags](features/tags.md) | implemented (M0-01…M0-11); customer acceptance pending |
 | M1 | Tasks | [tasks](features/tasks.md) | implemented (M1-01…M1-07); customer acceptance pending |
-| M2 | Shopping lists | [shopping](features/shopping.md) | not started |
+| M2 | Shopping lists | [shopping](features/shopping.md) | implemented (M2-01…M2-06); customer acceptance pending |
 | M3 | Calendar | [calendar](features/calendar.md) | not started |
 | M4 | Location | [location](features/location.md) | not started |
 | M5 | Budget | [budget](features/budget.md) | not started |
@@ -45,7 +45,8 @@ Family starts using the app daily ("family alpha").
 
 ## M2 Shopping lists
 
-Multiple shared lists, quick add, check off in store offline, suggestions from history.
+Multiple shared lists, quick add, check off in store offline, suggestions from history, automatic store departments
+(Q-019), who is shopping right now, the active list on Today.
 
 ## M3 Calendar
 

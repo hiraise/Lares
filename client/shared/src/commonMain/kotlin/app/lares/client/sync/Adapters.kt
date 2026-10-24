@@ -12,14 +12,20 @@ import app.lares.contract.entities.LenientRecurrenceSerializer
 import app.lares.contract.entities.MemberData
 import app.lares.contract.entities.PaletteColor
 import app.lares.contract.entities.PersonData
+import app.lares.contract.entities.ProductCategory
 import app.lares.contract.entities.Recurrence
+import app.lares.contract.entities.ShoppingItemData
+import app.lares.contract.entities.ShoppingItemStatus
+import app.lares.contract.entities.ShoppingListData
 import app.lares.contract.entities.TagData
 import app.lares.contract.entities.TaskCompletionData
 import app.lares.contract.entities.TaskData
 import app.lares.contract.permissions.BuiltInGroup
 import app.lares.contract.permissions.PermissionSetSerializer
+import app.lares.contract.permissions.ShoppingRules
 import app.lares.contract.permissions.TaskRules
 import app.lares.contract.permissions.Viewer
+import app.lares.contract.shopping.ShoppingNames
 import app.lares.contract.sync.EntityTypes
 import app.lares.contract.sync.MutationOp
 import app.lares.contract.validation.Validators
@@ -36,6 +42,8 @@ import app.lares.client.db.Group_entity as GroupRow
 import app.lares.client.db.Household as HouseholdRow
 import app.lares.client.db.Member as MemberRow
 import app.lares.client.db.Person as PersonRow
+import app.lares.client.db.Shopping_item as ShoppingItemRow
+import app.lares.client.db.Shopping_list as ShoppingListRow
 import app.lares.client.db.Tag as TagRow
 import app.lares.client.db.Task as TaskRow
 import app.lares.client.db.Task_completion as TaskCompletionRow
@@ -522,6 +530,172 @@ class TaskCompletionAdapter :
     ): Map<String, FieldErrorCode> = Validators.taskCompletion(data, requireParentTask(db, data.taskId))
 }
 
+// Shopping (architecture/shopping.md § Adapters): the same ShoppingRules checks as the server's handlers, with the
+// parent list read from the local `shopping_list` table.
+
+internal fun ShoppingListRow.toData() =
+    ShoppingListData(
+        name = name,
+        createdBy = created_by,
+        tagIds = LaresJson.decodeFromString(stringList, tag_ids).toSet(),
+        groupByCategory = group_by_category != 0L,
+    )
+
+internal fun ShoppingItemRow.toData() =
+    ShoppingItemData(
+        listId = list_id,
+        name = name,
+        addedBy = added_by,
+        addedAt = Instant.fromEpochMilliseconds(added_at),
+        status = ShoppingItemStatus.fromKey(status) ?: ShoppingItemStatus.CLEARED,
+        category = ProductCategory.fromKey(category) ?: ProductCategory.OTHER,
+        quantity = quantity,
+        note = note,
+        tagIds = LaresJson.decodeFromString(stringList, tag_ids).toSet(),
+        boughtBy = bought_by,
+        boughtAt = bought_at?.let(Instant::fromEpochMilliseconds),
+        boughtCount = bought_count.toInt(),
+    )
+
+class ShoppingListAdapter : EntityAdapter<ShoppingListData>(EntityTypes.SHOPPING_LIST, ShoppingListData.serializer(), writable = true) {
+    override fun selectTyped(
+        db: LaresDb,
+        id: String,
+    ) = db.shopping_listQueries
+        .selectById(id)
+        .executeAsOneOrNull()
+        ?.toData()
+
+    override fun upsertTyped(
+        db: LaresDb,
+        id: String,
+        data: ShoppingListData,
+    ) {
+        db.shopping_listQueries.upsert(
+            id = id,
+            name = data.name,
+            created_by = data.createdBy,
+            tag_ids = LaresJson.encodeToString(stringList, data.tagIds.sorted()),
+            group_by_category = data.groupByCategory.toDb(),
+        )
+    }
+
+    override fun deleteTyped(
+        db: LaresDb,
+        id: String,
+    ) {
+        db.shopping_listQueries.deleteById(id)
+    }
+
+    override fun deleteAllTyped(db: LaresDb) {
+        db.shopping_listQueries.deleteAll()
+    }
+
+    override fun normalize(data: ShoppingListData) = Validators.normalizeShoppingList(data)
+
+    override fun validate(data: ShoppingListData) = Validators.shoppingList(data)
+
+    override fun authorize(
+        db: LaresDb,
+        viewer: Viewer,
+        op: MutationOp,
+        id: String,
+        current: ShoppingListData?,
+        merged: ShoppingListData?,
+    ) {
+        val allowed =
+            when {
+                current != null -> ShoppingRules.canManageLists(viewer)
+                merged != null -> ShoppingRules.canCreateList(viewer, merged)
+                else -> false
+            }
+        if (!allowed) forbidden(op, "shopping list")
+        if (current != null && merged != null && current.createdBy != merged.createdBy) {
+            throw LocalValidationException(mapOf("createdBy" to FieldErrorCode.INVALID_FORMAT))
+        }
+    }
+}
+
+class ShoppingItemAdapter : EntityAdapter<ShoppingItemData>(EntityTypes.SHOPPING_ITEM, ShoppingItemData.serializer(), writable = true) {
+    override fun selectTyped(
+        db: LaresDb,
+        id: String,
+    ) = db.shopping_itemQueries
+        .selectById(id)
+        .executeAsOneOrNull()
+        ?.toData()
+
+    override fun upsertTyped(
+        db: LaresDb,
+        id: String,
+        data: ShoppingItemData,
+    ) {
+        db.shopping_itemQueries.upsert(
+            id = id,
+            list_id = data.listId,
+            name = data.name,
+            name_key = ShoppingNames.key(data.name),
+            status = data.status.key,
+            category = data.category.key,
+            quantity = data.quantity,
+            note = data.note,
+            tag_ids = LaresJson.encodeToString(stringList, data.tagIds.sorted()),
+            added_by = data.addedBy,
+            added_at = data.addedAt.toEpochMilliseconds(),
+            bought_by = data.boughtBy,
+            bought_at = data.boughtAt?.toEpochMilliseconds(),
+            bought_count = data.boughtCount.toLong(),
+        )
+    }
+
+    override fun deleteTyped(
+        db: LaresDb,
+        id: String,
+    ) {
+        db.shopping_itemQueries.deleteById(id)
+    }
+
+    override fun deleteAllTyped(db: LaresDb) {
+        db.shopping_itemQueries.deleteAll()
+    }
+
+    override fun normalize(data: ShoppingItemData) = Validators.normalizeShoppingItem(data)
+
+    override fun validate(data: ShoppingItemData) = Validators.shoppingItem(data)
+
+    override fun authorize(
+        db: LaresDb,
+        viewer: Viewer,
+        op: MutationOp,
+        id: String,
+        current: ShoppingItemData?,
+        merged: ShoppingItemData?,
+    ) {
+        val allowed =
+            if (merged != null) {
+                // Like the server: the stored parent decides; a changed listId is invalid (checked after the rights).
+                requireParentList(db, (current ?: merged).listId)
+                ShoppingRules.canEditItems(viewer) && ShoppingRules.foreignAuthorFields(viewer, current, merged).isEmpty()
+            } else {
+                ShoppingRules.canEditItems(viewer)
+            }
+        if (!allowed) forbidden(op, "shopping item")
+        if (current != null && merged != null && current.listId != merged.listId) {
+            throw LocalValidationException(mapOf("listId" to FieldErrorCode.INVALID_FORMAT))
+        }
+    }
+}
+
+/** The parent of a shopping item; `ENTITY_NOT_FOUND` if it is not (or no longer) in the local table. */
+private fun requireParentList(
+    db: LaresDb,
+    listId: String,
+): ShoppingListData =
+    db.shopping_listQueries
+        .selectById(listId)
+        .executeAsOneOrNull()
+        ?.toData() ?: throw LocalWriteException(ErrorCode.ENTITY_NOT_FOUND, message = "Shopping list not found")
+
 /** All adapters of this client version. */
 fun defaultEntityAdapters(clock: Clock) =
     EntityAdapters(
@@ -534,5 +708,7 @@ fun defaultEntityAdapters(clock: Clock) =
             TaskAdapter(),
             ChecklistItemAdapter(),
             TaskCompletionAdapter(),
+            ShoppingListAdapter(),
+            ShoppingItemAdapter(),
         ),
     )

@@ -81,3 +81,24 @@ M1 acceptance (after all plans): APK on the family's phones against the real ser
 
 Shared references for all M1 plans: [tasks design](../architecture/tasks.md), [ADR-0017](../adr/0017-task-occurrences-derived-from-completions.md),
 [ADR-0018](../adr/0018-tags-embedded-in-entities.md), [tasks spec](../product/features/tasks.md).
+
+## M2 plans
+
+Milestone [M2 Shopping lists](../product/roadmap.md#m2-shopping-lists). [Shopping spec](../product/features/shopping.md)
+approved by the customer on 2026-10-24 (Q-018…Q-020 answered the same day).
+
+| Plan | Title | Depends on | Status |
+| --- | --- | --- | --- |
+| [M2-01](M2/01-shopping-contract.md) | Shopping contract: data, names, quick add, departments, write rules, validators | M1 | done |
+| [M2-02](M2/02-shopping-server-sync.md) | Shopping on the server: tables, sync handlers, permissions, cascade | M2-01 | done |
+| [M2-03](M2/03-shopping-client-data.md) | Shopping in the client core: tables, adapters, views, repository, writer | M2-02 | done |
+| [M2-04](M2/04-shopping-lists-ui.md) | Shopping UI: the Shopping tab and the list page | M2-03 | done |
+| [M2-05](M2/05-shopping-items-suggestions-tags.md) | Item sheet, suggestions, autocomplete and tags | M2-04 | done |
+| [M2-06](M2/06-shopping-today-tags-manual.md) | Today shopping card, tag page section, manual, M2 wrap-up | M2-05 | done |
+
+M2 acceptance (after all plans): APK on the family's phones, a real shopping trip with the list offline, the spec
+scenarios, Russian changelog.
+
+Shared references for all M2 plans: [shopping design](../architecture/shopping.md),
+[ADR-0021](../adr/0021-shopping-items-kept-as-list-memory.md), [ADR-0018](../adr/0018-tags-embedded-in-entities.md),
+[shopping spec](../product/features/shopping.md).

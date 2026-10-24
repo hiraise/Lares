@@ -21,6 +21,8 @@ Scripts in `tools/dev/` (run from the repo root; each prints its usage when call
 tools/dev/server.sh start          # dev DB + server on :8080, own database lares_e2e; `reset` = empty server
 tools/dev/seed.py family           # test family Петровы (olga / olga-password is the admin)
 tools/dev/seed.py tasks            # sample tasks: routines, checklist, overdue, tag «Машина» (after family)
+tools/dev/seed.py shopping         # lists «Аптека», «Дача» (tag «Дача»), «Продукты» (active; dima ticked 2) (after family)
+tools/dev/seed.py tick Хлеб --as dima   # another member ticks an item now: «who is shopping» for 15 min
 tools/dev/emu.sh start             # headless; run in background, boot takes about a minute
 tools/dev/emu.sh install           # build + install debug APK + launch (after every code change)
 ```

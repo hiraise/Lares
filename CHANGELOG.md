@@ -5,6 +5,24 @@ Versioning: [SemVer](https://semver.org/) from the first release.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-24
+
+### Added
+
+- Each release now includes `lares-X.Y.Z.apk.sha256`, and the release notes show the APK file SHA-256, so you can check
+  that the download is complete and unchanged.
+- Shopping lists (M2-04): the Shopping tab with the family's lists and progress; on a list add several items in one line,
+  items grouped by store department, tick them off in the store even without network, «Куплено» with clearing and
+  undo; rename, grouping and delete in the list menu.
+- Shopping suggestions and editing (M2-05): chips with what the list bought before under the empty field and matching
+  names from all lists while typing; a long press opens the item sheet (name, quantity, note, department, tags, who
+  added and bought) with «Убрать из списка» and undo; a department you correct is remembered for that product in all
+  lists; tags on lists and items and a tag filter on the list page.
+- Shopping everywhere (M2-06): the Today screen starts with the list you need now — its name, «6 из 9», what is left,
+  who is in the store right now and «Открыть», plus «Ещё 2 списка» when other lists have something to buy. Each tag's
+  page shows the items to buy and the lists with that tag; an item opens its list filtered by the tag. New user manual
+  "Shopping lists" in English and Russian.
+
 ## [0.2.0] - 2026-10-24
 
 ### Added

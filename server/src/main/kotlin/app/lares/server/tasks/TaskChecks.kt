@@ -1,16 +1,12 @@
 package app.lares.server.tasks
 
 import app.lares.contract.api.ErrorCode
-import app.lares.contract.api.FieldErrorCode
 import app.lares.contract.entities.TaskData
 import app.lares.server.household.MemberRepository
 import app.lares.server.platform.http.ApiException
 import app.lares.server.sync.MutationContext
-import app.lares.server.tags.TagTable
-import org.jetbrains.exposed.v1.core.and
-import org.jetbrains.exposed.v1.core.eq
-import org.jetbrains.exposed.v1.core.inList
-import org.jetbrains.exposed.v1.jdbc.select
+import app.lares.server.sync.invalidField
+import app.lares.server.sync.parseAll
 import java.util.UUID
 
 // Server-only checks of the tasks handlers that need the database (architecture/tasks.md § Validation).
@@ -26,12 +22,6 @@ internal fun requireParentTask(
     return task.data
 }
 
-/** `VALIDATION_FAILED` with one field error. */
-internal fun invalidField(
-    field: String,
-    code: FieldErrorCode = FieldErrorCode.INVALID_FORMAT,
-) = ApiException(ErrorCode.VALIDATION_FAILED, "Invalid fields: $field", mapOf(field to code))
-
 /** Ids not yet stored must be non-deleted members of the household; stored ones stay valid (clients hide unknown ids). */
 internal fun requireAddedMembers(
     ctx: MutationContext,
@@ -41,21 +31,3 @@ internal fun requireAddedMembers(
     val ids = parseAll(added) ?: throw invalidField("assigneeIds")
     if (MemberRepository.activeIds(ctx.householdId, ids).size != ids.size) throw invalidField("assigneeIds")
 }
-
-/** Ids not yet stored must be non-deleted tags of the household (archived tags count). */
-internal fun requireAddedTags(
-    ctx: MutationContext,
-    added: Set<String>,
-) {
-    if (added.isEmpty()) return
-    val ids = parseAll(added) ?: throw invalidField("tagIds")
-    val found =
-        TagTable
-            .select(TagTable.id)
-            .where { (TagTable.householdId eq ctx.householdId) and (TagTable.id inList ids) and (TagTable.deleted eq false) }
-            .count()
-    if (found != ids.size.toLong()) throw invalidField("tagIds")
-}
-
-private fun parseAll(ids: Set<String>): Set<UUID>? =
-    ids.mapTo(mutableSetOf()) { runCatching { UUID.fromString(it) }.getOrNull() ?: return null }

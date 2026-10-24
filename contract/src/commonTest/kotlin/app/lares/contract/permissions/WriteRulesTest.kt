@@ -38,6 +38,18 @@ class WriteRulesTest {
     }
 
     @Test
+    fun shoppingListsNeedManageListsAndItemsNeedEdit() {
+        for (op in MutationOp.entries) {
+            assertTrue(can(EntityTypes.SHOPPING_LIST, op, viewer(Permission.SHOPPING_MANAGE_LISTS)))
+            assertFalse(can(EntityTypes.SHOPPING_LIST, op, viewer(Permission.SHOPPING_VIEW, Permission.SHOPPING_EDIT)))
+            assertTrue(can(EntityTypes.SHOPPING_LIST, op, viewer(admin = true)))
+            assertTrue(can(EntityTypes.SHOPPING_ITEM, op, viewer(Permission.SHOPPING_EDIT)))
+            assertFalse(can(EntityTypes.SHOPPING_ITEM, op, viewer(Permission.SHOPPING_VIEW, Permission.SHOPPING_MANAGE_LISTS)))
+            assertTrue(can(EntityTypes.SHOPPING_ITEM, op, viewer(admin = true)))
+        }
+    }
+
+    @Test
     fun readOnlyAndUnknownTypesAreNeverWritable() {
         for (type in listOf(EntityTypes.HOUSEHOLD, EntityTypes.MEMBER, EntityTypes.GROUP, "widget")) {
             for (op in MutationOp.entries) assertFalse(can(type, op, viewer(admin = true), own = true), "$type $op")

@@ -5,19 +5,44 @@ Updated: 2026-10-24
 ## Phase
 
 **M0 Foundation — all plans M0-01…M0-11 done; M0 acceptance with the customer pending.
-M1 Tasks — all plans M1-01…M1-07 done; M1 acceptance with the customer next.**
+M1 Tasks — all plans M1-01…M1-07 done; M1 acceptance with the customer next.
+M2 Shopping lists — all plans M2-01…M2-06 done; M2 acceptance with the customer next.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
 
 [M1 Tasks](product/roadmap.md#m1-tasks): implemented, customer acceptance pending (together with M0). Specs
-`foundation`, `tags` and `tasks` approved.
+`foundation`, `tags` and `tasks` approved. Next: [M2 Shopping lists](product/roadmap.md#m2-shopping-lists) — plans ready
+([M2 plans](plans/README.md#m2-plans)), shopping spec approved.
 
-**Active release branch: `release/0.2.0`** (M0 + M1). Commit approved work here; `main` is protected
-([release process](process/release.md), ADR-0020).
+**Active release branch: `release/0.3.0`** (next: M2). Commit approved work here; `main` is protected
+([release process](process/release.md), ADR-0020). Latest release: [v0.2.0](https://github.com/hiraise/lares/releases/tag/v0.2.0)
+(M0 + M1, 2026-10-24).
 
 ## Last completed
 
+- 2026-10-24 M2-06 Shopping everywhere: the active list as the gradient hero card first on Today (count, what is left,
+  who is in the store, «Открыть», «Ещё N списка»), the «Покупки» section on the tag page (an item opens its list
+  filtered by the tag), user manual "Shopping lists" (en, ru); all shopping MVP requirements done; 9 new tests,
+  emulator walkthrough of spec scenarios 1–7 without bugs.
+- 2026-10-24 M2-05 Shopping item sheet, suggestions, tags: long press opens the item sheet (name, quantity, note,
+  department remembered for all lists, tags, who added and bought, «Убрать из списка» with undo); «+ Яйца» chips with
+  «Больше не предлагать»; autocomplete while typing; list tags, tags on cards and rows, tag filter; 13 new tests.
+- 2026-10-24 M2-04 Shopping UI: the Shopping tab with list cards and creating a list; the list page with offline banner,
+  progress and "who is shopping", quick add, departments, ticking, «Куплено» with clear and undo, rename, grouping,
+  delete; 21 new tests.
+- 2026-10-24 M2-03 Shopping in the client core: local tables (schema 4, data schema 3), adapters with the server's
+  checks, pure views (departments, bought, suggestions, autocomplete, active list, who is shopping, tag page), repository,
+  writer (quick add with matching and department memory), `seed.py shopping` / `tick`; 36 unit and 7 multi-device tests.
+- 2026-10-24 M2-02 Shopping on the server: tables, list and item sync handlers with `ShoppingRules` checks, cascade
+  tombstones on list delete, `shopping.view` visibility, housekeeping; 13 server tests.
+- 2026-10-24 M2-01 Shopping contract: data classes and enums, quick-add parser, department guessing (dictionary passes
+  the design table), write rules and validators; 25 contract tests.
+- 2026-10-24 M2 planning: shopping spec detailed and approved (Q-018…Q-020 answered), [shopping design](architecture/shopping.md),
+  ADR-0021 (items kept as the list's memory: suggestions, no duplicates, remembered departments), plans M2-01…M2-06.
+- 2026-10-24 Release **v0.2.0** (M0 + M1) through the new flow: release pull request #1 merged, signed APK, server
+  image `ghcr.io/hiraise/lares-server:0.2.0` (amd64, arm64, public), GitHub release. Fixed on the way: notification
+  switches lost when changed during the first load (CI flake in `MainAndSettingsViewModelTest`).
 - 2026-10-24 Release branches (ADR-0020): `main` protected by rulesets (no push, only a release pull request with
   green CI, merge commits), work on `release/X.Y.Z`, `tools/release/release.sh start|finish`, CI job `release-pr`
   (`tools/release/check.sh`), a merge into `main` tags `vX.Y.Z` and publishes the APK and images automatically;
@@ -57,15 +82,13 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 
 ## Next steps
 
-1. M0 and M1 acceptance with the customer (APK, walkthrough on real phones, Russian changelog; checklist in the M1-07
+1. M0 and M1 acceptance with the customer (APK v0.2.0, walkthrough on real phones, Russian changelog; checklist in the M1-07
    handoff).
-2. First signed release `0.2.0` from `release/0.2.0` (`release.sh finish`, merge after the customer's approval;
-   [release process](process/release.md));
-   make the GHCR package `lares-server` public or `docker login ghcr.io` on the server
-   ([deploy/README](../deploy/README.md#releases)).
-3. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
-4. M4 plan: re-run the load test with location uploads every 30 s (ADR-0015).
-5. After the M1 acceptance: set the tasks spec to `implemented`; plans for M2 Shopping lists.
+2. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
+3. M4 plan: re-run the load test with location uploads every 30 s (ADR-0015).
+4. After the M1 acceptance: set the tasks spec to `implemented`.
+5. M2 acceptance with the customer (checklist in the M2-06 handoff); after it set the shopping spec to `implemented`
+   and write the M3 Calendar plans.
 
 ## Plan progress
 

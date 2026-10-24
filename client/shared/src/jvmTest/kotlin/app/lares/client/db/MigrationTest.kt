@@ -20,10 +20,10 @@ class MigrationTest {
             ).value
         }
 
-    private fun JdbcSqliteDriver.indexes(): List<String> =
+    private fun JdbcSqliteDriver.indexes(like: String = "%task%"): List<String> =
         executeQuery(
             null,
-            "SELECT name FROM sqlite_master WHERE type = 'index' AND name LIKE '%task%' AND name NOT LIKE 'sqlite_%' ORDER BY name",
+            "SELECT name FROM sqlite_master WHERE type = 'index' AND name LIKE '$like' AND name NOT LIKE 'sqlite_%' ORDER BY name",
             { cursor ->
                 val names = mutableListOf<String>()
                 while (cursor.next().value) names += cursor.getString(0)!!
@@ -38,16 +38,35 @@ class MigrationTest {
         val tables = arrayOf("task", "checklist_item", "task_completion")
         val fresh = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY).also { LaresDb.Schema.create(it) }
 
-        // An M0 database (schema version 2): everything except the task tables.
+        // An M0 database (schema version 2): everything except the task and shopping tables.
         val old = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
         LaresDb.Schema.create(old)
-        tables.forEach { old.execute(null, "DROP TABLE $it", 0) }
+        (tables + SHOPPING_TABLES).forEach { old.execute(null, "DROP TABLE $it", 0) }
         assertEquals(emptyList(), old.indexes())
 
         LaresDb.Schema.migrate(old, 2, 3)
-        assertEquals(3L, LaresDb.Schema.version)
         assertEquals(fresh.schemaOf(*tables), old.schemaOf(*tables))
         assertEquals(fresh.indexes(), old.indexes())
         assertEquals(listOf("checklist_item_task", "task_completion_task"), old.indexes())
+    }
+
+    @Test
+    fun version3DatabaseGetsTheShoppingTablesOfAFreshInstall() {
+        val fresh = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY).also { LaresDb.Schema.create(it) }
+
+        // An M1 database (schema version 3): everything except the shopping tables.
+        val old = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
+        LaresDb.Schema.create(old)
+        SHOPPING_TABLES.forEach { old.execute(null, "DROP TABLE $it", 0) }
+        assertEquals(emptyList(), old.indexes("shopping%"))
+
+        LaresDb.Schema.migrate(old, 3, 4)
+        assertEquals(4L, LaresDb.Schema.version)
+        assertEquals(fresh.schemaOf(*SHOPPING_TABLES), old.schemaOf(*SHOPPING_TABLES))
+        assertEquals(listOf("shopping_item_key", "shopping_item_list"), old.indexes("shopping%"))
+    }
+
+    private companion object {
+        val SHOPPING_TABLES = arrayOf("shopping_list", "shopping_item")
     }
 }

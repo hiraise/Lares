@@ -1,0 +1,23 @@
+-- Shopping lists (architecture/shopping.md § Client). `tag_ids` is a JSON array of ids.
+CREATE TABLE shopping_list (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    created_by TEXT NOT NULL,
+    tag_ids TEXT NOT NULL,
+    group_by_category INTEGER NOT NULL
+);
+
+selectAll:
+SELECT * FROM shopping_list ORDER BY id;
+
+selectById:
+SELECT * FROM shopping_list WHERE id = ?;
+
+upsert:
+INSERT OR REPLACE INTO shopping_list (id, name, created_by, tag_ids, group_by_category) VALUES (?, ?, ?, ?, ?);
+
+deleteById:
+DELETE FROM shopping_list WHERE id = ?;
+
+deleteAll:
+DELETE FROM shopping_list;

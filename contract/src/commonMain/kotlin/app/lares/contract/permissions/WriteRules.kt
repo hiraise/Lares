@@ -18,7 +18,8 @@ object WriteRules {
     /**
      * [existingPersonOwner] is true when the mutation targets an existing person that is the viewer's own profile;
      * members may always edit their own profile. For `task`, `checklist_item` and `task_completion` this is only the
-     * coarse `tasks.view` gate; the entity-level decision is [TaskRules]. Types not listed here (including read-only
+     * coarse `tasks.view` gate; the entity-level decision is [TaskRules]. `shopping_list` needs `shopping.manage_lists` and
+     * `shopping_item` `shopping.edit`; the entity-level checks are [ShoppingRules]. Types not listed here (including read-only
      * `household`, `member`, `group`) cannot be changed through sync.
      */
     fun canMutate(
@@ -42,6 +43,14 @@ object WriteRules {
 
             EntityTypes.TASK, EntityTypes.CHECKLIST_ITEM, EntityTypes.TASK_COMPLETION -> {
                 permissions.has(Permission.TASKS_VIEW)
+            }
+
+            EntityTypes.SHOPPING_LIST -> {
+                permissions.has(Permission.SHOPPING_MANAGE_LISTS)
+            }
+
+            EntityTypes.SHOPPING_ITEM -> {
+                permissions.has(Permission.SHOPPING_EDIT)
             }
 
             else -> {

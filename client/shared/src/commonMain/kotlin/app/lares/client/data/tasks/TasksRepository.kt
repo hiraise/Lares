@@ -2,40 +2,25 @@ package app.lares.client.data.tasks
 
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
-import app.cash.sqldelight.coroutines.mapToOneOrNull
 import app.lares.client.data.HouseholdRepository
 import app.lares.client.data.MemberView
 import app.lares.client.data.MembersRepository
 import app.lares.client.data.PermissionsRepository
 import app.lares.client.data.Tag
 import app.lares.client.data.TagsRepository
+import app.lares.client.data.minuteTicks
+import app.lares.client.data.observeViewer
 import app.lares.client.db.LocalDb
 import app.lares.client.sync.toData
-import app.lares.contract.api.LaresJson
-import app.lares.contract.api.auth.Me
 import app.lares.contract.permissions.Viewer
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.IllegalTimeZoneException
 import kotlinx.datetime.TimeZone
 import kotlin.time.Clock
 import kotlin.time.Instant
-
-/** Emits [Clock.now] right away and then at every minute boundary, so overdue states change without data changes. */
-fun minuteTicks(clock: Clock): Flow<Instant> =
-    flow {
-        while (true) {
-            val now = clock.now()
-            emit(now)
-            delay(MINUTE_MS - now.toEpochMilliseconds().mod(MINUTE_MS))
-        }
-    }
-
-private const val MINUTE_MS = 60_000L
 
 /** The household's zone, or the phone's when it is unknown (before the first sync) or invalid. */
 internal fun householdZone(timeZone: String?): TimeZone =
@@ -85,18 +70,6 @@ class TasksRepository(
             )
         }
 
-    private fun viewer(): Flow<Viewer?> {
-        val me =
-            db.local_sessionQueries
-                .get()
-                .asFlow()
-                .mapToOneOrNull(localDb.dispatcher)
-                .map { json -> json?.let { LaresJson.decodeFromString(Me.serializer(), it) } }
-        return combine(me, permissions.observeMine()) { current, mine ->
-            current?.let { Viewer(it.memberId, it.personId, mine) }
-        }
-    }
-
     /** All inputs of the views; a new value on every data change and every minute. */
     fun observeInputs(): Flow<TaskInputs> {
         val context =
@@ -104,7 +77,7 @@ class TasksRepository(
                 members.observeAll(),
                 tags.observeAll(includeArchived = true),
                 household.observe().map { householdZone(it?.data?.timeZone) },
-                viewer(),
+                observeViewer(localDb, permissions),
             ) { allMembers, allTags, zone, viewer -> Context(allMembers, allTags, zone, viewer) }
         return combine(rows(), context, ticks) { (tasks, items, completions), ctx, now ->
             TaskInputs(tasks, items, completions, ctx.members, ctx.tags, ctx.zone, ctx.viewer, now)

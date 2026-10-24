@@ -178,7 +178,7 @@ class NotificationsTest {
     @Test
     fun pendingNavigationKeepsATaskTargetUntilConsumed() {
         val pending = PendingNavigation()
-        assertFalse(pending.submit("shopping_list", "l1"), "no screen for that type yet")
+        assertFalse(pending.submit("widget", "l1"), "no screen for that type yet")
         assertNull(pending.target.value)
         assertTrue(pending.submit(EntityTypes.TASK, "t1"))
         val target = assertIs<NavTarget.Task>(pending.target.value)

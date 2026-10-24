@@ -58,6 +58,7 @@ import app.lares.client.ui.common.messageRes
 import app.lares.client.ui.components.AppIcon
 import app.lares.client.ui.family.FamilyTab
 import app.lares.client.ui.settings.NotificationPermissionPromptHost
+import app.lares.client.ui.shopping.ShoppingRoute
 import app.lares.client.ui.tasks.TaskEditorArgs
 import app.lares.client.ui.tasks.TaskEventSnackbars
 import app.lares.client.ui.tasks.TasksRoute
@@ -100,6 +101,7 @@ class MainNavigation(
     val onTask: (String) -> Unit = {},
     /** The task editor (a new task with its defaults, or an existing one). */
     val onTaskEditor: (TaskEditorArgs) -> Unit = {},
+    val onShoppingList: (String) -> Unit = {},
 )
 
 @Composable
@@ -163,6 +165,8 @@ fun MainScaffoldRoute(
                     tab.value = MainTab.TASKS
                 },
                 onCreate = { navigation.onTaskEditor(TaskEditorArgs(assignToMe = true)) },
+                onShoppingList = navigation.onShoppingList,
+                onAllShopping = { tab.value = MainTab.SHOPPING },
             ),
     )
     if (sheetOpen) {
@@ -207,7 +211,11 @@ fun MainScaffold(
                     TasksRoute(snackbar, onTask = navigation.onTask, onNewTask = navigation.onTaskEditor)
                 }
 
-                MainTab.SHOPPING, MainTab.CALENDAR -> {
+                MainTab.SHOPPING -> {
+                    ShoppingRoute(snackbar, onList = navigation.onShoppingList)
+                }
+
+                MainTab.CALENDAR -> {
                     SectionPlaceholder(current.section!!)
                 }
 

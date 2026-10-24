@@ -43,6 +43,7 @@ import app.lares.client.ui.settings.NotificationSettingsRoute
 import app.lares.client.ui.settings.ProfileRoute
 import app.lares.client.ui.settings.SettingsNavigation
 import app.lares.client.ui.settings.SettingsRoute
+import app.lares.client.ui.shopping.ShoppingListRoute
 import app.lares.client.ui.tasks.TaskDetailRoute
 import app.lares.client.ui.tasks.TaskEditorArgs
 import app.lares.client.ui.tasks.TaskEditorRoute
@@ -154,6 +155,14 @@ data class TagDestination(
     val id: String,
 )
 
+/** A shopping list page (M2-04). */
+@Serializable
+data class ShoppingListDestination(
+    val id: String,
+    /** Open filtered by this tag (from the tag page). */
+    val tagId: String? = null,
+)
+
 @Serializable
 data class TaskDetailDestination(
     val id: String,
@@ -257,8 +266,13 @@ fun MainNavHost() {
                     onFamily = { navController.navigate(FamilyDestination(it)) },
                     onTask = { navController.navigate(TaskDetailDestination(it)) },
                     onTaskEditor = { navController.navigate(TaskEditorDestination.of(it)) },
+                    onShoppingList = { navController.navigate(ShoppingListDestination(it)) },
                 ),
             )
+        }
+        composable<ShoppingListDestination> { entry ->
+            val route = entry.toRoute<ShoppingListDestination>()
+            ShoppingListRoute(route.id, onBack = { navController.popBackStack() }, tagId = route.tagId)
         }
         composable<TaskDetailDestination> { entry ->
             val id = entry.toRoute<TaskDetailDestination>().id
@@ -358,6 +372,7 @@ private fun NavGraphBuilder.familyGraph(navController: NavHostController) {
             entry.toRoute<TagDestination>().id,
             onBack = back,
             onTask = { navController.navigate(TaskDetailDestination(it)) },
+            onShoppingList = { id, tagId -> navController.navigate(ShoppingListDestination(id, tagId)) },
         )
     }
     composable<MemberDestination> { entry ->
