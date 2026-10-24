@@ -452,4 +452,12 @@
     <string name="notif_prompt_title">Allow notifications?</string>
     <string name="notif_prompt_text">Lares shows reminders and family news as notifications. You can change this later in Settings › Notifications.</string>
     <string name="notif_prompt_later">Not now</string>
+
+    <!-- Task reminders (notification body). %1$s time, e.g. 20:00; %1$s/%2$s date ("24 October") and time -->
+    <string name="task_reminder_today">Due today</string>
+    <string name="task_reminder_today_at">Due today at %1$s</string>
+    <string name="task_reminder_tomorrow">Due tomorrow</string>
+    <string name="task_reminder_tomorrow_at">Due tomorrow at %1$s</string>
+    <string name="task_reminder_date">Due %1$s</string>
+    <string name="task_reminder_date_at">Due %1$s at %2$s</string>
 </resources>

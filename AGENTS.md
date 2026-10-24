@@ -104,7 +104,7 @@ troubleshooting: [dev-setup](docs/process/dev-setup.md).
 | One module or test class | `tools/dev/verify.sh :server:test`, `tools/dev/verify.sh :client:shared:jvmTest --tests '*Name*'` |
 | Multi-device sync tests | `tools/dev/verify.sh :integration-tests:test` (real server + several client cores) |
 | Local server for manual checks (port 8080, database `lares_e2e`) | `tools/dev/server.sh start` / `stop` / `reset` / `log` |
-| Test family and API calls | `tools/dev/seed.py family`, `seed.py token`, `seed.py invite`, `seed.py login-code Аня`, `seed.py call GET /me` |
+| Test family and API calls | `tools/dev/seed.py family`, `seed.py tasks`, `seed.py token`, `seed.py invite`, `seed.py login-code Аня`, `seed.py call GET /me` |
 | Emulator: boot, install + launch, clear data, deep link, stop | `tools/dev/emu.sh start` / `install` / `fresh` / `link URL` / `stop` |
 | Drive the app by text, screenshot | `tools/dev/ui.sh dump` / `tap TEXT` / `field N` / `type TEXT` / `shot NAME` / `crash` |
 | Start dev database only | `docker compose -f deploy/dev/docker-compose.yml up -d --wait` (port taken: `LARES_DEV_DB_PORT=5434 …`) |

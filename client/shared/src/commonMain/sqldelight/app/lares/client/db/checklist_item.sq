@@ -1,0 +1,30 @@
+-- Checklist items of a task. Rows of a task deleted locally stay until the server's cascade arrives; readers ignore
+-- children of missing tasks. `done_occurrence` is an ISO date (routines only).
+CREATE TABLE checklist_item (
+    id TEXT NOT NULL PRIMARY KEY,
+    task_id TEXT NOT NULL,
+    text TEXT NOT NULL,
+    position INTEGER NOT NULL,
+    done INTEGER NOT NULL,
+    done_occurrence TEXT
+);
+
+CREATE INDEX checklist_item_task ON checklist_item (task_id);
+
+selectAll:
+SELECT * FROM checklist_item ORDER BY task_id, position, id;
+
+selectById:
+SELECT * FROM checklist_item WHERE id = ?;
+
+selectByTask:
+SELECT * FROM checklist_item WHERE task_id = ? ORDER BY position, id;
+
+upsert:
+INSERT OR REPLACE INTO checklist_item (id, task_id, text, position, done, done_occurrence) VALUES (?, ?, ?, ?, ?, ?);
+
+deleteById:
+DELETE FROM checklist_item WHERE id = ?;
+
+deleteAll:
+DELETE FROM checklist_item;

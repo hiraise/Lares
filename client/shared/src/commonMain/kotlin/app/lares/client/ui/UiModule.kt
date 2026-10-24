@@ -1,10 +1,12 @@
 package app.lares.client.ui
 
+import app.lares.client.data.tasks.TaskReminderTexts
 import app.lares.client.di.AppScope
 import app.lares.client.notifications.notificationsModule
 import app.lares.client.platform.AppStartup
 import app.lares.client.platform.AppearanceSettings
 import app.lares.client.platform.DeepLinkHandler
+import app.lares.client.ui.common.TaskReminderResourceTexts
 import app.lares.client.ui.family.AddMemberViewModel
 import app.lares.client.ui.family.FamilySettingsViewModel
 import app.lares.client.ui.family.FamilyViewModel
@@ -40,6 +42,8 @@ fun uiModule(): Module =
     module {
         includes(notificationsModule())
         single { DeepLinkHandler() }
+        // Replaces the core's English fallback.
+        single<TaskReminderTexts> { TaskReminderResourceTexts(getOrNull<Clock>() ?: Clock.System) }
         single { AppStartup(get(), get(AppScope)) }
         single { AppearanceSettings(get(), get(), get(AppScope)) }
         viewModel { ServerViewModel(get()) }

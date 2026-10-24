@@ -57,7 +57,8 @@ class LocalWriter(
         fields: JsonObject,
     ): Boolean {
         val viewer = viewer(db)
-        val current = adapter.selectJson(db, id)
+        val currentData = adapter.selectTyped(db, id)
+        val current = currentData?.let(adapter::encode)
         if (current == null && isKnown(db, adapter.type, id)) throw LocalWriteException(ErrorCode.ENTITY_DELETED)
         requireAllowed(adapter.type, MutationOp.UPSERT, viewer, id)
 
@@ -70,6 +71,7 @@ class LocalWriter(
             adapter.decodeOrNull(merged)
                 ?: throw LocalValidationException(fields.keys.associateWith { FieldErrorCode.INVALID_FORMAT })
         val data = adapter.normalize(decoded)
+        adapter.authorize(db, viewer, MutationOp.UPSERT, id, currentData, data)
         val errors = adapter.validate(data) + adapter.localConflicts(db, id, data)
         if (errors.isNotEmpty()) throw LocalValidationException(errors)
 
@@ -82,17 +84,16 @@ class LocalWriter(
         return true
     }
 
-    private fun delete(
+    private fun <T : Any> delete(
         db: LaresDb,
-        adapter: EntityAdapter<*>,
+        adapter: EntityAdapter<T>,
         id: String,
     ): Boolean {
         val viewer = viewer(db)
-        if (adapter.selectTyped(db, id) == null) return false
+        val current = adapter.selectTyped(db, id) ?: return false
         requireAllowed(adapter.type, MutationOp.DELETE, viewer, id)
-        if (adapter.type == EntityTypes.PERSON && db.memberQueries.countByPerson(id).executeAsOne() > 0) {
-            throw LocalWriteException(ErrorCode.PERSON_IS_MEMBER)
-        }
+        adapter.authorize(db, viewer, MutationOp.DELETE, id, current, null)
+        adapter.checkDelete(db, id, current)
         adapter.deleteTyped(db, id)
         enqueue(db, adapter.type, id, MutationOp.DELETE, null)
         return true

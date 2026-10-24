@@ -451,4 +451,12 @@
     <string name="notif_prompt_title">Разрешить уведомления?</string>
     <string name="notif_prompt_text">Lares показывает напоминания и новости семьи в виде уведомлений. Это можно изменить позже в Настройках › Уведомления.</string>
     <string name="notif_prompt_later">Не сейчас</string>
+
+    <!-- Task reminders (notification body). %1$s time, e.g. 20:00; %1$s/%2$s date ("24 October") and time -->
+    <string name="task_reminder_today">Срок: сегодня</string>
+    <string name="task_reminder_today_at">Срок: сегодня в %1$s</string>
+    <string name="task_reminder_tomorrow">Срок: завтра</string>
+    <string name="task_reminder_tomorrow_at">Срок: завтра в %1$s</string>
+    <string name="task_reminder_date">Срок: %1$s</string>
+    <string name="task_reminder_date_at">Срок: %1$s в %2$s</string>
 </resources>

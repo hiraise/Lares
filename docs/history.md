@@ -145,3 +145,12 @@ Current state and next steps: [STATUS.md](STATUS.md).
   `TaskOverdueJob` (30 s after start, then every 60 s, 500 tasks per run, household lock, `updated_at` and 24 h guards).
   Tests: `AfterCommitTest` (4), `TaskNotificationsTest` (14); deterministic via `TaskNotifier.awaitIdle()` and
   `FakePushService.drain()`.
+
+- 2026-10-24 **M1-04 Tasks in the client core.** Tables `task`, `checklist_item`, `task_completion` (migration `2.sqm`,
+  `DATA_SCHEMA_VERSION = 2`); `EntityAdapter.authorize`/`checkDelete` hooks called by `LocalWriter` (person
+  `PERSON_IS_MEMBER` moved into `checkDelete`); three task adapters with the server's `TaskRules` and immutability checks.
+  `data/tasks/`: `TaskViews` (pure build, filter, sections, counts, "done today" rows), `TasksRepository` (minute ticker,
+  household zone), `TasksWriter` (every action incl. complete/skip/undo/reopen and checklist), `TaskReminderPlanner`
+  (`task:<id>` reminders, collector on login, `SyncWorker` reconcile; en/ru body texts). `seed.py tasks` (sample data;
+  values must be canonical — the server rejects fields that change in a decode round trip, e.g. missing `weekdays: []`).
+  Tests: 31 client unit tests (views 11, writer 10, repository 4, reminders 5, migration 1), 5 multi-device `TaskSyncTest`.

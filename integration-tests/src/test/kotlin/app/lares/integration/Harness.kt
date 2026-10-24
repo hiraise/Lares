@@ -12,21 +12,29 @@ import app.lares.client.data.PersonsRepository
 import app.lares.client.data.PersonsWriter
 import app.lares.client.data.TagsRepository
 import app.lares.client.data.TagsWriter
+import app.lares.client.data.tasks.TasksRepository
+import app.lares.client.data.tasks.TasksWriter
+import app.lares.client.db.LaresDb
 import app.lares.client.db.LocalDb
 import app.lares.client.di.AppScope
 import app.lares.client.di.jvmPlatformModule
 import app.lares.client.di.sharedModule
+import app.lares.client.sync.EntityAdapter
+import app.lares.client.sync.EntityAdapters
 import app.lares.client.sync.LocalWriter
 import app.lares.client.sync.SyncConfig
 import app.lares.client.sync.SyncEngine
 import app.lares.contract.api.LaresJson
 import app.lares.contract.api.admin.CreateMemberRequest
 import app.lares.contract.api.auth.DeviceInfo
+import app.lares.contract.entities.ChecklistItemData
 import app.lares.contract.entities.GroupData
 import app.lares.contract.entities.HouseholdData
 import app.lares.contract.entities.MemberData
 import app.lares.contract.entities.PersonData
 import app.lares.contract.entities.TagData
+import app.lares.contract.entities.TaskCompletionData
+import app.lares.contract.entities.TaskData
 import app.lares.contract.sync.EntityTypes
 import app.lares.server.AppDeps
 import app.lares.server.module
@@ -152,6 +160,9 @@ class TestClient(
     val groupsRepository: GroupsRepository = koin.get()
     val householdRepository: HouseholdRepository = koin.get()
     val permissionsRepository: PermissionsRepository = koin.get()
+    private val adapters: EntityAdapters = koin.get()
+    val tasks: TasksRepository = koin.get()
+    val tasksWriter: TasksWriter = koin.get()
 
     suspend fun connect() = session.connect(serverUrl)
 
@@ -180,7 +191,21 @@ class TestClient(
             groups = groupsRepository.observeAll().first().associate { it.id to it.data },
             persons = personsRepository.observeAll().first().associate { it.id to it.data },
             tags = tagsRepository.observeAll(includeArchived = true).first().associate { it.id to it.data },
+            // Raw rows, including children of tasks deleted locally whose cascade has not arrived yet.
+            tasks = typedRows(EntityTypes.TASK) { taskQueries.selectAll().executeAsList().map { it.id } },
+            checklistItems = typedRows(EntityTypes.CHECKLIST_ITEM) { checklist_itemQueries.selectAll().executeAsList().map { it.id } },
+            taskCompletions = typedRows(EntityTypes.TASK_COMPLETION) { task_completionQueries.selectAll().executeAsList().map { it.id } },
         )
+
+    @Suppress("UNCHECKED_CAST")
+    private suspend fun <T : Any> typedRows(
+        type: String,
+        ids: LaresDb.() -> List<String>,
+    ): Map<String, T> =
+        localDb.read {
+            val adapter = adapters[type] as EntityAdapter<T>
+            ids().associateWith { adapter.selectTyped(this, it)!! }
+        }
 
     /** The server's state for this member: a full pull from 0, decoded with the contract classes. */
     suspend fun serverSnapshot(): Snapshot {
@@ -204,6 +229,9 @@ class TestClient(
             groups = of(EntityTypes.GROUP, GroupData.serializer()),
             persons = of(EntityTypes.PERSON, PersonData.serializer()),
             tags = of(EntityTypes.TAG, TagData.serializer()),
+            tasks = of(EntityTypes.TASK, TaskData.serializer()),
+            checklistItems = of(EntityTypes.CHECKLIST_ITEM, ChecklistItemData.serializer()),
+            taskCompletions = of(EntityTypes.TASK_COMPLETION, TaskCompletionData.serializer()),
         )
     }
 
@@ -222,8 +250,14 @@ data class Snapshot(
     val groups: Map<String, GroupData>,
     val persons: Map<String, PersonData>,
     val tags: Map<String, TagData>,
+    val tasks: Map<String, TaskData>,
+    val checklistItems: Map<String, ChecklistItemData>,
+    val taskCompletions: Map<String, TaskCompletionData>,
 ) {
-    val isEmpty: Boolean get() = households.isEmpty() && members.isEmpty() && groups.isEmpty() && persons.isEmpty() && tags.isEmpty()
+    val isEmpty: Boolean
+        get() =
+            households.isEmpty() && members.isEmpty() && groups.isEmpty() && persons.isEmpty() && tags.isEmpty() &&
+                tasks.isEmpty() && checklistItems.isEmpty() && taskCompletions.isEmpty()
 }
 
 /**

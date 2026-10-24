@@ -1,11 +1,11 @@
 # Project status
 
-Updated: 2026-10-23
+Updated: 2026-10-24
 
 ## Phase
 
 **M0 Foundation — all plans M0-01…M0-11 done; M0 acceptance with the customer pending.
-M1 Tasks in progress: M1-01…M1-03 done; M1-04 next.**
+M1 Tasks in progress: M1-01…M1-04 done; M1-05 next.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
@@ -14,6 +14,9 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 
 ## Last completed
 
+- 2026-10-24 M1-04 Tasks in the client core: local tables and adapters (same rights as the server), views (groups,
+  overdue every minute, "done today", filters, counts), writer for every action, automatic local task reminders,
+  `seed.py tasks`; 31 unit and 5 multi-device tests.
 - 2026-10-23 M1-03 Task notifications on the server: `afterCommit` hook, `TaskNotifier` (assigned, completed),
   overdue job every 60 s with `overdue_check_at` tracking (one notice per occurrence, 09:00 next day for date-only
   tasks, nothing stale after downtime); 18 server tests.
@@ -44,7 +47,7 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
    ([deploy/README](../deploy/README.md#releases)).
 3. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
 4. M4 plan: re-run the load test with location uploads every 30 s (ADR-0015).
-5. M1 Tasks: next plan M1-04 (client data), then M1-05…M1-07 ([plans](plans/README.md#m1-plans); design:
+5. M1 Tasks: next plan M1-05 (list and task page UI), then M1-06, M1-07 ([plans](plans/README.md#m1-plans); design:
    [architecture/tasks.md](architecture/tasks.md), ADR-0017, ADR-0018).
 
 ## Plan progress

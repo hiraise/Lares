@@ -262,6 +262,10 @@ Children of a task deleted locally stay until the server's cascade tombstones ar
 `LocalForbiddenException`; called after merge on upsert, with `merged = null` on delete) and `checkDelete(db, id, current)`.
 `TaskAdapter`, `ChecklistItemAdapter`, `TaskCompletionAdapter` implement them with `TaskRules` (loading the parent task from
 the typed table). The writer never creates task rows on behalf of the server's cascade.
+The task adapter also refuses a changed `createdBy` and a routine → one-off change, the checklist adapter a changed
+`taskId`, the completion adapter any change of a stored completion (all `VALIDATION_FAILED`, like the server). The
+person adapter's `checkDelete` holds the `PERSON_IS_MEMBER` check. Missing parent task → `ENTITY_NOT_FOUND`.
+Completion times are written in whole milliseconds, as the typed table stores them.
 
 ### Views (`TasksRepository`)
 
@@ -277,6 +281,12 @@ own permissions and a **minute ticker** (`Clock`-driven flow, so overdue states 
 `reminder` rows with ids `task:<taskId>` match it (schedule new or changed, cancel the rest). Runs: on login, after every
 successful sync cycle, after local task writes, and from `SyncWorker` after its sync. Text: title = task title; body =
 "Due today at 20:00" / "Срок: сегодня в 20:00" style, rendered on the phone in the app language.
+
+Implementation (M1-04): a collector started by `NotificationsCoordinator` on login reconciles 1 s after any change of
+the task views or the mute settings; `SyncWorker` calls `reconcile()` after `syncNow()`. `TaskReminderTexts.body` is a
+`suspend` function (Compose resources are read with suspending `getString`); the core binds an English fallback and
+`uiModule()` the resource version. "Today"/"tomorrow" are relative to the phone's day when the reminder is planned;
+every later reconcile refreshes them.
 
 `NotificationType.TASK_REMINDER` (`task.reminder`, channel `reminders`) is added so members can mute task reminders; the
 server stores it like other types but never sends it.
