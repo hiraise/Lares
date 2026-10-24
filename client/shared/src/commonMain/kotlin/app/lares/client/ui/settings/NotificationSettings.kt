@@ -51,6 +51,7 @@ import app.lares.client.resources.notif_type_system_test
 import app.lares.client.resources.notif_type_task_assigned
 import app.lares.client.resources.notif_type_task_completed
 import app.lares.client.resources.notif_type_task_overdue
+import app.lares.client.resources.notif_type_task_reminder
 import app.lares.client.resources.notif_types
 import app.lares.client.resources.notif_use
 import app.lares.client.resources.settings_notifications
@@ -88,8 +89,15 @@ import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Instant
 
-/** Notification types with a switch; module types appear when their modules ship (M1). */
-val SwitchableNotificationTypes: List<NotificationType> = listOf(NotificationType.SYSTEM_TEST)
+/** Notification types with a switch (FND-052, TSK-034); later modules add theirs. */
+val SwitchableNotificationTypes: List<NotificationType> =
+    listOf(
+        NotificationType.TASK_ASSIGNED,
+        NotificationType.TASK_COMPLETED,
+        NotificationType.TASK_OVERDUE,
+        NotificationType.TASK_REMINDER,
+        NotificationType.SYSTEM_TEST,
+    )
 
 data class NotificationSettingsUiState(
     val push: PushStatus = PushStatus(),
@@ -372,6 +380,7 @@ private fun NotificationType.label(): StringResource =
         NotificationType.TASK_ASSIGNED -> Res.string.notif_type_task_assigned
         NotificationType.TASK_OVERDUE -> Res.string.notif_type_task_overdue
         NotificationType.TASK_COMPLETED -> Res.string.notif_type_task_completed
+        NotificationType.TASK_REMINDER -> Res.string.notif_type_task_reminder
     }
 
 private fun PushTestResult.message(): StringResource =

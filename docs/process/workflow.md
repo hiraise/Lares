@@ -31,20 +31,23 @@ How agents work on this project. The customer sets goals and accepts results; ag
    `emulator-tester` agent (skill `emulator`) so screenshots stay out of the implementation session.
 4. Self-review the diff (correctness, security, privacy, boundaries); run `/code-review` for non-trivial changes.
 5. Update docs in the same change (see DoD).
-6. Close the item with the `plan-finish` skill; commit per [Git until MVP](#git-until-mvp), Conventional Commits
+6. Close the item with the `plan-finish` skill; commit per [Git](#git), Conventional Commits
    with requirement IDs:
    `feat(tasks): overdue notification (TSK-033)`.
 
-## Git until MVP
+## Git
 
-Decided by the customer, 2026-10-22.
+Decided by the customer, 2026-10-24 ([ADR-0020](../adr/0020-release-branches.md); replaces "work directly on `main`").
 
-- Work directly on `main` in the local repository. The customer adds the GitHub remote later.
+- `main` is protected and holds released code only. Nobody pushes to it; it changes only by merging a release pull
+  request ([release process](release.md)).
+- Work goes to the active release branch `release/X.Y.Z` named in [STATUS.md](../STATUS.md). If there is none, start it
+  with `tools/release/release.sh start X.Y.Z` (next milestone: next minor version).
 - Before committing, show the customer a short Russian summary of the change (what and why, files touched,
-  tests run). Commit only after explicit approval. One approval may cover one work item or a few related ones.
+  tests run). Commit only after explicit approval; then `git push` the release branch (CI checks it). One approval may
+  cover one work item or a few related ones.
+- Parallel or risky work may use a `feature/<id>` branch and a pull request into the release branch.
 - Never rewrite published history; never force-push.
-- After the MVP (M6) a release flow replaces this: feature branches, pull requests, CI gate, version tags.
-  It will be defined in an ADR at M6.
 
 ## Definition of Done
 

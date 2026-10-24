@@ -9,13 +9,26 @@ import kotlin.time.Instant
 // What the notification core needs from the platform (plan M0-09). Android implements these in the app module;
 // the JVM build and tests use the no-op versions below.
 
-/** Shows notifications. [id] identifies a notification, so showing the same id again replaces it. */
+/**
+ * What a notification tap opens: an entity such as a task (`entityType` from `EntityTypes`). Null opens the app as
+ * it is.
+ */
+data class NotificationTarget(
+    val entityType: String,
+    val entityId: String,
+)
+
+/**
+ * Shows notifications. [id] identifies a notification, so showing the same id again replaces it; a tap opens
+ * [target] (plan M1-07).
+ */
 fun interface NotificationPoster {
     fun show(
         id: String,
         channel: NotificationChannel,
         title: String,
         body: String,
+        target: NotificationTarget?,
     )
 }
 
@@ -82,6 +95,9 @@ interface NotificationPermissions {
 
     /** Opens the system screen where the user allows exact alarms. */
     fun openExactAlarmSettings()
+
+    /** Opens the app's notification settings, for when the system no longer asks (denied twice, Android < 13). */
+    fun openNotificationSettings()
 }
 
 /** The language notification texts from the server should use (`en`, `ru`): the app's UI language. */
@@ -127,4 +143,6 @@ class AllowAllNotificationPermissions : NotificationPermissions {
     override fun exactAlarmsAllowed(): Boolean = true
 
     override fun openExactAlarmSettings() = Unit
+
+    override fun openNotificationSettings() = Unit
 }

@@ -1,6 +1,7 @@
 package app.lares.client.ui
 
 import app.lares.client.auth.SessionState
+import app.lares.client.notifications.NotificationSettingsRepository
 import app.lares.client.platform.AppLanguage
 import app.lares.client.platform.AppearanceSettings
 import app.lares.client.platform.ThemeMode
@@ -11,17 +12,24 @@ import app.lares.client.ui.main.MainViewModel
 import app.lares.client.ui.settings.ChangePasswordViewModel
 import app.lares.client.ui.settings.DevicesViewModel
 import app.lares.client.ui.settings.LoginQrViewModel
+import app.lares.client.ui.settings.NotificationSettingsViewModel
 import app.lares.client.ui.settings.SettingsViewModel
+import app.lares.client.ui.settings.SwitchableNotificationTypes
 import app.lares.contract.api.ErrorCode
 import app.lares.contract.api.FieldErrorCode
+import app.lares.contract.api.LaresJson
 import app.lares.contract.api.admin.LoginCodeCreated
 import app.lares.contract.api.auth.SessionInfo
+import app.lares.contract.api.notifications.NotificationSettings
+import app.lares.contract.api.notifications.NotificationType
 import app.lares.contract.permissions.EffectivePermissions
 import app.lares.contract.permissions.Permission
 import app.lares.contract.permissions.Section
 import io.ktor.client.engine.mock.respond
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.content.OutgoingContent
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.builtins.ListSerializer
 import kotlin.test.Test
@@ -74,6 +82,50 @@ class MainAndSettingsViewModelTest {
             val prefs = awaitState(vm.state) { it.preferences.theme == ThemeMode.DARK && it.preferences.language == AppLanguage.RUSSIAN }
             assertTrue(prefs.hasPassword)
         }
+
+    @Test
+    fun `task notification types have switches that persist (TSK-034, FND-052)`() {
+        assertEquals(
+            listOf(
+                NotificationType.TASK_ASSIGNED,
+                NotificationType.TASK_COMPLETED,
+                NotificationType.TASK_OVERDUE,
+                NotificationType.TASK_REMINDER,
+                NotificationType.SYSTEM_TEST,
+            ),
+            SwitchableNotificationTypes,
+        )
+        var onServer = NotificationSettings()
+        loggedIn(extra = { request ->
+            if (request.url.encodedPath != "/api/v1/me/notification-settings") return@loggedIn null
+            if (request.method == HttpMethod.Get) {
+                // A slow first load answers with what was stored when it was read; it must not overwrite the switches
+                // changed meanwhile.
+                val read = onServer
+                delay(300)
+                return@loggedIn json(NotificationSettings.serializer(), read)
+            }
+            if (request.method == HttpMethod.Put) {
+                val body = (request.body as OutgoingContent.ByteArrayContent).bytes().decodeToString()
+                onServer = LaresJson.decodeFromString(NotificationSettings.serializer(), body)
+            }
+            json(NotificationSettings.serializer(), onServer)
+        }) { core ->
+            val vm = core.koin.get<NotificationSettingsViewModel>()
+            awaitState(vm.state) { it.muted.isEmpty() }
+            vm.setEnabled(NotificationType.TASK_REMINDER, enabled = false)
+            awaitState(vm.state) { it.muted == setOf(NotificationType.TASK_REMINDER) }
+            Thread.sleep(500) // past the slow first load: it must not have reset the switch
+            assertEquals(setOf(NotificationType.TASK_REMINDER), vm.state.value.muted)
+            vm.setEnabled(NotificationType.TASK_OVERDUE, enabled = false)
+            awaitState(vm.state) { it.muted == setOf(NotificationType.TASK_REMINDER, NotificationType.TASK_OVERDUE) }
+            assertEquals(setOf(NotificationType.TASK_REMINDER, NotificationType.TASK_OVERDUE), onServer.muted)
+            vm.setEnabled(NotificationType.TASK_OVERDUE, enabled = true)
+            awaitState(vm.state) { it.muted == setOf(NotificationType.TASK_REMINDER) }
+            val stored = runBlocking { core.koin.get<NotificationSettingsRepository>().isMuted(NotificationType.TASK_REMINDER) }
+            assertTrue(stored, "mirrored on the phone for the reminder planner")
+        }
+    }
 
     @Test
     fun `delete account - LAST_ADMIN keeps the session, success ends it`() {

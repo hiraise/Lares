@@ -36,7 +36,7 @@ object FamilyFixture {
 
     private var seq = 0L
 
-    private fun <T> change(
+    fun <T> change(
         type: String,
         id: String,
         serializer: KSerializer<T>,
@@ -74,15 +74,18 @@ object FamilyFixture {
             change(EntityTypes.TAG, "t1", TagData.serializer(), TagData("Car", PaletteColor.BLUE)),
         )
 
-    fun MockRequestHandleScope.pull() =
-        json(PullResponse.serializer(), PullResponse(false, 1, "epoch", changes, changes.maxOf { it.seq }, false))
+    fun MockRequestHandleScope.pull(extra: List<Change> = emptyList()): HttpResponseData {
+        val all = changes + extra
+        return json(PullResponse.serializer(), PullResponse(false, 1, "epoch", all, all.maxOf { it.seq }, false))
+    }
 
     /**
      * A logged-in core as [me] with the fixture synced. [extra] answers requests first; sync push and anything else
-     * unknown answers 503.
+     * unknown answers 503. [extraChanges] are synced too (task rows of task tests).
      */
     fun core(
         me: Me = olga,
+        extraChanges: List<Change> = emptyList(),
         extra: suspend MockRequestHandleScope.(HttpRequestData) -> HttpResponseData? = { null },
     ): UiTestCore {
         val core =
@@ -90,7 +93,7 @@ object FamilyFixture {
                 extra(request) ?: when (request.url.encodedPath) {
                     "/api/v1/instance" -> instance()
                     "/api/v1/auth/login" -> authResult(me)
-                    "/api/v1/sync/changes" -> pull()
+                    "/api/v1/sync/changes" -> pull(extraChanges)
                     else -> unavailable()
                 }
             }

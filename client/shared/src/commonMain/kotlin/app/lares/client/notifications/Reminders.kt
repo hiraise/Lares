@@ -1,7 +1,9 @@
 package app.lares.client.notifications
 
+import app.lares.client.data.tasks.TaskReminderPlanner
 import app.lares.client.db.LocalDb
 import app.lares.contract.api.notifications.NotificationChannel
+import app.lares.contract.sync.EntityTypes
 import kotlin.time.Clock
 import kotlin.time.Instant
 
@@ -65,7 +67,15 @@ class Reminders(
                 reminderQueries.get(id).executeAsOneOrNull()?.also { reminderQueries.remove(id) }
             } ?: return false
         val channel = NotificationChannel.entries.firstOrNull { it.id == row.channel } ?: NotificationChannel.REMINDERS
-        poster.show("reminder:$id", channel, row.title, row.body)
+        poster.show("reminder:$id", channel, row.title, row.body, target(id))
         return true
     }
+
+    /** Task reminders (`task:<id>`) open their task; other reminders open the app. */
+    private fun target(id: String): NotificationTarget? =
+        if (id.startsWith(TaskReminderPlanner.ID_PREFIX)) {
+            NotificationTarget(EntityTypes.TASK, id.removePrefix(TaskReminderPlanner.ID_PREFIX))
+        } else {
+            null
+        }
 }

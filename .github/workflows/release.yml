@@ -1,9 +1,16 @@
 name: Release
 
-# On a version tag (v0.1.0): build and test, push the multi-arch server image to GHCR, attach the APK to a GitHub Release.
+# Every push to main is a release (ADR-0020): main is protected and changes only through a merged release/X.Y.Z pull
+# request, already checked by CI (job release-pr). This workflow builds and tests, pushes the multi-arch server image to
+# GHCR, then creates the tag vX.Y.Z and the GitHub Release with the signed APK and notes from CHANGELOG.md. The tag is
+# created last, so a failed run can simply be re-run. Process: docs/process/release.md.
 on:
   push:
-    tags: ["v*"]
+    branches: [main]
+
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -22,13 +29,12 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v6
 
-      - name: Version from tag
+      - name: Version from gradle.properties
         id: meta
         run: |
-          version="${GITHUB_REF_NAME#v}"
-          gradle_version="$(sed -n 's/^version=//p' gradle.properties)"
-          if [ "$version" != "$gradle_version" ]; then
-            echo "::error::Tag $GITHUB_REF_NAME does not match version=$gradle_version in gradle.properties"
+          version="$(sed -n 's/^version=//p' gradle.properties)"
+          if git ls-remote --exit-code --tags origin "refs/tags/v$version" > /dev/null; then
+            echo "::error::v$version is already released; main must change only through a release/X.Y.Z pull request"
             exit 1
           fi
           owner="$(echo "$GITHUB_REPOSITORY_OWNER" | tr '[:upper:]' '[:lower:]')"
@@ -38,36 +44,29 @@ jobs:
       - name: Check, test and build the server distribution
         run: ./gradlew check :server:installDist --stacktrace
 
-      - name: Release keystore
-        id: signing
-        env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-        run: |
-          if [ -n "$ANDROID_KEYSTORE_BASE64" ]; then
-            echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
-            echo "ANDROID_KEYSTORE_FILE=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
-            echo "variant=release" >> "$GITHUB_OUTPUT"
-          else
-            echo "::warning::No release keystore configured; attaching the debug-signed APK"
-            echo "variant=debug" >> "$GITHUB_OUTPUT"
-          fi
+      - name: Release notes from CHANGELOG.md
+        run: tools/release/notes.sh "${{ steps.meta.outputs.version }}" > "$RUNNER_TEMP/notes.md"
 
-      - name: Build APK
+      # The release APK must be signed with the permanent Lares key (ADR-0019); without it the release fails.
+      - name: Build and verify the signed APK
         env:
-          VARIANT: ${{ steps.signing.outputs.variant }}
           VERSION: ${{ steps.meta.outputs.version }}
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
-          if [ "$VARIANT" = release ]; then
-            ./gradlew :client:android:assembleRelease --stacktrace
-            cp client/android/build/outputs/apk/release/android-release.apk "$RUNNER_TEMP/lares-$VERSION.apk"
-          else
-            ./gradlew :client:android:assembleDebug --stacktrace
-            cp client/android/build/outputs/apk/debug/android-debug.apk "$RUNNER_TEMP/lares-$VERSION-debug.apk"
+          if [ -z "$ANDROID_KEYSTORE_BASE64" ]; then
+            echo "::error::Release keystore secrets are not configured (see docs/process/release.md)"
+            exit 1
           fi
-          rm -f "$RUNNER_TEMP/release.jks"
+          export ANDROID_KEYSTORE_FILE="$RUNNER_TEMP/release.jks"
+          trap 'rm -f "$ANDROID_KEYSTORE_FILE"' EXIT
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$ANDROID_KEYSTORE_FILE"
+          ./gradlew :client:android:assembleRelease --stacktrace
+          apk="$RUNNER_TEMP/lares-$VERSION.apk"
+          cp client/android/build/outputs/apk/release/android-release.apk "$apk"
+          tools/release/verify-apk.sh "$apk"
 
       - uses: docker/setup-qemu-action@v4
 
@@ -94,7 +93,10 @@ jobs:
             org.opencontainers.image.version=${{ steps.meta.outputs.version }}
             org.opencontainers.image.licenses=AGPL-3.0-or-later
 
-      - name: GitHub Release with the APK
+      - name: Tag and GitHub Release with the APK
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release create "$GITHUB_REF_NAME" "$RUNNER_TEMP"/lares-*.apk --title "Lares $GITHUB_REF_NAME" --generate-notes
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          gh release create "v$VERSION" "$RUNNER_TEMP/lares-$VERSION.apk" --target "$GITHUB_SHA" \
+            --title "Lares v$VERSION" --notes-file "$RUNNER_TEMP/notes.md"

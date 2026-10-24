@@ -1,7 +1,7 @@
 ---
 status: approved
 milestone: M0
-updated: 2026-10-23
+updated: 2026-10-24
 ---
 # Foundation (FND)
 
@@ -116,10 +116,12 @@ localization and deployment — everything feature modules depend on.
   without Google services ([ADR-0006](../../adr/0006-no-proprietary-dependencies.md)).
   *Infrastructure done (M0-09): UnifiedPush registration, encrypted Web Push from the server (tested against a fake push
   service), sync tickles, test notification. Open: end-to-end check on a real phone with ntfy (needs the deployed
-  ntfy from M0-10); the task notifications themselves come with M1.*
+  ntfy from M0-10). Task notifications (assigned, completed, overdue) are sent through it from M1-03; a tap opens the
+  task (M1-07).*
 - **FND-052** `MVP` `done` — Each user can mute notification types.
   *Stored per member on the server (muted types are not sent), mirrored on the phone; switches in Settings ›
-  Notifications. M0 shows only test notifications; task types get switches in M1 (M0-09).*
+  Notifications. M0 shows only test notifications (M0-09); task assigned, completed, overdue and task reminders have
+  switches (M1-07).*
 
 ### Client basics
 
@@ -131,7 +133,8 @@ localization and deployment — everything feature modules depend on.
   *System, light or dark in Settings › Appearance (M0-07).*
 - **FND-063** `MVP` `doing` — Home screen "Today" summarizes the sections the member can see: overdue and today's tasks,
   upcoming events and birthdays, the active shopping list, family on the map, budget of the month. Each module adds
-  its block in its milestone; in M0 it is an empty state. *Header and empty state done (M0-07).*
+  its block in its milestone; in M0 it is an empty state. *Header and empty state done (M0-07). Tasks block and the
+  «Добавить» button (M1-07); the empty state remains for members who see no section with a block.*
 - **FND-064** `MVP` `done` — Bottom navigation: Today · Tasks · Shopping · Calendar · More; Map, Budget, Family and Tags
   are reached from "More" and from Today blocks (Q-013). *Bar and More done (M0-07); Family and Tags tiles open the Family screen (M0-08).*
 - **FND-065** `MVP` `doing` — The UI follows the [visual style](../../design/visual-style.md) (ADR-0016).

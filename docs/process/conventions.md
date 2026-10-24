@@ -114,8 +114,8 @@ Toolchain versions: [versions.md](../plans/M0/versions.md) and `gradle/libs.vers
 
 ## Git
 
-- Until MVP: commits go to `main` after customer approval ([workflow](workflow.md#git-until-mvp)).
-  After MVP: release flow defined at M6.
+- Commits go to the active `release/X.Y.Z` branch after customer approval; `main` changes only by a release merge
+  ([workflow](workflow.md#git), ADR-0020).
 - Conventional Commits; scope = module (`tasks`, `sync`, `deploy`, `docs`); requirement IDs in the subject or body.
 - One logical change per commit; docs updated in the same commit or PR.
 

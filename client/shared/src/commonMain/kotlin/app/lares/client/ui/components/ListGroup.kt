@@ -67,6 +67,7 @@ fun ListRow(
     showChevron: Boolean = false,
     enabled: Boolean = true,
     onClick: (() -> Unit)? = null,
+    leading: @Composable (() -> Unit)? = null,
     trailing: @Composable (() -> Unit)? = null,
 ) {
     val clickable = if (onClick != null) Modifier.clickable(enabled = enabled, onClick = onClick) else Modifier
@@ -80,7 +81,7 @@ fun ListRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        if (icon != null) AppIcon(icon, contentDescription = null, tint = iconTint)
+        if (icon != null) AppIcon(icon, contentDescription = null, tint = iconTint) else leading?.invoke()
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
             Text(title, style = MaterialTheme.typography.bodyMedium, color = titleColor)
             if (supporting != null) {

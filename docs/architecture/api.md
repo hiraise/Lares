@@ -150,3 +150,9 @@ DTOs live in `contract/…/api/notifications/NotificationDtos.kt` (FND-051, FND-
   for sync tickles. 404/410 deletes the registration; other failures are logged and dropped (no retry queue).
 - Payload (cleartext ≤ 2 KB): `PushPayload {kind: "sync" | "notification", seq?, type?, title?, body?, entityType?, entityId?}`.
   Muted notification types are not sent at all; sync tickles cannot be muted.
+- Task notifications (M1-03), `entityType = "task"`, `entityId` = the task id; triggers and texts in
+  [tasks design § Notifications](tasks.md#notifications):
+  `task.assigned` — a task create/update adds assignees (to the added members, not the writer);
+  `task.completed` — the first non-skipped completion of an occurrence by someone else, if the creator opted in;
+  `task.overdue` — the server's overdue job (to the creator). Recipients need `tasks.view`. `task.reminder` is local
+  only (never pushed).

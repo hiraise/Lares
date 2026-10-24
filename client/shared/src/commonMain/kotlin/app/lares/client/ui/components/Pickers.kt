@@ -180,3 +180,48 @@ fun NoticeBanner(
         Text(text, style = MaterialTheme.typography.bodySmall, color = colors.warning)
     }
 }
+
+/** Segmented control (visual-style.md): track `surfaceContainerHigh`, selected segment `surfaceBright` with a hairline shadow. */
+@Composable
+fun <T> SegmentedControl(
+    options: List<T>,
+    selected: T,
+    label: @Composable (T) -> String,
+    onSelect: (T) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = MaterialTheme.colorScheme
+    Row(
+        modifier
+            .fillMaxWidth()
+            .background(colors.surfaceContainerHigh, CircleShape)
+            .padding(3.dp),
+    ) {
+        options.forEach { option ->
+            val isSelected = option == selected
+            val segment =
+                if (isSelected) {
+                    Modifier.shadow(1.dp, CircleShape).background(colors.surfaceBright, CircleShape)
+                } else {
+                    Modifier
+                }
+            Box(
+                Modifier
+                    .weight(1f)
+                    .heightIn(min = 36.dp)
+                    .then(segment)
+                    .clip(CircleShape)
+                    .selectable(isSelected, role = Role.Tab, onClick = { onSelect(option) })
+                    .padding(horizontal = Spacing.s, vertical = 6.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    label(option),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = if (isSelected) colors.onSurface else colors.onSurfaceVariant,
+                    maxLines = 1,
+                )
+            }
+        }
+    }
+}

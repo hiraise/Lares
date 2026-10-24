@@ -232,7 +232,7 @@ class SyncPushTest {
             val badId = client.pushOne(token, deps.upsert(EntityTypes.TAG, "not-a-uuid", fields("name" to "A", "color" to "red")))
             badId.assertRejected(ErrorCode.VALIDATION_FAILED)
 
-            client.pushOne(token, deps.upsert("task", Ids.newId(), fields("title" to "x"))).assertRejected(ErrorCode.VALIDATION_FAILED)
+            client.pushOne(token, deps.upsert("widget", Ids.newId(), fields("title" to "x"))).assertRejected(ErrorCode.VALIDATION_FAILED)
 
             // Required field set to null on an existing tag.
             val tag = deps.newTag("Car")

@@ -62,3 +62,22 @@ foundation scenarios, Russian changelog for the customer. Done by the planning s
 
 Shared references for all M0 plans: [versions](M0/versions.md), [sync protocol](../architecture/sync.md),
 [auth design](../architecture/auth.md), [API](../architecture/api.md), [foundation spec](../product/features/foundation.md).
+
+## M1 plans
+
+Milestone [M1 Tasks](../product/roadmap.md#m1-tasks). [Tasks spec](../product/features/tasks.md) approved by the customer on 2026-10-23 (Q-014…Q-017 answered the same day).
+
+| Plan | Title | Depends on | Status |
+| --- | --- | --- | --- |
+| [M1-01](M1/01-tasks-contract.md) | Tasks contract: data, schedule logic, write rules, validators | M0 | done |
+| [M1-02](M1/02-tasks-server-sync.md) | Tasks on the server: tables, sync handlers, permissions, cascade | M1-01 | done |
+| [M1-03](M1/03-tasks-server-notifications.md) | Task notifications on the server: assigned, completed, overdue job | M1-02 | done |
+| [M1-04](M1/04-tasks-client-data.md) | Tasks in the client core: tables, adapters, views, writer, reminders | M1-02 | done |
+| [M1-05](M1/05-tasks-list-and-detail-ui.md) | Tasks UI: the Tasks tab and the task page | M1-04 | done |
+| [M1-06](M1/06-task-editor-ui.md) | Task editor: repeat rules, assignees, tags, reminder | M1-05 | done |
+| [M1-07](M1/07-tasks-today-tags-notifications.md) | Today block, tag page, notification settings and taps, M1 docs | M1-06, M1-03 | done |
+
+M1 acceptance (after all plans): APK on the family's phones against the real server, the spec scenarios, Russian changelog.
+
+Shared references for all M1 plans: [tasks design](../architecture/tasks.md), [ADR-0017](../adr/0017-task-occurrences-derived-from-completions.md),
+[ADR-0018](../adr/0018-tags-embedded-in-entities.md), [tasks spec](../product/features/tasks.md).

@@ -3,6 +3,8 @@ package app.lares.client.sync
 import app.lares.client.db.LaresDb
 import app.lares.contract.api.FieldErrorCode
 import app.lares.contract.api.LaresJson
+import app.lares.contract.permissions.Viewer
+import app.lares.contract.sync.MutationOp
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.JsonNull
@@ -58,6 +60,27 @@ abstract class EntityAdapter<T : Any>(
         id: String,
         data: T,
     ): Map<String, FieldErrorCode> = emptyMap()
+
+    /**
+     * Entity-level rights (e.g. `TaskRules`), the same checks as the server's handler: throws [LocalForbiddenException],
+     * or [LocalWriteException] when the change cannot be made at all (missing parent, immutable field). Called after the
+     * merge on upsert ([current] null for a create) and with [merged] null on delete.
+     */
+    open fun authorize(
+        db: LaresDb,
+        viewer: Viewer,
+        op: MutationOp,
+        id: String,
+        current: T?,
+        merged: T?,
+    ) {}
+
+    /** Refuses a delete that the server would reject for reasons other than rights (e.g. `PERSON_IS_MEMBER`). */
+    open fun checkDelete(
+        db: LaresDb,
+        id: String,
+        current: T,
+    ) {}
 
     fun encode(data: T): JsonObject = LaresJson.encodeToJsonElement(serializer, data).jsonObject
 

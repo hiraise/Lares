@@ -43,6 +43,10 @@ enum class NotificationType(
 
     @SerialName("task.completed")
     TASK_COMPLETED(NotificationChannel.FAMILY_ACTIVITY),
+
+    /** Local task reminders (TSK-030). Stored like other types so members can mute them; the server never sends it. */
+    @SerialName("task.reminder")
+    TASK_REMINDER(NotificationChannel.REMINDERS),
     ;
 
     /** The stable wire name, e.g. `system.test`. */

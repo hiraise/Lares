@@ -1,0 +1,33 @@
+-- Tasks and routines (architecture/tasks.md § Client). Dates and times are ISO strings; `assignee_ids` and `tag_ids`
+-- are JSON arrays of ids; `recurrence` is the Recurrence JSON or NULL for a one-off.
+CREATE TABLE task (
+    id TEXT NOT NULL PRIMARY KEY,
+    title TEXT NOT NULL,
+    created_by TEXT NOT NULL,
+    notes TEXT,
+    due_date TEXT,
+    due_time TEXT,
+    assignee_ids TEXT NOT NULL,
+    tag_ids TEXT NOT NULL,
+    recurrence TEXT,
+    reminder_minutes_before INTEGER,
+    notify_creator_on_done INTEGER NOT NULL
+);
+
+selectAll:
+SELECT * FROM task ORDER BY id;
+
+selectById:
+SELECT * FROM task WHERE id = ?;
+
+upsert:
+INSERT OR REPLACE INTO task (
+    id, title, created_by, notes, due_date, due_time, assignee_ids, tag_ids, recurrence, reminder_minutes_before,
+    notify_creator_on_done
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+deleteById:
+DELETE FROM task WHERE id = ?;
+
+deleteAll:
+DELETE FROM task;

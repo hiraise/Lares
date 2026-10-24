@@ -1,0 +1,36 @@
+-- Schema 2 → 3 (M1-04): tasks, checklist items, task completions (DATA_SCHEMA_VERSION 2 makes the next sync a full resync).
+CREATE TABLE task (
+    id TEXT NOT NULL PRIMARY KEY,
+    title TEXT NOT NULL,
+    created_by TEXT NOT NULL,
+    notes TEXT,
+    due_date TEXT,
+    due_time TEXT,
+    assignee_ids TEXT NOT NULL,
+    tag_ids TEXT NOT NULL,
+    recurrence TEXT,
+    reminder_minutes_before INTEGER,
+    notify_creator_on_done INTEGER NOT NULL
+);
+
+CREATE TABLE checklist_item (
+    id TEXT NOT NULL PRIMARY KEY,
+    task_id TEXT NOT NULL,
+    text TEXT NOT NULL,
+    position INTEGER NOT NULL,
+    done INTEGER NOT NULL,
+    done_occurrence TEXT
+);
+
+CREATE INDEX checklist_item_task ON checklist_item (task_id);
+
+CREATE TABLE task_completion (
+    id TEXT NOT NULL PRIMARY KEY,
+    task_id TEXT NOT NULL,
+    completed_by TEXT NOT NULL,
+    completed_at INTEGER NOT NULL,
+    occurrence TEXT,
+    skipped INTEGER NOT NULL
+);
+
+CREATE INDEX task_completion_task ON task_completion (task_id);

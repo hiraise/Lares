@@ -35,7 +35,9 @@ what can be tried now and how; how it was tested (counts, not details); deviatio
 
 ## 5. Commit (only after the customer approves)
 
+- Commit on the active release branch `release/X.Y.Z` from STATUS.md (`git branch --show-current`), never on `main`.
 - `git add` the files of this work item only; check `git status` first.
 - Conventional Commit with the plan id: `feat(client): family management screens (M0-08)`.
 - End the message with the attribution lines from the session's system reminder.
+- `git push` the release branch; CI checks it (`gh run list --branch release/X.Y.Z`).
 - After the commit: `tools/dev/server.sh stop`, `tools/dev/emu.sh stop` if you started them.

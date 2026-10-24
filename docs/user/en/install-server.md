@@ -63,6 +63,10 @@ Everything else is optional and explained in the file. Keep `.env` private: it c
 
 ## 5. Start
 
+The server image `ghcr.io/hiraise/lares-server` is published with each project release. If `docker compose up` cannot
+pull it (`denied` or `not found`), the image is not public: log in once with a GitHub token that has the
+`read:packages` permission, `docker login ghcr.io -u <github-user>`, and repeat.
+
 ```sh
 docker compose up -d
 docker compose ps
@@ -83,7 +87,8 @@ The code is 10 letters and digits. You can also choose it yourself in advance wi
 
 ## 7. Install the app and create your family
 
-1. Install the Lares APK on your Android phone (download it from the project's releases page; allow installing
+1. Install the Lares APK on your Android phone (new versions install the same way, over the old one, and keep your
+   data; download it from the project's releases page; allow installing
    apps from this source when Android asks).
 2. Open the app, enter the **Server address** `https://family.example.com`.
 3. The app sees a new server and shows **New family**: enter the setup code, family name, time zone, currency,
@@ -150,7 +155,7 @@ Without this step notifications still arrive, but with a delay of up to about 15
 they arrive within seconds, and still without Google services.
 
 1. Create the DNS record `ntfy.family.example.com` (step 1).
-2. In `.env` set `LARES_CADDYFILE=Caddyfile.push`. If the ntfy domain is not `ntfy.` + your domain, also set
+2. In `.env` uncomment `LARES_CADDYFILE=Caddyfile.push` and `COMPOSE_PROFILES=push`. If the ntfy domain is not `ntfy.` + your domain, also set
    `LARES_NTFY_DOMAIN`.
 3. Start with the push profile and allow anonymous access to push topics only (one time):
 
@@ -159,7 +164,8 @@ they arrive within seconds, and still without Google services.
    docker compose exec ntfy ntfy access '*' 'up*' read-write
    ```
 
-4. Always use `--profile push` in later `docker compose` commands (or put `COMPOSE_PROFILES=push` in `.env`).
+4. With `COMPOSE_PROFILES=push` in `.env` every later `docker compose` command includes ntfy; without it add
+   `--profile push` each time.
 5. Each family member sets up the ntfy app on their phone:
    [Instant notifications with ntfy](instant-notifications.md).
 

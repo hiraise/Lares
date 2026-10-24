@@ -49,7 +49,7 @@ fun jvmPlatformModule(
         single<PreferencesStore> { InMemoryPreferencesStore() }
         single<LanguageApplier> { LanguageApplier { } }
         single { AppInfo(version = "dev") }
-        single<NotificationPoster> { NotificationPoster { _, _, _, _ -> } }
+        single<NotificationPoster> { NotificationPoster { _, _, _, _, _ -> } }
         single<AlarmScheduler> { NoopAlarmScheduler() }
         single<BackgroundSync> { NoopBackgroundSync() }
         single<PushDistributors> { NoopPushDistributors() }

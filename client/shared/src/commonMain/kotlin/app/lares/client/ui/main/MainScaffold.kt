@@ -20,6 +20,7 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,6 +32,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.lares.client.platform.DeepLinkHandler
+import app.lares.client.platform.NavTarget
+import app.lares.client.platform.PendingNavigation
 import app.lares.client.resources.Res
 import app.lares.client.resources.action_details
 import app.lares.client.resources.ic_apps
@@ -50,10 +53,15 @@ import app.lares.client.resources.nav_shopping
 import app.lares.client.resources.nav_tasks
 import app.lares.client.resources.nav_today
 import app.lares.client.resources.sync_rejected_snackbar
+import app.lares.client.resources.task_deleted
 import app.lares.client.ui.common.messageRes
 import app.lares.client.ui.components.AppIcon
 import app.lares.client.ui.family.FamilyTab
 import app.lares.client.ui.settings.NotificationPermissionPromptHost
+import app.lares.client.ui.tasks.TaskEditorArgs
+import app.lares.client.ui.tasks.TaskEventSnackbars
+import app.lares.client.ui.tasks.TasksRoute
+import app.lares.client.ui.tasks.TasksViewModel
 import app.lares.client.ui.theme.LaresTheme
 import app.lares.contract.permissions.Section
 import kotlinx.coroutines.flow.filterNotNull
@@ -89,15 +97,23 @@ class MainNavigation(
     val onDevices: () -> Unit,
     val onSection: (Section) -> Unit,
     val onFamily: (FamilyTab) -> Unit = {},
+    val onTask: (String) -> Unit = {},
+    /** The task editor (a new task with its defaults, or an existing one). */
+    val onTaskEditor: (TaskEditorArgs) -> Unit = {},
 )
 
 @Composable
 fun MainScaffoldRoute(
     navigation: MainNavigation,
     viewModel: MainViewModel = koinViewModel(),
+    todayViewModel: TodayViewModel = koinViewModel(),
+    tasksViewModel: TasksViewModel = koinViewModel(),
     deepLinks: DeepLinkHandler = koinInject(),
+    pendingNavigation: PendingNavigation = koinInject(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val today by todayViewModel.state.collectAsStateWithLifecycle()
+    val tab = rememberSaveable { mutableStateOf(MainTab.TODAY) }
     var sheetOpen by rememberSaveable { mutableStateOf(false) }
     val snackbar = remember { SnackbarHostState() }
     val shownRejections = rememberSaveable { mutableListOf<Long>() }
@@ -119,11 +135,35 @@ fun MainScaffoldRoute(
         }
     }
 
+    // A tapped notification of a task that is gone (plan M1-07).
+    LaunchedEffect(pendingNavigation) {
+        pendingNavigation.target.filterNotNull().collect { target ->
+            if (target == NavTarget.TaskGone && pendingNavigation.consume(target)) {
+                tasksViewModel.resetFilters()
+                tab.value = MainTab.TASKS
+                snackbar.showSnackbar(getString(Res.string.task_deleted))
+            }
+        }
+    }
+    TaskEventSnackbars(todayViewModel.events, snackbar, onUndo = todayViewModel::undo)
+
     MainScaffold(
         state = state,
         snackbar = snackbar,
         navigation = navigation,
         onOpenSync = { sheetOpen = true },
+        tab = tab,
+        today = today,
+        todayActions =
+            TodayActions(
+                onToggle = todayViewModel::toggle,
+                onTask = navigation.onTask,
+                onAllTasks = {
+                    tasksViewModel.resetFilters()
+                    tab.value = MainTab.TASKS
+                },
+                onCreate = { navigation.onTaskEditor(TaskEditorArgs(assignToMe = true)) },
+            ),
     )
     if (sheetOpen) {
         SyncSheet(
@@ -143,8 +183,11 @@ fun MainScaffold(
     snackbar: SnackbarHostState,
     navigation: MainNavigation,
     onOpenSync: () -> Unit,
+    tab: MutableState<MainTab> = rememberSaveable { mutableStateOf(MainTab.TODAY) },
+    today: TodayUiState = TodayUiState(),
+    todayActions: TodayActions = TodayActions(),
 ) {
-    var selected by rememberSaveable { mutableStateOf(MainTab.TODAY) }
+    var selected by tab
     val tabs = MainTab.visible(state.sections)
     // Access can be taken away while the app is open: fall back to Today.
     val current = if (selected in tabs) selected else MainTab.TODAY
@@ -156,9 +199,21 @@ fun MainScaffold(
     ) { padding ->
         Box(Modifier.fillMaxSize().padding(padding)) {
             when (current) {
-                MainTab.TODAY -> TodayScreen(state, onOpenSync = onOpenSync, onOpenMore = { selected = MainTab.MORE })
-                MainTab.TASKS, MainTab.SHOPPING, MainTab.CALENDAR -> SectionPlaceholder(current.section!!)
-                MainTab.MORE -> MoreScreen(state, navigation, onOpenSync)
+                MainTab.TODAY -> {
+                    TodayScreen(state, onOpenSync = onOpenSync, onOpenMore = { selected = MainTab.MORE }, today, todayActions)
+                }
+
+                MainTab.TASKS -> {
+                    TasksRoute(snackbar, onTask = navigation.onTask, onNewTask = navigation.onTaskEditor)
+                }
+
+                MainTab.SHOPPING, MainTab.CALENDAR -> {
+                    SectionPlaceholder(current.section!!)
+                }
+
+                MainTab.MORE -> {
+                    MoreScreen(state, navigation, onOpenSync)
+                }
             }
         }
     }

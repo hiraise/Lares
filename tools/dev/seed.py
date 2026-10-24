@@ -5,6 +5,7 @@
   tools/dev/seed.py token [login]          # access token (default olga)
   tools/dev/seed.py login-code [name]      # one-time login code + QR payload for a seeded member (default: olga herself)
   tools/dev/seed.py invite [group]         # invite into "Взрослые" (default) or "Дети"; prints code + payload
+  tools/dev/seed.py tasks                  # sample tasks and routines (after family; skips if already seeded)
   tools/dev/seed.py call METHOD PATH [JSON] [--as LOGIN]
 
 Test family "Петровы" (setup code DEVSETUP01):
@@ -14,9 +15,12 @@ Test family "Петровы" (setup code DEVSETUP01):
 A payload is a deep link; open it on the emulator with: tools/dev/emu.sh link '<payload>'.
 State (member ids) is kept in build/dev/seed.json. Env: LARES_PORT (default 8080).
 """
+import datetime
 import json
 import os
+import secrets
 import sys
+import time
 import urllib.error
 import urllib.request
 
@@ -116,6 +120,90 @@ def member_id(name):
     sys.exit(f"unknown member {name!r}; seeded: {', '.join(members) or 'none (run: seed.py family)'}")
 
 
+def uuid7():
+    """A UUIDv7 like the apps create (time-ordered, so tasks sort in creation order)."""
+    ms = int(time.time() * 1000)
+    raw = bytearray(ms.to_bytes(6, "big") + secrets.token_bytes(10))
+    raw[6] = (raw[6] & 0x0F) | 0x70
+    raw[8] = (raw[8] & 0x3F) | 0x80
+    h = raw.hex()
+    return f"{h[:8]}-{h[8:12]}-{h[12:16]}-{h[16:20]}-{h[20:]}"
+
+
+def push(token, mutations):
+    now = datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z")
+    body = {
+        "mutations": [
+            {"mutationId": uuid7(), "type": t, "id": i, "op": "upsert", "fields": f, "createdAt": now}
+            for t, i, f in mutations
+        ]
+    }
+    for r in call("POST", "/sync/mutations", body, token)["results"]:
+        if r["status"] != "applied":
+            sys.exit(f"mutation rejected: {json.dumps(r, ensure_ascii=False)}")
+
+
+def tasks():
+    state = load_state()
+    if not state.get("members"):
+        sys.exit("no test family; run: seed.py family")
+    if state.get("tasks"):
+        print("tasks already seeded:", ", ".join(state["tasks"]))
+        return
+    token = login()
+    me = call("GET", "/me", token=token)["memberId"]
+    dima, anya, timur = member_id("Дмитрий"), member_id("Аня"), member_id("Тимур")
+    changes = call("GET", "/sync/changes?after=0", token=token)["changes"]
+    tag = next((c["id"] for c in changes if c["type"] == "tag" and c.get("data", {}).get("name") == "Машина"), None)
+    mutations = []
+    if tag is None:
+        tag = uuid7()
+        mutations.append(("tag", tag, {"name": "Машина", "color": "blue", "archived": False}))
+    # Values must be canonical (the server rejects fields that change in a decode round trip, e.g. a missing
+    # "weekdays": []). Dates in the household zone (Europe/Moscow, UTC+3 all year).
+    today = (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=3)).date()
+    day = datetime.timedelta(days=1)
+    week_saturday = today + datetime.timedelta(days=(5 - today.weekday()) % 7)
+    samples = [
+        ("Забрать посылку", {"dueDate": str(today + day), "dueTime": "18:30", "assigneeIds": [dima], "reminderMinutesBefore": 60}),
+        (
+            "Вынести мусор",
+            {
+                "dueDate": str(today),
+                "dueTime": "20:00",
+                "assigneeIds": [anya, timur],
+                "recurrence": {"mode": "fixed", "unit": "week", "interval": 1, "weekdays": ["MONDAY", "THURSDAY"]},
+                "reminderMinutesBefore": 15,
+                "notifyCreatorOnDone": True,
+            },
+        ),
+        (
+            "Уборка в комнате",
+            {
+                "dueDate": str(week_saturday),
+                "recurrence": {"mode": "fixed", "unit": "week", "interval": 1, "weekdays": ["SATURDAY"]},
+            },
+        ),
+        (
+            "Поменять фильтр для воды",
+            {"dueDate": str(today), "recurrence": {"mode": "after_completion", "unit": "month", "interval": 3, "weekdays": []}},
+        ),
+        ("Оплатить интернет", {"dueDate": str(today - day), "assigneeIds": [me], "notes": "Счёт пришёл на почту"}),
+        ("Поменять резину", {"tagIds": [tag], "assigneeIds": [dima]}),
+    ]
+    created = {}
+    for title, fields in samples:
+        tid = uuid7()
+        created[title] = tid
+        mutations.append(("task", tid, {"title": title, "createdBy": me, **fields}))
+    for pos, text in enumerate(["Пропылесосить", "Протереть пыль", "Разобрать стол"]):
+        mutations.append(("checklist_item", uuid7(), {"taskId": created["Уборка в комнате"], "text": text, "position": pos}))
+    push(token, mutations)
+    state["tasks"] = created
+    save_state(state)
+    print("tasks:", ", ".join(created))
+
+
 def main(argv):
     if not argv or argv[0] in ("-h", "--help"):
         print(__doc__)
@@ -123,6 +211,8 @@ def main(argv):
     cmd, args = argv[0], argv[1:]
     if cmd == "family":
         family()
+    elif cmd == "tasks":
+        tasks()
     elif cmd == "token":
         print(login(*args[:2]))
     elif cmd == "login-code":

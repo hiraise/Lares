@@ -1,8 +1,11 @@
 name: CI
 
+# Checks every release branch push and every pull request (ADR-0020). main itself changes only through a release pull
+# request; the merge starts release.yml. The jobs build and deploy-smoke (and release-pr in release-pr.yml) are required
+# by the main ruleset (.github/rulesets/main.json), so renaming a job means updating the ruleset too.
 on:
   push:
-    branches: [main]
+    branches: ["release/**"]
   pull_request:
 
 permissions:
@@ -30,6 +33,7 @@ jobs:
           name: lares-debug-apk
           path: client/android/build/outputs/apk/debug/*.apk
           if-no-files-found: error
+          retention-days: 14
 
   deploy-smoke:
     runs-on: ubuntu-latest

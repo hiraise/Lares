@@ -61,6 +61,19 @@ abstract class WritableSyncHandler<D : Any>(
         data: D,
     ) = Unit
 
+    /**
+     * Entity-level permission check (e.g. `TaskRules`) after the coarse `WriteRules` gate; throw [ApiException] to reject.
+     * Called for an upsert after the merged data is decoded and normalized and before [validate] ([existing] is null for
+     * a create), and for a delete before [checkDelete] ([merged] is null). Default: allowed.
+     */
+    protected open fun authorize(
+        ctx: MutationContext,
+        op: MutationOp,
+        id: UUID,
+        existing: D?,
+        merged: D?,
+    ) = Unit
+
     protected open fun checkDelete(
         ctx: MutationContext,
         id: UUID,
@@ -123,6 +136,7 @@ abstract class WritableSyncHandler<D : Any>(
     ): Long? {
         if (stored == null || stored.deleted) return null
         requireAllowed(ctx, mutation, id)
+        authorize(ctx, mutation.op, id, stored.data, null)
         checkDelete(ctx, id)
         val seq = tx.recordChange(ctx.householdId)
         tombstone(ctx, id, seq)
@@ -140,6 +154,7 @@ abstract class WritableSyncHandler<D : Any>(
         requireAllowed(ctx, mutation, id)
         val fields = mutation.fields ?: JsonObject(emptyMap())
         val data = normalize(decodeMerged(stored?.data, fields))
+        authorize(ctx, mutation.op, id, stored?.data, data)
         val errors = validate(ctx, data)
         if (errors.isNotEmpty()) {
             throw ApiException(ErrorCode.VALIDATION_FAILED, "Invalid fields: ${errors.keys.joinToString()}", errors)

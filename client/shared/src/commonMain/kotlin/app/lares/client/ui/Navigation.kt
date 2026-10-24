@@ -11,6 +11,9 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import app.lares.client.auth.SessionState
 import app.lares.client.platform.DeepLinkHandler
+import app.lares.client.platform.NavTarget
+import app.lares.client.platform.PendingNavigation
+import app.lares.client.platform.TaskLinks
 import app.lares.client.ui.family.AddMemberMode
 import app.lares.client.ui.family.AddMemberRoute
 import app.lares.client.ui.family.FamilyNavigation
@@ -20,6 +23,7 @@ import app.lares.client.ui.family.FamilyTab
 import app.lares.client.ui.family.GroupEditorRoute
 import app.lares.client.ui.family.MemberDetailRoute
 import app.lares.client.ui.family.PersonRoute
+import app.lares.client.ui.family.TagRoute
 import app.lares.client.ui.main.MainNavigation
 import app.lares.client.ui.main.MainScaffoldRoute
 import app.lares.client.ui.main.SectionPlaceholderPage
@@ -39,8 +43,12 @@ import app.lares.client.ui.settings.NotificationSettingsRoute
 import app.lares.client.ui.settings.ProfileRoute
 import app.lares.client.ui.settings.SettingsNavigation
 import app.lares.client.ui.settings.SettingsRoute
+import app.lares.client.ui.tasks.TaskDetailRoute
+import app.lares.client.ui.tasks.TaskEditorArgs
+import app.lares.client.ui.tasks.TaskEditorRoute
 import app.lares.contract.DeepLink
 import app.lares.contract.permissions.Section
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.serialization.Serializable
 import org.koin.compose.koinInject
@@ -140,6 +148,31 @@ data class PersonDestination(
 @Serializable
 data object FamilySettingsDestination
 
+/** The tag page (TAG-004). */
+@Serializable
+data class TagDestination(
+    val id: String,
+)
+
+@Serializable
+data class TaskDetailDestination(
+    val id: String,
+)
+
+/** The task editor (M1-06); [id] null = a new task, with the defaults of [TaskEditorArgs]. */
+@Serializable
+data class TaskEditorDestination(
+    val id: String? = null,
+    val assignToMe: Boolean = false,
+    val tagId: String? = null,
+) {
+    fun toArgs() = TaskEditorArgs(id, assignToMe, tagId)
+
+    companion object {
+        fun of(args: TaskEditorArgs) = TaskEditorDestination(args.id, args.assignToMe, args.tagId)
+    }
+}
+
 /** Server → Setup | Login | InviteAccept, QR scanner; links (opened or scanned) continue on [LinkDestination]. */
 @Composable
 fun OnboardingNavHost(
@@ -212,6 +245,7 @@ private fun NavHostController.backOrServer() {
 @Composable
 fun MainNavHost() {
     val navController = rememberNavController()
+    NotificationTaps(navController)
     NavHost(navController, startDestination = SectionsDestination) {
         composable<SectionsDestination> {
             MainScaffoldRoute(
@@ -221,7 +255,28 @@ fun MainNavHost() {
                     onDevices = { navController.navigate(DevicesDestination) },
                     onSection = { navController.navigate(SectionPageDestination(it)) },
                     onFamily = { navController.navigate(FamilyDestination(it)) },
+                    onTask = { navController.navigate(TaskDetailDestination(it)) },
+                    onTaskEditor = { navController.navigate(TaskEditorDestination.of(it)) },
                 ),
+            )
+        }
+        composable<TaskDetailDestination> { entry ->
+            val id = entry.toRoute<TaskDetailDestination>().id
+            TaskDetailRoute(
+                id,
+                onBack = { navController.popBackStack() },
+                onEdit = { navController.navigate(TaskEditorDestination(id)) },
+                onTag = { navController.navigate(TagDestination(it)) },
+            )
+        }
+        composable<TaskEditorDestination> { entry ->
+            TaskEditorRoute(
+                entry.toRoute<TaskEditorDestination>().toArgs(),
+                onBack = { navController.popBackStack() },
+                // The new task's page replaces the editor, so Back returns to the list.
+                onCreated = { id ->
+                    navController.navigate(TaskDetailDestination(id)) { popUpTo<TaskEditorDestination> { inclusive = true } }
+                },
             )
         }
         composable<SectionPageDestination> { entry ->
@@ -257,6 +312,29 @@ fun MainNavHost() {
     }
 }
 
+/**
+ * A tapped task notification or reminder opens the task over the main screen; a task that is gone opens the Tasks tab
+ * with a notice instead (plan M1-07).
+ */
+@Composable
+private fun NotificationTaps(
+    navController: NavHostController,
+    pending: PendingNavigation = koinInject(),
+    taskLinks: TaskLinks = koinInject(),
+) {
+    LaunchedEffect(pending) {
+        pending.target.filterIsInstance<NavTarget.Task>().collect { target ->
+            if (!pending.consume(target)) return@collect
+            if (taskLinks.exists(target.id)) {
+                navController.navigate(TaskDetailDestination(target.id)) { popUpTo<SectionsDestination>() }
+            } else {
+                navController.popBackStack<SectionsDestination>(inclusive = false)
+                pending.submit(NavTarget.TaskGone)
+            }
+        }
+    }
+}
+
 /** Family (plan M0-08): tabs, member detail, adding members, groups, persons, family settings. */
 private fun NavGraphBuilder.familyGraph(navController: NavHostController) {
     val back: () -> Unit = { navController.popBackStack() }
@@ -271,7 +349,15 @@ private fun NavGraphBuilder.familyGraph(navController: NavHostController) {
                     onGroup = { navController.navigate(GroupDestination(it)) },
                     onPerson = { navController.navigate(PersonDestination(it)) },
                     onSettings = { navController.navigate(FamilySettingsDestination) },
+                    onTag = { navController.navigate(TagDestination(it)) },
                 ),
+        )
+    }
+    composable<TagDestination> { entry ->
+        TagRoute(
+            entry.toRoute<TagDestination>().id,
+            onBack = back,
+            onTask = { navController.navigate(TaskDetailDestination(it)) },
         )
     }
     composable<MemberDestination> { entry ->

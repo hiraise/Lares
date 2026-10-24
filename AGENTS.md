@@ -47,8 +47,9 @@ Full documentation map: [docs/README.md](docs/README.md).
 6. **Docs change with code.** A change is not done until STATUS, specs and ADRs reflect it ([DoD](docs/process/workflow.md#definition-of-done)).
 7. **Language:** code, comments, commits, technical docs — English. Customer communication — Russian.
    UI strings are localized (en, ru) and never hardcoded.
-8. **Commits:** until the MVP, commit to `main` only after the customer approves the change
-   ([workflow](docs/process/workflow.md#git-until-mvp)). After the MVP a release flow replaces this.
+8. **Commits:** commit to the active release branch `release/X.Y.Z` (see STATUS) only after the customer approves the
+   change, then push it. `main` is protected: it changes only by merging a release pull request
+   ([workflow](docs/process/workflow.md#git), [ADR-0020](docs/adr/0020-release-branches.md)).
 9. **Publishing actions need explicit customer approval:** creating or publishing the repo, releases, store submissions,
    anything that costs money or creates external accounts.
 
@@ -67,6 +68,7 @@ Full documentation map: [docs/README.md](docs/README.md).
 | `deploy/` | Docker Compose, Caddy, ntfy, example configs, backup/restore/smoke scripts | production stack (M0-10); dev database in `deploy/dev/` |
 | `integration-tests/` | Multi-device sync tests: server + several clients in one JVM | sync invariants and scenarios (M0-06) |
 | `tools/dev/` | Agent dev scripts: short-output build/test, local server, test family, emulator driving | exists |
+| `tools/release/` | Release script, release notes, APK signature check ([release process](docs/process/release.md)) | exists |
 | `tools/design-assets/` | Generates bundled fonts and icons (Python + fonttools) | exists (M0-07) |
 | `tools/loadsim/` | Load simulation CLI (simulated family against a running server) | exists (M0-11) |
 
@@ -103,7 +105,7 @@ troubleshooting: [dev-setup](docs/process/dev-setup.md).
 | One module or test class | `tools/dev/verify.sh :server:test`, `tools/dev/verify.sh :client:shared:jvmTest --tests '*Name*'` |
 | Multi-device sync tests | `tools/dev/verify.sh :integration-tests:test` (real server + several client cores) |
 | Local server for manual checks (port 8080, database `lares_e2e`) | `tools/dev/server.sh start` / `stop` / `reset` / `log` |
-| Test family and API calls | `tools/dev/seed.py family`, `seed.py token`, `seed.py invite`, `seed.py login-code Аня`, `seed.py call GET /me` |
+| Test family and API calls | `tools/dev/seed.py family`, `seed.py tasks`, `seed.py token`, `seed.py invite`, `seed.py login-code Аня`, `seed.py call GET /me` |
 | Emulator: boot, install + launch, clear data, deep link, stop | `tools/dev/emu.sh start` / `install` / `fresh` / `link URL` / `stop` |
 | Drive the app by text, screenshot | `tools/dev/ui.sh dump` / `tap TEXT` / `field N` / `type TEXT` / `shot NAME` / `crash` |
 | Start dev database only | `docker compose -f deploy/dev/docker-compose.yml up -d --wait` (port taken: `LARES_DEV_DB_PORT=5434 …`) |
@@ -112,6 +114,7 @@ troubleshooting: [dev-setup](docs/process/dev-setup.md).
 | Production stack smoke test (ports 80/443 free) | `./gradlew :server:installDist && deploy/scripts/smoke.sh` |
 | Load test: simulated family, latency, memory, cold start (ports 80/443 free, ~35 min; `--duration 5m` for a short run) | `./gradlew :server:installDist :tools:loadsim:installDist && deploy/scripts/loadtest.sh` → `build/loadtest/<time>/` |
 | Backup / restore (on the server host) | `deploy/scripts/backup.sh` / `deploy/scripts/restore.sh <file>` ([manual](docs/user/en/install-server.md)) |
+| Release branch: start, then finish (opens the PR into `main`; merge = release, customer approval only) | `tools/release/release.sh start X.Y.Z` / `finish` ([release process](docs/process/release.md)) |
 | Build debug APK | `./gradlew :client:android:assembleDebug` → `client/android/build/outputs/apk/debug/android-debug.apk` |
 | Regenerate fonts/icons | `tools/design-assets/.venv/bin/python tools/design-assets/build.py` ([README](tools/design-assets/README.md)) |
 

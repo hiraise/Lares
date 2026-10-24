@@ -5,6 +5,7 @@ import app.lares.server.platform.sync.HouseholdChangeBus
 import app.lares.server.platform.sync.PendingChanges
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.flywaydb.core.Flyway
@@ -14,9 +15,22 @@ import org.jetbrains.exposed.v1.jdbc.JdbcTransaction
 import org.jetbrains.exposed.v1.jdbc.transactions.suspendTransaction
 import javax.sql.DataSource
 
+private val log = KotlinLogging.logger {}
+
+/**
+ * Runs [action] after this transaction commits, after its change events are published; never on rollback. Must run
+ * inside `AppDatabase.dbQuery`. The action must be quick and must not block (e.g. put an event into a channel);
+ * exceptions are logged and swallowed.
+ */
+fun JdbcTransaction.afterCommit(action: () -> Unit) {
+    val pending = getUserData(PendingChanges.Key) ?: error("afterCommit must run inside AppDatabase.dbQuery")
+    pending.addAfterCommit(action)
+}
+
 /**
  * Entry point for all database access: `dbQuery { … }` runs a block in one transaction.
- * Household changes recorded inside the block (`recordChange`) are published to [changeBus] only after a successful commit.
+ * Household changes recorded inside the block (`recordChange`) are published to [changeBus] only after a successful commit,
+ * followed by the block's [afterCommit] actions.
  */
 class AppDatabase(
     private val database: Database,
@@ -41,6 +55,13 @@ class AppDatabase(
                 }
             }
         pending.events.forEach(changeBus::publish)
+        for (action in pending.afterCommit) {
+            try {
+                action()
+            } catch (e: Exception) {
+                log.error(e) { "After-commit action failed" }
+            }
+        }
         return result
     }
 

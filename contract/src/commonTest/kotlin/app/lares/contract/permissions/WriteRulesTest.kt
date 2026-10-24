@@ -39,7 +39,7 @@ class WriteRulesTest {
 
     @Test
     fun readOnlyAndUnknownTypesAreNeverWritable() {
-        for (type in listOf(EntityTypes.HOUSEHOLD, EntityTypes.MEMBER, EntityTypes.GROUP, "task")) {
+        for (type in listOf(EntityTypes.HOUSEHOLD, EntityTypes.MEMBER, EntityTypes.GROUP, "widget")) {
             for (op in MutationOp.entries) assertFalse(can(type, op, viewer(admin = true), own = true), "$type $op")
         }
     }

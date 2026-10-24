@@ -5,6 +5,8 @@ compose-multiplatform = "1.12.2"
 compose-material3 = "1.12.0-alpha03"
 compose-material-icons = "1.7.3"
 jb-navigation = "2.10.0-rc01"
+# Back handling in common code; the version navigation-compose already brings in.
+jb-navigationevent = "1.1.0"
 jb-lifecycle = "2.11.0"
 kotlinx-coroutines = "1.11.0"
 kotlinx-serialization = "1.12.0"
@@ -96,6 +98,7 @@ compose-material-icons-core = { module = "org.jetbrains.compose.material:materia
 compose-desktop-macos-arm64 = { module = "org.jetbrains.compose.desktop:desktop-jvm-macos-arm64", version.ref = "compose-multiplatform" }
 compose-desktop-linux-x64 = { module = "org.jetbrains.compose.desktop:desktop-jvm-linux-x64", version.ref = "compose-multiplatform" }
 jb-navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "jb-navigation" }
+jb-navigationevent-compose = { module = "org.jetbrains.androidx.navigationevent:navigationevent-compose", version.ref = "jb-navigationevent" }
 jb-lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "jb-lifecycle" }
 jb-lifecycle-runtime-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "jb-lifecycle" }
 

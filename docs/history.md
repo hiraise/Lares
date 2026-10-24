@@ -116,3 +116,87 @@ Current state and next steps: [STATUS.md](STATUS.md).
   `app.familyhub` → `app.lares` (also Android application id), classes `FamilyHub*` → `Lares*`, env vars
   `FAMILYHUB_*` → `LARES_*`, database, volume and image names `familyhub*` → `lares*`, protocol header
   `Lares-Protocol`, UI strings. Image default `ghcr.io/hiraise/lares-server`. Remote: `github.com/hiraise/lares`.
+- 2026-10-23 M1 planning: tasks spec detailed and approved (Q-014…Q-017 answered), [tasks design](architecture/tasks.md),
+  ADR-0017 (occurrences derived from completions), ADR-0018 (tags embedded in entities), plans M1-01…M1-07.
+- 2026-10-23 Deploy docs gaps: release → image dependency and GHCR visibility (`deploy/README.md#releases`, manual
+  step 5 en/ru), `COMPOSE_PROFILES=push` in `.env.example` and the ntfy section of the manual.
+- 2026-10-23 Release signing and flow (ADR-0019): new Lares-only release key (not shared with babylog), stored in GitHub
+  secrets and `~/.android/lares-release/`; release workflow requires it and verifies the certificate; releases per
+  milestone plus patch releases, no betas (customer); `tools/release/` scripts; `v0.1.1` was a debug APK.
+- 2026-10-23 M1-01 Tasks contract: `TaskData`, `Recurrence`, `ChecklistItemData`, `TaskCompletionData` (ISO dates,
+  lenient enums; an unknown repeat rule decodes to `null` = one-off), entity types, `Recurrences` and `TaskSchedule`
+  (current occurrence, overdue, groups, reminder and notice times, checklist reset, next overdue check), `TaskRules` +
+  `tasks.view` write gate, task validators and normalizers, `NotificationType.TASK_REMINDER` (label en/ru). Contract
+  tests 103 (all task rules from the spec examples, Moscow and Berlin DST). Fix during the work: a week rule's anchor is
+  scheduled only on a chosen weekday (design clarified; M1-02 plan gets the unknown-rule rejection).
+- 2026-10-23 **M1-02** Tasks on the server: `V6__tasks.sql` (`task`, `checklist_item`, `task_completion`, server-only
+  `overdue_*` columns), package `app.lares.server.tasks` (tables, `TaskRepository`, three `WritableSyncHandler`s), new
+  `WritableSyncHandler.authorize` hook for entity-level `TaskRules` checks, reference checks for added assignees and tags,
+  routine → one-off and `createdBy`/`taskId` changes rejected, immutable completions, cascade tombstones with one seq per
+  row, `tasks.view` visibility, housekeeping purge of the three tables, test helpers `testing/TaskFixtures.kt`.
+  Server tests +13 (`TaskSyncTest`, `TaskPermissionsTest`); M0 tests unchanged.
+
+- 2026-10-23 **M1-03** Task notifications on the server. `JdbcTransaction.afterCommit` (actions kept per attempt in
+  `PendingChanges`, run by `dbQuery` after the change events, failures logged). `TaskNotifier`: events `Assigned`,
+  `Completed`, `Overdue` in an unbounded channel, consumer started in `Application.module`; recipients are non-deleted
+  members with `tasks.view`, never the actor; texts en/ru in `NotificationTexts`, titles cut to 100 characters.
+  Handler hooks: added assignees on create/update; first non-skipped completion of an occurrence when the creator opted
+  in. `TaskOverdueTracker.refresh` keeps `overdue_check_at` (no seq) after every task and completion write;
+  `TaskOverdueJob` (30 s after start, then every 60 s, 500 tasks per run, household lock, `updated_at` and 24 h guards).
+  Tests: `AfterCommitTest` (4), `TaskNotificationsTest` (14); deterministic via `TaskNotifier.awaitIdle()` and
+  `FakePushService.drain()`.
+
+- 2026-10-24 **M1-04 Tasks in the client core.** Tables `task`, `checklist_item`, `task_completion` (migration `2.sqm`,
+  `DATA_SCHEMA_VERSION = 2`); `EntityAdapter.authorize`/`checkDelete` hooks called by `LocalWriter` (person
+  `PERSON_IS_MEMBER` moved into `checkDelete`); three task adapters with the server's `TaskRules` and immutability checks.
+  `data/tasks/`: `TaskViews` (pure build, filter, sections, counts, "done today" rows), `TasksRepository` (minute ticker,
+  household zone), `TasksWriter` (every action incl. complete/skip/undo/reopen and checklist), `TaskReminderPlanner`
+  (`task:<id>` reminders, collector on login, `SyncWorker` reconcile; en/ru body texts). `seed.py tasks` (sample data;
+  values must be canonical — the server rejects fields that change in a decode round trip, e.g. missing `weekdays: []`).
+  Tests: 31 client unit tests (views 11, writer 10, repository 4, reminders 5, migration 1), 5 multi-device `TaskSyncTest`.
+
+- 2026-10-24 **M1-05 Tasks UI.** `ui/tasks/`: Tasks tab (`TasksViewModel`/`TasksScreen`: chips «Все · N», «Мои · N»
+  (default), «Поручено мной», «Метка» with a tag picker, search, filters sheet with assignee and open/done, sections with
+  counts, ticking off with a 5 s undo snackbar, "not allowed" snackbar, gradient FAB), task page
+  (`TaskDetailViewModel`/`TaskDetailScreen`: status, «Выполнить» / «Не выполнено», facts, checklist with inline add and
+  long-press rename/delete, routine history with undo of the latest entry, skip, delete with "this occurrence / whole
+  series"), stub `TaskEditor` route for M1-06. Shared `TaskComponents` (row, checkbox, tag chip, avatars) for M1-07.
+  Pure formatting in `TasksLogic` returning `UiText` (resource descriptions resolved in Compose or with `getString`), so
+  texts follow the app language and are testable in en and ru. Icons `checklist`, `edit`, `skip_next`, `alarm`, `undo`,
+  `notes`; arrays `weekdays_short`, `months_short`. Tests: `TasksLogicTest` 8, `TasksViewModelTest` 4,
+  `TaskDetailViewModelTest` 4, `TasksUiTest` 3. Emulator walkthrough (ru/en, light/dark, admin and kid) passed; fixed
+  caret jumps in the search field (local text state) and the rename dialog (caret at the end). The `lares` AVD was
+  created (only the pre-rename `familyhub` AVD existed).
+
+**2026-10-24 — M1-06 Task editor.** One full-screen editor for new and existing tasks replaces the M1-05 stub: title,
+notes, date («Начало» for routines) and time pickers (Material 3), repeat sheet (presets and custom: fixed or after
+completion, interval, unit, weekdays, summary), assignees («Кто угодно» exclusive, members with `tasks.view`), tags
+(archived ones on the task kept; «+ Новая метка» reuses the Family tag sheet through the new shared `TagEditor`),
+reminder (choices with and without a time), «Сообщить мне, когда выполнят» for the creator, checklist on create,
+«Отменить изменения?» on Back. Pure `TaskForm` writes on edit only the fields the form changed (no implicit anchor
+rewrite). New task from «Мои» is mine, from a tag filter has that tag; after creating, the task page replaces the
+editor. Reminder labels aligned with the plan («В срок», «В день срока в 9:00», «За 1 день в 9:00»). New shared
+`SegmentedControl`. Dependency `navigationevent-compose` 1.1.0 declared (already shipped by navigation, Apache-2.0).
+Tests: `TaskFormTest` 9, `TaskEditorViewModelTest` 7, `TaskEditorUiTest` 3; emulator walkthrough of the spec scenarios
+(ru/en, light/dark) passed; the selected segment was made lighter in the dark theme after it.
+
+### 2026-10-24 M1-07 Today block, tag page, notification switches and taps
+
+Today shows «Задачи на сегодня» (my overdue, today's and done-today tasks, open count, «Все», at most 6 rows +
+«Ещё N», ticking with undo) and the «Добавить» button (editor with me as assignee). New tag page (`TagDestination`,
+tasks section, archived tags too, edit from the top bar) opened from Family › Tags rows and from tag chips on the
+task page. Settings › Notifications got the four task switches (muting reminders already cancels them through the
+planner). Notification taps: `NotificationPoster` got an optional `NotificationTarget`, Android puts it into the
+`MainActivity` intent, `PendingNavigation` hands it to the logged-in UI, which opens the task (after one sync if it is
+not there yet) or the Tasks tab with «Задача удалена». Row building and ticking were extracted from `TasksViewModel`
+into `TaskRows` / `TaskTicker`. User manual "Tasks" (en, ru), CHANGELOG. Tests: `TodayViewModelTest` 3,
+`TagViewModelTest` 3, notification targets and `PendingNavigation` 2, settings switches 1, Today UI 2.
+
+### 2026-10-24 Reminder asks for the notification permission
+
+Customer decision after M1-07: choosing a reminder in the task editor while notifications are off shows «Разрешить
+уведомления?»; «Разрешить» runs the system request, or opens the app's notification settings when the system no
+longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the emulator.
+- 2026-10-24 Release branches (ADR-0020, customer request): direct pushes to `main` closed by GitHub rulesets; work
+  lands on `release/X.Y.Z`; the release pull request is checked by CI (`release-pr`) and its merge tags and publishes the
+  release (`release.yml` on push to `main`). The eleven unpushed M1 commits became `release/0.2.0`.

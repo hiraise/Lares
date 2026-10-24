@@ -121,6 +121,8 @@ class FamilyNavigation(
     val onGroup: (groupId: String?) -> Unit,
     val onPerson: (personId: String?) -> Unit,
     val onSettings: () -> Unit,
+    /** The tag page (TAG-004). */
+    val onTag: (tagId: String) -> Unit = {},
 )
 
 /** What the Family screen does without leaving it. */
@@ -144,9 +146,9 @@ fun FamilyRoute(
         tab = tab,
         onTab = { tab = it },
         navigation = navigation,
-        actions = FamilyActions(viewModel::revokeInvite, viewModel::newTag, viewModel::editTag),
+        actions = FamilyActions(viewModel::revokeInvite, viewModel::newTag, onTag = { navigation.onTag(it.id) }),
     )
-    sheet?.let { TagSheetDialog(it, viewModel) }
+    sheet?.let { TagSheetDialog(it, viewModel.tagEditor) }
     state.error?.let { error ->
         AlertDialog(
             onDismissRequest = viewModel::clearError,
@@ -510,8 +512,7 @@ private fun TagsTab(
         EmptyState(Res.drawable.ic_sell, stringResource(Res.string.tags_empty))
         return
     }
-    val editable = state.access.manageTags
-    if (state.tags.isNotEmpty()) TagList(state.tags, editable, onTag)
+    if (state.tags.isNotEmpty()) TagList(state.tags, onTag)
     if (state.archivedTags.isNotEmpty()) {
         var expanded by rememberSaveable { mutableStateOf(false) }
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -535,7 +536,7 @@ private fun TagsTab(
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            if (expanded) TagList(state.archivedTags, editable, onTag)
+            if (expanded) TagList(state.archivedTags, onTag)
         }
     }
 }
@@ -543,7 +544,6 @@ private fun TagsTab(
 @Composable
 private fun TagList(
     tags: List<Tag>,
-    editable: Boolean,
     onTag: (Tag) -> Unit,
 ) {
     ListGroup {
@@ -553,7 +553,7 @@ private fun TagList(
             Row(
                 Modifier
                     .fillMaxWidth()
-                    .clickable(enabled = editable) { onTag(tag) }
+                    .clickable { onTag(tag) }
                     .heightIn(min = 52.dp)
                     .padding(horizontal = Spacing.l, vertical = 14.dp)
                     .testTag("tag_${tag.id}"),
@@ -562,7 +562,7 @@ private fun TagList(
             ) {
                 Box(Modifier.size(12.dp).background(tones.base, CircleShape))
                 Text(tag.data.name, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
-                if (editable) AppIcon(Res.drawable.ic_chevron_right, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                AppIcon(Res.drawable.ic_chevron_right, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }

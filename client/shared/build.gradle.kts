@@ -63,6 +63,7 @@ kotlin {
             implementation(libs.compose.components.resources)
             implementation(libs.compose.ui.tooling.preview)
             implementation(libs.jb.navigation.compose)
+            implementation(libs.jb.navigationevent.compose)
             implementation(libs.jb.lifecycle.viewmodel.compose)
             implementation(libs.jb.lifecycle.runtime.compose)
             api(libs.koin.compose)

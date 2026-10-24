@@ -123,6 +123,11 @@
     <string name="section_family">Family</string>
     <string name="section_tags">Tags</string>
     <string name="today_empty">Here will be the day summary: tasks, events, shopping</string>
+    <string name="today_tasks_title">Today's tasks</string>
+    <string name="today_tasks_all">All</string>
+    <string name="today_tasks_more">%1$s more</string>
+    <string name="today_tasks_none">No tasks for today</string>
+    <string name="today_add">Add</string>
     <string name="placeholder_coming">Coming in the next versions</string>
     <string name="profile_open">Profile and settings</string>
     <string name="group_administrators">Administrators</string>
@@ -394,6 +399,9 @@
     <string name="date_day_month_year">%2$s %1$s, %3$s</string>
     <string name="tag_new">New tag</string>
     <string name="tag_title">Tag</string>
+    <string name="tag_tasks_section">Tasks · %1$s</string>
+    <string name="tag_tasks_empty">No tasks with this tag</string>
+    <string name="tag_action_edit">Edit tag</string>
     <string name="tag_name">Name</string>
     <string name="tag_color">Color</string>
     <string name="tag_archive">Archive</string>
@@ -436,6 +444,7 @@
     <string name="notif_type_task_assigned">Task assigned to me</string>
     <string name="notif_type_task_overdue">Task overdue</string>
     <string name="notif_type_task_completed">Task completed</string>
+    <string name="notif_type_task_reminder">Task reminders</string>
     <string name="notif_device">On this phone</string>
     <string name="notif_permission">Show notifications</string>
     <string name="notif_permission_off">Not allowed</string>
@@ -451,4 +460,253 @@
     <string name="notif_prompt_title">Allow notifications?</string>
     <string name="notif_prompt_text">Lares shows reminders and family news as notifications. You can change this later in Settings › Notifications.</string>
     <string name="notif_prompt_later">Not now</string>
+
+    <!-- Task reminders (notification body). %1$s time, e.g. 20:00; %1$s/%2$s date ("24 October") and time -->
+    <string name="task_reminder_today">Due today</string>
+    <string name="task_reminder_today_at">Due today at %1$s</string>
+    <string name="task_reminder_tomorrow">Due tomorrow</string>
+    <string name="task_reminder_tomorrow_at">Due tomorrow at %1$s</string>
+    <string name="task_reminder_date">Due %1$s</string>
+    <string name="task_reminder_date_at">Due %1$s at %2$s</string>
+
+    <!-- Tasks (plan M1-05) -->
+    <string name="action_undo">Undo</string>
+    <string name="day_today">Today</string>
+    <string name="day_tomorrow">Tomorrow</string>
+    <string name="day_yesterday">Yesterday</string>
+    <!-- %1$s day number, %2$s short month name -->
+    <string name="date_day_month_short">%2$s %1$s</string>
+    <!-- Two items of a list: "Mon and Thu" -->
+    <string name="list_and">%1$s and %2$s</string>
+    <string-array name="weekdays_short">
+        <item>Mon</item>
+        <item>Tue</item>
+        <item>Wed</item>
+        <item>Thu</item>
+        <item>Fri</item>
+        <item>Sat</item>
+        <item>Sun</item>
+    </string-array>
+    <string-array name="months_short">
+        <item>Jan</item>
+        <item>Feb</item>
+        <item>Mar</item>
+        <item>Apr</item>
+        <item>May</item>
+        <item>Jun</item>
+        <item>Jul</item>
+        <item>Aug</item>
+        <item>Sep</item>
+        <item>Oct</item>
+        <item>Nov</item>
+        <item>Dec</item>
+    </string-array>
+    <!-- Weekly routine on one weekday, Monday first -->
+    <string-array name="task_repeat_every_weekday">
+        <item>Every Monday</item>
+        <item>Every Tuesday</item>
+        <item>Every Wednesday</item>
+        <item>Every Thursday</item>
+        <item>Every Friday</item>
+        <item>Every Saturday</item>
+        <item>Every Sunday</item>
+    </string-array>
+    <!-- Repeat rule summaries. %1$s weekdays ("Mon and Thu"), day of month, or day and month -->
+    <string name="task_repeat_daily">Every day</string>
+    <plurals name="task_repeat_days">
+        <item quantity="one">Every %1$d day</item>
+        <item quantity="other">Every %1$d days</item>
+    </plurals>
+    <string name="task_repeat_weekly_on">Every %1$s</string>
+    <plurals name="task_repeat_weeks_on">
+        <item quantity="one">Every %1$d week on %2$s</item>
+        <item quantity="other">Every %1$d weeks on %2$s</item>
+    </plurals>
+    <string name="task_repeat_monthly">Every month on day %1$s</string>
+    <plurals name="task_repeat_months">
+        <item quantity="one">Every %1$d month on day %2$s</item>
+        <item quantity="other">Every %1$d months on day %2$s</item>
+    </plurals>
+    <string name="task_repeat_yearly">Every year on %1$s</string>
+    <plurals name="task_repeat_years">
+        <item quantity="one">Every %1$d year on %2$s</item>
+        <item quantity="other">Every %1$d years on %2$s</item>
+    </plurals>
+    <string name="task_repeat_after_day">Every day after completion</string>
+    <string name="task_repeat_after_week">Every week after completion</string>
+    <string name="task_repeat_after_month">Every month after completion</string>
+    <string name="task_repeat_after_year">Every year after completion</string>
+    <plurals name="task_repeat_after_days">
+        <item quantity="one">Every %1$d day after completion</item>
+        <item quantity="other">Every %1$d days after completion</item>
+    </plurals>
+    <plurals name="task_repeat_after_weeks">
+        <item quantity="one">Every %1$d week after completion</item>
+        <item quantity="other">Every %1$d weeks after completion</item>
+    </plurals>
+    <plurals name="task_repeat_after_months">
+        <item quantity="one">Every %1$d month after completion</item>
+        <item quantity="other">Every %1$d months after completion</item>
+    </plurals>
+    <plurals name="task_repeat_after_years">
+        <item quantity="one">Every %1$d year after completion</item>
+        <item quantity="other">Every %1$d years after completion</item>
+    </plurals>
+    <!-- Meta line of a task row. %1$s time (20:00), date, or member name and time -->
+    <string name="task_meta_until">by %1$s</string>
+    <string name="tasks_overdue_since">Overdue since %1$s</string>
+    <string name="task_done_by_at">%1$s · at %2$s</string>
+    <!-- Reminder labels -->
+    <string name="task_reminder_at_due">At the due time</string>
+    <string name="task_reminder_on_day">On the day at 9:00</string>
+    <plurals name="task_reminder_minutes">
+        <item quantity="one">%1$d minute before</item>
+        <item quantity="other">%1$d minutes before</item>
+    </plurals>
+    <plurals name="task_reminder_hours">
+        <item quantity="one">%1$d hour before</item>
+        <item quantity="other">%1$d hours before</item>
+    </plurals>
+    <plurals name="task_reminder_days">
+        <item quantity="one">%1$d day before</item>
+        <item quantity="other">%1$d days before</item>
+    </plurals>
+    <!-- Tasks tab. %1$s counts -->
+    <string name="tasks_search">Search</string>
+    <string name="tasks_search_hint">Search by title</string>
+    <string name="tasks_search_close">Close search</string>
+    <string name="tasks_filters">Filters</string>
+    <string name="tasks_filter_assignee">Assignee</string>
+    <string name="tasks_filter_anyone">Anyone</string>
+    <string name="tasks_filter_state">State</string>
+    <string name="tasks_state_open">Open</string>
+    <string name="tasks_state_done">Done</string>
+    <string name="tasks_chip_all">All · %1$s</string>
+    <string name="tasks_chip_mine">Mine · %1$s</string>
+    <string name="tasks_chip_assigned_by_me">Assigned by me</string>
+    <string name="tasks_chip_tag">Tag</string>
+    <string name="tasks_scopes">Which tasks</string>
+    <string name="tasks_tag_picker_title">Filter by tag</string>
+    <string name="tasks_tag_clear">Remove the tag filter</string>
+    <string name="tasks_tags_none">No tags yet</string>
+    <string name="tasks_section_overdue">Overdue · %1$s</string>
+    <string name="tasks_section_today">Today · %1$s</string>
+    <string name="tasks_section_upcoming">Upcoming</string>
+    <string name="tasks_section_no_date">No due date</string>
+    <string name="tasks_section_done">Done</string>
+    <string name="tasks_empty_mine">Nothing for you. Enjoy the day</string>
+    <string name="tasks_empty_all">No tasks yet</string>
+    <string name="tasks_empty_filtered">No tasks match the filters</string>
+    <string name="tasks_reset_filters">Reset filters</string>
+    <string name="tasks_new">Task</string>
+    <string name="task_deleted">The task was deleted</string>
+    <string name="tasks_only_assignees">Only assignees can mark this task</string>
+    <string name="tasks_done_snackbar">Done</string>
+    <string name="tasks_skipped_snackbar">Skipped</string>
+    <string name="task_mark">Mark as done: %1$s</string>
+    <string name="task_unmark">Mark as not done: %1$s</string>
+    <!-- Task page -->
+    <string name="task_action_edit">Edit</string>
+    <string name="task_action_more">More actions</string>
+    <string name="task_action_skip">Skip</string>
+    <string name="task_action_complete">Mark done</string>
+    <string name="task_action_reopen">Mark as not done</string>
+    <string name="task_status_overdue">Overdue · %1$s</string>
+    <!-- %1$s member name, %2$s date and time -->
+    <string name="task_status_done">Done: %1$s, %2$s</string>
+    <string name="task_no_date">No due date</string>
+    <string name="task_next_time">Next time: %1$s</string>
+    <string name="task_anyone">Anyone</string>
+    <string name="task_created_by">Created by %1$s</string>
+    <string name="task_checklist">Checklist</string>
+    <string name="task_checklist_progress">Checklist · %1$s</string>
+    <string name="task_checklist_add">Add item</string>
+    <string name="task_checklist_item">Item</string>
+    <string name="task_checklist_rename">Rename</string>
+    <string name="task_history">History</string>
+    <string name="task_history_empty">Not done yet</string>
+    <!-- %1$s member name, %2$s weekday, date and time -->
+    <string name="task_history_done">%1$s · %2$s</string>
+    <string name="task_history_skipped">Skipped · %1$s · %2$s</string>
+    <!-- %1$s short weekday, %2$s short date, %3$s time: "Tue, Oct 21, 19:40" -->
+    <string name="task_history_when">%1$s, %2$s, %3$s</string>
+    <string name="task_history_undo">Undo this entry</string>
+    <string name="task_delete_title">Delete task?</string>
+    <string name="task_delete_text">The task, its checklist and history will be deleted for everyone.</string>
+    <string name="task_delete_routine_title">Delete routine</string>
+    <string name="task_delete_occurrence">Only this occurrence</string>
+    <string name="task_delete_series">The whole series</string>
+    <string name="task_editor_new">New task</string>
+    <string name="task_editor_edit">Task</string>
+    <!-- Task editor (plan M1-06) -->
+    <string name="action_clear">Clear</string>
+    <string name="task_field_title">Title</string>
+    <string name="task_field_notes">Notes</string>
+    <string name="task_field_date">Date</string>
+    <string name="task_field_starts">Starts</string>
+    <string name="task_field_time">Time</string>
+    <string name="task_field_repeat">Repeat</string>
+    <string name="task_field_assignees">Assignees</string>
+    <string name="task_field_tags">Tags</string>
+    <string name="task_field_reminder">Reminder</string>
+    <string name="task_reminder_needs_notifications_title">Allow notifications?</string>
+    <string name="task_reminder_needs_notifications_text">Notifications for Lares are off on this phone, so the reminder will not show. Allow them to get it on time.</string>
+    <string name="task_value_not_set">Not set</string>
+    <string name="task_time_none">No time</string>
+    <string name="task_tags_none">None</string>
+    <string name="task_reminder_none">None</string>
+    <string name="task_notify_done">Tell me when it's done</string>
+    <string name="task_editor_checklist_add">+ Add item</string>
+    <string name="task_checklist_remove">Remove item</string>
+    <string name="task_discard_title">Discard changes?</string>
+    <string name="task_discard_text">Your changes to this task will be lost.</string>
+    <string name="task_discard_confirm">Discard</string>
+    <string name="task_discard_keep">Keep editing</string>
+    <string name="task_editor_read_only">You can't edit this task</string>
+    <string name="task_editor_cannot_create">You can't create tasks</string>
+    <string name="task_new_tag">+ New tag</string>
+    <string name="task_anyone_hint">Whoever does it first</string>
+    <string name="task_repeat_none">Don't repeat</string>
+    <!-- Weekly preset of the repeat sheet, Monday first -->
+    <string-array name="task_repeat_weekly_preset">
+        <item>Every week (on Monday)</item>
+        <item>Every week (on Tuesday)</item>
+        <item>Every week (on Wednesday)</item>
+        <item>Every week (on Thursday)</item>
+        <item>Every week (on Friday)</item>
+        <item>Every week (on Saturday)</item>
+        <item>Every week (on Sunday)</item>
+    </string-array>
+    <!-- %1$s day of month -->
+    <string name="task_repeat_monthly_preset">Every month (on day %1$s)</string>
+    <string name="task_repeat_yearly_preset">Every year</string>
+    <string name="task_repeat_custom">Custom…</string>
+    <string name="task_repeat_mode_fixed">On a schedule</string>
+    <string name="task_repeat_mode_after">After completion</string>
+    <string name="task_repeat_how_often">How often</string>
+    <string name="task_repeat_on_days">On days</string>
+    <string name="task_repeat_less">Less</string>
+    <string name="task_repeat_more">More</string>
+    <string name="task_repeat_stop_hint">To stop repeating, delete the series</string>
+    <!-- Units of the custom repeat interval: "every 3 [months]" -->
+    <plurals name="task_unit_days">
+        <item quantity="one">day</item>
+        <item quantity="other">days</item>
+    </plurals>
+    <plurals name="task_unit_weeks">
+        <item quantity="one">week</item>
+        <item quantity="other">weeks</item>
+    </plurals>
+    <plurals name="task_unit_months">
+        <item quantity="one">month</item>
+        <item quantity="other">months</item>
+    </plurals>
+    <plurals name="task_unit_years">
+        <item quantity="one">year</item>
+        <item quantity="other">years</item>
+    </plurals>
+    <plurals name="task_reminder_days_at">
+        <item quantity="one">%1$d day before at 9:00</item>
+        <item quantity="other">%1$d days before at 9:00</item>
+    </plurals>
 </resources>

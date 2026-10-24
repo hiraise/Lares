@@ -23,3 +23,7 @@ DELETE FROM reminder WHERE id = ?;
 
 deleteAll:
 DELETE FROM reminder;
+
+-- Reminders of one module, e.g. 'task:%'.
+selectByPrefix:
+SELECT * FROM reminder WHERE id LIKE ? ORDER BY at;
