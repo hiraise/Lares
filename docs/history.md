@@ -167,3 +167,15 @@ Current state and next steps: [STATUS.md](STATUS.md).
   `TaskDetailViewModelTest` 4, `TasksUiTest` 3. Emulator walkthrough (ru/en, light/dark, admin and kid) passed; fixed
   caret jumps in the search field (local text state) and the rename dialog (caret at the end). The `lares` AVD was
   created (only the pre-rename `familyhub` AVD existed).
+
+**2026-10-24 — M1-06 Task editor.** One full-screen editor for new and existing tasks replaces the M1-05 stub: title,
+notes, date («Начало» for routines) and time pickers (Material 3), repeat sheet (presets and custom: fixed or after
+completion, interval, unit, weekdays, summary), assignees («Кто угодно» exclusive, members with `tasks.view`), tags
+(archived ones on the task kept; «+ Новая метка» reuses the Family tag sheet through the new shared `TagEditor`),
+reminder (choices with and without a time), «Сообщить мне, когда выполнят» for the creator, checklist on create,
+«Отменить изменения?» on Back. Pure `TaskForm` writes on edit only the fields the form changed (no implicit anchor
+rewrite). New task from «Мои» is mine, from a tag filter has that tag; after creating, the task page replaces the
+editor. Reminder labels aligned with the plan («В срок», «В день срока в 9:00», «За 1 день в 9:00»). New shared
+`SegmentedControl`. Dependency `navigationevent-compose` 1.1.0 declared (already shipped by navigation, Apache-2.0).
+Tests: `TaskFormTest` 9, `TaskEditorViewModelTest` 7, `TaskEditorUiTest` 3; emulator walkthrough of the spec scenarios
+(ru/en, light/dark) passed; the selected segment was made lighter in the dark theme after it.

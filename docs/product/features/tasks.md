@@ -27,12 +27,14 @@ Technical design: [architecture/tasks.md](../../architecture/tasks.md).
 
 ### Basics
 
-- **TSK-001** `MVP` `todo` — Create a task: title (required), notes, due date (optional time), assignees, tags.
+- **TSK-001** `MVP` `done` — Create a task: title (required), notes, due date (optional time), assignees, tags.
   *Server: storage, sync, validation and permissions done (M1-02).*
   *Client core: offline create/edit with the same rights and validation (M1-04).*
-- **TSK-002** `MVP` `todo` — Assignee options: specific members, or "anyone" (no assignees). One completion closes the
+  *UI: task editor — title, notes, date, time, repeat, assignees, tags, reminder, checklist on create (M1-06).*
+- **TSK-002** `MVP` `done` — Assignee options: specific members, or "anyone" (no assignees). One completion closes the
   task (or the occurrence) for everybody, also when several members are assigned (Q-014).
   *Server: assignees checked against household members (M1-02).*
+  *UI: «Кто угодно» (exclusive) or members who see tasks; new tasks from «Мои» are assigned to me (M1-06).*
 - **TSK-003** `MVP` `done` — Task states: open, done. Completion records who and when. Reopen is possible
   (by the person who completed it, the creator, or a member with "Edit others' tasks").
   *Server: completions (immutable, undo deletes) and their permissions done (M1-02).*
@@ -43,12 +45,12 @@ Technical design: [architecture/tasks.md](../../architecture/tasks.md).
   *Server: checklist items; ticking needs completion rights, other changes edit rights (M1-02).*
   *Client core: checklist add/rename/tick/delete; routine ticks reset per occurrence (M1-04).*
   *UI: task page checklist — tick, inline add, long-press rename/delete; progress «2/5» in rows (M1-05).*
-- **TSK-005** `MVP` `todo` — Edit and delete tasks; deleting a routine asks "this occurrence or the whole series"
+- **TSK-005** `MVP` `done` — Edit and delete tasks; deleting a routine asks "this occurrence or the whole series"
   ("this occurrence" = skip it, the next one becomes current).
   *Server: edit, delete with its checklist and completions, skip as a completion (M1-02).*
   *Client core: edit (changed fields only), delete, skip (M1-04).*
   *UI: delete (one-off: confirm; routine: «Только это повторение» / «Всю серию»), skip from the task page (M1-05);
-  editing comes with the editor (M1-06).*
+  editing in the task editor (M1-06).*
 - **TSK-006** `later` `todo` — Comments and photo attachments on a task (photos in M5b, [files](files.md); comments later).
 - **TSK-007** `MVP` `done` — Undo right after completing (snackbar), and "Mark as not done" later from the task.
   *Client core: `undo(completionId)`, `reopen(taskId)` (M1-04); UI: 5 s snackbar «Выполнено / Отменить», untick a
@@ -56,9 +58,11 @@ Technical design: [architecture/tasks.md](../../architecture/tasks.md).
 
 ### Recurring tasks (routines)
 
-- **TSK-010** `MVP` `todo` — Fixed schedules: every N days / every N weeks on chosen weekdays / every N months on the day of
+- **TSK-010** `MVP` `done` — Fixed schedules: every N days / every N weeks on chosen weekdays / every N months on the day of
   the start date / every N years. Day 31 in shorter months falls on the last day of the month.
-- **TSK-011** `MVP` `todo` — "After completion" schedules: next occurrence N days/weeks/months after the last completion.
+  *UI: repeat presets and «Настроить…» (interval, unit, weekdays); the start date is written only when changed (M1-06).*
+- **TSK-011** `MVP` `done` — "After completion" schedules: next occurrence N days/weeks/months after the last completion.
+  *UI: «После выполнения» in the custom repeat (M1-06).*
 - **TSK-012** `MVP` `todo` — Only the current occurrence is open; the next one appears when it is completed (or skipped) or,
   for fixed schedules, when its date comes.
 - **TSK-013** `MVP` `todo` — Missed occurrences are visible as overdue and do not pile up: at most one overdue per routine;
@@ -69,8 +73,9 @@ Technical design: [architecture/tasks.md](../../architecture/tasks.md).
   *Server: completions with author, time, occurrence and skip flag are kept and synced (M1-02).*
   *Client core: history newest first on the task detail view (M1-04).*
   *UI: «История» on the routine page, last 20 entries, undo of the latest one (M1-05).*
-- **TSK-016** `MVP` `todo` — A routine can be completed early (before its date); for "after completion" schedules the next
+- **TSK-016** `MVP` `done` — A routine can be completed early (before its date); for "after completion" schedules the next
   date counts from the actual completion.
+  *Client core and UI: the current occurrence is completed even before its date (M1-04, M1-05).*
 
 ### Views
 
@@ -89,15 +94,17 @@ Technical design: [architecture/tasks.md](../../architecture/tasks.md).
 
 ### Reminders and notifications
 
-- **TSK-030** `MVP` `todo` — A task can have a reminder (at due time or N minutes/hours/days before). It fires on the phones of
+- **TSK-030** `MVP` `doing` — A task can have a reminder (at due time or N minutes/hours/days before). It fires on the phones of
   the assignees; for "anyone" tasks on the phones of everybody who sees tasks (Q-015). Tasks without a time
   remind at 09:00 on the day (or N days before at 09:00) (Q-016).
   *Client core: local reminders planned automatically for the member's tasks, up to 30 days ahead (M1-04).*
+  *UI: reminder choice in the editor (M1-06); notification taps and settings in M1-07.*
 - **TSK-031** `MVP` `todo` — Assignees get a notification when a task is assigned to them (not for "anyone" tasks, not to the
   person who assigned it).
   *Server: sent after commit to added assignees with `tasks.view` (M1-03).*
-- **TSK-032** `MVP` `todo` — The creator can opt in to a notification when the task is completed by someone else.
+- **TSK-032** `MVP` `done` — The creator can opt in to a notification when the task is completed by someone else.
   *Server: sent for the first non-skipped completion of an occurrence (M1-03).*
+  *UI: «Сообщить мне, когда выполнят» switch for the creator (M1-06).*
 - **TSK-033** `MVP` `todo` — When a task becomes overdue (due time passed, not done), its creator gets a notification.
   Detected on the server, so it works while the assignee's phone is offline. Tasks without a time become overdue after
   their day; the notice comes the next morning at 09:00 (Q-016). No notice if the date was already past when

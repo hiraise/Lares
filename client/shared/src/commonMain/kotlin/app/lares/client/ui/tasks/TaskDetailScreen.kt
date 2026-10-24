@@ -65,7 +65,6 @@ import app.lares.client.resources.ic_repeat
 import app.lares.client.resources.ic_sell
 import app.lares.client.resources.ic_skip_next
 import app.lares.client.resources.ic_undo
-import app.lares.client.resources.placeholder_coming
 import app.lares.client.resources.task_action_complete
 import app.lares.client.resources.task_action_edit
 import app.lares.client.resources.task_action_more
@@ -83,8 +82,6 @@ import app.lares.client.resources.task_delete_routine_title
 import app.lares.client.resources.task_delete_series
 import app.lares.client.resources.task_delete_text
 import app.lares.client.resources.task_delete_title
-import app.lares.client.resources.task_editor_edit
-import app.lares.client.resources.task_editor_new
 import app.lares.client.resources.task_history
 import app.lares.client.resources.task_history_undo
 import app.lares.client.resources.task_mark
@@ -97,7 +94,6 @@ import app.lares.client.ui.components.AppPage
 import app.lares.client.ui.components.ChoiceDialog
 import app.lares.client.ui.components.ConfirmDialog
 import app.lares.client.ui.components.DetailTopBar
-import app.lares.client.ui.components.EmptyState
 import app.lares.client.ui.components.LinkButton
 import app.lares.client.ui.components.ListDivider
 import app.lares.client.ui.components.ListGroup
@@ -543,29 +539,5 @@ private fun History(
                 )
             }
         }
-    }
-}
-
-/** Until M1-06: the editor route shows "Coming in the next versions". */
-@Composable
-fun TaskEditorRoute(
-    id: String?,
-    onBack: () -> Unit,
-) {
-    AppPage(topBar = {
-        DetailTopBar(
-            stringResource(
-                if (id ==
-                    null
-                ) {
-                    Res.string.task_editor_new
-                } else {
-                    Res.string.task_editor_edit
-                },
-            ),
-            onBack,
-        )
-    }) {
-        EmptyState(Res.drawable.ic_edit, stringResource(Res.string.placeholder_coming))
     }
 }

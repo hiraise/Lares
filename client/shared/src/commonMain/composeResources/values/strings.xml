@@ -628,5 +628,74 @@
     <string name="task_delete_occurrence">Only this occurrence</string>
     <string name="task_delete_series">The whole series</string>
     <string name="task_editor_new">New task</string>
-    <string name="task_editor_edit">Edit task</string>
+    <string name="task_editor_edit">Task</string>
+    <!-- Task editor (plan M1-06) -->
+    <string name="action_clear">Clear</string>
+    <string name="task_field_title">Title</string>
+    <string name="task_field_notes">Notes</string>
+    <string name="task_field_date">Date</string>
+    <string name="task_field_starts">Starts</string>
+    <string name="task_field_time">Time</string>
+    <string name="task_field_repeat">Repeat</string>
+    <string name="task_field_assignees">Assignees</string>
+    <string name="task_field_tags">Tags</string>
+    <string name="task_field_reminder">Reminder</string>
+    <string name="task_value_not_set">Not set</string>
+    <string name="task_time_none">No time</string>
+    <string name="task_tags_none">None</string>
+    <string name="task_reminder_none">None</string>
+    <string name="task_notify_done">Tell me when it's done</string>
+    <string name="task_editor_checklist_add">+ Add item</string>
+    <string name="task_checklist_remove">Remove item</string>
+    <string name="task_discard_title">Discard changes?</string>
+    <string name="task_discard_text">Your changes to this task will be lost.</string>
+    <string name="task_discard_confirm">Discard</string>
+    <string name="task_discard_keep">Keep editing</string>
+    <string name="task_editor_read_only">You can't edit this task</string>
+    <string name="task_editor_cannot_create">You can't create tasks</string>
+    <string name="task_new_tag">+ New tag</string>
+    <string name="task_anyone_hint">Whoever does it first</string>
+    <string name="task_repeat_none">Don't repeat</string>
+    <!-- Weekly preset of the repeat sheet, Monday first -->
+    <string-array name="task_repeat_weekly_preset">
+        <item>Every week (on Monday)</item>
+        <item>Every week (on Tuesday)</item>
+        <item>Every week (on Wednesday)</item>
+        <item>Every week (on Thursday)</item>
+        <item>Every week (on Friday)</item>
+        <item>Every week (on Saturday)</item>
+        <item>Every week (on Sunday)</item>
+    </string-array>
+    <!-- %1$s day of month -->
+    <string name="task_repeat_monthly_preset">Every month (on day %1$s)</string>
+    <string name="task_repeat_yearly_preset">Every year</string>
+    <string name="task_repeat_custom">Custom…</string>
+    <string name="task_repeat_mode_fixed">On a schedule</string>
+    <string name="task_repeat_mode_after">After completion</string>
+    <string name="task_repeat_how_often">How often</string>
+    <string name="task_repeat_on_days">On days</string>
+    <string name="task_repeat_less">Less</string>
+    <string name="task_repeat_more">More</string>
+    <string name="task_repeat_stop_hint">To stop repeating, delete the series</string>
+    <!-- Units of the custom repeat interval: "every 3 [months]" -->
+    <plurals name="task_unit_days">
+        <item quantity="one">day</item>
+        <item quantity="other">days</item>
+    </plurals>
+    <plurals name="task_unit_weeks">
+        <item quantity="one">week</item>
+        <item quantity="other">weeks</item>
+    </plurals>
+    <plurals name="task_unit_months">
+        <item quantity="one">month</item>
+        <item quantity="other">months</item>
+    </plurals>
+    <plurals name="task_unit_years">
+        <item quantity="one">year</item>
+        <item quantity="other">years</item>
+    </plurals>
+    <plurals name="task_reminder_days_at">
+        <item quantity="one">%1$d day before at 9:00</item>
+        <item quantity="other">%1$d days before at 9:00</item>
+    </plurals>
 </resources>

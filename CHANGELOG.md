@@ -10,7 +10,10 @@ Versioning: [SemVer](https://semver.org/) from the first release.
 - Tasks tab (M1-05): my tasks and all tasks by sections (overdue, today, upcoming, no date), chips «Мои», «Все»,
   «Поручено мной», tag filter, search and filters by assignee and state; tick a task off right in the list and undo it.
   Task page with all details, checklist, history of a routine, skip one occurrence, delete one task or the whole
-  series. Creating and editing tasks comes next.
+  series.
+- Task editor (M1-06): create and edit tasks — title, notes, date and time, repeat (every day, week, month, year, on
+  chosen weekdays, or a set time after the last completion), assignees or «Кто угодно», tags (a new tag right from the
+  editor), a reminder, «Сообщить мне, когда выполнят», and a checklist when creating.
 
 ### Changed
 

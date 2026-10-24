@@ -40,6 +40,7 @@ import app.lares.client.ui.settings.ProfileRoute
 import app.lares.client.ui.settings.SettingsNavigation
 import app.lares.client.ui.settings.SettingsRoute
 import app.lares.client.ui.tasks.TaskDetailRoute
+import app.lares.client.ui.tasks.TaskEditorArgs
 import app.lares.client.ui.tasks.TaskEditorRoute
 import app.lares.contract.DeepLink
 import app.lares.contract.permissions.Section
@@ -147,11 +148,19 @@ data class TaskDetailDestination(
     val id: String,
 )
 
-/** The task editor (M1-06); [id] null = a new task. */
+/** The task editor (M1-06); [id] null = a new task, with the defaults of [TaskEditorArgs]. */
 @Serializable
 data class TaskEditorDestination(
     val id: String? = null,
-)
+    val assignToMe: Boolean = false,
+    val tagId: String? = null,
+) {
+    fun toArgs() = TaskEditorArgs(id, assignToMe, tagId)
+
+    companion object {
+        fun of(args: TaskEditorArgs) = TaskEditorDestination(args.id, args.assignToMe, args.tagId)
+    }
+}
 
 /** Server → Setup | Login | InviteAccept, QR scanner; links (opened or scanned) continue on [LinkDestination]. */
 @Composable
@@ -235,7 +244,7 @@ fun MainNavHost() {
                     onSection = { navController.navigate(SectionPageDestination(it)) },
                     onFamily = { navController.navigate(FamilyDestination(it)) },
                     onTask = { navController.navigate(TaskDetailDestination(it)) },
-                    onTaskEditor = { navController.navigate(TaskEditorDestination(it)) },
+                    onTaskEditor = { navController.navigate(TaskEditorDestination.of(it)) },
                 ),
             )
         }
@@ -248,7 +257,14 @@ fun MainNavHost() {
             )
         }
         composable<TaskEditorDestination> { entry ->
-            TaskEditorRoute(entry.toRoute<TaskEditorDestination>().id, onBack = { navController.popBackStack() })
+            TaskEditorRoute(
+                entry.toRoute<TaskEditorDestination>().toArgs(),
+                onBack = { navController.popBackStack() },
+                // The new task's page replaces the editor, so Back returns to the list.
+                onCreated = { id ->
+                    navController.navigate(TaskDetailDestination(id)) { popUpTo<TaskEditorDestination> { inclusive = true } }
+                },
+            )
         }
         composable<SectionPageDestination> { entry ->
             SectionPlaceholderPage(entry.toRoute<SectionPageDestination>().section, onBack = { navController.popBackStack() })

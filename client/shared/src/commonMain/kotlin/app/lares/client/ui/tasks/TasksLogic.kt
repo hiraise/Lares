@@ -20,6 +20,7 @@ import app.lares.client.resources.task_history_when
 import app.lares.client.resources.task_meta_until
 import app.lares.client.resources.task_reminder_at_due
 import app.lares.client.resources.task_reminder_days
+import app.lares.client.resources.task_reminder_days_at
 import app.lares.client.resources.task_reminder_hours
 import app.lares.client.resources.task_reminder_minutes
 import app.lares.client.resources.task_reminder_on_day
@@ -203,16 +204,27 @@ object TasksLogic {
         return Recurrences.firstOnOrAfter(rule, anchor, current.plus(1, DateTimeUnit.DAY))
     }
 
-    /** "15 minutes before", "1 day before"; 0 = at the due time, or 9:00 on the day for date-only tasks. */
+    /** "15 minutes before", "1 day before"; date-only tasks remind at 9:00 ("1 day before at 9:00", 0 = on the day). */
     fun reminder(
         minutesBefore: Int,
         hasTime: Boolean,
     ): UiText =
         when {
-            minutesBefore <= 0 -> uiText(if (hasTime) Res.string.task_reminder_at_due else Res.string.task_reminder_on_day)
-            minutesBefore % MINUTES_PER_DAY == 0 -> plural(Res.plurals.task_reminder_days, minutesBefore / MINUTES_PER_DAY)
-            minutesBefore % MINUTES_PER_HOUR == 0 -> plural(Res.plurals.task_reminder_hours, minutesBefore / MINUTES_PER_HOUR)
-            else -> plural(Res.plurals.task_reminder_minutes, minutesBefore)
+            minutesBefore <= 0 -> {
+                uiText(if (hasTime) Res.string.task_reminder_at_due else Res.string.task_reminder_on_day)
+            }
+
+            minutesBefore % MINUTES_PER_DAY == 0 -> {
+                plural(if (hasTime) Res.plurals.task_reminder_days else Res.plurals.task_reminder_days_at, minutesBefore / MINUTES_PER_DAY)
+            }
+
+            minutesBefore % MINUTES_PER_HOUR == 0 -> {
+                plural(Res.plurals.task_reminder_hours, minutesBefore / MINUTES_PER_HOUR)
+            }
+
+            else -> {
+                plural(Res.plurals.task_reminder_minutes, minutesBefore)
+            }
         }
 
     /**

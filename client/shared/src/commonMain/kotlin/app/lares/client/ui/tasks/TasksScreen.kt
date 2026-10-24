@@ -132,7 +132,7 @@ class TasksActions(
 fun TasksRoute(
     snackbar: SnackbarHostState,
     onTask: (String) -> Unit,
-    onNewTask: () -> Unit,
+    onNewTask: (TaskEditorArgs) -> Unit,
     viewModel: TasksViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -149,7 +149,11 @@ fun TasksRoute(
             onResetFilters = viewModel::resetFilters,
             onToggle = viewModel::toggle,
             onOpen = onTask,
-            onCreate = onNewTask,
+            // A new task from "Mine" is mine; from a tag-filtered list it has that tag.
+            onCreate = {
+                val filter = viewModel.state.value.filter
+                onNewTask(TaskEditorArgs(assignToMe = filter.scope == TaskScope.MINE, tagId = filter.tagId))
+            },
         ),
     )
 }

@@ -30,6 +30,7 @@ import app.lares.client.ui.settings.NotificationSettingsViewModel
 import app.lares.client.ui.settings.ProfileViewModel
 import app.lares.client.ui.settings.SettingsViewModel
 import app.lares.client.ui.tasks.TaskDetailViewModel
+import app.lares.client.ui.tasks.TaskEditorViewModel
 import app.lares.client.ui.tasks.TasksViewModel
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.viewModel
@@ -72,4 +73,5 @@ fun uiModule(): Module =
         viewModel { FamilySettingsViewModel(get(), get(), get(), get()) }
         viewModel { TasksViewModel(get(), get(), get()) }
         viewModel { params -> TaskDetailViewModel(get(), get(), params.get()) }
+        viewModel { params -> TaskEditorViewModel(get(), get(), get(), get(), get(), params.get()) }
     }

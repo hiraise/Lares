@@ -564,8 +564,8 @@
     <string name="tasks_overdue_since">Просрочено с %1$s</string>
     <string name="task_done_by_at">%1$s · в %2$s</string>
     <!-- Reminder labels -->
-    <string name="task_reminder_at_due">В момент срока</string>
-    <string name="task_reminder_on_day">В день задачи, в 9:00</string>
+    <string name="task_reminder_at_due">В срок</string>
+    <string name="task_reminder_on_day">В день срока в 9:00</string>
     <plurals name="task_reminder_minutes">
         <item quantity="one">За %1$d минуту</item>
         <item quantity="few">За %1$d минуты</item>
@@ -649,5 +649,81 @@
     <string name="task_delete_occurrence">Только это повторение</string>
     <string name="task_delete_series">Всю серию</string>
     <string name="task_editor_new">Новая задача</string>
-    <string name="task_editor_edit">Изменить задачу</string>
+    <string name="task_editor_edit">Задача</string>
+    <!-- Task editor (plan M1-06) -->
+    <string name="action_clear">Очистить</string>
+    <string name="task_field_title">Название</string>
+    <string name="task_field_notes">Заметки</string>
+    <string name="task_field_date">Дата</string>
+    <string name="task_field_starts">Начало</string>
+    <string name="task_field_time">Время</string>
+    <string name="task_field_repeat">Повтор</string>
+    <string name="task_field_assignees">Исполнители</string>
+    <string name="task_field_tags">Метки</string>
+    <string name="task_field_reminder">Напоминание</string>
+    <string name="task_value_not_set">Не задана</string>
+    <string name="task_time_none">Без времени</string>
+    <string name="task_tags_none">Нет</string>
+    <string name="task_reminder_none">Нет</string>
+    <string name="task_notify_done">Сообщить мне, когда выполнят</string>
+    <string name="task_editor_checklist_add">+ Добавить пункт</string>
+    <string name="task_checklist_remove">Удалить пункт</string>
+    <string name="task_discard_title">Отменить изменения?</string>
+    <string name="task_discard_text">Изменения в задаче не сохранятся.</string>
+    <string name="task_discard_confirm">Не сохранять</string>
+    <string name="task_discard_keep">Продолжить</string>
+    <string name="task_editor_read_only">Вы не можете изменить эту задачу</string>
+    <string name="task_editor_cannot_create">У вас нет права создавать задачи</string>
+    <string name="task_new_tag">+ Новая метка</string>
+    <string name="task_anyone_hint">Кто первый сделает</string>
+    <string name="task_repeat_none">Не повторять</string>
+    <string-array name="task_repeat_weekly_preset">
+        <item>Каждую неделю (по понедельникам)</item>
+        <item>Каждую неделю (по вторникам)</item>
+        <item>Каждую неделю (по средам)</item>
+        <item>Каждую неделю (по четвергам)</item>
+        <item>Каждую неделю (по пятницам)</item>
+        <item>Каждую неделю (по субботам)</item>
+        <item>Каждую неделю (по воскресеньям)</item>
+    </string-array>
+    <string name="task_repeat_monthly_preset">Каждый месяц (%1$s-го числа)</string>
+    <string name="task_repeat_yearly_preset">Каждый год</string>
+    <string name="task_repeat_custom">Настроить…</string>
+    <string name="task_repeat_mode_fixed">По расписанию</string>
+    <string name="task_repeat_mode_after">После выполнения</string>
+    <string name="task_repeat_how_often">Как часто</string>
+    <string name="task_repeat_on_days">По дням</string>
+    <string name="task_repeat_less">Реже</string>
+    <string name="task_repeat_more">Чаще</string>
+    <string name="task_repeat_stop_hint">Чтобы остановить повтор, удалите серию</string>
+    <plurals name="task_unit_days">
+        <item quantity="one">день</item>
+        <item quantity="few">дня</item>
+        <item quantity="many">дней</item>
+        <item quantity="other">дня</item>
+    </plurals>
+    <plurals name="task_unit_weeks">
+        <item quantity="one">неделя</item>
+        <item quantity="few">недели</item>
+        <item quantity="many">недель</item>
+        <item quantity="other">недели</item>
+    </plurals>
+    <plurals name="task_unit_months">
+        <item quantity="one">месяц</item>
+        <item quantity="few">месяца</item>
+        <item quantity="many">месяцев</item>
+        <item quantity="other">месяца</item>
+    </plurals>
+    <plurals name="task_unit_years">
+        <item quantity="one">год</item>
+        <item quantity="few">года</item>
+        <item quantity="many">лет</item>
+        <item quantity="other">года</item>
+    </plurals>
+    <plurals name="task_reminder_days_at">
+        <item quantity="one">За %1$d день в 9:00</item>
+        <item quantity="few">За %1$d дня в 9:00</item>
+        <item quantity="many">За %1$d дней в 9:00</item>
+        <item quantity="other">За %1$d дня в 9:00</item>
+    </plurals>
 </resources>

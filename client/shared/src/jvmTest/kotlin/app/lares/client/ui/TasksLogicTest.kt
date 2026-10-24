@@ -158,15 +158,16 @@ class TasksLogicTest {
 
     @Test
     fun `reminder labels`() {
-        assertTexts("At the due time", "В момент срока", TasksLogic.reminder(0, hasTime = true))
-        assertTexts("On the day at 9:00", "В день задачи, в 9:00", TasksLogic.reminder(0, hasTime = false))
+        assertTexts("At the due time", "В срок", TasksLogic.reminder(0, hasTime = true))
+        assertTexts("On the day at 9:00", "В день срока в 9:00", TasksLogic.reminder(0, hasTime = false))
         assertTexts("15 minutes before", "За 15 минут", TasksLogic.reminder(15, hasTime = true))
         assertTexts("1 minute before", "За 1 минуту", TasksLogic.reminder(1, hasTime = true))
         assertTexts("1 hour before", "За 1 час", TasksLogic.reminder(60, hasTime = true))
         assertTexts("2 hours before", "За 2 часа", TasksLogic.reminder(120, hasTime = true))
         assertTexts("90 minutes before", "За 90 минут", TasksLogic.reminder(90, hasTime = true))
-        assertTexts("1 day before", "За 1 день", TasksLogic.reminder(1440, hasTime = false))
-        assertTexts("7 days before", "За 7 дней", TasksLogic.reminder(7 * 1440, hasTime = false))
+        assertTexts("1 day before at 9:00", "За 1 день в 9:00", TasksLogic.reminder(1440, hasTime = false))
+        assertTexts("1 day before", "За 1 день", TasksLogic.reminder(1440, hasTime = true))
+        assertTexts("7 days before at 9:00", "За 7 дней в 9:00", TasksLogic.reminder(7 * 1440, hasTime = false))
     }
 
     @Test

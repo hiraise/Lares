@@ -23,6 +23,7 @@ Tags complement budget categories: car spending spread over "Fuel", "Insurance",
   *Server: tags through sync, `tags.manage` (M0-05); client core `TagsWriter`/`TagsRepository` (M0-06); Family › Tags:
   list, create/edit sheet with the palette, archive section, delete (M0-08). Icons are not offered in the UI yet.*
 - **TAG-002** `MVP` `todo` — A tag can be attached to tasks, shopping lists and items, events, transactions and debts (as each module ships).
+  *Tasks done: tags in the task editor, «+ Новая метка» for `tags.manage` (M1-06).*
 - **TAG-003** `MVP` `todo` — Each module list can be filtered by tag.
   *Tasks done: «Метка» chip with a tag picker in the Tasks tab (M1-05).*
 - **TAG-004** `MVP` `todo` — Tag page aggregates linked items across modules, grouped by module.

@@ -5,7 +5,7 @@ Updated: 2026-10-24
 ## Phase
 
 **M0 Foundation — all plans M0-01…M0-11 done; M0 acceptance with the customer pending.
-M1 Tasks in progress: M1-01…M1-05 done; M1-06 next.**
+M1 Tasks in progress: M1-01…M1-06 done; M1-07 next.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
@@ -14,6 +14,9 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 
 ## Last completed
 
+- 2026-10-24 M1-06 Task editor: create and edit with date and time, repeat (presets, custom, after completion),
+  assignees or "anyone", tags (new tag from the editor), reminder, "tell me when it's done", checklist on create;
+  19 new tests, emulator walkthrough in ru/en, light/dark.
 - 2026-10-24 M1-05 Tasks UI: the Tasks tab (chips, search, filters, sections, ticking off with undo) and the task page
   (checklist, routine history, skip, delete one occurrence or the whole series); editor stub until M1-06; 19 new tests,
   emulator walkthrough in ru/en, light/dark.
@@ -39,8 +42,7 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
   release workflow (multi-arch image, APK), install manual en/ru.
 - 2026-10-23 M0-09 Notifications: local reminders, UnifiedPush (ntfy), background sync, Settings › Notifications.
 - 2026-10-23 M0-08 Family management screens.
-- 2026-10-23 Agent tooling: skills `plan-run`, `plan-finish`, `build-check`, `emulator`, agent `emulator-tester`,
-  scripts in `tools/dev/`. Full log: [history.md](history.md).
+- Full log: [history.md](history.md).
 
 ## Next steps
 
@@ -50,7 +52,7 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
    ([deploy/README](../deploy/README.md#releases)).
 3. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
 4. M4 plan: re-run the load test with location uploads every 30 s (ADR-0015).
-5. M1 Tasks: next plan M1-06 (task editor), then M1-07 ([plans](plans/README.md#m1-plans); design:
+5. M1 Tasks: next plan M1-07 (Today block, tag page, notification settings and taps, M1 docs) ([plans](plans/README.md#m1-plans); design:
    [architecture/tasks.md](architecture/tasks.md), ADR-0017, ADR-0018).
 
 ## Plan progress

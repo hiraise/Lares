@@ -291,6 +291,16 @@ every later reconcile refreshes them.
 `NotificationType.TASK_REMINDER` (`task.reminder`, channel `reminders`) is added so members can mute task reminders; the
 server stores it like other types but never sends it.
 
+### Editor (M1-06)
+
+`TaskEditorViewModel` (args `TaskEditorArgs(id, assignToMe, tagId)`) holds a pure `TaskForm`. On create it calls
+`TasksWriter.create(draft, checklist)`; on edit it applies only the fields the form changed compared to the task as
+loaded (`TaskForm.applyTo`) onto the current local copy, so an untouched routine start date is never rewritten (monthly
+rules would drift) and changes made on another phone meanwhile survive; `TasksWriter.update` then sends the differing
+fields only. A repeat chosen without a date starts today; clearing the date clears time and reminder; switching between
+"with time" and "without time" resets a reminder outside the new choice list to 0. The tag sheet logic (`TagEditor`) is
+shared with the Family screen. Unsaved changes ask before leaving (`NavigationBackHandler`, `navigationevent-compose`).
+
 ### Notification taps
 
 Notifications with `entityType = "task"` and reminders with id `task:<id>` open the task detail screen.

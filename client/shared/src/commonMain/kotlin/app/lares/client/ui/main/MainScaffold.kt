@@ -54,6 +54,7 @@ import app.lares.client.ui.common.messageRes
 import app.lares.client.ui.components.AppIcon
 import app.lares.client.ui.family.FamilyTab
 import app.lares.client.ui.settings.NotificationPermissionPromptHost
+import app.lares.client.ui.tasks.TaskEditorArgs
 import app.lares.client.ui.tasks.TasksRoute
 import app.lares.client.ui.theme.LaresTheme
 import app.lares.contract.permissions.Section
@@ -91,8 +92,8 @@ class MainNavigation(
     val onSection: (Section) -> Unit,
     val onFamily: (FamilyTab) -> Unit = {},
     val onTask: (String) -> Unit = {},
-    /** The task editor; null id = a new task. */
-    val onTaskEditor: (String?) -> Unit = {},
+    /** The task editor (a new task with its defaults, or an existing one). */
+    val onTaskEditor: (TaskEditorArgs) -> Unit = {},
 )
 
 @Composable
@@ -161,7 +162,7 @@ fun MainScaffold(
         Box(Modifier.fillMaxSize().padding(padding)) {
             when (current) {
                 MainTab.TODAY -> TodayScreen(state, onOpenSync = onOpenSync, onOpenMore = { selected = MainTab.MORE })
-                MainTab.TASKS -> TasksRoute(snackbar, onTask = navigation.onTask, onNewTask = { navigation.onTaskEditor(null) })
+                MainTab.TASKS -> TasksRoute(snackbar, onTask = navigation.onTask, onNewTask = navigation.onTaskEditor)
                 MainTab.SHOPPING, MainTab.CALENDAR -> SectionPlaceholder(current.section!!)
                 MainTab.MORE -> MoreScreen(state, navigation, onOpenSync)
             }

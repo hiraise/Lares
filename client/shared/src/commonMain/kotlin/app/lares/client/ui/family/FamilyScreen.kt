@@ -146,7 +146,7 @@ fun FamilyRoute(
         navigation = navigation,
         actions = FamilyActions(viewModel::revokeInvite, viewModel::newTag, viewModel::editTag),
     )
-    sheet?.let { TagSheetDialog(it, viewModel) }
+    sheet?.let { TagSheetDialog(it, viewModel.tagEditor) }
     state.error?.let { error ->
         AlertDialog(
             onDismissRequest = viewModel::clearError,

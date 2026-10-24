@@ -1,6 +1,6 @@
 ---
 id: M1-06
-status: ready
+status: done
 depends_on: [M1-05]
 requirements: [TSK-001, TSK-002, TSK-005, TSK-010, TSK-011, TSK-016, TSK-030, TSK-032, TAG-002]
 ---
