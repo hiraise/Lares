@@ -38,6 +38,7 @@ Technical design: [architecture/calendar.md](../../architecture/calendar.md).
 
 - **CAL-001** `MVP` `todo` — Event: title (required), all-day or with a start and end time, place (text), notes, tags.
   A new timed event lasts one hour by default; the end is after the start.
+  *Server: storage, sync, validation and permissions done (M3-02).*
 - **CAL-013** `MVP` `todo` — Several days: an all-day event runs from a start date to an end date (holiday, trip); a timed
   event may end on a later day (overnight train). It shows on every day it covers.
 - **CAL-002** `MVP` `todo` — Participants ("who it concerns"): any persons — members and relatives. An event without
@@ -52,11 +53,13 @@ Technical design: [architecture/calendar.md](../../architecture/calendar.md).
 - **CAL-003** `MVP` `todo` — Repeat every N days, every N weeks on chosen weekdays, every N months on the day of the start
   date, every N years; optionally until an end date. Day 31 in shorter months falls on the last day; 29 February falls
   on 28 February in other years (as in tasks, TSK-010).
+  *Server: repeat rule and `repeatUntil` stored and validated; changed occurrences as derived-id rows (M3-02).*
 - **CAL-015** `MVP` `todo` — Changing or deleting a repeating event asks: «Только это», «Это и следующие», «Все».
   «Только это» changes one occurrence (another time, day, place, title, participants) or cancels it; «Это и следующие»
   splits the series at that date; «Все» changes the whole series.
   ASSUMPTION: when the repeat rule or the start of the whole series changes, earlier changes of single occurrences are
   reset (the app warns before saving).
+  *Server: occurrence rows, `splitFrom`, cascade on delete (M3-02).*
 
 ### Birthdays and memorable dates
 
@@ -74,10 +77,12 @@ Technical design: [architecture/calendar.md](../../architecture/calendar.md).
   participants — on the phones of everybody with access to Calendar (Q-021). Everybody who sees the event can set their
   own reminder for it («Напомнить мне»: another time or none), also when they are not a participant. Reminders work
   offline (FND-050).
+  *Server: personal reminder rows, synced only to their member (M3-02).*
 - **CAL-016** `MVP` `todo` — Birthday and memorable-date reminders (Q-022): for everybody with access to Calendar, at 09:00
   every day starting N days before and including the day itself. N = 3 by default; each member chooses in Settings ›
   Notifications: off, on the day only, 1, 3, 7 or 14 days before. A person does not get reminders about their own
   birthday. ASSUMPTION: memorable dates follow the same setting as birthdays.
+  *Server: `birthdayDaysBefore` in `/me/notification-settings` (M3-02).*
 - **CAL-007** `MVP` `todo` — Participants who are members get a notification when they are added to an event (a new event
   or added later), when its date, time or place changes, and when it is cancelled. Not the person who made the change,
   not for past events. ASSUMPTION: changes of the title, notes or tags only do not notify; a change of a whole series

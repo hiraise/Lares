@@ -7,7 +7,7 @@ Updated: 2026-10-24
 **M0 Foundation — all plans M0-01…M0-11 done; M0 acceptance with the customer pending.
 M1 Tasks — all plans M1-01…M1-07 done; M1 acceptance with the customer next.
 M2 Shopping lists — all plans M2-01…M2-06 done; M2 acceptance with the customer next.
-M3 Calendar — M3-01 done; next `/plan-run M3-02`.**
+M3 Calendar — M3-01…M3-02 done; next `/plan-run M3-03`.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
@@ -22,6 +22,9 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 
 ## Last completed
 
+- 2026-10-24 M3-02 Calendar on the server: tables, sync handlers for events, changed occurrences and personal reminders
+  (seen only by their member), permissions, cascade on delete, housekeeping, birthday reminder lead time in the
+  notification settings; 14 new server tests.
 - 2026-10-24 M3-01 Calendar contract: event, changed-occurrence and personal-reminder data, derived row ids, occurrence
   computation with overrides, birthdays and memorable dates, permission rules, validators, new notification types and
   the birthday lead-time setting; 47 new contract tests.
@@ -99,7 +102,7 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 3. M4 plan: re-run the load test with location uploads every 30 s (ADR-0015).
 4. After the M1 acceptance: set the tasks spec to `implemented`.
 5. M2 acceptance with the customer (checklist in the M2-06 handoff); after it set the shopping spec to `implemented`.
-6. Execute M3-02…M3-08 (`/plan-run M3-02`).
+6. Execute M3-03…M3-08 (`/plan-run M3-03`).
 
 ## Plan progress
 

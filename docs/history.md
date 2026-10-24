@@ -262,3 +262,9 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   rows never deleted), event validators and normalizers; notification types `event.changed`, `event.reminder`,
   `birthday.reminder` and `NotificationSettings.birthdayDaysBefore` (default 3); settings labels en/ru. Design detail:
   the schedule functions take the event id as a first parameter. 47 new contract tests.
+- 2026-10-24 M3-02 Calendar on the server: migration `V8__calendar.sql` (`event`, `event_occurrence`, `event_reminder`,
+  `notification_preference`), handlers with `EventRules` checks, derived-id checks for child rows, immutable fields,
+  participant (`requireAddedPersons`), tag and `splitFrom` references, cascade tombstones with distinct seqs, reminder
+  rows pulled only by their member (tombstones by everybody with the calendar), housekeeping order, and
+  `birthdayDaysBefore` in `/me/notification-settings` (0, 1, 3, 7, 14; default 3). Testfixtures `CalendarFixtures.kt`;
+  14 new server tests (`CalendarSyncTest`, `CalendarPermissionsTest`, `NotificationSettingsTest`).

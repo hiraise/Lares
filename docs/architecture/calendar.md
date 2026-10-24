@@ -205,7 +205,8 @@ event's effective participants are empty or contain `viewer.personId`; else null
 - `checkUpsert`: `createdBy`, `splitFrom`, `kind`, child `eventId`/`occurrence`/`memberId` immutable (`INVALID_FORMAT`);
   added `participantIds` must be live persons of the household, added `tagIds` live tags (`requireAddedPersons`,
   `requireAddedTags`); `splitFrom` on create must be an event of the household (may be deleted later); the mutation id
-  of a child row must equal its derived id (`id: INVALID_FORMAT`).
+  of a child row must equal its derived id (`id: INVALID_FORMAT`). Occurrence rows check only participant ids that are in neither the stored
+  row nor the series. Reminder rows also require the stored row to be the writer's own. Child deletes are `FORBIDDEN`.
 - `canSee`: `event`, `event_occurrence` → `calendar.view`; `event_reminder` → `calendar.view` and
   `row.data.memberId == viewer.memberId` (ADR-0023).
 - Cascade: tombstoning an event tombstones its live occurrence and reminder rows, each with its own seq (as tasks).

@@ -29,11 +29,14 @@ Implemented in M0 plans [M0-05](../plans/M0/05-sync-server.md) (server) and [M0-
 | `task_completion` | yes | — | Child of a `task`; immutable, undo deletes it |
 | `shopping_list` | yes | — | Shopping module (M2-02); delete tombstones its items |
 | `shopping_item` | yes | — | Child of a `shopping_list`; kept after it is bought (ADR-0021) |
+| `event` | yes | — | Calendar (M3-02); entity-level rules `EventRules`; delete tombstones its occurrence and reminder rows |
+| `event_occurrence` | yes (upsert only) | — | Child of an `event`; id derived from event id and date (ADR-0022) |
+| `event_reminder` | yes (upsert only) | — | Child of an `event`; id derived from event and member; visible to its member only (ADR-0023) |
 
 Member data includes `login` and `hasPassword`, so password changes and resets also give the member a new seq.
 Tag name uniqueness uses PostgreSQL `lower()`, which needs a UTF-8 database locale (ctype) to fold Cyrillic.
 
-Later modules add types (`event`, …). Every type has a JSON data schema defined in `contract/`
+Later modules add types. Every type has a JSON data schema defined in `contract/`
 as a `@Serializable` data class; wire data is that class serialized without `id`, `seq`, `deleted`.
 
 ## Server data model
@@ -251,7 +254,7 @@ Code: `client/shared/src/commonMain/kotlin/app/lares/client/` (`sync`, `db`, `ap
 
 - Daily: purge tombstones older than 90 days for rows nothing references (M0: `tag`, `group`, and `person` rows not referenced
   by any member or invite; M1: `checklist_item`, `task_completion`, then `task`;
-  M2: `shopping_item`, then `shopping_list`; `member` and `household` tombstones are kept); set `purge_horizon_seq = max(purge_horizon_seq, max purged seq)`.
+  M2: `shopping_item`, then `shopping_list`; M3: `event_reminder`, `event_occurrence`, then `event`; `member` and `household` tombstones are kept); set `purge_horizon_seq = max(purge_horizon_seq, max purged seq)`.
   The purge of a household runs under its sync-state lock, like every writer.
 - Restore procedure (`deploy/scripts/restore.sh`): after `pg_restore`, set a new `sync_epoch` for every household.
 - Daily: delete `sync_mutation_log` rows older than 30 days.

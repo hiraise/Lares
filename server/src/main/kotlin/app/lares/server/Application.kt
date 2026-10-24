@@ -1,5 +1,8 @@
 package app.lares.server
 
+import app.lares.server.calendar.EventOccurrenceSyncHandler
+import app.lares.server.calendar.EventReminderSyncHandler
+import app.lares.server.calendar.EventSyncHandler
 import app.lares.server.household.GroupAdminService
 import app.lares.server.household.GroupSyncHandler
 import app.lares.server.household.HouseholdAdminService
@@ -113,6 +116,9 @@ class AppDeps(
                 TaskCompletionSyncHandler(taskNotifier),
                 ShoppingListSyncHandler(),
                 ShoppingItemSyncHandler(),
+                EventSyncHandler(),
+                EventOccurrenceSyncHandler(),
+                EventReminderSyncHandler(),
             ),
         )
     val syncPullService = SyncPullService(db, syncHandlers, permissionService)

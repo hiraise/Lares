@@ -28,6 +28,7 @@ import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.core.isNull
 import org.jetbrains.exposed.v1.jdbc.batchInsert
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
+import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.upsert
 import java.util.UUID
@@ -80,23 +81,46 @@ class NotificationService(
         db.dbQuery { PushRegistrationTable.deleteWhere { sessionId eq principal.sessionId } }
     }
 
-    suspend fun settings(principal: MemberPrincipal): NotificationSettings =
-        db.dbQuery { NotificationSettings(mutedTypes(principal.memberId)) }
+    suspend fun settings(principal: MemberPrincipal): NotificationSettings = db.dbQuery { storedSettings(principal.memberId) }
 
-    /** Replaces the member's muted types. */
+    /** Replaces the member's muted types and stores the birthday lead time (one of `BIRTHDAY_DAYS_CHOICES`, CAL-016). */
     suspend fun setSettings(
         principal: MemberPrincipal,
         settings: NotificationSettings,
-    ): NotificationSettings =
-        db.dbQuery {
+    ): NotificationSettings {
+        if (settings.birthdayDaysBefore !in NotificationSettings.BIRTHDAY_DAYS_CHOICES) {
+            throw ApiException(
+                ErrorCode.VALIDATION_FAILED,
+                "Invalid fields: birthdayDaysBefore",
+                mapOf("birthdayDaysBefore" to FieldErrorCode.OUT_OF_RANGE),
+            )
+        }
+        return db.dbQuery {
             NotificationSettingTable.deleteWhere { memberId eq principal.memberId }
             NotificationSettingTable.batchInsert(settings.muted) { type ->
                 this[NotificationSettingTable.memberId] = principal.memberId
                 this[NotificationSettingTable.type] = type.key
                 this[NotificationSettingTable.muted] = true
             }
-            NotificationSettings(mutedTypes(principal.memberId))
+            NotificationPreferenceTable.upsert {
+                it[memberId] = principal.memberId
+                it[birthdayDaysBefore] = settings.birthdayDaysBefore
+            }
+            storedSettings(principal.memberId)
         }
+    }
+
+    private fun storedSettings(memberId: UUID): NotificationSettings =
+        NotificationSettings(
+            muted = mutedTypes(memberId),
+            birthdayDaysBefore =
+                NotificationPreferenceTable
+                    .select(NotificationPreferenceTable.birthdayDaysBefore)
+                    .where { NotificationPreferenceTable.memberId eq memberId }
+                    .singleOrNull()
+                    ?.get(NotificationPreferenceTable.birthdayDaysBefore)
+                    ?: NotificationSettings.DEFAULT_BIRTHDAY_DAYS_BEFORE,
+        )
 
     /** `POST /me/push/test`: a [NotificationType.SYSTEM_TEST] notification to the caller's own session. */
     suspend fun sendTest(principal: MemberPrincipal): PushTestResult {
