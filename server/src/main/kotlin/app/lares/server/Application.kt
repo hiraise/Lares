@@ -37,6 +37,8 @@ import app.lares.server.platform.http.installHttpPlumbing
 import app.lares.server.platform.http.instanceRoute
 import app.lares.server.platform.http.protocolChecked
 import app.lares.server.platform.sync.HouseholdChangeBus
+import app.lares.server.shopping.ShoppingItemSyncHandler
+import app.lares.server.shopping.ShoppingListSyncHandler
 import app.lares.server.sync.SyncEventsService
 import app.lares.server.sync.SyncHandlers
 import app.lares.server.sync.SyncHousekeeping
@@ -109,6 +111,8 @@ class AppDeps(
                 TaskSyncHandler(taskNotifier),
                 ChecklistItemSyncHandler(),
                 TaskCompletionSyncHandler(taskNotifier),
+                ShoppingListSyncHandler(),
+                ShoppingItemSyncHandler(),
             ),
         )
     val syncPullService = SyncPullService(db, syncHandlers, permissionService)

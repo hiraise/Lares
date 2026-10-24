@@ -211,3 +211,8 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   match key, display name), `QuickAdd` parser (splitting, trailing quantities with units, `x2`), department dictionary
   (≥ 20 Russian and ≥ 15 English stems per department, phrases, modifiers) with `ShoppingCategories.guess`, `ShoppingRules`
   and `WriteRules` gates, validators and normalizers; 25 contract tests, all rows of the design's department table pass.
+- 2026-10-24 M2-02 Shopping on the server: `V7__shopping.sql`, `ShoppingListSyncHandler` (`shopping.manage_lists`, creator
+  is the writer and never changes, delete tombstones the list's items each with its own seq) and `ShoppingItemSyncHandler`
+  (live parent list, `shopping.edit`, `addedBy`/`boughtBy` set by a write must be the writer, `listId` immutable, times
+  more than a day ahead rejected), added tag ids checked, `shopping.view` visibility, housekeeping purges items then
+  lists; `invalidField`/`requireAddedTags` moved to `sync/ReferenceChecks.kt`; `ShoppingFixtures`; 13 server tests.

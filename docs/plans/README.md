@@ -90,7 +90,7 @@ approved by the customer on 2026-10-24 (Q-018…Q-020 answered the same day).
 | Plan | Title | Depends on | Status |
 | --- | --- | --- | --- |
 | [M2-01](M2/01-shopping-contract.md) | Shopping contract: data, names, quick add, departments, write rules, validators | M1 | done |
-| [M2-02](M2/02-shopping-server-sync.md) | Shopping on the server: tables, sync handlers, permissions, cascade | M2-01 | ready |
+| [M2-02](M2/02-shopping-server-sync.md) | Shopping on the server: tables, sync handlers, permissions, cascade | M2-01 | done |
 | [M2-03](M2/03-shopping-client-data.md) | Shopping in the client core: tables, adapters, views, repository, writer | M2-02 | ready |
 | [M2-04](M2/04-shopping-lists-ui.md) | Shopping UI: the Shopping tab and the list page | M2-03 | ready |
 | [M2-05](M2/05-shopping-items-suggestions-tags.md) | Item sheet, suggestions, autocomplete and tags | M2-04 | ready |

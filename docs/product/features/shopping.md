@@ -32,18 +32,21 @@ Technical design: [architecture/shopping.md](../../architecture/shopping.md).
 
 ### Lists
 
-- **SHP-001** `MVP` `todo` — Several lists per household (e.g. «Продукты», «Аптека», «Хозтовары»). Create, rename, delete.
+- **SHP-001** `MVP` `doing` — Several lists per household (e.g. «Продукты», «Аптека», «Хозтовары»). Create, rename, delete.
   Deleting a list asks for confirmation and removes its items and suggestions for everybody.
-- **SHP-006** `MVP` `todo` — Items to buy are grouped by store department in a fixed store order (fruit and vegetables,
+  *Server: lists stored and synced, `shopping.manage_lists` checked, delete tombstones the items (M2-02).*
+- **SHP-006** `MVP` `doing` — Items to buy are grouped by store department in a fixed store order (fruit and vegetables,
   bread, dairy and eggs, meat and fish, pantry, sweets, drinks, frozen, household, personal care, baby, pets, pharmacy,
   other). The department is chosen automatically from a built-in dictionary (Russian and English names); unknown items
   go to «Другое». A member can move an item to another department; the family's choice is remembered for that product
   name in all lists (Q-019). Grouping can be turned off per list (e.g. «Подарки»).
+  *Server: department and per-list grouping stored and synced; unknown departments rejected (M2-02).*
 
 ### Items
 
-- **SHP-002** `MVP` `todo` — Item: name (required), optional quantity with unit as free text («2», «1,5 кг», «3 уп»),
+- **SHP-002** `MVP` `doing` — Item: name (required), optional quantity with unit as free text («2», «1,5 кг», «3 уп»),
   optional note, tags, department. The list shows who added an item (if not me) and who bought it and when.
+  *Server: items stored and synced, `shopping.edit` checked, author fields must be the writer (M2-02).*
 - **SHP-003** `MVP` `todo` — Quick add: one input at the top of the list; one entry per line, several entries at once
   separated by commas or line breaks («молоко, хлеб, яйца»); a quantity at the end of an entry is recognized
   («Молоко 2 л», «Яйца 10», «Хлеб x2»). A comma inside a number does not split («Молоко 2,5%»).
@@ -59,9 +62,10 @@ Technical design: [architecture/shopping.md](../../architecture/shopping.md).
 
 ### In the store
 
-- **SHP-004** `MVP` `todo` — Tick items off offline: a tap on the row marks it bought; bought items move to a collapsed
+- **SHP-004** `MVP` `doing` — Tick items off offline: a tap on the row marks it bought; bought items move to a collapsed
   «Куплено · N» section at the bottom (expandable; a tap there returns an item to the list). «Убрать купленные» clears
   them (they stay as suggestions), with undo. Bought items stay until somebody clears them.
+  *Server: tick, clear and re-add round trip; times more than a day ahead rejected (M2-02).*
 - **SHP-005** `MVP` `todo` — Two people shopping at once see each other's check-offs within seconds when online.
 - **SHP-011** `MVP` `todo` — Without network the list shows a banner «Нет сети. Отметки сохранены и отправятся, когда
   связь появится.» (or «Нет сети. Список может быть не самым свежим.» when nothing is waiting to be sent) (FND-043).
@@ -74,8 +78,9 @@ Technical design: [architecture/shopping.md](../../architecture/shopping.md).
 - **SHP-013** `MVP` `todo` — Today block (FND-063): the active list — the list with items to buy that changed most
   recently — as the hero card: name, «6 из 9» (bought of all), «Осталось: Молоко, Хлеб, Яблоки», progress, who is
   shopping, «Открыть»; «Ещё N списка» when other lists have items to buy. No card when nothing is to buy.
-- **SHP-014** `MVP` `todo` — Tags: lists and items can carry tags (TAG-002). The list page can be filtered by a tag used
+- **SHP-014** `MVP` `doing` — Tags: lists and items can carry tags (TAG-002). The list page can be filtered by a tag used
   in it (TAG-003). The tag page shows the items to buy with this tag and the tagged lists (TAG-004).
+  *Server: tags on lists and items stored; added tag ids checked (M2-02).*
 
 ### Later
 
