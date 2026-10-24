@@ -249,3 +249,8 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
 
 - 2026-10-24 Release **v0.3.0** (M2 Shopping lists): pull request #2 merged, signed APK, image `ghcr.io/hiraise/lares-server:0.3.0`,
   GitHub release; next branch `release/0.4.0`.
+- 2026-10-24 M3 planning: calendar spec detailed (CAL-001…CAL-022) and approved; customer answered Q-021
+  (event reminders to member participants, everybody can set their own), Q-022 (birthday reminders every day from
+  3 days before, configurable per member), Q-023 (tasks with a date in the calendar list), Q-024 (week grid by hours).
+  Design in [architecture/calendar.md](architecture/calendar.md), ADR-0022 (a series is one row, changed occurrences are
+  rows with derived ids, household time), ADR-0023 (personal reminder rows sync only to their member), plans M3-01…M3-08.

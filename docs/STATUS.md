@@ -6,7 +6,8 @@ Updated: 2026-10-24
 
 **M0 Foundation — all plans M0-01…M0-11 done; M0 acceptance with the customer pending.
 M1 Tasks — all plans M1-01…M1-07 done; M1 acceptance with the customer next.
-M2 Shopping lists — all plans M2-01…M2-06 done; M2 acceptance with the customer next.**
+M2 Shopping lists — all plans M2-01…M2-06 done; M2 acceptance with the customer next.
+M3 Calendar — spec approved, design and plans M3-01…M3-08 ready; next `/plan-run M3-01`.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
@@ -21,6 +22,11 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 
 ## Last completed
 
+- 2026-10-24 M3 planning: calendar spec detailed (CAL-001…CAL-022) and approved, customer answered Q-021 (event
+  reminders to participants plus personal ones), Q-022 (birthday reminders daily from 3 days before, configurable),
+  Q-023 (tasks with a date in the calendar), Q-024 (week as a grid by hours). Design in
+  [architecture/calendar.md](architecture/calendar.md), ADR-0022 (series + occurrence rows with derived ids, household
+  time), ADR-0023 (personal reminder rows visible only to their member), plans M3-01…M3-08.
 - 2026-10-24 Release **v0.3.0** (M2 Shopping lists): release pull request #2 merged, signed APK, server image
   `ghcr.io/hiraise/lares-server:0.3.0`, GitHub release. Fixed on the way: CI flake in `ShoppingListViewModelTest`.
 - 2026-10-24 M2-06 Shopping everywhere: the active list as the gradient hero card first on Today (count, what is left,
@@ -89,8 +95,8 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 2. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
 3. M4 plan: re-run the load test with location uploads every 30 s (ADR-0015).
 4. After the M1 acceptance: set the tasks spec to `implemented`.
-5. M2 acceptance with the customer (checklist in the M2-06 handoff); after it set the shopping spec to `implemented`
-   and write the M3 Calendar plans.
+5. M2 acceptance with the customer (checklist in the M2-06 handoff); after it set the shopping spec to `implemented`.
+6. Execute M3-01…M3-08 (`/plan-run M3-01`).
 
 ## Plan progress
 
