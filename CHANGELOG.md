@@ -5,6 +5,8 @@ Versioning: [SemVer](https://semver.org/) from the first release.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-24
+
 ### Added
 
 - Each release now includes `lares-X.Y.Z.apk.sha256`, and the release notes show the APK file SHA-256, so you can check
