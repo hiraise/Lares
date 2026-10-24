@@ -107,20 +107,22 @@ data class EventOccurrence(
     val title: String, val place: String?, val notes: String?,
     val participantIds: Set<String>,
     val changed: Boolean,               // an override row applies
-)
+) { val allDay: Boolean get() = startTime == null }
 object EventSchedule {
     const val MAX_SPAN_DAYS = 366
     const val MAX_PER_CALL = 2000                         // guard against a daily rule over a huge range
     fun spanDays(event): Int                              // endDate − startDate
     fun isScheduled(event, date): Boolean
     fun scheduledStarts(event, from, to): List<LocalDate>
-    fun occurrences(event, rows: List<EventOccurrenceData>, from, to): List<EventOccurrence>
-    fun occurrence(event, rows, date): EventOccurrence?   // the occurrence of a scheduled date, null if cancelled / not scheduled
-    fun next(event, rows, now, zone): EventOccurrence?    // first occurrence that has not ended at `now`
+    // `eventId` names the event (EventData has no id); only rows with that eventId apply
+    fun occurrences(eventId, event, rows: List<EventOccurrenceData>, from, to): List<EventOccurrence>
+    fun occurrence(eventId, event, rows, date): EventOccurrence?   // of a scheduled date, null if cancelled / not scheduled
+    fun next(eventId, event, rows, now, zone): EventOccurrence?    // first occurrence that has not ended at `now`
     fun lastDay(occ): LocalDate                           // timed ending at 00:00 on a later day -> endDate − 1
     fun startMoment(occ, zone): Instant?                  // timed only
     fun endMoment(occ, zone): Instant                     // all-day: lastDay + 1 at 00:00
     fun reminderAt(occ, minutesBefore, zone): Instant     // timed: start − m; all-day: startDate at DAY_START (09:00) − m
+    val ORDER: Comparator<EventOccurrence>                // the sort order below; for merging occurrences of many events
 }
 ```
 

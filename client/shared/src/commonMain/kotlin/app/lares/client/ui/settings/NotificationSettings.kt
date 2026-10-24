@@ -47,6 +47,9 @@ import app.lares.client.resources.notif_test_reminder_body
 import app.lares.client.resources.notif_test_reminder_set
 import app.lares.client.resources.notif_test_reminder_title
 import app.lares.client.resources.notif_test_sent
+import app.lares.client.resources.notif_type_birthday_reminder
+import app.lares.client.resources.notif_type_event_changed
+import app.lares.client.resources.notif_type_event_reminder
 import app.lares.client.resources.notif_type_system_test
 import app.lares.client.resources.notif_type_task_assigned
 import app.lares.client.resources.notif_type_task_completed
@@ -381,6 +384,9 @@ private fun NotificationType.label(): StringResource =
         NotificationType.TASK_OVERDUE -> Res.string.notif_type_task_overdue
         NotificationType.TASK_COMPLETED -> Res.string.notif_type_task_completed
         NotificationType.TASK_REMINDER -> Res.string.notif_type_task_reminder
+        NotificationType.EVENT_CHANGED -> Res.string.notif_type_event_changed
+        NotificationType.EVENT_REMINDER -> Res.string.notif_type_event_reminder
+        NotificationType.BIRTHDAY_REMINDER -> Res.string.notif_type_birthday_reminder
     }
 
 private fun PushTestResult.message(): StringResource =

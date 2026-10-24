@@ -50,6 +50,21 @@ class WriteRulesTest {
     }
 
     @Test
+    fun `CAL-015 events need calendar view, child rows are never deleted`() {
+        val viewer = viewer(Permission.CALENDAR_VIEW)
+        for (op in MutationOp.entries) {
+            assertTrue(can(EntityTypes.EVENT, op, viewer), "event $op")
+            assertFalse(can(EntityTypes.EVENT, op, viewer(Permission.CALENDAR_CREATE, Permission.CALENDAR_EDIT_ANY)), "event $op")
+        }
+        for (type in listOf(EntityTypes.EVENT_OCCURRENCE, EntityTypes.EVENT_REMINDER)) {
+            assertTrue(can(type, MutationOp.UPSERT, viewer), type)
+            assertFalse(can(type, MutationOp.UPSERT, viewer(Permission.TASKS_VIEW)), type)
+            assertFalse(can(type, MutationOp.DELETE, viewer), "$type delete")
+            assertFalse(can(type, MutationOp.DELETE, viewer(admin = true)), "$type delete by admin")
+        }
+    }
+
+    @Test
     fun readOnlyAndUnknownTypesAreNeverWritable() {
         for (type in listOf(EntityTypes.HOUSEHOLD, EntityTypes.MEMBER, EntityTypes.GROUP, "widget")) {
             for (op in MutationOp.entries) assertFalse(can(type, op, viewer(admin = true), own = true), "$type $op")

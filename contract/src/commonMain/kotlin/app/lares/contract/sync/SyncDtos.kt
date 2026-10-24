@@ -21,6 +21,9 @@ object EntityTypes {
     const val TASK_COMPLETION = "task_completion"
     const val SHOPPING_LIST = "shopping_list"
     const val SHOPPING_ITEM = "shopping_item"
+    const val EVENT = "event"
+    const val EVENT_OCCURRENCE = "event_occurrence"
+    const val EVENT_REMINDER = "event_reminder"
 }
 
 /** Limits of pull and push. */

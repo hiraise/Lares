@@ -110,7 +110,7 @@ by the customer on 2026-10-24 (Q-021…Q-024 answered the same day).
 
 | Plan | Title | Depends on | Status |
 | --- | --- | --- | --- |
-| [M3-01](M3/01-calendar-contract.md) | Calendar contract: data, derived ids, schedule, birthdays, write rules, validators | M2 | ready |
+| [M3-01](M3/01-calendar-contract.md) | Calendar contract: data, derived ids, schedule, birthdays, write rules, validators | M2 | done |
 | [M3-02](M3/02-calendar-server-sync.md) | Calendar on the server: tables, sync handlers, permissions, cascade, birthday setting | M3-01 | ready |
 | [M3-03](M3/03-calendar-server-notifications.md) | Event notifications on the server: added, changed, cancelled | M3-02 | ready |
 | [M3-04](M3/04-calendar-client-data.md) | Calendar in the client core: tables, adapters, views, repository, writer, reminders | M3-02 | ready |

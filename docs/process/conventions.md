@@ -98,7 +98,7 @@ Toolchain versions: [versions.md](../plans/M0/versions.md) and `gradle/libs.vers
 
 - IDs: UUIDv7, generated on the client for syncable entities.
 - Money: `Long` minor units + ISO 4217 code. Never `Double`/`Float`.
-- Time: UTC instants; event times carry an IANA zone id; birthdays and all-day dates are local dates.
+- Time: UTC instants; task and event dates and times are wall-clock values in the household time zone (ADR-0022); birthdays are local dates.
 - Every query in feature code is scoped by `household_id` (ADR-0010).
 
 ## API and contract

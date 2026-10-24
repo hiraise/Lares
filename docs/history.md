@@ -254,3 +254,11 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   3 days before, configurable per member), Q-023 (tasks with a date in the calendar list), Q-024 (week grid by hours).
   Design in [architecture/calendar.md](architecture/calendar.md), ADR-0022 (a series is one row, changed occurrences are
   rows with derived ids, household time), ADR-0023 (personal reminder rows sync only to their member), plans M3-01…M3-08.
+- 2026-10-24 M3-01 Calendar contract: `EventData`, `EventOccurrenceData`, `EventReminderData`, lenient `EventKind`
+  (→ `event`), entity types `event`, `event_occurrence`, `event_reminder`; derived version-8 ids
+  `Ids.occurrenceRowId` / `reminderRowId` (golden values in `IdsTest` for the M3-04 `seed.py` check); `EventSchedule`
+  (scheduled starts with the 2000 cap, override rows, several days, midnight ends, `next`, reminder times, display
+  order) and `Birthdays` (29 February, ages, memorable years, reminder days); `EventRules`, `WriteRules` gates (child
+  rows never deleted), event validators and normalizers; notification types `event.changed`, `event.reminder`,
+  `birthday.reminder` and `NotificationSettings.birthdayDaysBefore` (default 3); settings labels en/ru. Design detail:
+  the schedule functions take the event id as a first parameter. 47 new contract tests.
