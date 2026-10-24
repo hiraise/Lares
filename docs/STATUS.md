@@ -13,11 +13,15 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 [M1 Tasks](product/roadmap.md#m1-tasks): implemented, customer acceptance pending (together with M0). Specs
 `foundation`, `tags` and `tasks` approved.
 
-**Active release branch: `release/0.2.0`** (M0 + M1). Commit approved work here; `main` is protected
-([release process](process/release.md), ADR-0020).
+**Active release branch: `release/0.3.0`** (next: M2). Commit approved work here; `main` is protected
+([release process](process/release.md), ADR-0020). Latest release: [v0.2.0](https://github.com/hiraise/lares/releases/tag/v0.2.0)
+(M0 + M1, 2026-10-24).
 
 ## Last completed
 
+- 2026-10-24 Release **v0.2.0** (M0 + M1) through the new flow: release pull request #1 merged, signed APK, server
+  image `ghcr.io/hiraise/lares-server:0.2.0` (amd64, arm64, public), GitHub release. Fixed on the way: notification
+  switches lost when changed during the first load (CI flake in `MainAndSettingsViewModelTest`).
 - 2026-10-24 Release branches (ADR-0020): `main` protected by rulesets (no push, only a release pull request with
   green CI, merge commits), work on `release/X.Y.Z`, `tools/release/release.sh start|finish`, CI job `release-pr`
   (`tools/release/check.sh`), a merge into `main` tags `vX.Y.Z` and publishes the APK and images automatically;
@@ -57,15 +61,11 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 
 ## Next steps
 
-1. M0 and M1 acceptance with the customer (APK, walkthrough on real phones, Russian changelog; checklist in the M1-07
+1. M0 and M1 acceptance with the customer (APK v0.2.0, walkthrough on real phones, Russian changelog; checklist in the M1-07
    handoff).
-2. First signed release `0.2.0` from `release/0.2.0` (`release.sh finish`, merge after the customer's approval;
-   [release process](process/release.md));
-   make the GHCR package `lares-server` public or `docker login ghcr.io` on the server
-   ([deploy/README](../deploy/README.md#releases)).
-3. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
-4. M4 plan: re-run the load test with location uploads every 30 s (ADR-0015).
-5. After the M1 acceptance: set the tasks spec to `implemented`; plans for M2 Shopping lists.
+2. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
+3. M4 plan: re-run the load test with location uploads every 30 s (ADR-0015).
+4. After the M1 acceptance: set the tasks spec to `implemented`; plans for M2 Shopping lists.
 
 ## Plan progress
 

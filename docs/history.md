@@ -200,3 +200,5 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
 - 2026-10-24 Release branches (ADR-0020, customer request): direct pushes to `main` closed by GitHub rulesets; work
   lands on `release/X.Y.Z`; the release pull request is checked by CI (`release-pr`) and its merge tags and publishes the
   release (`release.yml` on push to `main`). The eleven unpushed M1 commits became `release/0.2.0`.
+- 2026-10-24 Release v0.2.0 (M0 + M1), the first through release branches: PR #1, signed APK, public multi-arch server
+  image. Notification switch race fixed on the way (found as a CI flake).
