@@ -244,4 +244,5 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   the tag through the new `tagId` of `ShoppingListDestination`/`ShoppingListArgs`) and list rows, the tasks empty state
   hidden when shopping rows exist; manuals `docs/user/{en,ru}/shopping.md`; all shopping MVP requirements `done`;
   9 new tests (5 Today and 2 tag view model, 2 Compose UI); emulator walkthrough (spec scenarios 1–7, ru/en,
-  light/dark) without bugs.
+  light/dark) without bugs. Fixed on the way: CI flake in `ShoppingListViewModelTest` (quick add writes each entry
+  separately; the test now waits for both).

@@ -92,7 +92,11 @@ class ShoppingListViewModelTest {
             vm.add("Bananas, Milk 1 l")
             val event = assertIs<ShoppingEvent.AlreadyThere>(TaskUiFixture.next(vm.events))
             assertEquals(listOf("Milk"), event.names)
-            val state = awaitState(vm.state) { "Bananas" in it.names(ProductCategory.PRODUCE) }
+            // Each entry is its own write: wait for both.
+            val state =
+                awaitState(vm.state) {
+                    "Bananas" in it.names(ProductCategory.PRODUCE) && it.item("Milk").data.quantity == "1 l"
+                }
             assertEquals(listOf("Apples", "Bananas"), state.names(ProductCategory.PRODUCE))
             assertEquals("1 l", state.item("Milk").data.quantity, "a new quantity replaces the old one")
             assertEquals(listOf("Milk"), state.names(ProductCategory.DAIRY), "no duplicate")
