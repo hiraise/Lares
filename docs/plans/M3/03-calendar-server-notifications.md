@@ -1,6 +1,6 @@
 ---
 id: M3-03
-status: ready
+status: done
 depends_on: [M3-02]
 requirements: [CAL-007]
 ---

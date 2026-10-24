@@ -6,6 +6,7 @@ import app.lares.contract.entities.EventKind
 import app.lares.contract.entities.EventOccurrenceData
 import app.lares.contract.entities.EventReminderData
 import app.lares.contract.entities.Recurrence
+import app.lares.server.household.MemberTable
 import app.lares.server.sync.StoredEntity
 import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toJavaLocalTime
@@ -50,6 +51,20 @@ object CalendarRepository {
             .where { (EventOccurrenceTable.eventId eq eventId) and (EventOccurrenceTable.deleted eq false) }
             .orderBy(EventOccurrenceTable.id)
             .map { it[EventOccurrenceTable.id] }
+
+    /** The live occurrence rows of an event. */
+    fun liveOccurrenceRows(eventId: UUID): List<EventOccurrenceData> =
+        EventOccurrenceTable
+            .selectAll()
+            .where { (EventOccurrenceTable.eventId eq eventId) and (EventOccurrenceTable.deleted eq false) }
+            .map(::toOccurrenceData)
+
+    /** Live members of the household by their person id (who of the participants gets event notices). */
+    fun membersByPerson(householdId: UUID): Map<String, UUID> =
+        MemberTable
+            .select(MemberTable.personId, MemberTable.id)
+            .where { (MemberTable.householdId eq householdId) and (MemberTable.deleted eq false) }
+            .associate { it[MemberTable.personId].toString() to it[MemberTable.id] }
 
     /** Ids of the live reminder rows of an event, ordered by id. */
     fun liveReminderIds(eventId: UUID): List<UUID> =

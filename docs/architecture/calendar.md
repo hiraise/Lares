@@ -234,7 +234,11 @@ actor. Memorable dates never notify. "Upcoming" = the affected occurrence has no
 | occurrence row: effective participants gain members | **added** to them |
 | occurrence row that becomes empty (reset) | nothing |
 
-The occurrence the text names: the affected occurrence for rows; for events `EventSchedule.next`. Texts
+The occurrence the text names: the affected occurrence for rows; for events `EventSchedule.next`; for a series cut the
+first occurrence of the old series after the new `repeatUntil` that has not ended (none → no notice). A row that brings
+a cancelled occurrence back sends nothing (not in the table). The decisions are pure functions in
+`server/…/calendar/EventChanges.kt`; `EventNotifier` events carry the named `EventOccurrence`, so a deleted event can
+still be described. Texts
 (`NotificationTexts`, en/ru, title shortened to 100), `{when}` = `EventWhenText.format(language, occ)`:
 ru «вт, 28 окт., 16:00» / «вт, 28 окт.» (all-day), en «Tue, Oct 28, 16:00» / «Tue, Oct 28» (fixed month and weekday
 abbreviations in code, household zone).

@@ -29,9 +29,12 @@ import java.util.UUID
 /**
  * Events and memorable dates (CAL-001…CAL-005, CAL-013, CAL-015). Entity-level rights come from `EventRules`; deleting an
  * event also tombstones its occurrence and reminder rows (ADR-0022). A rule this version cannot read decodes to `null`
- * and fails the strict round trip of `WritableSyncHandler` with `recurrence: INVALID_FORMAT`.
+ * and fails the strict round trip of `WritableSyncHandler` with `recurrence: INVALID_FORMAT`. Writes tell participants
+ * through [EventNotifier] (CAL-007).
  */
-class EventSyncHandler : WritableSyncHandler<EventData>(EventData.serializer()) {
+class EventSyncHandler(
+    private val notifier: EventNotifier,
+) : WritableSyncHandler<EventData>(EventData.serializer()) {
     override val type: String = EntityTypes.EVENT
 
     override fun changesSince(
@@ -122,6 +125,11 @@ class EventSyncHandler : WritableSyncHandler<EventData>(EventData.serializer()) 
             it[createdAt] = ctx.now
             it[updatedAt] = ctx.now
         }
+        // checkUpsert made sure splitFrom is an event of this household.
+        val origin = data.splitFrom?.let { CalendarRepository.get(ctx.householdId, UUID.fromString(it))?.data }
+        notifyAfterCommit(ctx, notifier, id) { members, now, zone ->
+            EventChanges.onCreate(id.toString(), data, origin, members, now, zone)
+        }
     }
 
     override fun update(
@@ -130,10 +138,17 @@ class EventSyncHandler : WritableSyncHandler<EventData>(EventData.serializer()) 
         data: EventData,
         seq: Long,
     ) {
+        val old = CalendarRepository.get(ctx.householdId, id)?.data
         EventTable.update({ (EventTable.householdId eq ctx.householdId) and (EventTable.id eq id) }) {
             CalendarRepository.writeEvent(it, data)
             it[EventTable.seq] = seq
             it[updatedAt] = ctx.now
+        }
+        if (old == null) return
+        val rows = CalendarRepository.liveOccurrenceRows(id)
+        notifyAfterCommit(ctx, notifier, id) { members, now, zone ->
+            val hasLiveSplit = { CalendarRepository.liveSplitOf(ctx.householdId, id) != null }
+            EventChanges.onUpdate(id.toString(), old, data, rows, hasLiveSplit, members, now, zone)
         }
     }
 
@@ -143,6 +158,14 @@ class EventSyncHandler : WritableSyncHandler<EventData>(EventData.serializer()) 
         id: UUID,
         seq: Long,
     ) {
+        // What it was before the tombstones: the notice names its next occurrence.
+        val stored = CalendarRepository.get(ctx.householdId, id)?.data
+        val rows = CalendarRepository.liveOccurrenceRows(id)
+        if (stored != null) {
+            notifyAfterCommit(ctx, notifier, id) { members, now, zone ->
+                EventChanges.onDelete(id.toString(), stored, rows, members, now, zone)
+            }
+        }
         EventTable.update({ (EventTable.householdId eq ctx.householdId) and (EventTable.id eq id) }) {
             it[deleted] = true
             it[EventTable.seq] = seq

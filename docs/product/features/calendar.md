@@ -87,6 +87,7 @@ Technical design: [architecture/calendar.md](../../architecture/calendar.md).
   or added later), when its date, time or place changes, and when it is cancelled. Not the person who made the change,
   not for past events. ASSUMPTION: changes of the title, notes or tags only do not notify; a change of a whole series
   sends one notification.
+  *Server: added / changed / cancelled notices as `event.changed` (M3-03); end to end on a real phone: pending, FND-051.*
 - **CAL-018** `MVP` `todo` — Settings › Notifications has switches for event notifications (CAL-007) and event reminders
   (CAL-006), and the birthday reminder choice (CAL-016) (FND-052).
 

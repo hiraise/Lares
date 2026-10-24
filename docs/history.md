@@ -268,3 +268,10 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   rows pulled only by their member (tombstones by everybody with the calendar), housekeeping order, and
   `birthdayDaysBefore` in `/me/notification-settings` (0, 1, 3, 7, 14; default 3). Testfixtures `CalendarFixtures.kt`;
   14 new server tests (`CalendarSyncTest`, `CalendarPermissionsTest`, `NotificationSettingsTest`).
+- 2026-10-25 M3-03 Event notifications on the server (CAL-007): `EventChanges` (pure decisions by the design table),
+  `EventNotifier` (consumer like `TaskNotifier`; drops the actor, deleted members, members without `calendar.view`),
+  `EventWhenText` (fixed ru/en abbreviations), `NotificationTexts.eventAdded/eventChanged/eventCancelled`; hooks in
+  `EventSyncHandler` (create, update, tombstone) and `EventOccurrenceSyncHandler` through `afterCommit`. Design detail:
+  notifier events carry the named `EventOccurrence` instead of a date (a deleted event can still be described); a series
+  cut names the first not-yet-ended occurrence it removes; un-cancelling an occurrence sends nothing. 8 new server tests
+  (`EventChangesTest`, `CalendarNotificationsTest`).

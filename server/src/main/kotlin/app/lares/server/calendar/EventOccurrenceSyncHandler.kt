@@ -29,9 +29,12 @@ import java.util.UUID
  * Changed or cancelled occurrences of a repeating event (CAL-003, CAL-015, ADR-0022). The row id is derived from the
  * event id and the occurrence date, so offline edits of one occurrence on two phones merge field by field. Writing needs
  * `canEdit` on the stored parent event. Clients never delete these rows (`WriteRules` rejects it); only the event's
- * cascade tombstones them.
+ * cascade tombstones them. Cancelling, moving or adding participants to an upcoming occurrence tells its participants
+ * through [EventNotifier] (CAL-007).
  */
-class EventOccurrenceSyncHandler : WritableSyncHandler<EventOccurrenceData>(EventOccurrenceData.serializer()) {
+class EventOccurrenceSyncHandler(
+    private val notifier: EventNotifier,
+) : WritableSyncHandler<EventOccurrenceData>(EventOccurrenceData.serializer()) {
     override val type: String = EntityTypes.EVENT_OCCURRENCE
 
     override fun changesSince(
@@ -114,6 +117,7 @@ class EventOccurrenceSyncHandler : WritableSyncHandler<EventOccurrenceData>(Even
             it[createdAt] = ctx.now
             it[updatedAt] = ctx.now
         }
+        notify(ctx, null, data)
     }
 
     override fun update(
@@ -122,10 +126,23 @@ class EventOccurrenceSyncHandler : WritableSyncHandler<EventOccurrenceData>(Even
         data: EventOccurrenceData,
         seq: Long,
     ) {
+        val old = load(id)?.data
         EventOccurrenceTable.update({ (EventOccurrenceTable.householdId eq ctx.householdId) and (EventOccurrenceTable.id eq id) }) {
             CalendarRepository.writeOccurrence(it, data)
             it[EventOccurrenceTable.seq] = seq
             it[updatedAt] = ctx.now
+        }
+        notify(ctx, old, data)
+    }
+
+    private fun notify(
+        ctx: MutationContext,
+        old: EventOccurrenceData?,
+        data: EventOccurrenceData,
+    ) {
+        val event = requireParentEvent(ctx, data.eventId)
+        notifyAfterCommit(ctx, notifier, UUID.fromString(data.eventId)) { members, now, zone ->
+            EventChanges.onOccurrenceRow(data.eventId, event, old, data, members, now, zone)
         }
     }
 
