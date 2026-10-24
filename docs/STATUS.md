@@ -5,13 +5,15 @@ Updated: 2026-10-24
 ## Phase
 
 **M0 Foundation — all plans M0-01…M0-11 done; M0 acceptance with the customer pending.
-M1 Tasks — all plans M1-01…M1-07 done; M1 acceptance with the customer next.**
+M1 Tasks — all plans M1-01…M1-07 done; M1 acceptance with the customer next.
+M2 Shopping lists — spec approved, design and plans M2-01…M2-06 ready; next: `/plan-run M2-01`.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
 
 [M1 Tasks](product/roadmap.md#m1-tasks): implemented, customer acceptance pending (together with M0). Specs
-`foundation`, `tags` and `tasks` approved.
+`foundation`, `tags` and `tasks` approved. Next: [M2 Shopping lists](product/roadmap.md#m2-shopping-lists) — plans ready
+([M2 plans](plans/README.md#m2-plans)), shopping spec approved.
 
 **Active release branch: `release/0.3.0`** (next: M2). Commit approved work here; `main` is protected
 ([release process](process/release.md), ADR-0020). Latest release: [v0.2.0](https://github.com/hiraise/lares/releases/tag/v0.2.0)
@@ -19,6 +21,8 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 
 ## Last completed
 
+- 2026-10-24 M2 planning: shopping spec detailed and approved (Q-018…Q-020 answered), [shopping design](architecture/shopping.md),
+  ADR-0021 (items kept as the list's memory: suggestions, no duplicates, remembered departments), plans M2-01…M2-06.
 - 2026-10-24 Release **v0.2.0** (M0 + M1) through the new flow: release pull request #1 merged, signed APK, server
   image `ghcr.io/hiraise/lares-server:0.2.0` (amd64, arm64, public), GitHub release. Fixed on the way: notification
   switches lost when changed during the first load (CI flake in `MainAndSettingsViewModelTest`).
@@ -65,7 +69,8 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
    handoff).
 2. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
 3. M4 plan: re-run the load test with location uploads every 30 s (ADR-0015).
-4. After the M1 acceptance: set the tasks spec to `implemented`; plans for M2 Shopping lists.
+4. After the M1 acceptance: set the tasks spec to `implemented`.
+5. Execute M2-01…M2-06 in order (`/plan-run M2-01`).
 
 ## Plan progress
 

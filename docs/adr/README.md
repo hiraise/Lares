@@ -27,6 +27,7 @@ Status values: `proposed` (direction chosen, details or customer confirmation pe
 | [0018](0018-tags-embedded-in-entities.md) | Tags are stored as id sets inside taggable entities | accepted | 2026-10-23 |
 | [0019](0019-release-signing-and-flow.md) | Releases are signed with one permanent Lares key and cut per milestone | accepted (§4, §7 superseded by 0020) | 2026-10-23 |
 | [0020](0020-release-branches.md) | Work lands on release branches; main changes only by a release merge | accepted | 2026-10-24 |
+| [0021](0021-shopping-items-kept-as-list-memory.md) | A shopping item is "this product in this list" and is kept after it is bought | accepted | 2026-10-24 |
 
 ## When to write an ADR
 

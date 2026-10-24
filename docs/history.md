@@ -202,3 +202,7 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   release (`release.yml` on push to `main`). The eleven unpushed M1 commits became `release/0.2.0`.
 - 2026-10-24 Release v0.2.0 (M0 + M1), the first through release branches: PR #1, signed APK, public multi-arch server
   image. Notification switch race fixed on the way (found as a CI flake).
+- 2026-10-24 M2 planning: shopping spec detailed (SHP-001…SHP-018) and approved, customer answered Q-018 (all lists visible to
+  everyone with Shopping), Q-019 (automatic store departments, corrections remembered), Q-020 (no shopping
+  notifications; "who is shopping" from recent ticks). Design in [architecture/shopping.md](architecture/shopping.md),
+  ADR-0021 (an item is "this product in this list", kept after purchase as the list's memory), six plans M2-01…M2-06.

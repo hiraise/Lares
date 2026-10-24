@@ -39,11 +39,15 @@ erDiagram
     MEMBER ||--o{ TASK : "creates"
     TASK ||--o{ CHECKLIST_ITEM : "contains"
     TASK ||--o{ TASK_COMPLETION : "history"
+    MEMBER ||--o{ SHOPPING_LIST : "creates"
     SHOPPING_LIST ||--o{ SHOPPING_ITEM : "contains"
 ```
 
 - A routine is a task with a recurrence rule. Occurrences are computed from the task and its completions, not stored
   (ADR-0017); assignees and tags are id sets inside the task. Design: [architecture/tasks.md](../architecture/tasks.md).
+- A shopping item is one product in one list with a status (`needed`, `bought`, `cleared`) and a department; it is kept
+  after it is bought as the list's memory for suggestions (ADR-0021). Lists and items carry tag id sets.
+  Design: [architecture/shopping.md](../architecture/shopping.md).
 
 ## Calendar (M3)
 

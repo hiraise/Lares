@@ -9,7 +9,7 @@ One file per module. A spec says **what** the product does; architecture and ADR
 | FND | [foundation.md](foundation.md) | M0 | approved |
 | TAG | [tags.md](tags.md) | M0 (core), each module | approved |
 | TSK | [tasks.md](tasks.md) | M1 | approved |
-| SHP | [shopping.md](shopping.md) | M2 | outline |
+| SHP | [shopping.md](shopping.md) | M2 | approved |
 | CAL | [calendar.md](calendar.md) | M3 | outline |
 | LOC, TRK | [location.md](location.md) | M4; trackers later | outline |
 | BUD | [budget.md](budget.md) | M5 | outline |

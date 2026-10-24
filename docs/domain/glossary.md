@@ -49,8 +49,15 @@ Add terms here before using them in code.
 | Rotation | Очерёдность | Assignees of a routine take turns. |
 | Completion | Выполнение | Record of who completed (or skipped) an occurrence and when. Immutable; undo deletes it. |
 | Checklist item | Пункт чек-листа | Sub-item inside a task. |
-| Shopping list | Список покупок | Shared list of items to buy. |
-| Shopping item | Позиция | One entry in a shopping list. |
+| Shopping list | Список покупок | Shared list of things to buy (SHP-001). |
+| Shopping item | Товар | One product in one list. Kept after it is bought or removed: the list's memory (ADR-0021). |
+| Item status | Нужно купить / Куплено / Убрано | `needed`, `bought` (ticked, in «Куплено»), `cleared` (out of the list, offered as a suggestion). |
+| Department | Отдел | Store department of an item (`ProductCategory`), chosen automatically, correctable (SHP-006). |
+| Quick add | Быстрое добавление | One input for one or several items with quantities (SHP-003). |
+| Suggestion | Подсказка | A cleared item of the list offered for one-tap re-adding; also names while typing (SHP-008). |
+| Clear bought | Убрать купленные | Move all bought items of a list out of it (they stay as suggestions) (SHP-004). |
+| Shopper | «Сейчас в магазине» | Another member who ticked an item of the list in the last 15 minutes (SHP-012). |
+| Active list | Активный список | The list with items to buy changed most recently; the hero card on Today (SHP-013). |
 
 ## Calendar
 
