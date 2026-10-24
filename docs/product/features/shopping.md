@@ -37,40 +37,42 @@ Technical design: [architecture/shopping.md](../../architecture/shopping.md).
   *Server: lists stored and synced, `shopping.manage_lists` checked, delete tombstones the items (M2-02).*
   *Client core: lists offline in creation order, Kids cannot create lists locally either (M2-03).*
   *UI: the Shopping tab with list cards, «Список» to create, rename and delete with confirmation in the list menu (M2-04).*
-- **SHP-006** `MVP` `doing` — Items to buy are grouped by store department in a fixed store order (fruit and vegetables,
+- **SHP-006** `MVP` `done` — Items to buy are grouped by store department in a fixed store order (fruit and vegetables,
   bread, dairy and eggs, meat and fish, pantry, sweets, drinks, frozen, household, personal care, baby, pets, pharmacy,
   other). The department is chosen automatically from a built-in dictionary (Russian and English names); unknown items
   go to «Другое». A member can move an item to another department; the family's choice is remembered for that product
   name in all lists (Q-019). Grouping can be turned off per list (e.g. «Подарки»).
   *Server: department and per-list grouping stored and synced; unknown departments rejected (M2-02).*
   *Client core: sections in store order when a list spans ≥ 2 departments; new rows take the family's department for the name, else the dictionary; a correction rewrites the same name in all lists (M2-03).*
-  *UI: sections with department headers and the «Группировать по отделам» switch (M2-04); correction in M2-05.*
+  *UI: sections with department headers and the «Группировать по отделам» switch (M2-04); «Отдел» in the item sheet with «Запомним для всех списков» (M2-05).*
 
 ### Items
 
-- **SHP-002** `MVP` `doing` — Item: name (required), optional quantity with unit as free text («2», «1,5 кг», «3 уп»),
+- **SHP-002** `MVP` `done` — Item: name (required), optional quantity with unit as free text («2», «1,5 кг», «3 уп»),
   optional note, tags, department. The list shows who added an item (if not me) and who bought it and when.
   *Server: items stored and synced, `shopping.edit` checked, author fields must be the writer (M2-02).*
   *Client core: items offline with who added and who bought (M2-03).*
-  *UI: rows show quantity, note, who added (if not me), and in «Куплено» who bought and when (M2-04); editing in M2-05.*
+  *UI: rows show quantity, note, who added (if not me), tags, and in «Куплено» who bought and when (M2-04, M2-05); the item sheet shows who added and bought and how often it was bought (M2-05).*
 - **SHP-003** `MVP` `done` — Quick add: one input at the top of the list; one entry per line, several entries at once
   separated by commas or line breaks («молоко, хлеб, яйца»); a quantity at the end of an entry is recognized
   («Молоко 2 л», «Яйца 10», «Хлеб x2»). A comma inside a number does not split («Молоко 2,5%»).
   *Client core: quick add parses, merges repeated names and adds each one (M2-03).*
   *UI: the «Добавить товар» field on the list page; a pasted line break adds at once (M2-04).*
-- **SHP-008** `MVP` `doing` — Suggestions from history: under the empty input, chips with items bought in this list
+- **SHP-008** `MVP` `done` — Suggestions from history: under the empty input, chips with items bought in this list
   before and not in it now (most often bought first, at most 8); while typing, up to 5 matching names from this list and
   the family's other lists. A tap adds the item with its department and note. A suggestion can be removed for good
   («Больше не предлагать»).
   *Client core: suggestions (cleared rows by purchases, at most 8), autocomplete (this list first, at most 5), forget (M2-03).*
+  *UI: «+ Яйца» chips under the empty field (long press: «Больше не предлагать»), up to 5 names under the field while typing (M2-05).*
 - **SHP-009** `MVP` `done` — No duplicates: adding a name that is already to buy in this list does not create a second
   item («Уже в списке»; a new quantity replaces the old one). Adding a name that was bought or removed earlier brings
   that item back to the list (with its department and note).
   *Client core: matching by name key, «already in the list» reported, cleared and bought rows brought back (M2-03).*
   *UI: «Уже в списке: …» snackbar (M2-04).*
-- **SHP-010** `MVP` `doing` — Edit an item (name, quantity, note, department, tags) from its sheet (long press);
+- **SHP-010** `MVP` `done` — Edit an item (name, quantity, note, department, tags) from its sheet (long press);
   «Убрать из списка» removes it from the list but keeps it as a suggestion; undo right after.
   *Client core: changed fields only; remove and restore for undo (M2-03).*
+  *UI: the item sheet on a long press (to buy or bought), «Не сохранять изменения?» on closing with changes, «Убрано из списка» with «Отменить» (M2-05).*
 
 ### In the store
 
@@ -102,6 +104,7 @@ Technical design: [architecture/shopping.md](../../architecture/shopping.md).
   in it (TAG-003). The tag page shows the items to buy with this tag and the tagged lists (TAG-004).
   *Server: tags on lists and items stored; added tag ids checked (M2-02).*
   *Client core: list page tag filter, tags in use and the tag page section computed (M2-03).*
+  *UI: list page part done — «Метки списка» in the menu, tags on cards and rows, the tag filter chips; adding while filtered tags the item (M2-05); tag page in M2-06.*
 
 ### Later
 

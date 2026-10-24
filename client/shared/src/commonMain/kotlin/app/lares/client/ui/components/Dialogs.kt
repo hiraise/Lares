@@ -5,7 +5,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -19,7 +21,7 @@ import app.lares.client.resources.Res
 import app.lares.client.resources.action_cancel
 import org.jetbrains.compose.resources.stringResource
 
-/** A dialog with one choice from a short list (theme, language). */
+/** A dialog with one choice from a list (theme, language, department); long lists scroll. */
 @Composable
 fun <T> ChoiceDialog(
     title: String,
@@ -33,7 +35,7 @@ fun <T> ChoiceDialog(
         onDismissRequest = onDismiss,
         title = { Text(title, style = MaterialTheme.typography.headlineSmall) },
         text = {
-            Column {
+            Column(Modifier.verticalScroll(rememberScrollState())) {
                 options.forEach { option ->
                     Row(
                         Modifier

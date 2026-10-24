@@ -1,6 +1,7 @@
 package app.lares.client.ui.shopping
 
 import app.lares.client.data.MemberView
+import app.lares.client.data.Tag
 import app.lares.client.data.shopping.ShoppingItemView
 import app.lares.client.data.shopping.ShoppingListView
 import app.lares.client.resources.Res
@@ -24,6 +25,9 @@ import app.lares.client.resources.shopping_category_produce
 import app.lares.client.resources.shopping_category_sweets
 import app.lares.client.resources.shopping_cleared
 import app.lares.client.resources.shopping_count_of
+import app.lares.client.resources.shopping_item_added
+import app.lares.client.resources.shopping_item_bought
+import app.lares.client.resources.shopping_item_bought_times
 import app.lares.client.resources.shopping_meta_pair
 import app.lares.client.resources.shopping_names_more
 import app.lares.client.resources.shopping_offline_pending
@@ -97,12 +101,46 @@ object ShoppingLogic {
     fun boughtMeta(
         item: ShoppingItemView,
         time: (Instant) -> String,
+    ): UiText? = pair(item.boughtBy, item.data.boughtAt, time)
+
+    /** «Добавлено: Ольга · 10:15» in the item sheet. */
+    fun addedLine(
+        item: ShoppingItemView,
+        time: (Instant) -> String,
+    ): UiText? = pair(item.addedBy, item.data.addedAt, time)?.let { uiText(Res.string.shopping_item_added, it) }
+
+    /** «Куплено: Дмитрий · 23 октября, 18:40» for an item ever bought. */
+    fun boughtLine(
+        item: ShoppingItemView,
+        time: (Instant) -> String,
+    ): UiText? =
+        item.data.boughtAt
+            ?.let { pair(item.boughtBy, it, time) }
+            ?.let { uiText(Res.string.shopping_item_bought, it) }
+
+    /** «Покупали 12 раз»; null unless bought more than once. */
+    fun boughtTimes(item: ShoppingItemView): UiText? =
+        item.data.boughtCount.takeIf { it > 1 }?.let {
+            UiText.Plural(Res.plurals.shopping_item_bought_times, it, listOf(raw(it.toString())))
+        }
+
+    /** Tags a picker offers: active ones and archived ones already [selected], by name. */
+    fun tagChoices(
+        tags: List<Tag>,
+        selected: Set<String>,
+    ): List<Tag> = tags.filter { !it.data.archived || it.id in selected }.sortedBy { it.data.name.lowercase() }
+
+    /** «Ольга · 10:15», or whichever of the two is known. */
+    private fun pair(
+        member: MemberView?,
+        at: Instant?,
+        time: (Instant) -> String,
     ): UiText? {
-        val who = item.boughtBy?.let(::firstName)
-        val at = item.data.boughtAt?.let(time)
+        val who = member?.let(::firstName)
+        val formatted = at?.let(time)
         return when {
-            who != null && at != null -> uiText(Res.string.shopping_meta_pair, raw(who), raw(at))
-            else -> (who ?: at)?.let(::raw)
+            who != null && formatted != null -> uiText(Res.string.shopping_meta_pair, raw(who), raw(formatted))
+            else -> (who ?: formatted)?.let(::raw)
         }
     }
 

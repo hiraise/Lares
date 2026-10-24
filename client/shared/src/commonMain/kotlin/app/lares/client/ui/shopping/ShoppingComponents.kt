@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -23,10 +25,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -42,25 +40,35 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import app.lares.client.data.Tag
 import app.lares.client.data.shopping.ShoppingItemView
 import app.lares.client.data.shopping.ShoppingListView
+import app.lares.client.data.shopping.ShoppingViews
+import app.lares.client.data.shopping.Suggestion
 import app.lares.client.resources.Res
 import app.lares.client.resources.action_add
 import app.lares.client.resources.ic_add
 import app.lares.client.resources.ic_check
 import app.lares.client.resources.ic_expand_less
 import app.lares.client.resources.ic_expand_more
+import app.lares.client.resources.ic_history
 import app.lares.client.resources.ic_person
 import app.lares.client.resources.ic_shopping_cart
 import app.lares.client.resources.shopping_add_hint
 import app.lares.client.resources.shopping_buy
 import app.lares.client.resources.shopping_clear_bought
+import app.lares.client.resources.shopping_filter_all
+import app.lares.client.resources.shopping_suggestion_chip
+import app.lares.client.resources.shopping_suggestions
 import app.lares.client.resources.shopping_unbuy
 import app.lares.client.ui.common.text
+import app.lares.client.ui.components.AppFilterChip
 import app.lares.client.ui.components.AppIcon
 import app.lares.client.ui.components.LinkButton
 import app.lares.client.ui.components.ListDivider
+import app.lares.client.ui.components.ListGroup
 import app.lares.client.ui.tasks.DISABLED_ALPHA
+import app.lares.client.ui.tasks.TagChips
 import app.lares.client.ui.theme.LaresTheme
 import app.lares.client.ui.theme.Spacing
 import app.lares.client.ui.theme.tabular
@@ -91,7 +99,7 @@ fun ShoppingCheckbox(
 
 /**
  * An item row (plan M2-04): checkbox, name, meta line ([meta], then the adder with a person icon), quantity on the
- * right. A tap anywhere toggles it; a long press is for the item sheet (M2-05). Without [enabled] the checkbox fades,
+ * right; item [tags] end the meta line. A tap anywhere toggles it; a long press opens the item sheet. Without [enabled] the checkbox fades,
  * but the row stays tappable so the tap can say why nothing happens.
  */
 @OptIn(ExperimentalFoundationApi::class)
@@ -105,6 +113,7 @@ fun ShoppingItemRow(
     adder: String? = null,
     enabled: Boolean = true,
     onLongClick: () -> Unit = {},
+    tags: List<Tag> = emptyList(),
 ) {
     val colors = MaterialTheme.colorScheme
     val label = stringResource(if (checked) Res.string.shopping_unbuy else Res.string.shopping_buy, item.data.name)
@@ -126,7 +135,7 @@ fun ShoppingItemRow(
                 color = if (checked) colors.onSurfaceVariant else colors.onSurface,
                 textDecoration = if (checked) TextDecoration.LineThrough else null,
             )
-            if (meta != null || adder != null) {
+            if (meta != null || adder != null || tags.isNotEmpty()) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
                     val style = MaterialTheme.typography.bodySmall
                     if (meta != null) {
@@ -149,6 +158,7 @@ fun ShoppingItemRow(
                         )
                         Text(adder, style = style, color = colors.onSurfaceVariant, maxLines = 1)
                     }
+                    if (tags.isNotEmpty()) TagChips(tags)
                 }
             }
         }
@@ -197,7 +207,7 @@ fun ShoppingProgressBar(
 
 /**
  * A list on the Shopping tab: name with «6 из 9», progress, «Осталось: …» / «Всё куплено» / «Пусто», who is
- * shopping.
+ * shopping, list tags.
  */
 @Composable
 fun ShoppingListCard(
@@ -238,6 +248,9 @@ fun ShoppingListCard(
             overflow = TextOverflow.Ellipsis,
         )
         ShoppingLogic.shopperNow(list)?.let { ShopperLine(it.text(), icon = true) }
+        if (list.tags.isNotEmpty()) {
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) { TagChips(list.tags) }
+        }
     }
 }
 
@@ -282,19 +295,20 @@ fun ShoppingProgress(
 }
 
 /**
- * The quick-add field (SHP-003): rounded field with a round `add` button. Done or the button adds the text; the
- * field clears and keeps focus. A pasted line break adds at once.
+ * The quick-add field (SHP-003): rounded field with a round `add` button. Done or the button adds the text as typed;
+ * the field clears and keeps focus. A pasted line break adds at once.
  */
 @Composable
 fun QuickAddField(
+    text: String,
+    onTextChange: (String) -> Unit,
     onAdd: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
-    var text by rememberSaveable { mutableStateOf("") }
     val submit = {
         if (text.isNotBlank()) onAdd(text)
-        text = ""
+        onTextChange("")
     }
     val hint = stringResource(Res.string.shopping_add_hint)
     Row(
@@ -313,9 +327,9 @@ fun QuickAddField(
                 onValueChange = {
                     if ('\n' in it) {
                         if (it.isNotBlank()) onAdd(it)
-                        text = ""
+                        onTextChange("")
                     } else {
-                        text = it
+                        onTextChange(it)
                     }
                 },
                 singleLine = true,
@@ -352,6 +366,7 @@ fun BoughtSection(
     onUntick: (ShoppingItemView) -> Unit,
     onClear: () -> Unit,
     modifier: Modifier = Modifier,
+    onItemSheet: (ShoppingItemView) -> Unit = {},
 ) {
     val colors = MaterialTheme.colorScheme
     Column(
@@ -396,6 +411,8 @@ fun BoughtSection(
                     onClick = { onUntick(item) },
                     meta = ShoppingLogic.boughtMeta(item, time)?.text(),
                     enabled = canEdit,
+                    onLongClick = { onItemSheet(item) },
+                    tags = item.tags,
                 )
             }
             if (canEdit) {
@@ -406,6 +423,115 @@ fun BoughtSection(
                     Modifier.padding(start = Spacing.s, top = Spacing.xs, bottom = Spacing.xs).testTag("shopping_clear_bought"),
                 )
             }
+        }
+    }
+}
+
+/**
+ * Suggestions under the empty add field (SHP-008, mockup `Shopping.dc.html`): the `history` icon, then «+ Яйца» chips
+ * in a horizontally scrolling row. A tap adds the item back; a long press asks «Больше не предлагать».
+ */
+@Composable
+fun SuggestionChips(
+    suggestions: List<ShoppingItemView>,
+    onAdd: (ShoppingItemView) -> Unit,
+    onForget: (ShoppingItemView) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = MaterialTheme.colorScheme
+    Row(
+        modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
+            .testTag("shopping_suggestions"),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.s),
+    ) {
+        AppIcon(Res.drawable.ic_history, stringResource(Res.string.shopping_suggestions), size = 20.dp, tint = colors.onSurfaceVariant)
+        suggestions.forEach { item -> SuggestionChip(item, onClick = { onAdd(item) }, onLongClick = { onForget(item) }) }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun SuggestionChip(
+    item: ShoppingItemView,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    Box(
+        Modifier
+            .height(36.dp)
+            .clip(CircleShape)
+            .background(colors.surfaceContainerLowest)
+            .border(1.dp, colors.outlineVariant, CircleShape)
+            .combinedClickable(role = Role.Button, onLongClick = onLongClick, onClick = onClick)
+            .padding(horizontal = 14.dp)
+            .testTag("shopping_suggestion_${item.id}"),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            stringResource(Res.string.shopping_suggestion_chip, item.data.name),
+            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+            maxLines = 1,
+        )
+    }
+}
+
+/** Names matching the typed text (SHP-008), right under the add field: name and department, at most 5. */
+@Composable
+fun AutocompleteList(
+    entries: List<Suggestion>,
+    onPick: (Suggestion) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    ListGroup(modifier.testTag("shopping_autocomplete")) {
+        entries.take(ShoppingViews.AUTOCOMPLETE_MAX).forEachIndexed { index, entry ->
+            if (index > 0) ListDivider(Spacing.l)
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .clickable { onPick(entry) }
+                    .heightIn(min = 52.dp)
+                    .padding(horizontal = Spacing.l, vertical = Spacing.s)
+                    .testTag("shopping_autocomplete_row"),
+                verticalArrangement = Arrangement.spacedBy(1.dp),
+            ) {
+                Text(entry.name, style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    stringResource(ShoppingLogic.categoryLabel(entry.category)),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
+}
+
+/** The tag filter of the list page (TAG-003): «Все» and one chip per tag in use. */
+@Composable
+fun TagFilterChips(
+    tags: List<Tag>,
+    selected: String?,
+    onSelect: (String?) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
+            .testTag("shopping_tag_filter"),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.s),
+    ) {
+        AppFilterChip(
+            selected == null,
+            stringResource(Res.string.shopping_filter_all),
+            { onSelect(null) },
+            Modifier.testTag("shopping_filter_all"),
+        )
+        tags.forEach { tag ->
+            AppFilterChip(selected == tag.id, tag.data.name, { onSelect(tag.id) }, Modifier.testTag("shopping_filter_${tag.id}"))
         }
     }
 }

@@ -21,6 +21,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,6 +30,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.lares.client.data.shopping.DepartmentSection
 import app.lares.client.data.shopping.ShoppingItemView
 import app.lares.client.data.shopping.ShoppingListDetail
+import app.lares.client.data.shopping.Suggestion
 import app.lares.client.resources.Res
 import app.lares.client.resources.action_delete
 import app.lares.client.resources.action_save
@@ -40,14 +42,20 @@ import app.lares.client.resources.ic_delete
 import app.lares.client.resources.ic_edit
 import app.lares.client.resources.ic_more_vert
 import app.lares.client.resources.ic_remove_done
+import app.lares.client.resources.ic_sell
 import app.lares.client.resources.shopping_all_bought
 import app.lares.client.resources.shopping_clear_bought
 import app.lares.client.resources.shopping_delete_list
 import app.lares.client.resources.shopping_delete_text
 import app.lares.client.resources.shopping_delete_title
+import app.lares.client.resources.shopping_forget_confirm
+import app.lares.client.resources.shopping_forget_text
+import app.lares.client.resources.shopping_forget_title
 import app.lares.client.resources.shopping_group_by_department
+import app.lares.client.resources.shopping_item_removed
 import app.lares.client.resources.shopping_list_actions
 import app.lares.client.resources.shopping_list_empty
+import app.lares.client.resources.shopping_list_tags
 import app.lares.client.resources.shopping_not_allowed
 import app.lares.client.resources.shopping_rename
 import app.lares.client.resources.shopping_rename_title
@@ -64,8 +72,11 @@ import app.lares.client.ui.components.ListGroup
 import app.lares.client.ui.components.ListRow
 import app.lares.client.ui.components.NoticeBanner
 import app.lares.client.ui.components.SectionHeader
+import app.lares.client.ui.family.TagSheetDialog
+import app.lares.client.ui.tasks.TagsSheet
 import app.lares.client.ui.theme.LaresTheme
 import app.lares.client.ui.theme.Spacing
+import app.lares.contract.entities.ShoppingItemStatus
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
@@ -80,9 +91,23 @@ import org.koin.core.parameter.parametersOf
 class ShoppingListActions(
     val onBack: () -> Unit = {},
     val onAdd: (String) -> Unit = {},
+    /** The typed text, for the autocomplete. */
+    val onQuery: (String) -> Unit = {},
+    val onSuggestion: (ShoppingItemView) -> Unit = {},
+    val onPick: (Suggestion) -> Unit = {},
+    /** Long press on a suggestion chip. */
+    val onAskForget: (ShoppingItemView) -> Unit = {},
+    val onForget: () -> Unit = {},
+    val onCloseForget: () -> Unit = {},
+    val onFilter: (String?) -> Unit = {},
     val onToggle: (ShoppingItemView) -> Unit = {},
-    /** Long press: the item sheet (M2-05). */
+    /** Long press: the item sheet. */
     val onItemSheet: (ShoppingItemView) -> Unit = {},
+    val item: ItemSheetActions = ItemSheetActions(),
+    val onListTags: () -> Unit = {},
+    val onToggleListTag: (String) -> Unit = {},
+    val onCloseListTags: () -> Unit = {},
+    val onNewTag: () -> Unit = {},
     val onToggleBought: () -> Unit = {},
     val onClearBought: () -> Unit = {},
     val onToggleGrouping: () -> Unit = {},
@@ -99,17 +124,43 @@ fun ShoppingListRoute(
     viewModel: ShoppingListViewModel = koinViewModel(key = "shopping-$id") { parametersOf(ShoppingListArgs(id)) },
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val tagSheet by viewModel.tagSheet.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     // Deleted here or on another phone.
     LaunchedEffect(state.gone) { if (state.gone) onBack() }
-    ShoppingEventSnackbars(viewModel.events, snackbar, onUndoClear = viewModel::undoClear)
+    ShoppingEventSnackbars(viewModel.events, snackbar, onUndoClear = viewModel::undoClear, onUndoRemove = viewModel::undoRemove)
     Box(Modifier.fillMaxSize()) {
         ShoppingListScreen(
             state,
             ShoppingListActions(
                 onBack = onBack,
                 onAdd = viewModel::add,
+                onQuery = viewModel::onQuery,
+                onSuggestion = viewModel::addSuggestion,
+                onPick = viewModel::addSuggestion,
+                onAskForget = viewModel::askForget,
+                onForget = viewModel::forget,
+                onCloseForget = viewModel::closeForget,
+                onFilter = viewModel::filterBy,
                 onToggle = viewModel::toggle,
+                onItemSheet = viewModel::openItem,
+                item =
+                    ItemSheetActions(
+                        onEdit = viewModel::editItem,
+                        onPicker = viewModel::openPicker,
+                        onDepartment = viewModel::onDepartment,
+                        onToggleTag = viewModel::toggleItemTag,
+                        onNewTag = viewModel::newTag,
+                        onSave = viewModel::saveItem,
+                        onRemove = viewModel::removeItem,
+                        onRequestClose = viewModel::requestCloseItem,
+                        onKeepEditing = viewModel::keepEditing,
+                        onDiscard = viewModel::closeItem,
+                    ),
+                onListTags = viewModel::openListTags,
+                onToggleListTag = viewModel::toggleListTag,
+                onCloseListTags = viewModel::closeListTags,
+                onNewTag = viewModel::newTag,
                 onToggleBought = viewModel::toggleBought,
                 onClearBought = viewModel::clearBought,
                 onToggleGrouping = viewModel::toggleGrouping,
@@ -121,14 +172,18 @@ fun ShoppingListRoute(
         )
         SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).windowInsetsPadding(WindowInsets.safeDrawing))
     }
+    tagSheet?.let { TagSheetDialog(it, viewModel.tagEditor) }
 }
 
-/** «Уже в списке: …», «Убрано: 6» with «Отменить» for 5 s, «Нет права изменять список», errors. */
+/**
+ * «Уже в списке: …», «Убрано: 6» and «Убрано из списка» with «Отменить» for 5 s, «Нет права изменять список», errors.
+ */
 @Composable
 private fun ShoppingEventSnackbars(
     events: Flow<ShoppingEvent>,
     snackbar: SnackbarHostState,
     onUndoClear: (List<String>) -> Unit,
+    onUndoRemove: (String, ShoppingItemStatus) -> Unit,
 ) {
     LaunchedEffect(events) {
         events.collect { event ->
@@ -151,6 +206,18 @@ private fun ShoppingEventSnackbars(
                         if (result == SnackbarResult.ActionPerformed) onUndoClear(event.ids)
                     }
 
+                    is ShoppingEvent.Removed -> {
+                        val result =
+                            withTimeoutOrNull(UNDO_MS) {
+                                snackbar.showSnackbar(
+                                    getString(Res.string.shopping_item_removed),
+                                    getString(Res.string.action_undo),
+                                    duration = SnackbarDuration.Indefinite,
+                                )
+                            }
+                        if (result == SnackbarResult.ActionPerformed) onUndoRemove(event.id, event.previous)
+                    }
+
                     ShoppingEvent.NotAllowed -> {
                         snackbar.showSnackbar(getString(Res.string.shopping_not_allowed))
                     }
@@ -167,8 +234,8 @@ private fun ShoppingEventSnackbars(
 private const val UNDO_MS = 5_000L
 
 /**
- * The list page (plan M2-04, mockup `Shopping.dc.html`): offline banner, progress, quick add, items by department,
- * «Куплено · N».
+ * The list page (plans M2-04, M2-05, mockup `Shopping.dc.html`): offline banner, progress, tag filter, quick add with
+ * suggestion chips or the autocomplete, items by department, «Куплено · N»; the item sheet on a long press.
  */
 @Composable
 fun ShoppingListScreen(
@@ -177,12 +244,34 @@ fun ShoppingListScreen(
 ) {
     val detail = state.detail
     val time = rememberTimeFormatter()
+    var text by rememberSaveable { mutableStateOf("") }
+    val setText = { value: String ->
+        text = value
+        actions.onQuery(value)
+    }
     AppPage(topBar = { TopBar(detail, actions) }) {
         state.banner?.let { NoticeBanner(it.text(), Modifier.testTag("shopping_banner")) }
         if (detail == null) return@AppPage
         Column(verticalArrangement = Arrangement.spacedBy(Spacing.l)) {
             ShoppingProgress(detail.list)
-            if (detail.canEdit) QuickAddField(actions.onAdd)
+            if (detail.tagsInUse.isNotEmpty()) TagFilterChips(detail.tagsInUse, state.tagId, actions.onFilter)
+            if (detail.canEdit) {
+                Column(verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
+                    QuickAddField(text, setText, actions.onAdd)
+                    when {
+                        text.isEmpty() && detail.suggestions.isNotEmpty() -> {
+                            SuggestionChips(detail.suggestions, actions.onSuggestion, actions.onAskForget)
+                        }
+
+                        text.isNotBlank() && state.autocomplete.isNotEmpty() -> {
+                            AutocompleteList(state.autocomplete, onPick = {
+                                actions.onPick(it)
+                                setText("")
+                            })
+                        }
+                    }
+                }
+            }
         }
         Items(detail, actions)
         if (detail.bought.isNotEmpty()) {
@@ -194,8 +283,29 @@ fun ShoppingListScreen(
                 onToggleExpanded = actions.onToggleBought,
                 onUntick = actions.onToggle,
                 onClear = actions.onClearBought,
+                onItemSheet = actions.onItemSheet,
             )
         }
+    }
+    state.sheet?.let { ShoppingItemSheet(it, state.tags, state.canManageTags, actions.item) }
+    state.listTags?.let { selected ->
+        TagsSheet(
+            ShoppingLogic.tagChoices(state.tags, selected),
+            selected,
+            state.canManageTags,
+            actions.onToggleListTag,
+            actions.onNewTag,
+            actions.onCloseListTags,
+        )
+    }
+    state.forget?.let { item ->
+        ConfirmDialog(
+            title = stringResource(Res.string.shopping_forget_title, item.data.name),
+            text = stringResource(Res.string.shopping_forget_text),
+            confirmLabel = stringResource(Res.string.shopping_forget_confirm),
+            onConfirm = actions.onForget,
+            onDismiss = actions.onCloseForget,
+        )
     }
     when (state.dialog.takeIf { detail != null }) {
         ShoppingListDialog.RENAME -> {
@@ -272,6 +382,7 @@ private fun Section(
                     adder = ShoppingLogic.adder(item),
                     enabled = canEdit,
                     onLongClick = { actions.onItemSheet(item) },
+                    tags = item.tags,
                 )
             }
         }
@@ -306,6 +417,9 @@ private fun TopBar(
                 }
                 if (detail.canManage) {
                     MenuItem(Res.string.shopping_rename, Res.drawable.ic_edit) { close { actions.onDialog(ShoppingListDialog.RENAME) } }
+                    MenuItem(Res.string.shopping_list_tags, Res.drawable.ic_sell, modifier = Modifier.testTag("shopping_list_tags")) {
+                        close(actions.onListTags)
+                    }
                     MenuItem(Res.string.shopping_group_by_department, Res.drawable.ic_category, detail.list.data.groupByCategory) {
                         close(actions.onToggleGrouping)
                     }
@@ -327,9 +441,11 @@ private fun MenuItem(
     label: StringResource,
     icon: DrawableResource,
     checked: Boolean = false,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
     DropdownMenuItem(
+        modifier = modifier,
         text = { Text(stringResource(label), style = MaterialTheme.typography.bodyLarge) },
         leadingIcon = { AppIcon(icon, null) },
         trailingIcon = if (checked) ({ AppIcon(Res.drawable.ic_check, null, tint = MaterialTheme.colorScheme.primary) }) else null,

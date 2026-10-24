@@ -12,6 +12,10 @@ Versioning: [SemVer](https://semver.org/) from the first release.
 - Shopping lists (M2-04): the Shopping tab with the family's lists and progress; on a list add several items in one line,
   items grouped by store department, tick them off in the store even without network, «Куплено» with clearing and
   undo; rename, grouping and delete in the list menu.
+- Shopping suggestions and editing (M2-05): chips with what the list bought before under the empty field and matching
+  names from all lists while typing; a long press opens the item sheet (name, quantity, note, department, tags, who
+  added and bought) with «Убрать из списка» and undo; a department you correct is remembered for that product in all
+  lists; tags on lists and items and a tag filter on the list page.
 
 ## [0.2.0] - 2026-10-24
 

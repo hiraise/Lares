@@ -1,6 +1,6 @@
 ---
 id: M2-05
-status: ready
+status: done
 depends_on: [M2-04]
 requirements: [SHP-002, SHP-006, SHP-008, SHP-009, SHP-010, SHP-014, TAG-002, TAG-003]
 ---

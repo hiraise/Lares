@@ -13,9 +13,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import app.lares.client.resources.Res
@@ -28,17 +31,32 @@ import app.lares.client.ui.components.ListRow
 import app.lares.client.ui.theme.Spacing
 import org.jetbrains.compose.resources.stringResource
 
-/** A bottom sheet of the task editor: title, then [content] on the screen background. */
+/**
+ * A bottom sheet of the task editor (and the shopping item sheet): title, then [content] on the screen background.
+ * While [canClose] is false, a swipe, the scrim or back keep the sheet open and call [onDismiss] (an "unsaved changes"
+ * prompt).
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun EditorSheet(
     title: String,
     onDismiss: () -> Unit,
+    canClose: () -> Boolean = { true },
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    val currentCanClose by rememberUpdatedState(canClose)
+    val currentOnDismiss by rememberUpdatedState(onDismiss)
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        sheetState =
+            rememberModalBottomSheetState(skipPartiallyExpanded = true) { value ->
+                if (value != SheetValue.Hidden || currentCanClose()) {
+                    true
+                } else {
+                    currentOnDismiss()
+                    false
+                }
+            },
         containerColor = MaterialTheme.colorScheme.background,
         shape = MaterialTheme.shapes.extraLarge.copy(bottomStart = CornerSize(0), bottomEnd = CornerSize(0)),
     ) {

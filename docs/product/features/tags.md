@@ -25,9 +25,11 @@ Tags complement budget categories: car spending spread over "Fuel", "Insurance",
 - **TAG-002** `MVP` `doing` — A tag can be attached to tasks, shopping lists and items, events, transactions and debts (as each module ships).
   *Tasks: done (M1-02, M1-06). Other modules add theirs.*
   *Tasks done: tags in the task editor, «+ Новая метка» for `tags.manage` (M1-06).*
+  *Shopping done: tags on lists («Метки списка») and items (item sheet), «+ Новая метка» for `tags.manage` (M2-05).*
 - **TAG-003** `MVP` `doing` — Each module list can be filtered by tag.
   *Tasks: the «Метка» chip (M1-05). Other modules add theirs.*
   *Tasks done: «Метка» chip with a tag picker in the Tasks tab (M1-05).*
+  *Shopping done: tag chips «Все» / one per tag in use on the list page (M2-05).*
 - **TAG-004** `MVP` `doing` — Tag page aggregates linked items across modules, grouped by module.
   *Page with the tasks section «Задачи · N» (archived tags too), opened from Family › Tags and from a tag chip on the
   task page; editing the tag moved to its top bar (M1-07). Other modules add their sections.*

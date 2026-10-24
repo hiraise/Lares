@@ -85,5 +85,5 @@ fun uiModule(): Module =
         viewModel { params -> TaskDetailViewModel(get(), get(), params.get()) }
         viewModel { params -> TaskEditorViewModel(get(), get(), get(), get(), get(), params.get()) }
         viewModel { ShoppingListsViewModel(get(), get()) }
-        viewModel { params -> ShoppingListViewModel(get(), get(), get(), params.get()) }
+        viewModel { params -> ShoppingListViewModel(get(), get(), get(), get(), get(), params.get()) }
     }

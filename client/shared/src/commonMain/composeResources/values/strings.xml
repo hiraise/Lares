@@ -765,4 +765,31 @@
     <string name="shopping_category_pets">Pets</string>
     <string name="shopping_category_pharmacy">Pharmacy</string>
     <string name="shopping_category_other">Other</string>
+    <string name="shopping_item_title">Item</string>
+    <string name="shopping_item_name">Name</string>
+    <string name="shopping_item_quantity">Quantity</string>
+    <string name="shopping_item_quantity_hint">For example, 2 pcs or 1.5 kg</string>
+    <string name="shopping_item_note">Note</string>
+    <string name="shopping_item_department">Department</string>
+    <string name="shopping_item_department_hint">We will remember it for all lists</string>
+    <string name="shopping_item_tags">Tags</string>
+    <string name="shopping_item_added">Added: %1$s</string>
+    <string name="shopping_item_bought">Bought: %1$s</string>
+    <plurals name="shopping_item_bought_times">
+        <item quantity="one">Bought %1$d time</item>
+        <item quantity="other">Bought %1$d times</item>
+    </plurals>
+    <string name="shopping_item_remove">Remove from the list</string>
+    <string name="shopping_item_removed">Removed from the list</string>
+    <string name="shopping_discard_title">Discard changes?</string>
+    <string name="shopping_discard_text">Changes to the item will not be saved.</string>
+    <string name="shopping_discard_confirm">Discard</string>
+    <string name="shopping_discard_keep">Keep editing</string>
+    <string name="shopping_suggestions">Bought before</string>
+    <string name="shopping_suggestion_chip">+ %1$s</string>
+    <string name="shopping_forget_title">Stop suggesting “%1$s”?</string>
+    <string name="shopping_forget_text">It will disappear from the suggestions of this list.</string>
+    <string name="shopping_forget_confirm">Stop suggesting</string>
+    <string name="shopping_list_tags">List tags</string>
+    <string name="shopping_filter_all">All</string>
 </resources>

@@ -797,4 +797,33 @@
     <string name="shopping_category_pets">Для животных</string>
     <string name="shopping_category_pharmacy">Аптека</string>
     <string name="shopping_category_other">Другое</string>
+    <string name="shopping_item_title">Товар</string>
+    <string name="shopping_item_name">Название</string>
+    <string name="shopping_item_quantity">Количество</string>
+    <string name="shopping_item_quantity_hint">Например, 2 шт или 1,5 кг</string>
+    <string name="shopping_item_note">Заметка</string>
+    <string name="shopping_item_department">Отдел</string>
+    <string name="shopping_item_department_hint">Запомним для всех списков</string>
+    <string name="shopping_item_tags">Метки</string>
+    <string name="shopping_item_added">Добавлено: %1$s</string>
+    <string name="shopping_item_bought">Куплено: %1$s</string>
+    <plurals name="shopping_item_bought_times">
+        <item quantity="one">Покупали %1$d раз</item>
+        <item quantity="few">Покупали %1$d раза</item>
+        <item quantity="many">Покупали %1$d раз</item>
+        <item quantity="other">Покупали %1$d раза</item>
+    </plurals>
+    <string name="shopping_item_remove">Убрать из списка</string>
+    <string name="shopping_item_removed">Убрано из списка</string>
+    <string name="shopping_discard_title">Не сохранять изменения?</string>
+    <string name="shopping_discard_text">Изменения в товаре не сохранятся.</string>
+    <string name="shopping_discard_confirm">Не сохранять</string>
+    <string name="shopping_discard_keep">Продолжить</string>
+    <string name="shopping_suggestions">Покупали раньше</string>
+    <string name="shopping_suggestion_chip">+ %1$s</string>
+    <string name="shopping_forget_title">Больше не предлагать «%1$s»?</string>
+    <string name="shopping_forget_text">Товар пропадёт из подсказок этого списка.</string>
+    <string name="shopping_forget_confirm">Не предлагать</string>
+    <string name="shopping_list_tags">Метки списка</string>
+    <string name="shopping_filter_all">Все</string>
 </resources>

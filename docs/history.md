@@ -227,3 +227,11 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   items by department, tap to tick, collapsed «Куплено · N», clear with undo, menu with rename, grouping, delete);
   `ShoppingLogic` texts via `UiText`; icons `category`, `remove_shopping_cart`, `add_shopping_cart`, `remove_done`;
   21 new tests (6 logic, 10 view model, 5 Compose UI).
+- 2026-10-24 M2-05 Item sheet, suggestions, autocomplete and tags: `ShoppingItemSheet` on a long press of a row to buy
+  or bought (name, quantity, note, «Отдел» with `ChoiceDialog` and «Запомним для всех списков», «Метки» via the shared
+  `TagsSheet` and `TagEditor`, who added / bought, «Покупали N раз»; «Сохранить» sends only changed fields, then
+  `setCategory`; «Убрать из списка» with undo; «Не сохранять изменения?» through a new `canClose` of `EditorSheet`);
+  «+ Яйца» suggestion chips under the empty field with «Больше не предлагать»; autocomplete (debounced 150 ms, at most
+  5 rows) under the field; «Метки списка» menu item, tags on cards and rows, tag filter chips (adding and clearing follow
+  the filter; resets when the tag is no longer in use); `ChoiceDialog` scrolls long lists; 13 new tests (9 view model,
+  4 Compose UI).
