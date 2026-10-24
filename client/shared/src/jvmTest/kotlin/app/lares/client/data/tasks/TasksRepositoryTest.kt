@@ -1,5 +1,6 @@
 package app.lares.client.data.tasks
 
+import app.lares.client.data.minuteTicks
 import app.lares.contract.entities.TaskData
 import app.lares.contract.tasks.TaskGroup
 import kotlinx.coroutines.flow.first

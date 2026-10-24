@@ -30,6 +30,8 @@ class LocalDb(
             taskQueries.deleteAll()
             checklist_itemQueries.deleteAll()
             task_completionQueries.deleteAll()
+            shopping_listQueries.deleteAll()
+            shopping_itemQueries.deleteAll()
             sync_shadowQueries.deleteAll()
             sync_outboxQueries.deleteAll()
             sync_stateQueries.deleteAll()

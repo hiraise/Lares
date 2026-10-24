@@ -8,7 +8,7 @@ import kotlin.time.Instant
  * Version of the local data layout. Raise it when the client starts storing data differently (new typed columns,
  * a new entity type); a mismatch with the stored value makes the next sync a full resync.
  */
-const val DATA_SCHEMA_VERSION = 2
+const val DATA_SCHEMA_VERSION = 3
 
 /** What `sync_state` holds. [cursor] 0 means "never synced". */
 data class SyncStateValues(

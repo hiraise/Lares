@@ -279,7 +279,7 @@ Pure functions in `ShoppingViews` (no database; unit-tested):
 | `detail(inputs, listId, tagId?)` | `needed` and `bought` items, both filtered by the tag if set (the list's counts, progress and the "≥ 2 departments" rule follow the filter; `suggestions` and `tagsInUse` do not); grouped when `groupByCategory` and they span ≥ 2 categories (sections in enum order), else one section with `category = null`; inside a section `addedAt` asc, then id. `bought`: `boughtAt` desc. `suggestions`: the list's `cleared` items by `boughtCount` desc, `boughtAt` desc (null last), name; at most 8. `tagsInUse`: tags on the list's needed or bought items |
 | `autocomplete(inputs, listId, query)` | query key shorter than 2 → empty. Candidates: this list's `bought`/`cleared` rows (`itemId` set), then other lists' rows of any status whose key this list does not have (`itemId` null, note null). A candidate matches if its key starts with the query key or one of its words does. Order: this list first, whole-key prefix before word prefix, `boughtCount` desc, name. Distinct by key, at most 5 |
 | `active(inputs)` | lists with `needed > 0`; the one with the latest `lastActivity` (ties: larger id); `othersToBuy` = the rest |
-| `shopper(items, me, now)` | among the list's `bought` items with `boughtBy ≠ me` and `boughtAt` within `[now − 15 min, now + 1 min]` (a phone with a clock ahead must not keep the line for hours), the member of the latest |
+| `shopper(items, me, now)` (member id; the list view resolves it to a `MemberView`, unknown → null) | among the list's `bought` items with `boughtBy ≠ me` and `boughtAt` within `[now − 15 min, now + 1 min]` (a phone with a clock ahead must not keep the line for hours), the member of the latest |
 | `forTag(inputs, tagId)` | needed items with the tag in all lists (list order, then display order) and lists with the tag |
 
 Unknown or deleted member and tag ids are dropped (archived tags kept), as in tasks.
@@ -300,9 +300,9 @@ ticks = minuteTicks(clock))` — the same inputs as `TasksRepository` minus the 
 | `add(listId, text, tagId?): AddResult` | `QuickAdd.parse`, entries with equal keys merged (last non-null quantity wins), then per entry `addOne` |
 | `addSuggestion(listId, s: Suggestion, tagId?)` | `s.itemId` set → bring back that row; else `addOne(name, quantity = null)` with `s.category` |
 | `setBought(itemId, true)` | `status = bought, boughtBy = me, boughtAt = now, boughtCount + 1` |
-| `setBought(itemId, false)` | `status = needed, boughtCount = max(0, count − 1)` (boughtBy/At unchanged) |
+| `setBought(itemId, false)` | `status = needed, boughtCount = max(0, count − 1)` (boughtBy/At unchanged); both directions write nothing when the item is already in that state |
 | `clearBought(listId, tagId?): List<String>` | every `bought` item (with the tag, when the page is filtered) → `cleared`; returns their ids for undo |
-| `restore(ids, status)` | `status` only (undo of clear → `bought`, undo of remove → `needed`) |
+| `restore(ids, status)` | `status` only (undo of clear → `bought`, undo of remove → `needed`); items gone locally meanwhile are skipped |
 | `remove(itemId): ShoppingItemStatus` | `status = cleared`; returns the previous status for undo |
 | `forget(itemId)` | delete (tombstone) — "Больше не предлагать" |
 | `updateItem(itemId, name, quantity, note, tagIds)` | changed fields only |

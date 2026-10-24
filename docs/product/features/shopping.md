@@ -35,30 +35,37 @@ Technical design: [architecture/shopping.md](../../architecture/shopping.md).
 - **SHP-001** `MVP` `doing` — Several lists per household (e.g. «Продукты», «Аптека», «Хозтовары»). Create, rename, delete.
   Deleting a list asks for confirmation and removes its items and suggestions for everybody.
   *Server: lists stored and synced, `shopping.manage_lists` checked, delete tombstones the items (M2-02).*
+  *Client core: lists offline in creation order, Kids cannot create lists locally either (M2-03).*
 - **SHP-006** `MVP` `doing` — Items to buy are grouped by store department in a fixed store order (fruit and vegetables,
   bread, dairy and eggs, meat and fish, pantry, sweets, drinks, frozen, household, personal care, baby, pets, pharmacy,
   other). The department is chosen automatically from a built-in dictionary (Russian and English names); unknown items
   go to «Другое». A member can move an item to another department; the family's choice is remembered for that product
   name in all lists (Q-019). Grouping can be turned off per list (e.g. «Подарки»).
   *Server: department and per-list grouping stored and synced; unknown departments rejected (M2-02).*
+  *Client core: sections in store order when a list spans ≥ 2 departments; new rows take the family's department for the name, else the dictionary; a correction rewrites the same name in all lists (M2-03).*
 
 ### Items
 
 - **SHP-002** `MVP` `doing` — Item: name (required), optional quantity with unit as free text («2», «1,5 кг», «3 уп»),
   optional note, tags, department. The list shows who added an item (if not me) and who bought it and when.
   *Server: items stored and synced, `shopping.edit` checked, author fields must be the writer (M2-02).*
-- **SHP-003** `MVP` `todo` — Quick add: one input at the top of the list; one entry per line, several entries at once
+  *Client core: items offline with who added and who bought (M2-03).*
+- **SHP-003** `MVP` `doing` — Quick add: one input at the top of the list; one entry per line, several entries at once
   separated by commas or line breaks («молоко, хлеб, яйца»); a quantity at the end of an entry is recognized
   («Молоко 2 л», «Яйца 10», «Хлеб x2»). A comma inside a number does not split («Молоко 2,5%»).
-- **SHP-008** `MVP` `todo` — Suggestions from history: under the empty input, chips with items bought in this list
+  *Client core: quick add parses, merges repeated names and adds each one (M2-03).*
+- **SHP-008** `MVP` `doing` — Suggestions from history: under the empty input, chips with items bought in this list
   before and not in it now (most often bought first, at most 8); while typing, up to 5 matching names from this list and
   the family's other lists. A tap adds the item with its department and note. A suggestion can be removed for good
   («Больше не предлагать»).
-- **SHP-009** `MVP` `todo` — No duplicates: adding a name that is already to buy in this list does not create a second
+  *Client core: suggestions (cleared rows by purchases, at most 8), autocomplete (this list first, at most 5), forget (M2-03).*
+- **SHP-009** `MVP` `doing` — No duplicates: adding a name that is already to buy in this list does not create a second
   item («Уже в списке»; a new quantity replaces the old one). Adding a name that was bought or removed earlier brings
   that item back to the list (with its department and note).
-- **SHP-010** `MVP` `todo` — Edit an item (name, quantity, note, department, tags) from its sheet (long press);
+  *Client core: matching by name key, «already in the list» reported, cleared and bought rows brought back (M2-03).*
+- **SHP-010** `MVP` `doing` — Edit an item (name, quantity, note, department, tags) from its sheet (long press);
   «Убрать из списка» removes it from the list but keeps it as a suggestion; undo right after.
+  *Client core: changed fields only; remove and restore for undo (M2-03).*
 
 ### In the store
 
@@ -66,21 +73,26 @@ Technical design: [architecture/shopping.md](../../architecture/shopping.md).
   «Куплено · N» section at the bottom (expandable; a tap there returns an item to the list). «Убрать купленные» clears
   them (they stay as suggestions), with undo. Bought items stay until somebody clears them.
   *Server: tick, clear and re-add round trip; times more than a day ahead rejected (M2-02).*
-- **SHP-005** `MVP` `todo` — Two people shopping at once see each other's check-offs within seconds when online.
+  *Client core: tick, untick, clear bought (also by tag) and undo offline; offline ticks of two phones merge (M2-03).*
+- **SHP-005** `MVP` `doing` — Two people shopping at once see each other's check-offs within seconds when online.
+  *Client core: proven by a multi-device test, tick seen within 2 s (M2-03).*
 - **SHP-011** `MVP` `todo` — Without network the list shows a banner «Нет сети. Отметки сохранены и отправятся, когда
   связь появится.» (or «Нет сети. Список может быть не самым свежим.» when nothing is waiting to be sent) (FND-043).
-- **SHP-012** `MVP` `todo` — "Who is shopping": if another member ticked an item in a list during the last 15 minutes,
+- **SHP-012** `MVP` `doing` — "Who is shopping": if another member ticked an item in a list during the last 15 minutes,
   its card and the Today block show «Дмитрий сейчас в магазине», the list page the short «Дмитрий в магазине»
   (Q-020). Derived from the ticks; nothing extra is sent or stored.
+  *Client core: computed from ticks, expires with the minute ticker (M2-03).*
 
 ### Elsewhere in the app
 
-- **SHP-013** `MVP` `todo` — Today block (FND-063): the active list — the list with items to buy that changed most
+- **SHP-013** `MVP` `doing` — Today block (FND-063): the active list — the list with items to buy that changed most
   recently — as the hero card: name, «6 из 9» (bought of all), «Осталось: Молоко, Хлеб, Яблоки», progress, who is
   shopping, «Открыть»; «Ещё N списка» when other lists have items to buy. No card when nothing is to buy.
+  *Client core: active list and other lists with items to buy computed (M2-03).*
 - **SHP-014** `MVP` `doing` — Tags: lists and items can carry tags (TAG-002). The list page can be filtered by a tag used
   in it (TAG-003). The tag page shows the items to buy with this tag and the tagged lists (TAG-004).
   *Server: tags on lists and items stored; added tag ids checked (M2-02).*
+  *Client core: list page tag filter, tags in use and the tag page section computed (M2-03).*
 
 ### Later
 

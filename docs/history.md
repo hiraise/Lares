@@ -216,3 +216,8 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   (live parent list, `shopping.edit`, `addedBy`/`boughtBy` set by a write must be the writer, `listId` immutable, times
   more than a day ahead rejected), added tag ids checked, `shopping.view` visibility, housekeeping purges items then
   lists; `invalidField`/`requireAddedTags` moved to `sync/ReferenceChecks.kt`; `ShoppingFixtures`; 13 server tests.
+- 2026-10-24 M2-03 Shopping in the client core: `shopping_list` / `shopping_item` tables (`3.sqm`, `DATA_SCHEMA_VERSION`
+  3), adapters mirroring the M2-02 handlers, `ShoppingViews` (sections, bought, suggestions, autocomplete, active list,
+  shopper, tag page), `ShoppingRepository`, `ShoppingWriter` (quick add with name-key matching and department memory,
+  best-effort department correction across lists); `minuteTicks` and the viewer flow moved to `data/`; `seed.py shopping`
+  and `seed.py tick`; 36 unit tests, 7 multi-device tests (offline ticks, realtime within 2 s, cascade, stale rights).

@@ -6,6 +6,8 @@
   tools/dev/seed.py login-code [name]      # one-time login code + QR payload for a seeded member (default: olga herself)
   tools/dev/seed.py invite [group]         # invite into "Взрослые" (default) or "Дети"; prints code + payload
   tools/dev/seed.py tasks                  # sample tasks and routines (after family; skips if already seeded)
+  tools/dev/seed.py shopping               # sample shopping lists (after family; skips if already seeded)
+  tools/dev/seed.py tick NAME [--as LOGIN] # mark the first item named NAME bought by that member (default olga)
   tools/dev/seed.py call METHOD PATH [JSON] [--as LOGIN]
 
 Test family "Петровы" (setup code DEVSETUP01):
@@ -204,6 +206,122 @@ def tasks():
     print("tasks:", ", ".join(created))
 
 
+def all_changes(token):
+    """Every live change visible to the token's member (a full pull from 0)."""
+    changes, after = [], 0
+    while True:
+        page = call("GET", f"/sync/changes?after={after}", token=token)
+        changes += [c for c in page["changes"] if not c.get("deleted")]
+        if not page.get("hasMore"):
+            return changes
+        after = page["cursor"]
+
+
+def instant(moment):
+    """Canonical instant in whole seconds (the server rejects values that change in a decode round trip)."""
+    return moment.astimezone(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def shopping():
+    state = load_state()
+    if not state.get("members"):
+        sys.exit("no test family; run: seed.py family")
+    if state.get("shopping"):
+        print("shopping already seeded:", ", ".join(state["shopping"]))
+        return
+    token = login()
+    me = call("GET", "/me", token=token)["memberId"]
+    tag = next(
+        (c["id"] for c in all_changes(token) if c["type"] == "tag" and c.get("data", {}).get("name") == "Дача"), None
+    )
+    mutations = []
+    if tag is None:
+        tag = uuid7()
+        mutations.append(("tag", tag, {"name": "Дача", "color": "green", "archived": False}))
+    now = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0)
+    lists = {}
+
+    def new_list(name, tag_ids=()):
+        time.sleep(0.002)  # distinct milliseconds keep the creation order of the UUIDv7 ids
+        lid = uuid7()
+        lists[name] = lid
+        mutations.append(("shopping_list", lid, {"name": name, "createdBy": me, "tagIds": list(tag_ids)}))
+        return lid
+
+    def item(list_id, name, category, added, quantity=None, note=None, tag_ids=(), status="needed", bought_at=None, count=0):
+        fields = {
+            "listId": list_id,
+            "name": name,
+            "addedBy": me,
+            "addedAt": instant(added),
+            "status": status,
+            "category": category,
+            "tagIds": list(tag_ids),
+            "boughtCount": count,
+        }
+        if quantity:
+            fields["quantity"] = quantity
+        if note:
+            fields["note"] = note
+        if bought_at:
+            fields.update(boughtBy=me, boughtAt=instant(bought_at))
+        iid = uuid7()
+        mutations.append(("shopping_item", iid, fields))
+        return iid
+
+    day, minute = datetime.timedelta(days=1), datetime.timedelta(minutes=1)
+    pharmacy = new_list("Аптека")
+    item(pharmacy, "Парацетамол", "pharmacy", now - 3 * day)
+    item(pharmacy, "Пластырь", "pharmacy", now - 3 * day)
+    dacha = new_list("Дача", [tag])
+    item(dacha, "Уголь", "other", now - 2 * day)
+    item(dacha, "Перчатки", "other", now - 2 * day, tag_ids=[tag])
+    groceries = new_list("Продукты")
+    to_buy = [
+        ("Молоко 2,5%", "dairy", "2 л", "Без лактозы, если будет"),
+        ("Хлеб", "bakery", None, None),
+        ("Яблоки", "produce", "1 кг", None),
+        ("Курица", "meat_fish", None, None),
+        ("Гречка", "grocery", None, None),
+        ("Шоколад", "sweets", None, None),
+        ("Туалетная бумага", "household", None, None),
+        ("Сметана", "dairy", None, None),
+    ]
+    for i, (name, category, quantity, note) in enumerate(to_buy):
+        item(groceries, name, category, now - (50 - i) * minute, quantity, note)
+    cleared = [("Яйца", "dairy", 9), ("Сыр", "dairy", 7), ("Бананы", "produce", 6), ("Творог", "dairy", 4),
+               ("Кефир", "dairy", 3), ("Огурцы", "produce", 2)]
+    for i, (name, category, count) in enumerate(cleared):
+        bought = now - (i + 1) * 4 * day
+        item(groceries, name, category, bought - day, status="cleared", bought_at=bought, count=count)
+    push(token, mutations)
+    state["shopping"] = lists
+    save_state(state)
+    for name in ("Гречка", "Туалетная бумага"):
+        tick(name, "dima", now - minute)
+    print("shopping lists:", ", ".join(lists))
+
+
+def tick(name, as_login="olga", at=None):
+    """Marks the first live item named NAME (any list, ignoring case) bought by that member."""
+    token = login(as_login)
+    me = call("GET", "/me", token=token)["memberId"]
+    found = next(
+        (
+            c
+            for c in all_changes(token)
+            if c["type"] == "shopping_item" and c["data"]["name"].lower() == name.lower()
+        ),
+        None,
+    )
+    if found is None:
+        sys.exit(f"no shopping item named {name!r}")
+    at = at or datetime.datetime.now(datetime.timezone.utc)
+    fields = {"status": "bought", "boughtBy": me, "boughtAt": instant(at), "boughtCount": found["data"].get("boughtCount", 0) + 1}
+    push(token, [("shopping_item", found["id"], fields)])
+    print(f"ticked {found['data']['name']} as {as_login}")
+
+
 def main(argv):
     if not argv or argv[0] in ("-h", "--help"):
         print(__doc__)
@@ -213,6 +331,17 @@ def main(argv):
         family()
     elif cmd == "tasks":
         tasks()
+    elif cmd == "shopping":
+        shopping()
+    elif cmd == "tick":
+        as_login = "olga"
+        if "--as" in args:
+            i = args.index("--as")
+            as_login = args[i + 1]
+            args = args[:i] + args[i + 2 :]
+        if not args:
+            sys.exit("usage: seed.py tick NAME [--as LOGIN]")
+        tick(" ".join(args), as_login)
     elif cmd == "token":
         print(login(*args[:2]))
     elif cmd == "login-code":

@@ -190,7 +190,7 @@ WebSocket `GET /api/v1/sync/events` (bearer token on the upgrade request).
 ## Client data model (SQLite)
 
 - **Typed tables** per entity type (`household`, `member`, `group_entity`, `person`, `tag`, `task`, `checklist_item`,
-  `task_completion`) — what the UI queries.
+  `task_completion`, `shopping_list`, `shopping_item`) — what the UI queries.
 - `sync_shadow(type, id, seq, deleted, data, PK(type, id))` — last known server state as JSON.
 - `sync_outbox(local_seq INTEGER PK AUTOINCREMENT, mutation_id UNIQUE, type, entity_id, op, fields, created_at, attempts, last_error)`.
 - `sync_state(key PK, value)` — `cursor`, `accessVersion`, `epoch`, `dataSchemaVersion`, `lastSuccessAt`, `lastError`.
