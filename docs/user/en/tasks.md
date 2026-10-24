@@ -26,7 +26,8 @@ Tap **Add** on Today or **Task** on the Tasks tab. Only the title is required:
 - **Assignees**: one or more family members, or **Anyone** ("whoever does it first"). A new task from Today or from
   "Mine" is assigned to you.
 - **Tags**: for example "Kids" or "Car". You can create a new tag right here.
-- **Reminder**: at the due time or some minutes, hours or days before. A task without a time reminds at 9:00.
+- **Reminder**: at the due time or some minutes, hours or days before. A task without a time reminds at 9:00. If
+  notifications for Lares are off on the phone, the app asks you to allow them.
 - **Tell me when it's done**: you get a notification when someone else completes your task.
 - **Checklist**: steps inside the task, such as vacuum, dust, mop.
 

@@ -191,3 +191,9 @@ planner). Notification taps: `NotificationPoster` got an optional `NotificationT
 not there yet) or the Tasks tab with «Задача удалена». Row building and ticking were extracted from `TasksViewModel`
 into `TaskRows` / `TaskTicker`. User manual "Tasks" (en, ru), CHANGELOG. Tests: `TodayViewModelTest` 3,
 `TagViewModelTest` 3, notification targets and `PendingNavigation` 2, settings switches 1, Today UI 2.
+
+### 2026-10-24 Reminder asks for the notification permission
+
+Customer decision after M1-07: choosing a reminder in the task editor while notifications are off shows «Разрешить
+уведомления?»; «Разрешить» runs the system request, or opens the app's notification settings when the system no
+longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the emulator.

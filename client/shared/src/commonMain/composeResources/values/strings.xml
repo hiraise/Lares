@@ -649,6 +649,8 @@
     <string name="task_field_assignees">Assignees</string>
     <string name="task_field_tags">Tags</string>
     <string name="task_field_reminder">Reminder</string>
+    <string name="task_reminder_needs_notifications_title">Allow notifications?</string>
+    <string name="task_reminder_needs_notifications_text">Notifications for Lares are off on this phone, so the reminder will not show. Allow them to get it on time.</string>
     <string name="task_value_not_set">Not set</string>
     <string name="task_time_none">No time</string>
     <string name="task_tags_none">None</string>

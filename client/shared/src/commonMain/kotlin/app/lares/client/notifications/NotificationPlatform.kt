@@ -95,6 +95,9 @@ interface NotificationPermissions {
 
     /** Opens the system screen where the user allows exact alarms. */
     fun openExactAlarmSettings()
+
+    /** Opens the app's notification settings, for when the system no longer asks (denied twice, Android < 13). */
+    fun openNotificationSettings()
 }
 
 /** The language notification texts from the server should use (`en`, `ru`): the app's UI language. */
@@ -140,4 +143,6 @@ class AllowAllNotificationPermissions : NotificationPermissions {
     override fun exactAlarmsAllowed(): Boolean = true
 
     override fun openExactAlarmSettings() = Unit
+
+    override fun openNotificationSettings() = Unit
 }

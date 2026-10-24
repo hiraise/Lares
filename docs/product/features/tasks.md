@@ -101,7 +101,8 @@ Technical design: [architecture/tasks.md](../../architecture/tasks.md).
   the assignees; for "anyone" tasks on the phones of everybody who sees tasks (Q-015). Tasks without a time
   remind at 09:00 on the day (or N days before at 09:00) (Q-016).
   *Client core: local reminders planned automatically for the member's tasks, up to 30 days ahead (M1-04).*
-  *UI: reminder choice in the editor (M1-06); a tap on a reminder opens the task, switch «Напоминания о задачах» (M1-07).*
+  *UI: reminder choice in the editor (M1-06); a tap on a reminder opens the task, switch «Напоминания о задачах» (M1-07).
+  Choosing a reminder while notifications are off asks to allow them (customer, 2026-10-24).*
 - **TSK-031** `MVP` `done` — Assignees get a notification when a task is assigned to them (not for "anyone" tasks, not to the
   person who assigned it).
   *Server: sent after commit to added assignees with `tasks.view` (M1-03). A tap opens the task (M1-07). End to end
@@ -154,6 +155,8 @@ Task (with recurrence rule, assignees and tags), checklist item, completion. Occ
 - Q-015 — reminders go to assignees; for "anyone" tasks to everyone with access to tasks.
 - Q-016 — tasks without a time: reminder at 09:00, overdue notice at 09:00 the next day.
 - Q-017 — besides assignees, the creator and members with "Edit others' tasks" can tick a task off.
+- 2026-10-24 — if notifications are off on the phone, choosing a reminder in the editor asks to allow them again (the
+  system dialog, or the phone's notification settings when the system no longer asks).
 
 ## Assumptions
 - A routine cannot be turned back into a one-off task; delete the series and create a new task instead.

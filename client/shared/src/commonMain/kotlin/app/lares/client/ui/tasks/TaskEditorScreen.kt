@@ -41,6 +41,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
+import app.lares.client.notifications.NotificationPermissions
 import app.lares.client.resources.Res
 import app.lares.client.resources.action_cancel
 import app.lares.client.resources.action_clear
@@ -53,6 +54,8 @@ import app.lares.client.resources.ic_group
 import app.lares.client.resources.ic_repeat
 import app.lares.client.resources.ic_schedule
 import app.lares.client.resources.ic_sell
+import app.lares.client.resources.notif_allow
+import app.lares.client.resources.notif_prompt_later
 import app.lares.client.resources.task_anyone
 import app.lares.client.resources.task_checklist
 import app.lares.client.resources.task_checklist_item
@@ -77,11 +80,14 @@ import app.lares.client.resources.task_field_time
 import app.lares.client.resources.task_field_title
 import app.lares.client.resources.task_next_time
 import app.lares.client.resources.task_notify_done
+import app.lares.client.resources.task_reminder_needs_notifications_text
+import app.lares.client.resources.task_reminder_needs_notifications_title
 import app.lares.client.resources.task_reminder_none
 import app.lares.client.resources.task_repeat_none
 import app.lares.client.resources.task_tags_none
 import app.lares.client.resources.task_time_none
 import app.lares.client.resources.task_value_not_set
+import app.lares.client.ui.common.rememberNotificationPermissionRequest
 import app.lares.client.ui.common.text
 import app.lares.client.ui.components.AppIcon
 import app.lares.client.ui.components.AppPage
@@ -104,6 +110,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import kotlin.time.Instant
@@ -136,7 +143,11 @@ fun TaskEditorRoute(
     onBack: () -> Unit,
     onCreated: (String) -> Unit,
     viewModel: TaskEditorViewModel = koinViewModel(key = "task-editor-$args") { parametersOf(args) },
+    permissions: NotificationPermissions = koinInject(),
 ) {
+    // A reminder needs notifications: ask when one is chosen while they are off (customer, 2026-10-24).
+    var askNotifications by rememberSaveable { mutableStateOf(false) }
+    val requestPermission = rememberNotificationPermissionRequest { granted -> if (!granted) permissions.openNotificationSettings() }
     val state by viewModel.state.collectAsStateWithLifecycle()
     val tagSheet by viewModel.tagSheet.collectAsState()
     var confirmDiscard by rememberSaveable { mutableStateOf(false) }
@@ -167,7 +178,10 @@ fun TaskEditorRoute(
             onToggleAssignee = viewModel::toggleAssignee,
             onToggleTag = viewModel::toggleTag,
             onNewTag = viewModel::newTag,
-            onReminder = viewModel::onReminder,
+            onReminder = { minutes ->
+                viewModel.onReminder(minutes)
+                if (minutes != null && !permissions.notificationsAllowed()) askNotifications = true
+            },
             onNotifyCreator = viewModel::onNotifyCreator,
             onAddItem = viewModel::addChecklistItem,
             onItem = viewModel::onChecklistItem,
@@ -176,6 +190,19 @@ fun TaskEditorRoute(
         ),
     )
     tagSheet?.let { TagSheetDialog(it, viewModel.tagEditor) }
+    if (askNotifications) {
+        ConfirmDialog(
+            title = stringResource(Res.string.task_reminder_needs_notifications_title),
+            text = stringResource(Res.string.task_reminder_needs_notifications_text),
+            confirmLabel = stringResource(Res.string.notif_allow),
+            dismissLabel = stringResource(Res.string.notif_prompt_later),
+            onConfirm = {
+                askNotifications = false
+                if (permissions.needsRuntimePermission) requestPermission() else permissions.openNotificationSettings()
+            },
+            onDismiss = { askNotifications = false },
+        )
+    }
     if (confirmDiscard) {
         ConfirmDialog(
             title = stringResource(Res.string.task_discard_title),

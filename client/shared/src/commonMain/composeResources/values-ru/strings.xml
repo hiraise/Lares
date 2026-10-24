@@ -670,6 +670,8 @@
     <string name="task_field_assignees">Исполнители</string>
     <string name="task_field_tags">Метки</string>
     <string name="task_field_reminder">Напоминание</string>
+    <string name="task_reminder_needs_notifications_title">Разрешить уведомления?</string>
+    <string name="task_reminder_needs_notifications_text">Уведомления Lares на этом телефоне выключены, поэтому напоминание не появится. Разрешите их, чтобы оно пришло вовремя.</string>
     <string name="task_value_not_set">Не задана</string>
     <string name="task_time_none">Без времени</string>
     <string name="task_tags_none">Нет</string>
