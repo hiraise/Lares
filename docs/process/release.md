@@ -32,7 +32,8 @@ runs CI (checks, smoke test, debug APK kept 14 days).
    commits are allowed into `main`.
 5. **Watch** `gh run list --workflow release.yml`. The workflow runs all checks, builds and verifies the signed APK,
    pushes `ghcr.io/hiraise/lares-server:X.Y.Z` and `:latest`, then creates the tag `vX.Y.Z` and the GitHub release with
-   the CHANGELOG notes. The release branch is deleted automatically after the merge.
+   the APK, its checksum file `lares-X.Y.Z.apk.sha256` and the CHANGELOG notes (with the certificate fingerprint and
+   the APK file SHA-256). The release branch is deleted automatically after the merge.
 6. Tell the customer in Russian what was released, with the release link. Start the next release branch.
 
 If the release workflow fails: nothing is tagged yet; fix the cause (secrets, registry) and re-run the failed run
@@ -64,7 +65,8 @@ Renaming a CI job means updating `main.json` and re-running the script.
 | CI copy | GitHub secrets `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` (`lares`), `ANDROID_KEY_PASSWORD` |
 | Certificate SHA-256 (public) | `client/android/release-cert.sha256` |
 
-Check any APK: `tools/release/verify-apk.sh lares-X.Y.Z.apk`.
+Check any APK: `tools/release/verify-apk.sh lares-X.Y.Z.apk` (signed with the Lares key). Check that a download is
+complete and unchanged: `sha256sum -c lares-X.Y.Z.apk.sha256` (macOS: `shasum -a 256 -c`).
 
 Build a signed APK locally (rarely needed):
 

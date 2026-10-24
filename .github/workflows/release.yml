@@ -2,7 +2,8 @@ name: Release
 
 # Every push to main is a release (ADR-0020): main is protected and changes only through a merged release/X.Y.Z pull
 # request, already checked by CI (job release-pr). This workflow builds and tests, pushes the multi-arch server image to
-# GHCR, then creates the tag vX.Y.Z and the GitHub Release with the signed APK and notes from CHANGELOG.md. The tag is
+# GHCR, then creates the tag vX.Y.Z and the GitHub Release with the signed APK, its SHA-256 checksum file and notes from
+# CHANGELOG.md. The tag is
 # created last, so a failed run can simply be re-run. Process: docs/process/release.md.
 on:
   push:
@@ -44,9 +45,6 @@ jobs:
       - name: Check, test and build the server distribution
         run: ./gradlew check :server:installDist --stacktrace
 
-      - name: Release notes from CHANGELOG.md
-        run: tools/release/notes.sh "${{ steps.meta.outputs.version }}" > "$RUNNER_TEMP/notes.md"
-
       # The release APK must be signed with the permanent Lares key (ADR-0019); without it the release fails.
       - name: Build and verify the signed APK
         env:
@@ -67,6 +65,12 @@ jobs:
           apk="$RUNNER_TEMP/lares-$VERSION.apk"
           cp client/android/build/outputs/apk/release/android-release.apk "$apk"
           tools/release/verify-apk.sh "$apk"
+          (cd "$RUNNER_TEMP" && sha256sum "lares-$VERSION.apk" > "lares-$VERSION.apk.sha256")
+
+      - name: Release notes from CHANGELOG.md
+        env:
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: tools/release/notes.sh "$VERSION" "$RUNNER_TEMP/lares-$VERSION.apk" > "$RUNNER_TEMP/notes.md"
 
       - uses: docker/setup-qemu-action@v4
 
@@ -93,10 +97,10 @@ jobs:
             org.opencontainers.image.version=${{ steps.meta.outputs.version }}
             org.opencontainers.image.licenses=AGPL-3.0-or-later
 
-      - name: Tag and GitHub Release with the APK
+      - name: Tag and GitHub Release with the APK and its checksum
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ steps.meta.outputs.version }}
         run: |
-          gh release create "v$VERSION" "$RUNNER_TEMP/lares-$VERSION.apk" --target "$GITHUB_SHA" \
+          gh release create "v$VERSION" "$RUNNER_TEMP/lares-$VERSION.apk" "$RUNNER_TEMP/lares-$VERSION.apk.sha256" --target "$GITHUB_SHA" \
             --title "Lares v$VERSION" --notes-file "$RUNNER_TEMP/notes.md"
