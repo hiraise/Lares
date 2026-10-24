@@ -6,7 +6,7 @@ Updated: 2026-10-24
 
 **M0 Foundation — all plans M0-01…M0-11 done; M0 acceptance with the customer pending.
 M1 Tasks — all plans M1-01…M1-07 done; M1 acceptance with the customer next.
-M2 Shopping lists — spec approved, design and plans M2-01…M2-06 ready; next: `/plan-run M2-01`.**
+M2 Shopping lists — in progress: M2-01 done; next: `/plan-run M2-02`.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
@@ -21,6 +21,8 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 
 ## Last completed
 
+- 2026-10-24 M2-01 Shopping contract: data classes and enums, quick-add parser, department guessing (dictionary passes
+  the design table), write rules and validators; 25 contract tests.
 - 2026-10-24 M2 planning: shopping spec detailed and approved (Q-018…Q-020 answered), [shopping design](architecture/shopping.md),
   ADR-0021 (items kept as the list's memory: suggestions, no duplicates, remembered departments), plans M2-01…M2-06.
 - 2026-10-24 Release **v0.2.0** (M0 + M1) through the new flow: release pull request #1 merged, signed APK, server
@@ -70,7 +72,7 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 2. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
 3. M4 plan: re-run the load test with location uploads every 30 s (ADR-0015).
 4. After the M1 acceptance: set the tasks spec to `implemented`.
-5. Execute M2-01…M2-06 in order (`/plan-run M2-01`).
+5. Execute M2-02…M2-06 in order (`/plan-run M2-02`).
 
 ## Plan progress
 

@@ -206,3 +206,8 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   everyone with Shopping), Q-019 (automatic store departments, corrections remembered), Q-020 (no shopping
   notifications; "who is shopping" from recent ticks). Design in [architecture/shopping.md](architecture/shopping.md),
   ADR-0021 (an item is "this product in this list", kept after purchase as the list's memory), six plans M2-01…M2-06.
+- 2026-10-24 M2-01 Shopping contract: `ShoppingListData`, `ShoppingItemData`, lenient `ShoppingItemStatus` (→ `cleared`) and
+  `ProductCategory` (→ `other`, store order), entity types `shopping_list`/`shopping_item`; `ShoppingNames` (normalize,
+  match key, display name), `QuickAdd` parser (splitting, trailing quantities with units, `x2`), department dictionary
+  (≥ 20 Russian and ≥ 15 English stems per department, phrases, modifiers) with `ShoppingCategories.guess`, `ShoppingRules`
+  and `WriteRules` gates, validators and normalizers; 25 contract tests, all rows of the design's department table pass.

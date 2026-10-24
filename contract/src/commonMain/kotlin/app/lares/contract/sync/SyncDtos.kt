@@ -19,6 +19,8 @@ object EntityTypes {
     const val TASK = "task"
     const val CHECKLIST_ITEM = "checklist_item"
     const val TASK_COMPLETION = "task_completion"
+    const val SHOPPING_LIST = "shopping_list"
+    const val SHOPPING_ITEM = "shopping_item"
 }
 
 /** Limits of pull and push. */
