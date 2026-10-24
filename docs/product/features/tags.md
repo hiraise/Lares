@@ -24,6 +24,7 @@ Tags complement budget categories: car spending spread over "Fuel", "Insurance",
   list, create/edit sheet with the palette, archive section, delete (M0-08). Icons are not offered in the UI yet.*
 - **TAG-002** `MVP` `todo` — A tag can be attached to tasks, shopping lists and items, events, transactions and debts (as each module ships).
 - **TAG-003** `MVP` `todo` — Each module list can be filtered by tag.
+  *Tasks done: «Метка» chip with a tag picker in the Tasks tab (M1-05).*
 - **TAG-004** `MVP` `todo` — Tag page aggregates linked items across modules, grouped by module.
 - **TAG-005** `MVP` `todo` — Tag page shows spending for the tag over a chosen period (after M5).
 - **TAG-006** `MVP` `done` — Tag names are unique within a household, case-insensitive.

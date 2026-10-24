@@ -138,7 +138,8 @@ Icon names in use (Material Symbols): `home`, `task_alt`, `shopping_cart`, `cale
 `language`, `devices`, `help`, `push_pin`, `layers`, `my_location`, `pause`, `school`, `restaurant`, `directions_car`,
 `beach_access`, `swap_horiz`, `event_repeat`, `local_grocery_store`, `battery_3_bar`, `battery_5_bar`, `battery_6_bar`;
 added in M0-07: `visibility`, `visibility_off`, `close`, `logout`, `delete`, `info`, `qr_code_2`, `content_paste`, `person`,
-`palette`, `sync`; added in M0-08: `share`, `lock_reset`, `person_remove`, `expand_less`.
+`palette`, `sync`; added in M0-08: `share`, `lock_reset`, `person_remove`, `expand_less`; added in M1-05: `checklist`, `edit`, `skip_next`,
+`alarm`, `undo`, `notes`.
 
 ## People
 

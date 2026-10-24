@@ -5,6 +5,13 @@ Versioning: [SemVer](https://semver.org/) from the first release.
 
 ## [Unreleased]
 
+### Added
+
+- Tasks tab (M1-05): my tasks and all tasks by sections (overdue, today, upcoming, no date), chips «Мои», «Все»,
+  «Поручено мной», tag filter, search and filters by assignee and state; tick a task off right in the list and undo it.
+  Task page with all details, checklist, history of a routine, skip one occurrence, delete one task or the whole
+  series. Creating and editing tasks comes next.
+
 ### Changed
 
 - Android APKs in releases are signed with a permanent Lares key, so new versions install over old ones. The first

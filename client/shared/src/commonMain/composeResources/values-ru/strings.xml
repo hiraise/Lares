@@ -459,4 +459,195 @@
     <string name="task_reminder_tomorrow_at">Срок: завтра в %1$s</string>
     <string name="task_reminder_date">Срок: %1$s</string>
     <string name="task_reminder_date_at">Срок: %1$s в %2$s</string>
+
+    <!-- Tasks (plan M1-05) -->
+    <string name="action_undo">Отменить</string>
+    <string name="day_today">Сегодня</string>
+    <string name="day_tomorrow">Завтра</string>
+    <string name="day_yesterday">Вчера</string>
+    <!-- %1$s day number, %2$s short month name -->
+    <string name="date_day_month_short">%1$s %2$s</string>
+    <!-- Two items of a list: "Mon and Thu" -->
+    <string name="list_and">%1$s и %2$s</string>
+    <string-array name="weekdays_short">
+        <item>пн</item>
+        <item>вт</item>
+        <item>ср</item>
+        <item>чт</item>
+        <item>пт</item>
+        <item>сб</item>
+        <item>вс</item>
+    </string-array>
+    <string-array name="months_short">
+        <item>янв.</item>
+        <item>февр.</item>
+        <item>мар.</item>
+        <item>апр.</item>
+        <item>мая</item>
+        <item>июн.</item>
+        <item>июл.</item>
+        <item>авг.</item>
+        <item>сент.</item>
+        <item>окт.</item>
+        <item>нояб.</item>
+        <item>дек.</item>
+    </string-array>
+    <!-- Weekly routine on one weekday, Monday first -->
+    <string-array name="task_repeat_every_weekday">
+        <item>По понедельникам</item>
+        <item>По вторникам</item>
+        <item>По средам</item>
+        <item>По четвергам</item>
+        <item>По пятницам</item>
+        <item>По субботам</item>
+        <item>По воскресеньям</item>
+    </string-array>
+    <!-- Repeat rule summaries. %1$s weekdays ("Mon and Thu"), day of month, or day and month -->
+    <string name="task_repeat_daily">Каждый день</string>
+    <plurals name="task_repeat_days">
+        <item quantity="one">Раз в %1$d день</item>
+        <item quantity="few">Раз в %1$d дня</item>
+        <item quantity="many">Раз в %1$d дней</item>
+        <item quantity="other">Раз в %1$d дня</item>
+    </plurals>
+    <string name="task_repeat_weekly_on">По %1$s</string>
+    <plurals name="task_repeat_weeks_on">
+        <item quantity="one">Раз в %1$d неделю: %2$s</item>
+        <item quantity="few">Раз в %1$d недели: %2$s</item>
+        <item quantity="many">Раз в %1$d недель: %2$s</item>
+        <item quantity="other">Раз в %1$d недели: %2$s</item>
+    </plurals>
+    <string name="task_repeat_monthly">Каждый месяц, %1$s числа</string>
+    <plurals name="task_repeat_months">
+        <item quantity="one">Раз в %1$d месяц, %2$s числа</item>
+        <item quantity="few">Раз в %1$d месяца, %2$s числа</item>
+        <item quantity="many">Раз в %1$d месяцев, %2$s числа</item>
+        <item quantity="other">Раз в %1$d месяца, %2$s числа</item>
+    </plurals>
+    <string name="task_repeat_yearly">Каждый год, %1$s</string>
+    <plurals name="task_repeat_years">
+        <item quantity="one">Раз в %1$d год, %2$s</item>
+        <item quantity="few">Раз в %1$d года, %2$s</item>
+        <item quantity="many">Раз в %1$d лет, %2$s</item>
+        <item quantity="other">Раз в %1$d года, %2$s</item>
+    </plurals>
+    <string name="task_repeat_after_day">Раз в день после выполнения</string>
+    <string name="task_repeat_after_week">Раз в неделю после выполнения</string>
+    <string name="task_repeat_after_month">Раз в месяц после выполнения</string>
+    <string name="task_repeat_after_year">Раз в год после выполнения</string>
+    <plurals name="task_repeat_after_days">
+        <item quantity="one">Раз в %1$d день после выполнения</item>
+        <item quantity="few">Раз в %1$d дня после выполнения</item>
+        <item quantity="many">Раз в %1$d дней после выполнения</item>
+        <item quantity="other">Раз в %1$d дня после выполнения</item>
+    </plurals>
+    <plurals name="task_repeat_after_weeks">
+        <item quantity="one">Раз в %1$d неделю после выполнения</item>
+        <item quantity="few">Раз в %1$d недели после выполнения</item>
+        <item quantity="many">Раз в %1$d недель после выполнения</item>
+        <item quantity="other">Раз в %1$d недели после выполнения</item>
+    </plurals>
+    <plurals name="task_repeat_after_months">
+        <item quantity="one">Раз в %1$d месяц после выполнения</item>
+        <item quantity="few">Раз в %1$d месяца после выполнения</item>
+        <item quantity="many">Раз в %1$d месяцев после выполнения</item>
+        <item quantity="other">Раз в %1$d месяца после выполнения</item>
+    </plurals>
+    <plurals name="task_repeat_after_years">
+        <item quantity="one">Раз в %1$d год после выполнения</item>
+        <item quantity="few">Раз в %1$d года после выполнения</item>
+        <item quantity="many">Раз в %1$d лет после выполнения</item>
+        <item quantity="other">Раз в %1$d года после выполнения</item>
+    </plurals>
+    <!-- Meta line of a task row. %1$s time (20:00), date, or member name and time -->
+    <string name="task_meta_until">до %1$s</string>
+    <string name="tasks_overdue_since">Просрочено с %1$s</string>
+    <string name="task_done_by_at">%1$s · в %2$s</string>
+    <!-- Reminder labels -->
+    <string name="task_reminder_at_due">В момент срока</string>
+    <string name="task_reminder_on_day">В день задачи, в 9:00</string>
+    <plurals name="task_reminder_minutes">
+        <item quantity="one">За %1$d минуту</item>
+        <item quantity="few">За %1$d минуты</item>
+        <item quantity="many">За %1$d минут</item>
+        <item quantity="other">За %1$d минуты</item>
+    </plurals>
+    <plurals name="task_reminder_hours">
+        <item quantity="one">За %1$d час</item>
+        <item quantity="few">За %1$d часа</item>
+        <item quantity="many">За %1$d часов</item>
+        <item quantity="other">За %1$d часа</item>
+    </plurals>
+    <plurals name="task_reminder_days">
+        <item quantity="one">За %1$d день</item>
+        <item quantity="few">За %1$d дня</item>
+        <item quantity="many">За %1$d дней</item>
+        <item quantity="other">За %1$d дня</item>
+    </plurals>
+    <!-- Tasks tab. %1$s counts -->
+    <string name="tasks_search">Поиск</string>
+    <string name="tasks_search_hint">Поиск по названию</string>
+    <string name="tasks_search_close">Закрыть поиск</string>
+    <string name="tasks_filters">Фильтры</string>
+    <string name="tasks_filter_assignee">Исполнитель</string>
+    <string name="tasks_filter_anyone">Любой</string>
+    <string name="tasks_filter_state">Состояние</string>
+    <string name="tasks_state_open">Открытые</string>
+    <string name="tasks_state_done">Выполненные</string>
+    <string name="tasks_chip_all">Все · %1$s</string>
+    <string name="tasks_chip_mine">Мои · %1$s</string>
+    <string name="tasks_chip_assigned_by_me">Поручено мной</string>
+    <string name="tasks_chip_tag">Метка</string>
+    <string name="tasks_scopes">Какие задачи</string>
+    <string name="tasks_tag_picker_title">Фильтр по метке</string>
+    <string name="tasks_tag_clear">Убрать фильтр по метке</string>
+    <string name="tasks_tags_none">Меток пока нет</string>
+    <string name="tasks_section_overdue">Просрочено · %1$s</string>
+    <string name="tasks_section_today">Сегодня · %1$s</string>
+    <string name="tasks_section_upcoming">Скоро</string>
+    <string name="tasks_section_no_date">Без срока</string>
+    <string name="tasks_section_done">Выполнено</string>
+    <string name="tasks_empty_mine">Для вас ничего нет. Хорошего дня</string>
+    <string name="tasks_empty_all">Задач пока нет</string>
+    <string name="tasks_empty_filtered">Нет задач по этим фильтрам</string>
+    <string name="tasks_reset_filters">Сбросить фильтры</string>
+    <string name="tasks_new">Задача</string>
+    <string name="tasks_only_assignees">Отметить могут только исполнители</string>
+    <string name="tasks_done_snackbar">Выполнено</string>
+    <string name="tasks_skipped_snackbar">Пропущено</string>
+    <string name="task_mark">Отметить: %1$s</string>
+    <string name="task_unmark">Снять отметку: %1$s</string>
+    <!-- Task page -->
+    <string name="task_action_edit">Изменить</string>
+    <string name="task_action_more">Другие действия</string>
+    <string name="task_action_skip">Пропустить</string>
+    <string name="task_action_complete">Выполнить</string>
+    <string name="task_action_reopen">Не выполнено</string>
+    <string name="task_status_overdue">Просрочено · %1$s</string>
+    <!-- %1$s member name, %2$s date and time -->
+    <string name="task_status_done">Выполнено: %1$s, %2$s</string>
+    <string name="task_no_date">Без срока</string>
+    <string name="task_next_time">Следующий раз: %1$s</string>
+    <string name="task_anyone">Кто угодно</string>
+    <string name="task_created_by">Автор: %1$s</string>
+    <string name="task_checklist">Чек-лист</string>
+    <string name="task_checklist_progress">Чек-лист · %1$s</string>
+    <string name="task_checklist_add">Добавить пункт</string>
+    <string name="task_checklist_item">Пункт</string>
+    <string name="task_checklist_rename">Переименовать</string>
+    <string name="task_history">История</string>
+    <string name="task_history_empty">Ещё не выполнялась</string>
+    <!-- %1$s member name, %2$s weekday, date and time -->
+    <string name="task_history_done">%1$s · %2$s</string>
+    <string name="task_history_skipped">Пропущено · %1$s · %2$s</string>
+    <!-- %1$s short weekday, %2$s short date, %3$s time: "Tue, Oct 21, 19:40" -->
+    <string name="task_history_when">%1$s, %2$s, %3$s</string>
+    <string name="task_history_undo">Отменить запись</string>
+    <string name="task_delete_title">Удалить задачу?</string>
+    <string name="task_delete_text">Задача, её чек-лист и история удалятся у всех.</string>
+    <string name="task_delete_routine_title">Удалить регулярную задачу</string>
+    <string name="task_delete_occurrence">Только это повторение</string>
+    <string name="task_delete_series">Всю серию</string>
+    <string name="task_editor_new">Новая задача</string>
+    <string name="task_editor_edit">Изменить задачу</string>
 </resources>

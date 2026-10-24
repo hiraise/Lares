@@ -154,3 +154,16 @@ Current state and next steps: [STATUS.md](STATUS.md).
   (`task:<id>` reminders, collector on login, `SyncWorker` reconcile; en/ru body texts). `seed.py tasks` (sample data;
   values must be canonical — the server rejects fields that change in a decode round trip, e.g. missing `weekdays: []`).
   Tests: 31 client unit tests (views 11, writer 10, repository 4, reminders 5, migration 1), 5 multi-device `TaskSyncTest`.
+
+- 2026-10-24 **M1-05 Tasks UI.** `ui/tasks/`: Tasks tab (`TasksViewModel`/`TasksScreen`: chips «Все · N», «Мои · N»
+  (default), «Поручено мной», «Метка» with a tag picker, search, filters sheet with assignee and open/done, sections with
+  counts, ticking off with a 5 s undo snackbar, "not allowed" snackbar, gradient FAB), task page
+  (`TaskDetailViewModel`/`TaskDetailScreen`: status, «Выполнить» / «Не выполнено», facts, checklist with inline add and
+  long-press rename/delete, routine history with undo of the latest entry, skip, delete with "this occurrence / whole
+  series"), stub `TaskEditor` route for M1-06. Shared `TaskComponents` (row, checkbox, tag chip, avatars) for M1-07.
+  Pure formatting in `TasksLogic` returning `UiText` (resource descriptions resolved in Compose or with `getString`), so
+  texts follow the app language and are testable in en and ru. Icons `checklist`, `edit`, `skip_next`, `alarm`, `undo`,
+  `notes`; arrays `weekdays_short`, `months_short`. Tests: `TasksLogicTest` 8, `TasksViewModelTest` 4,
+  `TaskDetailViewModelTest` 4, `TasksUiTest` 3. Emulator walkthrough (ru/en, light/dark, admin and kid) passed; fixed
+  caret jumps in the search field (local text state) and the rename dialog (caret at the end). The `lares` AVD was
+  created (only the pre-rename `familyhub` AVD existed).

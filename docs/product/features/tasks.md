@@ -1,7 +1,7 @@
 ---
 status: approved  # customer, 2026-10-23 (Q-014…Q-017 answered the same day)
 milestone: M1
-updated: 2026-10-23
+updated: 2026-10-24
 ---
 # Tasks (TSK)
 
@@ -33,21 +33,26 @@ Technical design: [architecture/tasks.md](../../architecture/tasks.md).
 - **TSK-002** `MVP` `todo` — Assignee options: specific members, or "anyone" (no assignees). One completion closes the
   task (or the occurrence) for everybody, also when several members are assigned (Q-014).
   *Server: assignees checked against household members (M1-02).*
-- **TSK-003** `MVP` `todo` — Task states: open, done. Completion records who and when. Reopen is possible
+- **TSK-003** `MVP` `done` — Task states: open, done. Completion records who and when. Reopen is possible
   (by the person who completed it, the creator, or a member with "Edit others' tasks").
   *Server: completions (immutable, undo deletes) and their permissions done (M1-02).*
   *Client core: complete, undo, reopen offline (M1-04).*
-- **TSK-004** `MVP` `todo` — Checklist inside a task (sub-items with their own done flag). In a routine the checklist starts
+  *UI: tick off in the list with undo, «Выполнить» / «Не выполнено» on the task page (M1-05).*
+- **TSK-004** `MVP` `done` — Checklist inside a task (sub-items with their own done flag). In a routine the checklist starts
   unticked for every occurrence.
   *Server: checklist items; ticking needs completion rights, other changes edit rights (M1-02).*
   *Client core: checklist add/rename/tick/delete; routine ticks reset per occurrence (M1-04).*
+  *UI: task page checklist — tick, inline add, long-press rename/delete; progress «2/5» in rows (M1-05).*
 - **TSK-005** `MVP` `todo` — Edit and delete tasks; deleting a routine asks "this occurrence or the whole series"
   ("this occurrence" = skip it, the next one becomes current).
   *Server: edit, delete with its checklist and completions, skip as a completion (M1-02).*
   *Client core: edit (changed fields only), delete, skip (M1-04).*
+  *UI: delete (one-off: confirm; routine: «Только это повторение» / «Всю серию»), skip from the task page (M1-05);
+  editing comes with the editor (M1-06).*
 - **TSK-006** `later` `todo` — Comments and photo attachments on a task (photos in M5b, [files](files.md); comments later).
-- **TSK-007** `MVP` `todo` — Undo right after completing (snackbar), and "Mark as not done" later from the task.
-  *Client core: `undo(completionId)`, `reopen(taskId)` (M1-04); UI in M1-05.*
+- **TSK-007** `MVP` `done` — Undo right after completing (snackbar), and "Mark as not done" later from the task.
+  *Client core: `undo(completionId)`, `reopen(taskId)` (M1-04); UI: 5 s snackbar «Выполнено / Отменить», untick a
+  "done today" row, «Не выполнено» on the task page (M1-05).*
 
 ### Recurring tasks (routines)
 
@@ -60,23 +65,27 @@ Technical design: [architecture/tasks.md](../../architecture/tasks.md).
   when the next scheduled date comes, the missed one is dropped.
   *Client core: current occurrence and overdue state recomputed every minute offline (M1-04).*
 - **TSK-014** `later` `todo` — Rotation: assignees of a routine take turns in a set order.
-- **TSK-015** `MVP` `todo` — Completion history per routine (who did it and when; skipped occurrences marked).
+- **TSK-015** `MVP` `done` — Completion history per routine (who did it and when; skipped occurrences marked).
   *Server: completions with author, time, occurrence and skip flag are kept and synced (M1-02).*
   *Client core: history newest first on the task detail view (M1-04).*
+  *UI: «История» on the routine page, last 20 entries, undo of the latest one (M1-05).*
 - **TSK-016** `MVP` `todo` — A routine can be completed early (before its date); for "after completion" schedules the next
   date counts from the actual completion.
 
 ### Views
 
-- **TSK-020** `MVP` `todo` — "My tasks": assigned to me or "anyone", grouped overdue / today / upcoming / no date.
+- **TSK-020** `MVP` `done` — "My tasks": assigned to me or "anyone", grouped overdue / today / upcoming / no date.
   Tasks completed today stay visible, ticked, at the end of "Today".
-  *Client core: scope filter, sections and "done today" rows (M1-04); screen in M1-05.*
-- **TSK-021** `MVP` `todo` — "All tasks" with filters: assignee, tag, state (open / done); "Assigned by me" (created by me
+  *Client core: scope filter, sections and "done today" rows (M1-04); Tasks tab with «Мои» as the default chip (M1-05).*
+- **TSK-021** `MVP` `done` — "All tasks" with filters: assignee, tag, state (open / done); "Assigned by me" (created by me
   for others); search by title.
-  *Client core: filters and chip counts (M1-04); screen in M1-05.*
+  *Client core: filters and chip counts (M1-04); chips «Все · N», «Мои · N», «Поручено мной», «Метка», search,
+  filters sheet (assignee, open / done) (M1-05).*
 - **TSK-022** `MVP` `todo` — Tasks with a due date also appear in the calendar agenda (after M3).
 - **TSK-023** `MVP` `todo` — "Today" home screen block: my overdue and today's tasks, ticking them off right there (FND-063).
-- **TSK-024** `MVP` `todo` — Task page: all fields, checklist, history (routines), who created it.
+- **TSK-024** `MVP` `done` — Task page: all fields, checklist, history (routines), who created it.
+  *UI: task page with status, main action, facts (date, repeat and next time, assignees, tags, reminder, notes,
+  author), checklist, history; edit opens the editor (M1-06) (M1-05).*
 
 ### Reminders and notifications
 

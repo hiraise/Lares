@@ -83,10 +83,12 @@ fun DetailTopBar(
 fun SectionHeader(
     text: String,
     modifier: Modifier = Modifier,
+    color: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.onSurface,
 ) {
     Text(
         text,
         style = MaterialTheme.typography.titleLarge,
+        color = color,
         modifier = modifier.padding(horizontal = Spacing.xs).semantics { heading() },
     )
 }

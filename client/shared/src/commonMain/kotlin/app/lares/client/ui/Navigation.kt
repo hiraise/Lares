@@ -39,6 +39,8 @@ import app.lares.client.ui.settings.NotificationSettingsRoute
 import app.lares.client.ui.settings.ProfileRoute
 import app.lares.client.ui.settings.SettingsNavigation
 import app.lares.client.ui.settings.SettingsRoute
+import app.lares.client.ui.tasks.TaskDetailRoute
+import app.lares.client.ui.tasks.TaskEditorRoute
 import app.lares.contract.DeepLink
 import app.lares.contract.permissions.Section
 import kotlinx.coroutines.flow.filterNotNull
@@ -140,6 +142,17 @@ data class PersonDestination(
 @Serializable
 data object FamilySettingsDestination
 
+@Serializable
+data class TaskDetailDestination(
+    val id: String,
+)
+
+/** The task editor (M1-06); [id] null = a new task. */
+@Serializable
+data class TaskEditorDestination(
+    val id: String? = null,
+)
+
 /** Server → Setup | Login | InviteAccept, QR scanner; links (opened or scanned) continue on [LinkDestination]. */
 @Composable
 fun OnboardingNavHost(
@@ -221,8 +234,21 @@ fun MainNavHost() {
                     onDevices = { navController.navigate(DevicesDestination) },
                     onSection = { navController.navigate(SectionPageDestination(it)) },
                     onFamily = { navController.navigate(FamilyDestination(it)) },
+                    onTask = { navController.navigate(TaskDetailDestination(it)) },
+                    onTaskEditor = { navController.navigate(TaskEditorDestination(it)) },
                 ),
             )
+        }
+        composable<TaskDetailDestination> { entry ->
+            val id = entry.toRoute<TaskDetailDestination>().id
+            TaskDetailRoute(
+                id,
+                onBack = { navController.popBackStack() },
+                onEdit = { navController.navigate(TaskEditorDestination(id)) },
+            )
+        }
+        composable<TaskEditorDestination> { entry ->
+            TaskEditorRoute(entry.toRoute<TaskEditorDestination>().id, onBack = { navController.popBackStack() })
         }
         composable<SectionPageDestination> { entry ->
             SectionPlaceholderPage(entry.toRoute<SectionPageDestination>().section, onBack = { navController.popBackStack() })

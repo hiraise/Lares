@@ -73,7 +73,7 @@ Milestone [M1 Tasks](../product/roadmap.md#m1-tasks). [Tasks spec](../product/fe
 | [M1-02](M1/02-tasks-server-sync.md) | Tasks on the server: tables, sync handlers, permissions, cascade | M1-01 | done |
 | [M1-03](M1/03-tasks-server-notifications.md) | Task notifications on the server: assigned, completed, overdue job | M1-02 | done |
 | [M1-04](M1/04-tasks-client-data.md) | Tasks in the client core: tables, adapters, views, writer, reminders | M1-02 | done |
-| [M1-05](M1/05-tasks-list-and-detail-ui.md) | Tasks UI: the Tasks tab and the task page | M1-04 | ready |
+| [M1-05](M1/05-tasks-list-and-detail-ui.md) | Tasks UI: the Tasks tab and the task page | M1-04 | done |
 | [M1-06](M1/06-task-editor-ui.md) | Task editor: repeat rules, assignees, tags, reminder | M1-05 | ready |
 | [M1-07](M1/07-tasks-today-tags-notifications.md) | Today block, tag page, notification settings and taps, M1 docs | M1-06, M1-03 | ready |
 
