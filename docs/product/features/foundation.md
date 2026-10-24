@@ -116,7 +116,7 @@ localization and deployment — everything feature modules depend on.
   without Google services ([ADR-0006](../../adr/0006-no-proprietary-dependencies.md)).
   *Infrastructure done (M0-09): UnifiedPush registration, encrypted Web Push from the server (tested against a fake push
   service), sync tickles, test notification. Open: end-to-end check on a real phone with ntfy (needs the deployed
-  ntfy from M0-10); the task notifications themselves come with M1.*
+  ntfy from M0-10). Task notifications (assigned, completed, overdue) are sent through it from M1-03.*
 - **FND-052** `MVP` `done` — Each user can mute notification types.
   *Stored per member on the server (muted types are not sent), mirrored on the phone; switches in Settings ›
   Notifications. M0 shows only test notifications; task types get switches in M1 (M0-09).*

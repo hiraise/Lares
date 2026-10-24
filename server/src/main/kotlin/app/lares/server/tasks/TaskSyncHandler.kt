@@ -9,8 +9,10 @@ import app.lares.contract.permissions.Viewer
 import app.lares.contract.sync.EntityTypes
 import app.lares.contract.sync.MutationOp
 import app.lares.contract.validation.Validators
+import app.lares.server.platform.db.afterCommit
 import app.lares.server.platform.http.ApiException
 import app.lares.server.platform.sync.recordChange
+import app.lares.server.platform.toContract
 import app.lares.server.sync.ChangeRow
 import app.lares.server.sync.MutationContext
 import app.lares.server.sync.StoredEntity
@@ -27,9 +29,12 @@ import java.util.UUID
 /**
  * Tasks and routines (TSK-001…TSK-011). Entity-level rights come from `TaskRules`; deleting a task also tombstones its
  * checklist items and completions. A rule this version cannot read (unknown mode or unit) decodes to `null` and fails the
- * strict round trip of `WritableSyncHandler` with `recurrence: INVALID_FORMAT`.
+ * strict round trip of `WritableSyncHandler` with `recurrence: INVALID_FORMAT`. Every write refreshes the overdue check
+ * time; added assignees are told after commit (TSK-031).
  */
-class TaskSyncHandler : WritableSyncHandler<TaskData>(TaskData.serializer()) {
+class TaskSyncHandler(
+    private val notifier: TaskNotifier,
+) : WritableSyncHandler<TaskData>(TaskData.serializer()) {
     override val type: String = EntityTypes.TASK
 
     override fun changesSince(
@@ -111,6 +116,8 @@ class TaskSyncHandler : WritableSyncHandler<TaskData>(TaskData.serializer()) {
             it[createdAt] = ctx.now
             it[updatedAt] = ctx.now
         }
+        TaskOverdueTracker.refresh(ctx.householdId, id, ctx.now.toContract())
+        notifyAssigned(ctx, id, data.assigneeIds)
     }
 
     override fun update(
@@ -119,10 +126,33 @@ class TaskSyncHandler : WritableSyncHandler<TaskData>(TaskData.serializer()) {
         data: TaskData,
         seq: Long,
     ) {
+        val before =
+            TaskRepository
+                .get(ctx.householdId, id)
+                ?.data
+                ?.assigneeIds
+                .orEmpty()
         TaskTable.update({ (TaskTable.householdId eq ctx.householdId) and (TaskTable.id eq id) }) {
             TaskRepository.writeTask(it, data)
             it[TaskTable.seq] = seq
             it[updatedAt] = ctx.now
+        }
+        TaskOverdueTracker.refresh(ctx.householdId, id, ctx.now.toContract())
+        notifyAssigned(ctx, id, data.assigneeIds - before)
+    }
+
+    /** `task.assigned` to members added by this write, except the writer; nothing for removals or "anyone" tasks. */
+    private fun notifyAssigned(
+        ctx: MutationContext,
+        id: UUID,
+        added: Set<String>,
+    ) {
+        val actor = UUID.fromString(ctx.viewer.memberId)
+        // Added ids were checked by checkUpsert; the stored ones may be anything a client kept.
+        val members = added.mapNotNullTo(mutableSetOf()) { runCatching { UUID.fromString(it) }.getOrNull() } - actor
+        if (members.isEmpty()) return
+        TransactionManager.current().afterCommit {
+            notifier.enqueue(TaskNotifier.Assigned(ctx.householdId, id, actor, members))
         }
     }
 
@@ -166,5 +196,6 @@ class TaskSyncHandler : WritableSyncHandler<TaskData>(TaskData.serializer()) {
                 it[updatedAt] = ctx.now
             }
         }
+        TaskOverdueTracker.refresh(ctx.householdId, id, ctx.now.toContract())
     }
 }

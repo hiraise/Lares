@@ -83,6 +83,9 @@ class FakePushService : AutoCloseable {
     /** Waits briefly and returns what arrived, if anything. */
     suspend fun nextOrNull(timeout: Duration = 300.milliseconds): ReceivedPush? = withTimeoutOrNull(timeout) { received.receive() }
 
+    /** Everything received so far, without waiting. */
+    fun drain(): List<ReceivedPush> = buildList { while (true) add(received.tryReceive().getOrNull() ?: break) }
+
     override fun close() {
         server.stop(0, 0)
     }

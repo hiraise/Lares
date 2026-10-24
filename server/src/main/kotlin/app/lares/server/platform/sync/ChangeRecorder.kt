@@ -27,9 +27,21 @@ class HouseholdChangeBus {
     }
 }
 
-/** Changes recorded in the current transaction, published by `AppDatabase.dbQuery` after commit. */
+/**
+ * Changes recorded in the current transaction and actions to run after it, both handled by `AppDatabase.dbQuery`
+ * after commit (see `JdbcTransaction.afterCommit`).
+ */
 class PendingChanges {
     private val byHousehold = LinkedHashMap<UUID, Long>()
+    private val actions = mutableListOf<() -> Unit>()
+
+    /** Actions registered with `afterCommit`, in registration order. */
+    val afterCommit: List<() -> Unit>
+        get() = actions
+
+    fun addAfterCommit(action: () -> Unit) {
+        actions += action
+    }
 
     /** One event per household with its last seq; that is all a listener needs to pull. */
     val events: List<HouseholdChanged>

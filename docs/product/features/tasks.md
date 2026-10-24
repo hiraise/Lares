@@ -76,11 +76,14 @@ Technical design: [architecture/tasks.md](../../architecture/tasks.md).
   remind at 09:00 on the day (or N days before at 09:00) (Q-016).
 - **TSK-031** `MVP` `todo` — Assignees get a notification when a task is assigned to them (not for "anyone" tasks, not to the
   person who assigned it).
+  *Server: sent after commit to added assignees with `tasks.view` (M1-03).*
 - **TSK-032** `MVP` `todo` — The creator can opt in to a notification when the task is completed by someone else.
+  *Server: sent for the first non-skipped completion of an occurrence (M1-03).*
 - **TSK-033** `MVP` `todo` — When a task becomes overdue (due time passed, not done), its creator gets a notification.
   Detected on the server, so it works while the assignee's phone is offline. Tasks without a time become overdue after
   their day; the notice comes the next morning at 09:00 (Q-016). No notice if the date was already past when
   the task was saved.
+  *Server: overdue job every 60 s, one notice per occurrence, none older than 24 h (M1-03).*
 - **TSK-034** `MVP` `todo` — Each notification type can be turned off in Settings › Notifications: task assigned, task
   completed, task overdue, task reminders (FND-052).
 

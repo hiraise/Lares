@@ -9,6 +9,7 @@ import app.lares.contract.permissions.Viewer
 import app.lares.contract.sync.EntityTypes
 import app.lares.contract.sync.MutationOp
 import app.lares.contract.validation.Validators
+import app.lares.server.platform.db.afterCommit
 import app.lares.server.platform.http.ApiException
 import app.lares.server.platform.toContract
 import app.lares.server.sync.ChangeRow
@@ -19,16 +20,21 @@ import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.JdbcTransaction
 import org.jetbrains.exposed.v1.jdbc.insert
+import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
 import org.jetbrains.exposed.v1.jdbc.update
 import java.util.UUID
 import kotlin.time.Duration.Companion.days
 
 /**
  * Completions and skips (TSK-003, ADR-0017). Immutable: undo and reopen delete them. Only the member themselves can
- * complete (`completedBy` is the writer), and only if `canComplete`.
+ * complete (`completedBy` is the writer), and only if `canComplete`. Every write refreshes the task's overdue check
+ * time; the first completion of an occurrence may tell the creator (TSK-032).
  */
-class TaskCompletionSyncHandler : WritableSyncHandler<TaskCompletionData>(TaskCompletionData.serializer()) {
+class TaskCompletionSyncHandler(
+    private val notifier: TaskNotifier,
+) : WritableSyncHandler<TaskCompletionData>(TaskCompletionData.serializer()) {
     override val type: String = EntityTypes.TASK_COMPLETION
 
     override fun changesSince(
@@ -115,6 +121,8 @@ class TaskCompletionSyncHandler : WritableSyncHandler<TaskCompletionData>(TaskCo
         data: TaskCompletionData,
         seq: Long,
     ) {
+        val taskId = UUID.fromString(data.taskId)
+        val notifyCreator = shouldNotifyCreator(ctx, taskId, data)
         TaskCompletionTable.insert {
             it[TaskCompletionTable.id] = id
             it[householdId] = ctx.householdId
@@ -122,6 +130,29 @@ class TaskCompletionSyncHandler : WritableSyncHandler<TaskCompletionData>(TaskCo
             it[TaskCompletionTable.seq] = seq
             it[createdAt] = ctx.now
             it[updatedAt] = ctx.now
+        }
+        TaskOverdueTracker.refresh(ctx.householdId, taskId, ctx.now.toContract())
+        if (notifyCreator) {
+            val actor = UUID.fromString(data.completedBy)
+            TransactionManager.current().afterCommit { notifier.enqueue(TaskNotifier.Completed(ctx.householdId, taskId, actor)) }
+        }
+    }
+
+    /**
+     * `task.completed` goes to a creator who opted in, when someone else completes (not skips) the occurrence and nobody
+     * completed it before: a one-off has no earlier non-skipped completion, a routine none of the same occurrence.
+     * Runs before the insert, under the household lock.
+     */
+    private fun shouldNotifyCreator(
+        ctx: MutationContext,
+        taskId: UUID,
+        data: TaskCompletionData,
+    ): Boolean {
+        if (data.skipped) return false
+        val task = TaskRepository.get(ctx.householdId, taskId)?.data ?: return false
+        if (!task.notifyCreatorOnDone || data.completedBy == task.createdBy) return false
+        return TaskRepository.completionsOf(ctx.householdId, taskId).none { earlier ->
+            !earlier.data.skipped && (task.recurrence == null || earlier.data.occurrence == data.occurrence)
         }
     }
 
@@ -143,5 +174,11 @@ class TaskCompletionSyncHandler : WritableSyncHandler<TaskCompletionData>(TaskCo
             it[TaskCompletionTable.seq] = seq
             it[updatedAt] = ctx.now
         }
+        val taskId =
+            TaskCompletionTable
+                .select(TaskCompletionTable.taskId)
+                .where { TaskCompletionTable.id eq id }
+                .single()[TaskCompletionTable.taskId]
+        TaskOverdueTracker.refresh(ctx.householdId, taskId, ctx.now.toContract())
     }
 }

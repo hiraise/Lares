@@ -1,6 +1,6 @@
 ---
 id: M1-03
-status: ready
+status: done
 depends_on: [M1-02]
 requirements: [TSK-031, TSK-032, TSK-033, FND-051]
 ---

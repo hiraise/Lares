@@ -216,7 +216,7 @@ unchanged. For a delete, `merged` is null.
 | Type | When | To |
 | --- | --- | --- |
 | `task.assigned` (TSK-031) | task create/update adds member ids to `assigneeIds` | the added members |
-| `task.completed` (TSK-032) | a completion with `skipped = false` is created, `notifyCreatorOnDone` is true, and it is the first non-skipped completion of that occurrence | the creator |
+| `task.completed` (TSK-032) | a completion with `skipped = false` is created, `notifyCreatorOnDone` is true, and it is the first non-skipped completion of that occurrence (one-off: of the task), by someone other than the creator | the creator |
 | `task.overdue` (TSK-033) | overdue job | the creator |
 
 Texts (`NotificationTexts`, en/ru, title shortened to 100 characters):
@@ -229,7 +229,7 @@ Texts (`NotificationTexts`, en/ru, title shortened to 100 characters):
 
 ### Overdue job
 
-`overdue_check_at` is the next moment the job must look at the task. `TaskOverdueTracker.refresh(tx, householdId, taskId, now)`
+`overdue_check_at` is the next moment the job must look at the task. `TaskOverdueTracker.refresh(householdId, taskId, now)` (inside `dbQuery`)
 recomputes it after every write to the task or its completions (task and completion handlers, cascade) and after each job
 visit:
 

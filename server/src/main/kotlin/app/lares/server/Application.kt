@@ -46,6 +46,8 @@ import app.lares.server.sync.syncRoutes
 import app.lares.server.tags.TagSyncHandler
 import app.lares.server.tasks.ChecklistItemSyncHandler
 import app.lares.server.tasks.TaskCompletionSyncHandler
+import app.lares.server.tasks.TaskNotifier
+import app.lares.server.tasks.TaskOverdueJob
 import app.lares.server.tasks.TaskSyncHandler
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.server.application.Application
@@ -69,7 +71,7 @@ class AppDeps(
     val buildInfo: BuildInfo,
     val clock: Clock = Clock.System,
     val passwordHasher: PasswordHasher = PasswordHasher(),
-    /** Daily sync housekeeping; tests switch it off and call the job functions directly. */
+    /** Sync housekeeping and the overdue job; tests switch them off and call the job functions directly. */
     val backgroundJobs: Boolean = true,
 ) {
     val tokenGenerator = TokenGenerator()
@@ -90,6 +92,12 @@ class AppDeps(
     val inviteService = InviteService(db, clock, passwordHasher, codeGenerator, authService, loginLimiter, config.publicUrl)
     val loginCodeService = LoginCodeService(db, clock, codeGenerator, authService, permissionService, loginLimiter, config.publicUrl)
 
+    val pushEndpointGuard = PushEndpointGuard(config.pushAllowedHosts)
+    val webPushSender = WebPushSender(db, pushEndpointGuard, WebPushSender.subjectFor(config.publicUrl))
+    val notificationService = NotificationService(db, clock, pushEndpointGuard, webPushSender)
+    val taskNotifier = TaskNotifier(db, permissionService, notificationService)
+    val taskOverdueJob = TaskOverdueJob(db, clock, taskNotifier)
+
     val syncHandlers =
         SyncHandlers(
             listOf(
@@ -98,9 +106,9 @@ class AppDeps(
                 GroupSyncHandler(),
                 TagSyncHandler(),
                 PersonSyncHandler(),
-                TaskSyncHandler(),
+                TaskSyncHandler(taskNotifier),
                 ChecklistItemSyncHandler(),
-                TaskCompletionSyncHandler(),
+                TaskCompletionSyncHandler(taskNotifier),
             ),
         )
     val syncPullService = SyncPullService(db, syncHandlers, permissionService)
@@ -108,9 +116,6 @@ class AppDeps(
     val syncEventsService = SyncEventsService(db, changeBus)
     val syncHousekeeping = SyncHousekeeping(db, clock)
 
-    val pushEndpointGuard = PushEndpointGuard(config.pushAllowedHosts)
-    val webPushSender = WebPushSender(db, pushEndpointGuard, WebPushSender.subjectFor(config.publicUrl))
-    val notificationService = NotificationService(db, clock, pushEndpointGuard, webPushSender)
     val syncTickles =
         SyncTicklePublisher(changeBus, clock, TickleThrottle(), send = { householdId, seq -> notificationService.tickle(householdId, seq) })
 }
@@ -163,5 +168,10 @@ fun Application.module(deps: AppDeps) {
     }
     // Tickles only send to registered push endpoints, so they also run in tests.
     deps.syncTickles.start(this)
-    if (deps.backgroundJobs) deps.syncHousekeeping.start(this)
+    // Task events come from requests and jobs alike; tests await them with `taskNotifier.awaitIdle()`.
+    deps.taskNotifier.start(this)
+    if (deps.backgroundJobs) {
+        deps.syncHousekeeping.start(this)
+        deps.taskOverdueJob.start(this)
+    }
 }

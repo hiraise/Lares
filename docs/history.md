@@ -135,3 +135,13 @@ Current state and next steps: [STATUS.md](STATUS.md).
   routine → one-off and `createdBy`/`taskId` changes rejected, immutable completions, cascade tombstones with one seq per
   row, `tasks.view` visibility, housekeeping purge of the three tables, test helpers `testing/TaskFixtures.kt`.
   Server tests +13 (`TaskSyncTest`, `TaskPermissionsTest`); M0 tests unchanged.
+
+- 2026-10-23 **M1-03** Task notifications on the server. `JdbcTransaction.afterCommit` (actions kept per attempt in
+  `PendingChanges`, run by `dbQuery` after the change events, failures logged). `TaskNotifier`: events `Assigned`,
+  `Completed`, `Overdue` in an unbounded channel, consumer started in `Application.module`; recipients are non-deleted
+  members with `tasks.view`, never the actor; texts en/ru in `NotificationTexts`, titles cut to 100 characters.
+  Handler hooks: added assignees on create/update; first non-skipped completion of an occurrence when the creator opted
+  in. `TaskOverdueTracker.refresh` keeps `overdue_check_at` (no seq) after every task and completion write;
+  `TaskOverdueJob` (30 s after start, then every 60 s, 500 tasks per run, household lock, `updated_at` and 24 h guards).
+  Tests: `AfterCommitTest` (4), `TaskNotificationsTest` (14); deterministic via `TaskNotifier.awaitIdle()` and
+  `FakePushService.drain()`.
