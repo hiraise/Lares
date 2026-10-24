@@ -13,6 +13,8 @@ import app.lares.contract.api.notifications.PushTestResult
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.SerializationException
 
 /**
@@ -23,6 +25,12 @@ class NotificationSettingsRepository(
     private val api: LaresApi,
     private val localDb: LocalDb,
 ) {
+    /**
+     * One server round trip at a time: a refresh answered after a change would overwrite it with the old settings, and
+     * two quick changes would each start from the same set and lose one of them.
+     */
+    private val serverLock = Mutex()
+
     val muted: Flow<Set<NotificationType>> =
         localDb.db.notification_muteQueries
             .all()
@@ -34,12 +42,12 @@ class NotificationSettingsRepository(
         localDb.read { notification_muteQueries.all().executeAsList() }.contains(type.key)
 
     /** Loads the settings from the server into the local mirror. */
-    suspend fun refresh() = store(api.notificationSettings())
+    suspend fun refresh() = serverLock.withLock { store(api.notificationSettings()) }
 
     suspend fun setMuted(
         type: NotificationType,
         muted: Boolean,
-    ) {
+    ) = serverLock.withLock {
         val current = localDb.read { notification_muteQueries.all().executeAsList() }.mapNotNull(NotificationType::fromKey).toSet()
         store(api.setNotificationSettings(NotificationSettings(if (muted) current + type else current - type)))
     }

@@ -27,6 +27,11 @@ Versioning: [SemVer](https://semver.org/) from the first release.
   signed release installs as a separate app next to the 0.1.1 test build: remove 0.1.1 and sign in again (family data
   stays on the server).
 
+### Fixed
+
+- Settings › Notifications: a switch turned off right after opening the screen, or two switches turned off quickly one
+  after another, no longer turn themselves back on.
+
 ## [0.1.1] - 2026-10-23
 
 ### Added

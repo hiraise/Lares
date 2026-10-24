@@ -29,6 +29,7 @@ import io.ktor.client.engine.mock.respond
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.OutgoingContent
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.builtins.ListSerializer
 import kotlin.test.Test
@@ -97,6 +98,13 @@ class MainAndSettingsViewModelTest {
         var onServer = NotificationSettings()
         loggedIn(extra = { request ->
             if (request.url.encodedPath != "/api/v1/me/notification-settings") return@loggedIn null
+            if (request.method == HttpMethod.Get) {
+                // A slow first load answers with what was stored when it was read; it must not overwrite the switches
+                // changed meanwhile.
+                val read = onServer
+                delay(300)
+                return@loggedIn json(NotificationSettings.serializer(), read)
+            }
             if (request.method == HttpMethod.Put) {
                 val body = (request.body as OutgoingContent.ByteArrayContent).bytes().decodeToString()
                 onServer = LaresJson.decodeFromString(NotificationSettings.serializer(), body)
@@ -107,6 +115,8 @@ class MainAndSettingsViewModelTest {
             awaitState(vm.state) { it.muted.isEmpty() }
             vm.setEnabled(NotificationType.TASK_REMINDER, enabled = false)
             awaitState(vm.state) { it.muted == setOf(NotificationType.TASK_REMINDER) }
+            Thread.sleep(500) // past the slow first load: it must not have reset the switch
+            assertEquals(setOf(NotificationType.TASK_REMINDER), vm.state.value.muted)
             vm.setEnabled(NotificationType.TASK_OVERDUE, enabled = false)
             awaitState(vm.state) { it.muted == setOf(NotificationType.TASK_REMINDER, NotificationType.TASK_OVERDUE) }
             assertEquals(setOf(NotificationType.TASK_REMINDER, NotificationType.TASK_OVERDUE), onServer.muted)
