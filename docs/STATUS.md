@@ -15,12 +15,14 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 `foundation`, `tags` and `tasks` approved. Next: [M2 Shopping lists](product/roadmap.md#m2-shopping-lists) — plans ready
 ([M2 plans](plans/README.md#m2-plans)), shopping spec approved.
 
-**Active release branch: `release/0.3.0`** (next: M2). Commit approved work here; `main` is protected
-([release process](process/release.md), ADR-0020). Latest release: [v0.2.0](https://github.com/hiraise/lares/releases/tag/v0.2.0)
-(M0 + M1, 2026-10-24).
+**Active release branch: `release/0.4.0`** (next: M3). Commit approved work here; `main` is protected
+([release process](process/release.md), ADR-0020). Latest release: [v0.3.0](https://github.com/hiraise/lares/releases/tag/v0.3.0)
+(M2, 2026-10-24).
 
 ## Last completed
 
+- 2026-10-24 Release **v0.3.0** (M2 Shopping lists): release pull request #2 merged, signed APK, server image
+  `ghcr.io/hiraise/lares-server:0.3.0`, GitHub release. Fixed on the way: CI flake in `ShoppingListViewModelTest`.
 - 2026-10-24 M2-06 Shopping everywhere: the active list as the gradient hero card first on Today (count, what is left,
   who is in the store, «Открыть», «Ещё N списка»), the «Покупки» section on the tag page (an item opens its list
   filtered by the tag), user manual "Shopping lists" (en, ru); all shopping MVP requirements done; 9 new tests,

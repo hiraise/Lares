@@ -246,3 +246,6 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   9 new tests (5 Today and 2 tag view model, 2 Compose UI); emulator walkthrough (spec scenarios 1–7, ru/en,
   light/dark) without bugs. Fixed on the way: CI flake in `ShoppingListViewModelTest` (quick add writes each entry
   separately; the test now waits for both).
+
+- 2026-10-24 Release **v0.3.0** (M2 Shopping lists): pull request #2 merged, signed APK, image `ghcr.io/hiraise/lares-server:0.3.0`,
+  GitHub release; next branch `release/0.4.0`.
