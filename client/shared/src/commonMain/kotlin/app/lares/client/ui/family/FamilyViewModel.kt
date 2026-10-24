@@ -133,8 +133,6 @@ class FamilyViewModel(
 
     fun newTag() = tagEditor.new(state.value.tags.map { it.data.color })
 
-    fun editTag(tag: Tag) = tagEditor.edit(tag)
-
     fun closeTagSheet() = tagEditor.close()
 
     fun onTagName(value: String) = tagEditor.onName(value)

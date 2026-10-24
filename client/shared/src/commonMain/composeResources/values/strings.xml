@@ -123,6 +123,11 @@
     <string name="section_family">Family</string>
     <string name="section_tags">Tags</string>
     <string name="today_empty">Here will be the day summary: tasks, events, shopping</string>
+    <string name="today_tasks_title">Today's tasks</string>
+    <string name="today_tasks_all">All</string>
+    <string name="today_tasks_more">%1$s more</string>
+    <string name="today_tasks_none">No tasks for today</string>
+    <string name="today_add">Add</string>
     <string name="placeholder_coming">Coming in the next versions</string>
     <string name="profile_open">Profile and settings</string>
     <string name="group_administrators">Administrators</string>
@@ -394,6 +399,9 @@
     <string name="date_day_month_year">%2$s %1$s, %3$s</string>
     <string name="tag_new">New tag</string>
     <string name="tag_title">Tag</string>
+    <string name="tag_tasks_section">Tasks · %1$s</string>
+    <string name="tag_tasks_empty">No tasks with this tag</string>
+    <string name="tag_action_edit">Edit tag</string>
     <string name="tag_name">Name</string>
     <string name="tag_color">Color</string>
     <string name="tag_archive">Archive</string>
@@ -591,6 +599,7 @@
     <string name="tasks_empty_filtered">No tasks match the filters</string>
     <string name="tasks_reset_filters">Reset filters</string>
     <string name="tasks_new">Task</string>
+    <string name="task_deleted">The task was deleted</string>
     <string name="tasks_only_assignees">Only assignees can mark this task</string>
     <string name="tasks_done_snackbar">Done</string>
     <string name="tasks_skipped_snackbar">Skipped</string>

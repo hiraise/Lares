@@ -89,8 +89,15 @@ import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Instant
 
-/** Notification types with a switch; module types appear when their modules ship (M1). */
-val SwitchableNotificationTypes: List<NotificationType> = listOf(NotificationType.SYSTEM_TEST)
+/** Notification types with a switch (FND-052, TSK-034); later modules add theirs. */
+val SwitchableNotificationTypes: List<NotificationType> =
+    listOf(
+        NotificationType.TASK_ASSIGNED,
+        NotificationType.TASK_COMPLETED,
+        NotificationType.TASK_OVERDUE,
+        NotificationType.TASK_REMINDER,
+        NotificationType.SYSTEM_TEST,
+    )
 
 data class NotificationSettingsUiState(
     val push: PushStatus = PushStatus(),

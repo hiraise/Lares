@@ -14,7 +14,6 @@ import app.lares.client.sync.toData
 import app.lares.contract.api.LaresJson
 import app.lares.contract.api.auth.Me
 import app.lares.contract.permissions.Viewer
-import app.lares.contract.tasks.TaskGroup
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -123,12 +122,7 @@ class TasksRepository(
             .distinctUntilChanged()
 
     /** Open tasks with the tag, in section order (tag page, TAG-004). */
-    fun observeForTag(tagId: String): Flow<List<TaskView>> =
-        observeViews()
-            .map { views ->
-                val open = views.filter { tagId in it.data.tagIds && it.group != TaskGroup.DONE }
-                TaskViews.sections(open).flatMap { it.tasks }
-            }.distinctUntilChanged()
+    fun observeForTag(tagId: String): Flow<List<TaskView>> = observeViews().map { TaskViews.forTag(it, tagId) }.distinctUntilChanged()
 
     private data class Context(
         val members: List<MemberView>,

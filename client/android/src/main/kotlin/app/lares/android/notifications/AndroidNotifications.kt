@@ -20,6 +20,7 @@ import app.lares.android.R
 import app.lares.client.notifications.AlarmScheduler
 import app.lares.client.notifications.NotificationPermissions
 import app.lares.client.notifications.NotificationPoster
+import app.lares.client.notifications.NotificationTarget
 import kotlin.time.Instant
 import app.lares.contract.api.notifications.NotificationChannel as Channel
 
@@ -53,7 +54,10 @@ fun createNotificationChannels(context: Context) {
     manager.createNotificationChannels(channels)
 }
 
-/** Shows notifications; a tap opens the app. Without the permission (Android 13+) nothing is shown. */
+/**
+ * Shows notifications; a tap opens the app, or the notification's target (plan M1-07). Without the permission
+ * (Android 13+) nothing is shown.
+ */
 class AndroidNotificationPoster(
     private val context: Context,
 ) : NotificationPoster {
@@ -62,13 +66,23 @@ class AndroidNotificationPoster(
         channel: Channel,
         title: String,
         body: String,
+        target: NotificationTarget?,
     ) {
         if (!canPost(context)) return
+        val intent = Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        if (target != null) {
+            // A data URI per notification keeps the PendingIntents (and their extras) apart.
+            intent
+                .setData(Uri.parse("lares-notification:${Uri.encode(id)}"))
+                .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                .putExtra(MainActivity.EXTRA_ENTITY_TYPE, target.entityType)
+                .putExtra(MainActivity.EXTRA_ENTITY_ID, target.entityId)
+        }
         val open =
             PendingIntent.getActivity(
                 context,
-                0,
-                Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP),
+                if (target == null) 0 else id.hashCode(),
+                intent,
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
             )
         val notification =

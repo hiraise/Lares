@@ -1,6 +1,7 @@
 package app.lares.client.ui.tasks
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
@@ -34,6 +36,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.testTag
@@ -111,6 +114,8 @@ import org.koin.core.parameter.parametersOf
 class TaskDetailActions(
     val onBack: () -> Unit = {},
     val onEdit: () -> Unit = {},
+    /** A tag chip opens the tag page (TAG-004). */
+    val onTag: (String) -> Unit = {},
     val onComplete: () -> Unit = {},
     val onReopen: () -> Unit = {},
     val onSkip: () -> Unit = {},
@@ -133,6 +138,7 @@ fun TaskDetailRoute(
     id: String,
     onBack: () -> Unit,
     onEdit: () -> Unit,
+    onTag: (String) -> Unit = {},
     viewModel: TaskDetailViewModel = koinViewModel(key = "task-$id") { parametersOf(TaskDetailArgs(id)) },
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -148,6 +154,7 @@ fun TaskDetailRoute(
             TaskDetailActions(
                 onBack = onBack,
                 onEdit = onEdit,
+                onTag = onTag,
                 onComplete = viewModel::complete,
                 onReopen = viewModel::reopen,
                 onSkip = viewModel::skip,
@@ -184,7 +191,7 @@ fun TaskDetailScreen(
             view.canComplete && !view.state.done -> PrimaryButton(stringResource(Res.string.task_action_complete), actions.onComplete)
             view.state.done && state.canReopen -> TonalButton(stringResource(Res.string.task_action_reopen), actions.onReopen)
         }
-        Facts(state, detail)
+        Facts(state, detail, actions.onTag)
         if (detail.checklist.isNotEmpty() || view.canEdit) Checklist(detail, newItem, actions)
         if (routine) History(state, actions.onUndo)
     }
@@ -293,6 +300,7 @@ private fun Header(
 private fun Facts(
     state: TaskDetailUiState,
     detail: TaskDetail,
+    onTag: (String) -> Unit,
 ) {
     val view = detail.task
     val data = view.data
@@ -326,7 +334,17 @@ private fun Facts(
     if (view.tags.isNotEmpty()) {
         rows += {
             FactRow(Res.drawable.ic_sell) {
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) { view.tags.forEach { TagChip(it) } }
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    view.tags.forEach { tag ->
+                        TagChip(
+                            tag,
+                            Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable { onTag(tag.id) }
+                                .testTag("task_tag_${tag.id}"),
+                        )
+                    }
+                }
             }
         }
     }

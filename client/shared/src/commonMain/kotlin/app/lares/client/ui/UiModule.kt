@@ -6,6 +6,8 @@ import app.lares.client.notifications.notificationsModule
 import app.lares.client.platform.AppStartup
 import app.lares.client.platform.AppearanceSettings
 import app.lares.client.platform.DeepLinkHandler
+import app.lares.client.platform.PendingNavigation
+import app.lares.client.platform.TaskLinks
 import app.lares.client.ui.common.TaskReminderResourceTexts
 import app.lares.client.ui.family.AddMemberViewModel
 import app.lares.client.ui.family.FamilySettingsViewModel
@@ -15,7 +17,9 @@ import app.lares.client.ui.family.GroupEditorViewModel
 import app.lares.client.ui.family.MemberDetailViewModel
 import app.lares.client.ui.family.PersonArgs
 import app.lares.client.ui.family.PersonViewModel
+import app.lares.client.ui.family.TagViewModel
 import app.lares.client.ui.main.MainViewModel
+import app.lares.client.ui.main.TodayViewModel
 import app.lares.client.ui.onboarding.InviteAcceptViewModel
 import app.lares.client.ui.onboarding.LinkViewModel
 import app.lares.client.ui.onboarding.LoginViewModel
@@ -45,6 +49,8 @@ fun uiModule(): Module =
     module {
         includes(notificationsModule())
         single { DeepLinkHandler() }
+        single { PendingNavigation() }
+        single { TaskLinks(get(), get()) }
         // Replaces the core's English fallback.
         single<TaskReminderTexts> { TaskReminderResourceTexts(getOrNull<Clock>() ?: Clock.System) }
         single { AppStartup(get(), get(AppScope)) }
@@ -72,6 +78,8 @@ fun uiModule(): Module =
         }
         viewModel { FamilySettingsViewModel(get(), get(), get(), get()) }
         viewModel { TasksViewModel(get(), get(), get()) }
+        viewModel { TodayViewModel(get(), get()) }
+        viewModel { params -> TagViewModel(get(), get(), get(), get(), params.get()) }
         viewModel { params -> TaskDetailViewModel(get(), get(), params.get()) }
         viewModel { params -> TaskEditorViewModel(get(), get(), get(), get(), get(), params.get()) }
     }

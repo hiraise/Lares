@@ -9,8 +9,8 @@ Each milestone ends with a build the family can install (APK) and a short change
 
 | # | Milestone | Spec | State |
 | --- | --- | --- | --- |
-| M0 | Foundation | [foundation](features/foundation.md), [tags](features/tags.md) | not started |
-| M1 | Tasks | [tasks](features/tasks.md) | not started |
+| M0 | Foundation | [foundation](features/foundation.md), [tags](features/tags.md) | implemented (M0-01…M0-11); customer acceptance pending |
+| M1 | Tasks | [tasks](features/tasks.md) | implemented (M1-01…M1-07); customer acceptance pending |
 | M2 | Shopping lists | [shopping](features/shopping.md) | not started |
 | M3 | Calendar | [calendar](features/calendar.md) | not started |
 | M4 | Location | [location](features/location.md) | not started |

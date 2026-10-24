@@ -13,6 +13,7 @@ import app.lares.client.ui.main.MainNavigation
 import app.lares.client.ui.main.MainScaffold
 import app.lares.client.ui.main.MainTab
 import app.lares.client.ui.main.MainUiState
+import app.lares.client.ui.main.TodayUiState
 import app.lares.client.ui.onboarding.LoginScreen
 import app.lares.client.ui.onboarding.LoginUiState
 import app.lares.client.ui.onboarding.ServerScreen
@@ -103,6 +104,7 @@ class ScreensUiTest {
                         SnackbarHostState(),
                         MainNavigation({}, {}, {}, {}),
                         onOpenSync = {},
+                        today = TodayUiState(loaded = true),
                     )
                 }
             }

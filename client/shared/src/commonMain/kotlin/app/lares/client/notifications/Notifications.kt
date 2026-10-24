@@ -129,7 +129,8 @@ class PushMessageHandler(
                 val title = payload.title ?: return
                 if (settings.isMuted(type)) return
                 val id = payload.entityId?.let { "${type.key}:$it" } ?: type.key
-                poster.show(id, type.channel, title, payload.body.orEmpty())
+                val target = payload.entityType?.let { type -> payload.entityId?.let { NotificationTarget(type, it) } }
+                poster.show(id, type.channel, title, payload.body.orEmpty(), target)
             }
         }
     }

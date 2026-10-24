@@ -63,9 +63,10 @@ Technical design: [architecture/tasks.md](../../architecture/tasks.md).
   *UI: repeat presets and «Настроить…» (interval, unit, weekdays); the start date is written only when changed (M1-06).*
 - **TSK-011** `MVP` `done` — "After completion" schedules: next occurrence N days/weeks/months after the last completion.
   *UI: «После выполнения» in the custom repeat (M1-06).*
-- **TSK-012** `MVP` `todo` — Only the current occurrence is open; the next one appears when it is completed (or skipped) or,
+- **TSK-012** `MVP` `done` — Only the current occurrence is open; the next one appears when it is completed (or skipped) or,
   for fixed schedules, when its date comes.
-- **TSK-013** `MVP` `todo` — Missed occurrences are visible as overdue and do not pile up: at most one overdue per routine;
+  *Contract `TaskSchedule.current` (M1-01); client views and task page (M1-04, M1-05).*
+- **TSK-013** `MVP` `done` — Missed occurrences are visible as overdue and do not pile up: at most one overdue per routine;
   when the next scheduled date comes, the missed one is dropped.
   *Client core: current occurrence and overdue state recomputed every minute offline (M1-04).*
 - **TSK-014** `later` `todo` — Rotation: assignees of a routine take turns in a set order.
@@ -87,35 +88,41 @@ Technical design: [architecture/tasks.md](../../architecture/tasks.md).
   *Client core: filters and chip counts (M1-04); chips «Все · N», «Мои · N», «Поручено мной», «Метка», search,
   filters sheet (assignee, open / done) (M1-05).*
 - **TSK-022** `MVP` `todo` — Tasks with a due date also appear in the calendar agenda (after M3).
-- **TSK-023** `MVP` `todo` — "Today" home screen block: my overdue and today's tasks, ticking them off right there (FND-063).
+- **TSK-023** `MVP` `done` — "Today" home screen block: my overdue and today's tasks, ticking them off right there (FND-063).
+  *UI: «Задачи на сегодня» with the open count, «Все», overdue → today → done today, at most 6 rows + «Ещё N»,
+  ticking with undo; the «Добавить» button opens the editor with me as assignee (M1-07).*
 - **TSK-024** `MVP` `done` — Task page: all fields, checklist, history (routines), who created it.
   *UI: task page with status, main action, facts (date, repeat and next time, assignees, tags, reminder, notes,
   author), checklist, history; edit opens the editor (M1-06) (M1-05).*
 
 ### Reminders and notifications
 
-- **TSK-030** `MVP` `doing` — A task can have a reminder (at due time or N minutes/hours/days before). It fires on the phones of
+- **TSK-030** `MVP` `done` — A task can have a reminder (at due time or N minutes/hours/days before). It fires on the phones of
   the assignees; for "anyone" tasks on the phones of everybody who sees tasks (Q-015). Tasks without a time
   remind at 09:00 on the day (or N days before at 09:00) (Q-016).
   *Client core: local reminders planned automatically for the member's tasks, up to 30 days ahead (M1-04).*
-  *UI: reminder choice in the editor (M1-06); notification taps and settings in M1-07.*
-- **TSK-031** `MVP` `todo` — Assignees get a notification when a task is assigned to them (not for "anyone" tasks, not to the
+  *UI: reminder choice in the editor (M1-06); a tap on a reminder opens the task, switch «Напоминания о задачах» (M1-07).*
+- **TSK-031** `MVP` `done` — Assignees get a notification when a task is assigned to them (not for "anyone" tasks, not to the
   person who assigned it).
-  *Server: sent after commit to added assignees with `tasks.view` (M1-03).*
+  *Server: sent after commit to added assignees with `tasks.view` (M1-03). A tap opens the task (M1-07). End to end
+  on a real phone with ntfy: pending (FND-051).*
 - **TSK-032** `MVP` `done` — The creator can opt in to a notification when the task is completed by someone else.
   *Server: sent for the first non-skipped completion of an occurrence (M1-03).*
   *UI: «Сообщить мне, когда выполнят» switch for the creator (M1-06).*
-- **TSK-033** `MVP` `todo` — When a task becomes overdue (due time passed, not done), its creator gets a notification.
+- **TSK-033** `MVP` `done` — When a task becomes overdue (due time passed, not done), its creator gets a notification.
   Detected on the server, so it works while the assignee's phone is offline. Tasks without a time become overdue after
   their day; the notice comes the next morning at 09:00 (Q-016). No notice if the date was already past when
   the task was saved.
-  *Server: overdue job every 60 s, one notice per occurrence, none older than 24 h (M1-03).*
-- **TSK-034** `MVP` `todo` — Each notification type can be turned off in Settings › Notifications: task assigned, task
+  *Server: overdue job every 60 s, one notice per occurrence, none older than 24 h (M1-03). A tap opens the task
+  (M1-07); end to end on a real phone: pending (FND-051).*
+- **TSK-034** `MVP` `done` — Each notification type can be turned off in Settings › Notifications: task assigned, task
   completed, task overdue, task reminders (FND-052).
+  *UI: four switches under «О чём уведомлять»; muting reminders cancels the planned ones (M1-07).*
 
 ### Tags
 
-- TAG-002 (tasks part), TAG-003 (filter in Tasks) and TAG-004 (tag page with the tasks section) are delivered in M1.
+- TAG-002 (tasks part), TAG-003 (filter in Tasks) and TAG-004 (tag page with the tasks section) are delivered in M1:
+  tags in the editor (M1-06), the «Метка» chip (M1-05), the tag page from Family › Tags and from a tag chip (M1-07).
 
 ## Permissions and privacy
 

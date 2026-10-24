@@ -304,3 +304,19 @@ shared with the Family screen. Unsaved changes ask before leaving (`NavigationBa
 ### Notification taps
 
 Notifications with `entityType = "task"` and reminders with id `task:<id>` open the task detail screen.
+
+Implementation (M1-07): `NotificationPoster.show` got an optional `NotificationTarget(entityType, entityId)`; with
+`null` it behaves as in M0 (the app opens as it is). `PushMessageHandler` passes the payload's entity, and
+`Reminders.fire` derives the target from the `task:` id prefix. The Android poster puts the target into the extras of
+the `MainActivity` intent, with a data URI and request code per notification so the PendingIntents stay apart.
+`MainActivity` submits them to `PendingNavigation` (Koin single, `StateFlow<NavTarget?>`, shaped like
+`DeepLinkHandler`); the target waits there until the logged-in `MainNavHost` consumes it. If the task exists locally,
+or after one `syncNow()` (a just-assigned task may not have arrived yet; `TaskLinks`), the task page opens over the
+main screen; otherwise the main screen switches to the Tasks tab and shows «Задача удалена».
+
+### Today block and tag page (M1-07)
+
+`TodayViewModel` builds the block from `observeInputs()`: `TaskViews.filter(scope = MINE)` → sections → overdue and
+today groups (done-today rows are last in "today"), at most 6 rows. `TagViewModel` lists `TaskViews.forTag` (open tasks
+of the tag in section order) and edits the tag with the shared `TagEditor`. Both reuse `TaskRows` (row building and
+toggle rights) and `TaskTicker` (tick, undo, snackbar events), extracted from `TasksViewModel`.

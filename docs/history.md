@@ -179,3 +179,15 @@ editor. Reminder labels aligned with the plan («В срок», «В день с
 `SegmentedControl`. Dependency `navigationevent-compose` 1.1.0 declared (already shipped by navigation, Apache-2.0).
 Tests: `TaskFormTest` 9, `TaskEditorViewModelTest` 7, `TaskEditorUiTest` 3; emulator walkthrough of the spec scenarios
 (ru/en, light/dark) passed; the selected segment was made lighter in the dark theme after it.
+
+### 2026-10-24 M1-07 Today block, tag page, notification switches and taps
+
+Today shows «Задачи на сегодня» (my overdue, today's and done-today tasks, open count, «Все», at most 6 rows +
+«Ещё N», ticking with undo) and the «Добавить» button (editor with me as assignee). New tag page (`TagDestination`,
+tasks section, archived tags too, edit from the top bar) opened from Family › Tags rows and from tag chips on the
+task page. Settings › Notifications got the four task switches (muting reminders already cancels them through the
+planner). Notification taps: `NotificationPoster` got an optional `NotificationTarget`, Android puts it into the
+`MainActivity` intent, `PendingNavigation` hands it to the logged-in UI, which opens the task (after one sync if it is
+not there yet) or the Tasks tab with «Задача удалена». Row building and ticking were extracted from `TasksViewModel`
+into `TaskRows` / `TaskTicker`. User manual "Tasks" (en, ru), CHANGELOG. Tests: `TodayViewModelTest` 3,
+`TagViewModelTest` 3, notification targets and `PendingNavigation` 2, settings switches 1, Today UI 2.

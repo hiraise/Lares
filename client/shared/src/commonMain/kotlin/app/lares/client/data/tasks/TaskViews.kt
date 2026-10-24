@@ -117,6 +117,12 @@ object TaskViews {
         }
     }
 
+    /** Open tasks with the tag, in section order (tag page, TAG-004). */
+    fun forTag(
+        views: List<TaskView>,
+        tagId: String,
+    ): List<TaskView> = sections(views.filter { tagId in it.data.tagIds && it.group != TaskGroup.DONE }).flatMap { it.tasks }
+
     /** Non-empty sections in [TaskGroup] order, each sorted by the rules of plan M1-04. */
     fun sections(views: List<TaskView>): List<TaskSection> =
         TaskGroup.entries.mapNotNull { group ->

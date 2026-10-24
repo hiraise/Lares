@@ -48,7 +48,7 @@ class TaskReminderPlannerTest {
         TaskReminderPlanner(
             f.repository,
             f.localDb,
-            Reminders(f.localDb, alarms, { _, _, _, _ -> }, f.clock),
+            Reminders(f.localDb, alarms, { _, _, _, _, _ -> }, f.clock),
             NotificationSettingsRepository(api, f.localDb),
             EnglishTaskReminderTexts(f.clock),
             f.clock,

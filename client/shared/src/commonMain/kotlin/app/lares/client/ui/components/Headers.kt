@@ -1,6 +1,7 @@
 package app.lares.client.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -60,6 +61,8 @@ fun DetailTopBar(
     title: String,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    /** Drawn before the title, e.g. a tag's color dot. */
+    leading: (@Composable () -> Unit)? = null,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
     Row(
@@ -67,6 +70,7 @@ fun DetailTopBar(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         IconButton(onClick = onBack) { AppIcon(Res.drawable.ic_arrow_back, stringResource(Res.string.action_back)) }
+        if (leading != null) Box(Modifier.padding(start = Spacing.xs)) { leading() }
         Text(
             title,
             style = MaterialTheme.typography.headlineSmall,

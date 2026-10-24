@@ -5,15 +5,19 @@ Updated: 2026-10-24
 ## Phase
 
 **M0 Foundation — all plans M0-01…M0-11 done; M0 acceptance with the customer pending.
-M1 Tasks in progress: M1-01…M1-06 done; M1-07 next.**
+M1 Tasks — all plans M1-01…M1-07 done; M1 acceptance with the customer next.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
 
-[M0 Foundation](product/roadmap.md#m0-foundation). Specs `foundation` and `tags` approved.
+[M1 Tasks](product/roadmap.md#m1-tasks): implemented, customer acceptance pending (together with M0). Specs
+`foundation`, `tags` and `tasks` approved.
 
 ## Last completed
 
+- 2026-10-24 M1-07 Tasks everywhere: Today block «Задачи на сегодня» with ticking and «Добавить», tag page (from
+  Family › Tags and tag chips), four task switches in Settings › Notifications, a tap on a task notification or
+  reminder opens the task; user manual "Tasks" (en, ru); 11 new tests, emulator walkthrough.
 - 2026-10-24 M1-06 Task editor: create and edit with date and time, repeat (presets, custom, after completion),
   assignees or "anyone", tags (new tag from the editor), reminder, "tell me when it's done", checklist on create;
   19 new tests, emulator walkthrough in ru/en, light/dark.
@@ -46,14 +50,14 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 
 ## Next steps
 
-1. M0 acceptance with the customer (APK, walkthrough, Russian changelog).
+1. M0 and M1 acceptance with the customer (APK, walkthrough on real phones, Russian changelog; checklist in the M1-07
+   handoff).
 2. First signed release `0.2.0` after M1 is accepted (customer, 2026-10-23: no `0.1.2`; [release process](process/release.md));
    make the GHCR package `lares-server` public or `docker login ghcr.io` on the server
    ([deploy/README](../deploy/README.md#releases)).
 3. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
 4. M4 plan: re-run the load test with location uploads every 30 s (ADR-0015).
-5. M1 Tasks: next plan M1-07 (Today block, tag page, notification settings and taps, M1 docs) ([plans](plans/README.md#m1-plans); design:
-   [architecture/tasks.md](architecture/tasks.md), ADR-0017, ADR-0018).
+5. After the M1 acceptance: set the tasks spec to `implemented`; plans for M2 Shopping lists.
 
 ## Plan progress
 

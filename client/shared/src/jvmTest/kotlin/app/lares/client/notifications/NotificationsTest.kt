@@ -4,7 +4,10 @@ import app.lares.client.api.LaresApi
 import app.lares.client.api.createHttpClient
 import app.lares.client.auth.InMemoryTokenStore
 import app.lares.client.auth.Tokens
+import app.lares.client.data.tasks.TaskReminderPlanner
 import app.lares.client.platform.InMemoryServerStore
+import app.lares.client.platform.NavTarget
+import app.lares.client.platform.PendingNavigation
 import app.lares.client.sync.testLocalDb
 import app.lares.contract.api.LaresJson
 import app.lares.contract.api.notifications.NotificationChannel
@@ -12,6 +15,7 @@ import app.lares.contract.api.notifications.NotificationSettings
 import app.lares.contract.api.notifications.NotificationType
 import app.lares.contract.api.notifications.PushPayload
 import app.lares.contract.api.notifications.PushRegistrationRequest
+import app.lares.contract.sync.EntityTypes
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
 import io.ktor.client.engine.mock.respondError
@@ -25,13 +29,15 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertIs
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Instant
 
-/** Push payload routing, reminder storage and re-registration, endpoint upload (plan M0-09). */
+/** Push payload routing, reminder storage and re-registration, endpoint upload (plan M0-09), tap targets (M1-07). */
 class NotificationsTest {
     private val now = Instant.parse("2026-10-23T10:00:00Z")
     private val clock =
@@ -45,10 +51,11 @@ class NotificationsTest {
         val channel: NotificationChannel,
         val title: String,
         val body: String,
+        val target: NotificationTarget?,
     )
 
     private val shown = mutableListOf<Shown>()
-    private val poster = NotificationPoster { id, channel, title, body -> shown += Shown(id, channel, title, body) }
+    private val poster = NotificationPoster { id, channel, title, body, target -> shown += Shown(id, channel, title, body, target) }
 
     private class RecordingSync : BackgroundSync {
         var requests = 0
@@ -140,6 +147,46 @@ class NotificationsTest {
             assertEquals(1, shown.size)
             assertEquals(0, sync.requests)
         }
+
+    @Test
+    fun taskNotificationsAndRemindersOpenTheirTask() =
+        runTest {
+            val handler = PushMessageHandler(poster, RecordingSync(), settings)
+            handler.handle(
+                payload(
+                    PushPayload(
+                        PushPayload.KIND_NOTIFICATION,
+                        type = NotificationType.TASK_OVERDUE,
+                        title = "T",
+                        entityType = EntityTypes.TASK,
+                        entityId = "t9",
+                    ),
+                ),
+            )
+            handler.handle(payload(PushPayload(PushPayload.KIND_NOTIFICATION, type = NotificationType.SYSTEM_TEST, title = "Test")))
+            assertEquals(listOf(NotificationTarget(EntityTypes.TASK, "t9"), null), shown.map { it.target })
+
+            val reminders = Reminders(localDb, RecordingAlarms(), poster, clock)
+            reminders.schedule("${TaskReminderPlanner.ID_PREFIX}t7", now + 5.minutes, "Trash", "Due today at 20:00")
+            reminders.schedule("diagnostics.test", now + 5.minutes, "Test", "body")
+            reminders.fire("${TaskReminderPlanner.ID_PREFIX}t7")
+            reminders.fire("diagnostics.test")
+            assertEquals(listOf(NotificationTarget(EntityTypes.TASK, "t7"), null), shown.drop(2).map { it.target })
+            assertEquals("reminder:task:t7", shown[2].id)
+        }
+
+    @Test
+    fun pendingNavigationKeepsATaskTargetUntilConsumed() {
+        val pending = PendingNavigation()
+        assertFalse(pending.submit("shopping_list", "l1"), "no screen for that type yet")
+        assertNull(pending.target.value)
+        assertTrue(pending.submit(EntityTypes.TASK, "t1"))
+        val target = assertIs<NavTarget.Task>(pending.target.value)
+        assertEquals("t1", target.id)
+        assertTrue(pending.consume(target))
+        assertFalse(pending.consume(target), "handled once")
+        assertNull(pending.target.value)
+    }
 
     @Test
     fun unknownTypesKindsAndGarbageAreIgnored() =

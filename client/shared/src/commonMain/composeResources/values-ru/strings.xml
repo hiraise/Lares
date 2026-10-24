@@ -113,6 +113,11 @@
     <string name="section_family">Семья</string>
     <string name="section_tags">Метки</string>
     <string name="today_empty">Здесь будет сводка дня: задачи, события, покупки</string>
+    <string name="today_tasks_title">Задачи на сегодня</string>
+    <string name="today_tasks_all">Все</string>
+    <string name="today_tasks_more">Ещё %1$s</string>
+    <string name="today_tasks_none">На сегодня задач нет</string>
+    <string name="today_add">Добавить</string>
     <string name="placeholder_coming">Появится в следующих версиях</string>
     <string name="profile_open">Профиль и настройки</string>
     <string name="group_administrators">Администраторы</string>
@@ -393,6 +398,9 @@
     <string name="date_day_month_year">%1$s %2$s %3$s</string>
     <string name="tag_new">Новая метка</string>
     <string name="tag_title">Метка</string>
+    <string name="tag_tasks_section">Задачи · %1$s</string>
+    <string name="tag_tasks_empty">С этой меткой нет задач</string>
+    <string name="tag_action_edit">Изменить метку</string>
     <string name="tag_name">Название</string>
     <string name="tag_color">Цвет</string>
     <string name="tag_archive">В архив</string>
@@ -612,6 +620,7 @@
     <string name="tasks_empty_filtered">Нет задач по этим фильтрам</string>
     <string name="tasks_reset_filters">Сбросить фильтры</string>
     <string name="tasks_new">Задача</string>
+    <string name="task_deleted">Задача удалена</string>
     <string name="tasks_only_assignees">Отметить могут только исполнители</string>
     <string name="tasks_done_snackbar">Выполнено</string>
     <string name="tasks_skipped_snackbar">Пропущено</string>

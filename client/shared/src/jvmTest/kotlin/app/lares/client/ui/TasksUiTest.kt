@@ -1,5 +1,6 @@
 package app.lares.client.ui
 
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOff
@@ -9,6 +10,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.style.TextDecoration
 import app.lares.client.data.MemberView
 import app.lares.client.data.Tag
 import app.lares.client.data.tasks.TaskCompletion
@@ -16,6 +19,9 @@ import app.lares.client.data.tasks.TaskDetail
 import app.lares.client.data.tasks.TaskFilter
 import app.lares.client.data.tasks.TaskScope
 import app.lares.client.data.tasks.TaskView
+import app.lares.client.ui.main.MainUiState
+import app.lares.client.ui.main.TodayScreen
+import app.lares.client.ui.main.TodayUiState
 import app.lares.client.ui.tasks.TaskDetailScreen
 import app.lares.client.ui.tasks.TaskDetailUiState
 import app.lares.client.ui.tasks.TaskRowUi
@@ -40,6 +46,7 @@ import kotlinx.datetime.TimeZone
 import java.util.Locale
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.time.Instant
 
 @OptIn(ExperimentalTestApi::class)
@@ -80,6 +87,53 @@ class TasksUiTest {
         done: Boolean = false,
         key: String = view.id,
     ) = TaskRowUi(key, view, TasksLogic.meta(view, today, zone, names), done, canToggle = true)
+
+    @Test
+    fun `Today block - done row struck through with who and when, more row, FAB (TSK-023)`() =
+        runComposeUiTest {
+            Locale.setDefault(Locale.forLanguageTag("ru"))
+            val open = view("t-today", TaskData("Забрать Аню", "m1", dueDate = today), TaskGroup.TODAY)
+            val completion = TaskCompletion("c1", TaskCompletionData("t-done", "m2", Instant.parse("2026-10-21T06:12:00Z"), today))
+            val done = view("t-done", TaskData("Полить цветы", "m1", dueDate = today), TaskGroup.TODAY, completedToday = completion)
+            val today =
+                TodayUiState(
+                    loaded = true,
+                    showTasks = true,
+                    canCreate = true,
+                    count = 1,
+                    rows = listOf(row(open), row(done, done = true)),
+                    more = 2,
+                )
+            setContent { LaresTheme(darkTheme = false) { TodayScreen(MainUiState(name = "Olga"), {}, {}, today) } }
+
+            onNodeWithText("Задачи на сегодня").assertIsDisplayed()
+            onNodeWithTag("today_count", useUnmergedTree = true).assertTextEquals("1")
+            onNodeWithTag("task_meta_t-done", useUnmergedTree = true).assertTextEquals("Boris · в 9:12")
+            onNodeWithTag("task_check_t-done").assertIsOn()
+            val layout = mutableListOf<TextLayoutResult>()
+            onNodeWithTag("task_title_t-done", useUnmergedTree = true)
+                .fetchSemanticsNode()
+                .config[SemanticsActions.GetTextLayoutResult]
+                .action
+                ?.invoke(layout)
+            assertEquals(
+                TextDecoration.LineThrough,
+                layout
+                    .single()
+                    .layoutInput.style.textDecoration,
+            )
+            onNodeWithText("Ещё 2", useUnmergedTree = true).assertExists()
+            onNodeWithTag("today_fab").assertExists()
+        }
+
+    @Test
+    fun `Today block - no tasks for today`() =
+        runComposeUiTest {
+            val today = TodayUiState(loaded = true, showTasks = true)
+            setContent { LaresTheme(darkTheme = false) { TodayScreen(MainUiState(name = "Olga"), {}, {}, today) } }
+            onNodeWithText("No tasks for today", useUnmergedTree = true).assertExists()
+            onNodeWithTag("today_fab").assertDoesNotExist()
+        }
 
     @Test
     fun `sections, overdue meta and done rows`() =

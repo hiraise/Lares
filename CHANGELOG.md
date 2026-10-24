@@ -14,6 +14,10 @@ Versioning: [SemVer](https://semver.org/) from the first release.
 - Task editor (M1-06): create and edit tasks — title, notes, date and time, repeat (every day, week, month, year, on
   chosen weekdays, or a set time after the last completion), assignees or «Кто угодно», tags (a new tag right from the
   editor), a reminder, «Сообщить мне, когда выполнят», and a checklist when creating.
+- Tasks everywhere (M1-07): the Today screen shows your overdue and today's tasks, you tick them off right there, and
+  «Добавить» creates a new task. Each tag has its own page with its tasks. Settings › Notifications can turn off task
+  notifications and task reminders one by one. Tapping a task notification or reminder opens the task. New user
+  manual "Tasks" in English and Russian.
 
 ### Changed
 

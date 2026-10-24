@@ -11,6 +11,9 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import app.lares.client.auth.SessionState
 import app.lares.client.platform.DeepLinkHandler
+import app.lares.client.platform.NavTarget
+import app.lares.client.platform.PendingNavigation
+import app.lares.client.platform.TaskLinks
 import app.lares.client.ui.family.AddMemberMode
 import app.lares.client.ui.family.AddMemberRoute
 import app.lares.client.ui.family.FamilyNavigation
@@ -20,6 +23,7 @@ import app.lares.client.ui.family.FamilyTab
 import app.lares.client.ui.family.GroupEditorRoute
 import app.lares.client.ui.family.MemberDetailRoute
 import app.lares.client.ui.family.PersonRoute
+import app.lares.client.ui.family.TagRoute
 import app.lares.client.ui.main.MainNavigation
 import app.lares.client.ui.main.MainScaffoldRoute
 import app.lares.client.ui.main.SectionPlaceholderPage
@@ -44,6 +48,7 @@ import app.lares.client.ui.tasks.TaskEditorArgs
 import app.lares.client.ui.tasks.TaskEditorRoute
 import app.lares.contract.DeepLink
 import app.lares.contract.permissions.Section
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.serialization.Serializable
 import org.koin.compose.koinInject
@@ -143,6 +148,12 @@ data class PersonDestination(
 @Serializable
 data object FamilySettingsDestination
 
+/** The tag page (TAG-004). */
+@Serializable
+data class TagDestination(
+    val id: String,
+)
+
 @Serializable
 data class TaskDetailDestination(
     val id: String,
@@ -234,6 +245,7 @@ private fun NavHostController.backOrServer() {
 @Composable
 fun MainNavHost() {
     val navController = rememberNavController()
+    NotificationTaps(navController)
     NavHost(navController, startDestination = SectionsDestination) {
         composable<SectionsDestination> {
             MainScaffoldRoute(
@@ -254,6 +266,7 @@ fun MainNavHost() {
                 id,
                 onBack = { navController.popBackStack() },
                 onEdit = { navController.navigate(TaskEditorDestination(id)) },
+                onTag = { navController.navigate(TagDestination(it)) },
             )
         }
         composable<TaskEditorDestination> { entry ->
@@ -299,6 +312,29 @@ fun MainNavHost() {
     }
 }
 
+/**
+ * A tapped task notification or reminder opens the task over the main screen; a task that is gone opens the Tasks tab
+ * with a notice instead (plan M1-07).
+ */
+@Composable
+private fun NotificationTaps(
+    navController: NavHostController,
+    pending: PendingNavigation = koinInject(),
+    taskLinks: TaskLinks = koinInject(),
+) {
+    LaunchedEffect(pending) {
+        pending.target.filterIsInstance<NavTarget.Task>().collect { target ->
+            if (!pending.consume(target)) return@collect
+            if (taskLinks.exists(target.id)) {
+                navController.navigate(TaskDetailDestination(target.id)) { popUpTo<SectionsDestination>() }
+            } else {
+                navController.popBackStack<SectionsDestination>(inclusive = false)
+                pending.submit(NavTarget.TaskGone)
+            }
+        }
+    }
+}
+
 /** Family (plan M0-08): tabs, member detail, adding members, groups, persons, family settings. */
 private fun NavGraphBuilder.familyGraph(navController: NavHostController) {
     val back: () -> Unit = { navController.popBackStack() }
@@ -313,7 +349,15 @@ private fun NavGraphBuilder.familyGraph(navController: NavHostController) {
                     onGroup = { navController.navigate(GroupDestination(it)) },
                     onPerson = { navController.navigate(PersonDestination(it)) },
                     onSettings = { navController.navigate(FamilySettingsDestination) },
+                    onTag = { navController.navigate(TagDestination(it)) },
                 ),
+        )
+    }
+    composable<TagDestination> { entry ->
+        TagRoute(
+            entry.toRoute<TagDestination>().id,
+            onBack = back,
+            onTask = { navController.navigate(TaskDetailDestination(it)) },
         )
     }
     composable<MemberDestination> { entry ->
