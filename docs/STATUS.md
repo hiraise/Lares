@@ -16,12 +16,14 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 `foundation`, `tags` and `tasks` approved. Next: [M2 Shopping lists](product/roadmap.md#m2-shopping-lists) — plans ready
 ([M2 plans](plans/README.md#m2-plans)), shopping spec approved.
 
-**Active release branch: `release/0.4.0`** (next: M3). Commit approved work here; `main` is protected
-([release process](process/release.md), ADR-0020). Latest release: [v0.3.0](https://github.com/hiraise/lares/releases/tag/v0.3.0)
-(M2, 2026-10-24).
+**Active release branch: `release/0.4.1`** (fixes after M3). Commit approved work here; `main` is protected
+([release process](process/release.md), ADR-0020). Latest release: [v0.4.0](https://github.com/hiraise/Lares/releases/tag/v0.4.0)
+(M3, 2026-10-25).
 
 ## Last completed
 
+- 2026-10-25 Release **v0.4.0** (M3 Calendar): release pull request #3 merged, signed APK, server image
+  `ghcr.io/hiraise/lares-server:0.4.0`, GitHub release. Next branch `release/0.4.1` for the customer's fixes.
 - 2026-10-25 M3-08 Calendar everywhere: «Скоро» on Today (date tiles, «Бабушка Валя, 78 лет · Понедельник · через 3
   дня», «Ещё N» opens «Список»), «События» on the tag page, «Исполнится 78 · через 3 дня» and «Даты» with «Добавить
   памятную дату» on the person page, Settings switches for calendar notifications and event reminders and the
@@ -128,8 +130,8 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 3. M4 plan: re-run the load test with location uploads every 30 s (ADR-0015).
 4. After the M1 acceptance: set the tasks spec to `implemented`.
 5. M2 acceptance with the customer (checklist in the M2-06 handoff); after it set the shopping spec to `implemented`.
-6. M3 acceptance with the customer (checklist in the M3-08 handoff), then release v0.4.0; after it set the calendar
-   spec to `implemented`.
+6. M3 acceptance with the customer on v0.4.0 (checklist in the M3-08 handoff); fixes go to `release/0.4.1`; after the
+   acceptance set the calendar spec to `implemented`.
 
 ## Plan progress
 
