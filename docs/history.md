@@ -318,3 +318,18 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   (the «Дни рождения» row moved before the test switch).
 - 2026-10-25 Release **v0.4.0** (M3 Calendar): release pull request #3 merged, signed APK, server image
   `ghcr.io/hiraise/lares-server:0.4.0`, GitHub release; branch `release/0.4.1` started for fixes.
+- 2026-10-25 M4 planning: location spec detailed (LOC-001…LOC-027, draft), customer answered Q-025 (pause with durations,
+  others see «на паузе» and the last position), Q-026 (sharing turned off on a kid's phone: mark + notification to
+  administrators), Q-027 («Обновить» for everybody who sees the member), Q-028 (everybody sets their own arrive / leave
+  alerts; the member sees who gets them), Q-029 (street addresses and address search through OpenStreetMap via the
+  server). Design in [architecture/location.md](architecture/location.md), ADR-0024 (positions outside the sync log,
+  live channel), ADR-0025 (visibility rules), ADR-0026 (addresses through a server geocoder, on demand), ADR-0027
+  (maplibre-compose behind an expect composable), ADR-0028 (foreground service with moving / still modes), plans
+  M4-01…M4-10.
+- 2026-10-25 M4 plans reviewed by two fresh agents from the executor's point of view (server half, client half); 42
+  findings fixed — among them: live sockets closed on sign-out and checked per message, retention also clears the last
+  position, «Обновить» compares server times only and never fires during a pause, all session-ending paths covered,
+  geocoder off-switch that survives `value()` and compose defaults, seed sessions with refresh tokens, Android 8–10
+  background-permission paths, a client compile break from new notification types.
+- 2026-10-25 Customer approved the location spec; no bugs found in v0.4.0, so `release/0.4.1` is dropped and M4 work goes
+  to `release/0.5.0` (started from `main`, the 0.4.1 status commit carried over).

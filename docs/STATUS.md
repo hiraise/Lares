@@ -7,21 +7,27 @@ Updated: 2026-10-25
 **M0 Foundation — all plans M0-01…M0-11 done; M0 acceptance with the customer pending.
 M1 Tasks — all plans M1-01…M1-07 done; M1 acceptance with the customer next.
 M2 Shopping lists — all plans M2-01…M2-06 done; M2 acceptance with the customer next.
-M3 Calendar — all plans M3-01…M3-08 done; M3 acceptance with the customer next, then release v0.4.0.**
+M3 Calendar — all plans M3-01…M3-08 done, released as v0.4.0; M3 acceptance with the customer next.
+M4 Location — spec approved, design, ADR-0024…0028 and plans M4-01…M4-10 ready; next M4-01.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
 
-[M1 Tasks](product/roadmap.md#m1-tasks): implemented, customer acceptance pending (together with M0). Specs
-`foundation`, `tags` and `tasks` approved. Next: [M2 Shopping lists](product/roadmap.md#m2-shopping-lists) — plans ready
-([M2 plans](plans/README.md#m2-plans)), shopping spec approved.
+[M4 Location](product/roadmap.md#m4-location): planned — [location spec](product/features/location.md) (approved,
+Q-025…Q-029 answered), [location design](architecture/location.md), [M4 plans](plans/README.md#m4-plans). Next:
+M4-01 (`/plan-run M4-01`).
+Acceptance of M0–M3 is still pending.
 
-**Active release branch: `release/0.4.1`** (fixes after M3). Commit approved work here; `main` is protected
+**Active release branch: `release/0.5.0`** (M4). `release/0.4.1` was not needed: the customer found no bugs in v0.4.0. Commit approved work here; `main` is protected
 ([release process](process/release.md), ADR-0020). Latest release: [v0.4.0](https://github.com/hiraise/Lares/releases/tag/v0.4.0)
 (M3, 2026-10-25).
 
 ## Last completed
 
+- 2026-10-25 M4 planning: location spec detailed (draft), customer answered Q-025…Q-029 (pause with durations and the
+  last position, a mark and an admin notification when a kid's phone stops sharing, «Обновить» for everybody who sees the
+  member, own arrive / leave alerts with transparency, street addresses via OpenStreetMap through the server). Design
+  [architecture/location.md](architecture/location.md), ADR-0024…ADR-0028, plans M4-01…M4-10.
 - 2026-10-25 Release **v0.4.0** (M3 Calendar): release pull request #3 merged, signed APK, server image
   `ghcr.io/hiraise/lares-server:0.4.0`, GitHub release. Next branch `release/0.4.1` for the customer's fixes.
 - 2026-10-25 M3-08 Calendar everywhere: «Скоро» on Today (date tiles, «Бабушка Валя, 78 лет · Понедельник · через 3
@@ -127,10 +133,10 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 1. M0 and M1 acceptance with the customer (APK v0.2.0, walkthrough on real phones, Russian changelog; checklist in the M1-07
    handoff).
 2. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
-3. M4 plan: re-run the load test with location uploads every 30 s (ADR-0015).
+3. M4-01 on `release/0.5.0`, then the M4 plans in order (load test with location is plan M4-05).
 4. After the M1 acceptance: set the tasks spec to `implemented`.
 5. M2 acceptance with the customer (checklist in the M2-06 handoff); after it set the shopping spec to `implemented`.
-6. M3 acceptance with the customer on v0.4.0 (checklist in the M3-08 handoff); fixes go to `release/0.4.1`; after the
+6. M3 acceptance with the customer on v0.4.0 (checklist in the M3-08 handoff); fixes go to `release/0.5.0`; after the
    acceptance set the calendar spec to `implemented`.
 
 ## Plan progress
@@ -149,6 +155,9 @@ See the table in [plans README](plans/README.md#m0-plans).
 | Loss or leak of the release signing key | No updates for installed apps / fake updates | Lares-only key, backup archive kept off the machine by the customer, fingerprint checked in the release workflow (ADR-0019) |
 | OEM battery optimizations (Xiaomi, Huawei, Samsung) kill background location | Gaps in location tracking | In-app guide to exclude the app from battery optimization; detect and warn about stale positions |
 | JVM server memory above budget | Stack does not fit a 1 GB VPS | M0-11: RSS max 237 of 256 MiB after tuning, stack ~320 MiB; re-measure in M4 with location; next lever GraalVM native image |
+| maplibre-compose is pre-1.0 (breaking changes in minor releases) | Map code churn on upgrades | Pinned 0.20.0, all map code behind `FamilyMapView` (ADR-0027); upgrades as their own plan |
+| Public Nominatim usage policy (1 req/s, no bulk, may ask apps to switch) | Addresses stop working | On-demand lookups only, caches, rate limit, configurable URL, off switch (ADR-0026) |
+| Android 17 (targetSdk 37) requires `ACCESS_LOCAL_NETWORK` for servers on a home network | A LAN-only server unreachable | Check in the M4 acceptance; the documented setup uses a public domain |
 | Compose Multiplatform web target is Beta | Web client (M7) may need workarounds | Re-evaluate at M7; fallback is a separate web UI |
 | Sync engine complexity | Data loss or conflicts | Protocol accepted (sync.md, ADR-0008); server invariants (M0-05) and multi-device convergence tests (M0-06) run in `check` |
 | Flexible permissions make UI and testing harder | Confusing group editor, permission bugs | Templates "Adults"/"Kids", plain wording, permission matrix tests (ADR-0014) |

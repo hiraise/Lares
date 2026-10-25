@@ -125,3 +125,28 @@ the spec scenarios, Russian changelog.
 Shared references for all M3 plans: [calendar design](../architecture/calendar.md),
 [ADR-0022](../adr/0022-event-series-with-occurrence-rows.md), [ADR-0023](../adr/0023-owner-only-sync-rows.md),
 [ADR-0018](../adr/0018-tags-embedded-in-entities.md), [calendar spec](../product/features/calendar.md).
+
+## M4 plans
+
+Milestone [M4 Location](../product/roadmap.md#m4-location). [Location spec](../product/features/location.md) detailed on
+2026-10-25 with the customer's answers Q-025…Q-029 and approved by the customer the same day.
+
+| Plan | Title | Depends on | Status |
+| --- | --- | --- | --- |
+| [M4-01](M4/01-location-contract.md) | Location contract: data, DTOs, visibility, geofence and stops, write rules, validators | M3 | ready |
+| [M4-02](M4/02-places-rules-server.md) | Places, alerts and visibility rules on the server | M4-01 | ready |
+| [M4-03](M4/03-positions-live-server.md) | Positions, sharing state and the live channel on the server | M4-02 | ready |
+| [M4-04](M4/04-geofences-notifications-addresses-server.md) | Geofences, location notifications and addresses on the server | M4-03 | ready |
+| [M4-05](M4/05-load-test-with-location.md) | Load simulation with location uploads (ADR-0015) | M4-04 | ready |
+| [M4-06](M4/06-location-client-core.md) | Location in the client core: places, live map data, sharing, queue, tracking policy | M4-04 | ready |
+| [M4-07](M4/07-android-sharing-service.md) | Android sharing: foreground service, permissions, setup, pause, Settings › Геопозиция | M4-06 | ready |
+| [M4-08](M4/08-map-screen.md) | The Map screen: MapLibre, pins, places, family sheet, member card, «Обновить» | M4-07 | ready |
+| [M4-09](M4/09-history-and-places-ui.md) | History with stops; place list and editor with address search | M4-08 | ready |
+| [M4-10](M4/10-alerts-rules-everywhere-manual.md) | Alerts, visibility rules, Today, person page, settings, taps, manual, M4 wrap-up | M4-09, M4-05 | ready |
+
+M4-05 may run any time after M4-04 (it needs only the server). M4 acceptance (after all plans): APK on the family's
+phones against the real server, sharing on every phone for a few days, a school day with arrive / leave alerts, pause,
+«Обновить», a kid turning location off, battery use on the family's phone brands, Russian changelog.
+
+Shared references for all M4 plans: [location design](../architecture/location.md), ADR-0024…ADR-0028
+([index](../adr/README.md)), [location spec](../product/features/location.md), mockup `docs/design/mockups/Map.dc.html`.

@@ -42,7 +42,8 @@ Full documentation map: [docs/README.md](docs/README.md).
 3. **No proprietary dependencies** in client or server: no Google Play Services, Firebase, Google Maps,
    analytics or crash-reporting SDKs ([ADR-0006](docs/adr/0006-no-proprietary-dependencies.md)).
 4. **No telemetry.** The app talks only to the family's own server and to services the server admin configures
-   (map tiles, push distributor).
+   (map tiles, push distributor). The server itself calls only services the admin configures (address lookup,
+   ADR-0026).
 5. **Privacy by design.** Location and finance data are sensitive. Every feature spec states who can see and change what.
 6. **Docs change with code.** A change is not done until STATUS, specs and ADRs reflect it ([DoD](docs/process/workflow.md#definition-of-done)).
 7. **Language:** code, comments, commits, technical docs — English. Customer communication — Russian.
