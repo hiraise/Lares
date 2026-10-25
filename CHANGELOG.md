@@ -5,6 +5,8 @@ Versioning: [SemVer](https://semver.org/) from the first release.
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-25
+
 ### Added
 
 - Family calendar (M3): the Calendar tab with «Месяц» (dots in each person's color, the chosen day's list), «Неделя»
