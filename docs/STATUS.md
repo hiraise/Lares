@@ -7,7 +7,7 @@ Updated: 2026-10-25
 **M0 Foundation — all plans M0-01…M0-11 done; M0 acceptance with the customer pending.
 M1 Tasks — all plans M1-01…M1-07 done; M1 acceptance with the customer next.
 M2 Shopping lists — all plans M2-01…M2-06 done; M2 acceptance with the customer next.
-M3 Calendar — M3-01…M3-06 done; next `/plan-run M3-07`.**
+M3 Calendar — M3-01…M3-07 done; next `/plan-run M3-08`.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
@@ -22,6 +22,10 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 
 ## Last completed
 
+- 2026-10-25 M3-07 Calendar week: «Неделя» shows seven days by hours — events as blocks in the first participant's
+  color (side by side when they overlap), holidays, birthdays and memorable dates as chips on top, the "now" line;
+  a tap on a free hour creates an event there, a tap on a day opens it in «Месяц». 11 new tests, emulator walkthrough
+  of spec scenario 7 (four small issues found and fixed).
 - 2026-10-25 M3-06 Event editor: events and memorable dates are created and changed — times, several days, repeat
   with «До», participants, place, reminder, tags, notes; a repeating event changes for «Только это», «Это и следующие»
   or «Все» (with a warning before resetting changed occurrences). Date, time and repeat pickers shared with tasks.
@@ -118,7 +122,7 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 3. M4 plan: re-run the load test with location uploads every 30 s (ADR-0015).
 4. After the M1 acceptance: set the tasks spec to `implemented`.
 5. M2 acceptance with the customer (checklist in the M2-06 handoff); after it set the shopping spec to `implemented`.
-6. Execute M3-07…M3-08 (`/plan-run M3-07`).
+6. Execute M3-08 (`/plan-run M3-08`), then M3 acceptance with the customer.
 
 ## Plan progress
 

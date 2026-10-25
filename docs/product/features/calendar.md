@@ -45,6 +45,7 @@ Technical design: [architecture/calendar.md](../../architecture/calendar.md).
   event may end on a later day (overnight train). It shows on every day it covers.
   *Client core: multi-day occurrences on every day with `continuesBefore/After`, week blocks clipped to the day (M3-04).*
   *UI: the end date in the editor; all-day events over several days, timed ones ending on a later day; more than 366 days is refused with «Слишком длинное событие» (M3-06).*
+  *UI: in the week an all-day event is one chip across its days; a timed one is a block on every day it covers (M3-07).*
 - **CAL-002** `MVP` `todo` — Participants ("who it concerns"): any persons — members and relatives. An event without
   participants concerns the whole family. ASSUMPTION: deleting a relative removes them from events; the events stay.
   *Client core: participants (unknown ids dropped), person filter incl. whole-family events (M3-04).*
@@ -122,6 +123,9 @@ Technical design: [architecture/calendar.md](../../architecture/calendar.md).
   remembered. Filters by person (events they take part in and their birthdays and dates) and by tag.
   *Client core: `days`, `month` (42 cells, dots), `week` (column layout), person and tag filters (M3-04).*
   *UI: the Calendar tab — month pager with dots and the day's list, «Список» growing forward and back, ‹ › and «Сегодня», filter sheet with removable chips, the view remembered on the device; «Неделя» is a placeholder until M3-07 (M3-05).*
+  *UI: week grid — pager of weeks, day header (a tap opens the day in «Месяц»), all-day strip, 24 h grid by hours with
+  blocks in the first participant's tone side by side when they overlap, the "now" line, a tap on a free hour creates an
+  event there (M3-07).*
 - **CAL-009** `MVP` `todo` — Tasks with a date appear in «Список» and in the day list under the month (Q-023): for
   repeating tasks only the current occurrence; they can be ticked off there. The filter has «Показывать задачи», on by
   default; the person filter applies to assignees, the tag filter to task tags. Only for members with access to Tasks.

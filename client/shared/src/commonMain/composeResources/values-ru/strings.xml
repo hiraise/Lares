@@ -980,4 +980,19 @@
     <string name="cal_editor_cannot_create">Нет прав на создание событий. Попросите администратора семьи.</string>
     <string name="cal_error_too_long">Слишком длинное событие</string>
     <string name="cal_error_before_start">Раньше начала</string>
+    <!-- Week view (M3-07) -->
+    <string name="cal_week_same_month">%1$s–%2$s %3$s</string>
+    <string name="cal_week_same_month_year">%1$s–%2$s %3$s %4$s</string>
+    <string name="date_day_month_short_year">%1$s %2$s %3$s</string>
+    <string name="cal_week_more">+%1$d</string>
+    <string name="cal_block_description">%1$s, %2$s %3$s–%4$s, %5$s</string>
+    <string-array name="weekdays_lower">
+        <item>понедельник</item>
+        <item>вторник</item>
+        <item>среда</item>
+        <item>четверг</item>
+        <item>пятница</item>
+        <item>суббота</item>
+        <item>воскресенье</item>
+    </string-array>
 </resources>

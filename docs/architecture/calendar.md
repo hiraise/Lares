@@ -417,3 +417,23 @@ after a change of the calendar inputs, the mute set or `birthdayDaysBefore`, and
   `countYears` or a year before this one shows its year (ASSUMPTION: an unknown year entered last year shows that year).
 - Refused by rights (a kid opening another's event by a link): the editor closes and «Нет прав на изменение этого
   события» shows on the main screen (`UiNotices`).
+
+### Implementation notes (M3-07)
+
+- `ui/calendar/WeekGrid.kt` (pager, header, strip, grid, blocks) and the pure `WeekGridLogic` (block geometry, strip
+  rows, initial scroll, titles, block descriptions). The view model computes `week` for the shown week and its two
+  neighbours (`CalendarUiState.weeks`), so a swipe shows the next week's blocks at once; `nowMinute` moves the "now"
+  line with the minute ticks.
+- Switching from «Месяц» to «Неделя» shows the week of the selected day; a tap on a day of the week header opens it in
+  «Месяц».
+- The title carries the year also when the week lies in another year than today («4–10 января 2027»), as day headers
+  elsewhere do.
+- Thin vertical lines separate the day columns; hour labels start at 01:00 (00:00 would be cut at the top) and shrink
+  to the 40 dp gutter at a large font scale. The grid opens 8 dp above the hour, so its label shows whole. Block start
+  times use the app's time format («7:30»); hour labels keep «07:00».
+- A block keeps the click action for screen readers (its texts are hidden, the block reads
+  «Танцы, понедельник 17:30–18:45, Аня»). A night part of an overnight event reads «0:00–7:30» / «22:00–24:00».
+- With the FAB in the week view a new event starts today when the current week is shown, otherwise on the week's Monday.
+- The scroll position of each week page is saved, so it stays after returning from an event page or the editor.
+- The header's `today` action comes before ‹ ›, so ‹ › and the filter keep their places when it appears (also in
+  «Месяц»).

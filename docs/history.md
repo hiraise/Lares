@@ -302,3 +302,11 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   `EventEditorUiTest`); emulator walkthrough of spec scenarios 1, 2, 4, 5, kid access, ru/en, light/dark without bugs.
   Fixed on the way: a save right after typing could be dropped (checked the combined state); the year column clipped
   «Год неизвестен».
+- 2026-10-25 **M3-07** Calendar week view: `WeekGrid.kt` (pager of weeks, day header, all-day strip, 24 h grid drawn
+  with `Canvas`, event blocks) and pure `WeekGridLogic` (block geometry, strip rows with «+N», initial scroll, week
+  titles, block descriptions for screen readers); the view model computes the shown week and its neighbours and the
+  "now" minute; a tap on a free hour opens the editor at that hour; switching from «Месяц» shows the selected day's week.
+  11 new tests (`WeekGridLogicTest`, `CalendarViewModelTest`, `CalendarUiTest` additions); emulator walkthrough of spec
+  scenario 7, overlaps, ru/en, light/dark, smooth scrolling. Fixed after the walkthrough: hour labels cut at 130 % font
+  scale, scroll position lost after returning from an event, ‹ › moving when «Сегодня» appears, the 07:00 label half
+  hidden on open.

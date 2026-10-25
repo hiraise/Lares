@@ -56,14 +56,12 @@ import app.lares.client.resources.cal_view_list
 import app.lares.client.resources.cal_view_month
 import app.lares.client.resources.cal_view_week
 import app.lares.client.resources.ic_add
-import app.lares.client.resources.ic_calendar_month
 import app.lares.client.resources.ic_chevron_left
 import app.lares.client.resources.ic_chevron_right
 import app.lares.client.resources.ic_close
 import app.lares.client.resources.ic_event
 import app.lares.client.resources.ic_filter_list
 import app.lares.client.resources.ic_today
-import app.lares.client.resources.placeholder_coming
 import app.lares.client.ui.common.text
 import app.lares.client.ui.components.AppFilterChip
 import app.lares.client.ui.components.AppIcon
@@ -90,6 +88,8 @@ class CalendarActions(
     val onMode: (CalendarMode) -> Unit = {},
     /** The pager settled on the month starting on this day. */
     val onMonth: (LocalDate) -> Unit = {},
+    /** The week pager settled on the week starting on this Monday. */
+    val onWeek: (LocalDate) -> Unit = {},
     val onSelect: (LocalDate) -> Unit = {},
     val onPrevious: () -> Unit = {},
     val onNext: () -> Unit = {},
@@ -121,6 +121,7 @@ fun CalendarRoute(
         CalendarActions(
             onMode = viewModel::setMode,
             onMonth = viewModel::showMonth,
+            onWeek = viewModel::showWeek,
             onSelect = viewModel::select,
             onPrevious = viewModel::previous,
             onNext = viewModel::next,
@@ -162,19 +163,18 @@ fun CalendarScreen(
                     CalendarMode.LIST -> visibleDay != null && visibleDay != listToday?.second
                     else -> !state.atToday
                 }
+            val title =
+                if (state.mode == CalendarMode.WEEK) {
+                    WeekGridLogic.weekTitle(state.nav.weekStart, state.today)
+                } else {
+                    CalendarLogic.monthTitle(titleDate.year, titleDate.month.ordinal + 1)
+                }
             ScreenHeader(
-                CalendarLogic.monthTitle(titleDate.year, titleDate.month.ordinal + 1).text(),
+                title.text(),
                 Modifier.testTag("cal_title"),
                 singleLineTitle = true,
             ) {
-                if (state.mode != CalendarMode.LIST) {
-                    IconButton(onClick = actions.onPrevious, modifier = Modifier.testTag("cal_previous")) {
-                        AppIcon(Res.drawable.ic_chevron_left, stringResource(Res.string.cal_previous))
-                    }
-                    IconButton(onClick = actions.onNext, modifier = Modifier.testTag("cal_next")) {
-                        AppIcon(Res.drawable.ic_chevron_right, stringResource(Res.string.cal_next))
-                    }
-                }
+                // «Сегодня» comes first, so ‹ › and the filter keep their places when it appears.
                 if (showToday) {
                     IconButton(
                         onClick = {
@@ -185,6 +185,14 @@ fun CalendarScreen(
                         },
                         modifier = Modifier.testTag("cal_today"),
                     ) { AppIcon(Res.drawable.ic_today, stringResource(Res.string.cal_go_today)) }
+                }
+                if (state.mode != CalendarMode.LIST) {
+                    IconButton(onClick = actions.onPrevious, modifier = Modifier.testTag("cal_previous")) {
+                        AppIcon(Res.drawable.ic_chevron_left, stringResource(Res.string.cal_previous))
+                    }
+                    IconButton(onClick = actions.onNext, modifier = Modifier.testTag("cal_next")) {
+                        AppIcon(Res.drawable.ic_chevron_right, stringResource(Res.string.cal_next))
+                    }
                 }
                 FilterButton(state.filtered) { filterOpen = true }
             }
@@ -198,7 +206,7 @@ fun CalendarScreen(
             if (state.filtered) FilterChips(state, actions)
             when (state.mode) {
                 CalendarMode.MONTH -> if (state.loaded) MonthView(state, actions)
-                CalendarMode.WEEK -> WeekPlaceholder()
+                CalendarMode.WEEK -> if (state.loaded) WeekPager(state, actions)
                 CalendarMode.LIST -> ListView(state, actions, listState, listIndex)
             }
         }
@@ -208,7 +216,12 @@ fun CalendarScreen(
                 Res.drawable.ic_add,
                 description,
                 {
-                    val date = if (state.mode == CalendarMode.MONTH) state.nav.selected else state.today
+                    val date =
+                        when (state.mode) {
+                            CalendarMode.MONTH -> state.nav.selected
+                            CalendarMode.WEEK -> if (state.atToday) state.today else state.nav.weekStart
+                            CalendarMode.LIST -> state.today
+                        }
                     actions.onCreate(EventEditorArgs(date = date))
                 },
                 Modifier.align(Alignment.BottomEnd).padding(Spacing.l).testTag("cal_fab"),
@@ -323,13 +336,6 @@ private fun MonthView(
             onAdd = if (state.canCreate) ({ actions.onCreate(EventEditorArgs(date = state.nav.selected)) }) else null,
             modifier = Modifier.padding(horizontal = Spacing.screen),
         )
-    }
-}
-
-@Composable
-private fun WeekPlaceholder() {
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-        EmptyState(Res.drawable.ic_calendar_month, stringResource(Res.string.placeholder_coming), Modifier.testTag("cal_week_placeholder"))
     }
 }
 

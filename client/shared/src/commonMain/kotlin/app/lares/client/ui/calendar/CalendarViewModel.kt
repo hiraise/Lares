@@ -10,6 +10,7 @@ import app.lares.client.data.calendar.CalendarItem
 import app.lares.client.data.calendar.CalendarRepository
 import app.lares.client.data.calendar.CalendarViews
 import app.lares.client.data.calendar.MonthCell
+import app.lares.client.data.calendar.WeekDay
 import app.lares.client.data.tasks.TaskInputs
 import app.lares.client.data.tasks.TasksRepository
 import app.lares.client.data.tasks.TasksWriter
@@ -104,6 +105,10 @@ data class CalendarUiState(
     val day: List<CalendarRow> = emptyList(),
     /** Non-empty days of the list range («Список»). */
     val listDays: List<DayUi> = emptyList(),
+    /** Days of the shown week and its neighbours, keyed by their Monday (week view). */
+    val weeks: Map<LocalDate, List<WeekDay>> = emptyMap(),
+    /** Minutes since 00:00 now, for the "now" line of the week grid. */
+    val nowMinute: Int = 0,
     val canCreate: Boolean = false,
     /** The member sees tasks, so «Показывать задачи» applies. */
     val canFilterTasks: Boolean = false,
@@ -173,8 +178,18 @@ class CalendarViewModel(
                     .let { CalendarUiState(today = it, nav = CalendarNav.at(it)) },
             )
 
+    /** Switching to the week shows the week of the day selected in the month. */
     fun setMode(mode: CalendarMode) {
+        if (mode == CalendarMode.WEEK && state.value.mode == CalendarMode.MONTH) {
+            updateNav { it.copy(weekStart = CalendarViews.mondayOnOrBefore(it.selected)) }
+        }
         viewModelScope.launch { preferences.setCalendarView(mode.key) }
+    }
+
+    /** The week pager settled on the week starting on [monday]. */
+    fun showWeek(monday: LocalDate) {
+        if (nav.value == null) return
+        updateNav { nav -> if (nav.weekStart == monday) nav else nav.copy(weekStart = monday) }
     }
 
     /** Pages to the month starting on [first]; the selected day keeps its day of month when it exists, else the 1st. */
@@ -257,6 +272,7 @@ class CalendarViewModel(
         const val PAST_STEP_DAYS = 30
         const val LIST_MAX_DAYS = 730
         private const val DAYS_PER_WEEK = 7
+        private const val MINUTES_PER_HOUR = 60
 
         fun build(
             inputs: CalendarInputs,
@@ -300,7 +316,12 @@ class CalendarViewModel(
                 }
 
                 CalendarMode.WEEK -> {
-                    base
+                    val weeks = listOf(-DAYS_PER_WEEK, 0, DAYS_PER_WEEK).map { nav.weekStart.plus(it, DateTimeUnit.DAY) }
+                    val now = inputs.now.toLocalDateTime(inputs.zone).time
+                    base.copy(
+                        weeks = weeks.associateWith { CalendarViews.week(inputs, it, effective) },
+                        nowMinute = now.hour * MINUTES_PER_HOUR + now.minute,
+                    )
                 }
             }
         }

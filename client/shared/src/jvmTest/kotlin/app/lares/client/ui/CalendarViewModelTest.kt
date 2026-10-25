@@ -1,6 +1,7 @@
 package app.lares.client.ui
 
 import app.lares.client.data.calendar.CalendarItem
+import app.lares.client.data.calendar.CalendarViews
 import app.lares.client.platform.AppPreferences
 import app.lares.client.platform.PreferencesStore
 import app.lares.client.ui.calendar.CalendarMode
@@ -193,6 +194,67 @@ class CalendarViewModelTest {
         }
         CalendarUiFixture.core(FamilyFixture.carol).use { core ->
             assertTrue(loaded(core.koin.get<CalendarViewModel>()).canCreate, "Kids create events by default")
+        }
+    }
+
+    @Test
+    fun `the week pages by seven days and returns to today`() {
+        CalendarUiFixture.core().use { core ->
+            val vm = core.koin.get<CalendarViewModel>()
+            loaded(vm)
+            val monday = CalendarViews.mondayOnOrBefore(today)
+            vm.setMode(CalendarMode.WEEK)
+            val week = awaitState(vm.state) { it.mode == CalendarMode.WEEK && it.weeks.isNotEmpty() }
+            assertEquals(monday, week.nav.weekStart)
+            assertTrue(week.atToday)
+            assertEquals(setOf(monday.minus(7, DateTimeUnit.DAY), monday, monday.plus(7, DateTimeUnit.DAY)), week.weeks.keys)
+            val dance =
+                week.weeks
+                    .getValue(monday)
+                    .single { it.date == today }
+                    .blocks
+                    .single()
+            assertEquals(CalendarUiFixture.E_DANCE, dance.item.occ.eventId)
+            assertEquals(17 * 60 + 30 to 18 * 60 + 45, dance.startMinute to dance.endMinute)
+            assertTrue(
+                week.weeks.values
+                    .flatten()
+                    .all { day -> day.allDay.none { it is CalendarItem.Task } },
+                "no tasks in the week",
+            )
+
+            vm.next()
+            val next = awaitState(vm.state) { it.nav.weekStart == monday.plus(7, DateTimeUnit.DAY) }
+            assertFalse(next.atToday)
+            val moved =
+                next.weeks
+                    .getValue(next.nav.weekStart)
+                    .single { it.date == CalendarUiFixture.week }
+                    .blocks
+                    .single()
+            assertEquals(18 * 60, moved.startMinute, "the changed occurrence")
+
+            vm.previous()
+            vm.previous()
+            assertEquals(monday.minus(7, DateTimeUnit.DAY), awaitState(vm.state) { it.nav.weekStart < monday }.nav.weekStart)
+            vm.showWeek(monday.plus(21, DateTimeUnit.DAY))
+            awaitState(vm.state) { it.nav.weekStart == monday.plus(21, DateTimeUnit.DAY) }
+            vm.goToToday()
+            assertTrue(awaitState(vm.state) { it.nav.weekStart == monday }.atToday)
+        }
+    }
+
+    @Test
+    fun `switching from a month day to the week shows that day's week`() {
+        CalendarUiFixture.core().use { core ->
+            val vm = core.koin.get<CalendarViewModel>()
+            loaded(vm)
+            val later = today.plus(30, DateTimeUnit.DAY)
+            vm.select(later)
+            awaitState(vm.state) { it.nav.selected == later }
+            vm.setMode(CalendarMode.WEEK)
+            val week = awaitState(vm.state) { it.mode == CalendarMode.WEEK && it.weeks.isNotEmpty() }
+            assertEquals(CalendarViews.mondayOnOrBefore(later), week.nav.weekStart)
         }
     }
 }
