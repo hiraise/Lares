@@ -378,30 +378,110 @@ fun CalendarTaskRow(
     }
 }
 
-/** A calendar date tile (visual-style § Component patterns): 48 × 52, radius 14, `secondaryContainer`. */
+/**
+ * A calendar date tile (visual-style § Component patterns): 48 × 52, radius 14, `secondaryContainer`, the month
+ * uppercase; [highlighted] (today) in `primaryContainer`.
+ */
 @Composable
 fun DateTile(
     date: LocalDate,
     modifier: Modifier = Modifier,
+    highlighted: Boolean = false,
 ) {
     val colors = MaterialTheme.colorScheme
+    val container = if (highlighted) colors.primaryContainer else colors.secondaryContainer
+    val content = if (highlighted) colors.onPrimaryContainer else colors.onSecondaryContainer
     Column(
-        modifier.size(width = 48.dp, height = 52.dp).background(colors.secondaryContainer, RoundedCornerShape(14.dp)),
+        modifier.size(width = 48.dp, height = 52.dp).background(container, RoundedCornerShape(14.dp)),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
         Text(
             date.day.toString(),
             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
-            color = colors.onSecondaryContainer,
+            color = content,
         )
         Text(
-            stringArrayResource(Res.array.months_short).getOrElse(date.month.ordinal) { "" },
+            stringArrayResource(Res.array.months_short)
+                .getOrElse(date.month.ordinal) { "" }
+                .trimEnd('.')
+                .uppercase(),
             style = MaterialTheme.typography.labelSmall,
-            color = colors.onSecondaryContainer,
+            color = content,
         )
     }
 }
+
+/**
+ * A row with a [DateTile] outside the Calendar tab (Today «Скоро», tag page, person page): [title] (a birthday with a
+ * 16 dp `cake` in [cake], the person's color), [supporting] and the [persons]' avatars.
+ */
+@Composable
+fun DatedRow(
+    date: LocalDate,
+    title: String,
+    supporting: String,
+    today: LocalDate,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    persons: List<Person> = emptyList(),
+    allNames: List<String> = persons.map { it.data.name },
+    cake: PaletteColor? = null,
+) {
+    val colors = MaterialTheme.colorScheme
+    Row(
+        modifier
+            .fillMaxWidth()
+            .heightIn(min = 72.dp)
+            .clickable(onClick = onClick)
+            .padding(horizontal = Spacing.l, vertical = Spacing.m),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+    ) {
+        DateTile(date, highlighted = date == today)
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                if (cake != null) AppIcon(Res.drawable.ic_cake, null, size = 16.dp, tint = cake.tones().base)
+                Text(
+                    title,
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
+                    color = colors.onSurface,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            Meta(supporting)
+        }
+        PersonAvatars(persons, allNames)
+    }
+}
+
+/** A calendar item as a [DatedRow] on [date]. */
+@Composable
+fun DatedItemRow(
+    date: LocalDate,
+    item: CalendarItem,
+    supporting: String,
+    today: LocalDate,
+    allNames: List<String>,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    DatedRow(
+        date = date,
+        title = CalendarLogic.itemTitle(item).text(),
+        supporting = supporting,
+        today = today,
+        onClick = onClick,
+        modifier = modifier,
+        persons = (item as? CalendarItem.Event)?.participants.orEmpty(),
+        allNames = allNames,
+        cake = (item as? CalendarItem.Birthday)?.person?.color,
+    )
+}
+
+/** Inset of the divider between [DatedRow]s: under the text, past the tile. */
+val DATED_ROW_INSET = 78.dp
 
 /** Participant avatars: up to 3 overlapping (24 dp) and "+N"; none for the whole family. */
 @Composable

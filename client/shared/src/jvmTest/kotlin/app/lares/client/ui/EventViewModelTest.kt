@@ -7,6 +7,7 @@ import app.lares.client.data.calendar.CalendarItem
 import app.lares.client.data.calendar.CalendarRepository
 import app.lares.client.data.calendar.P_ANYA
 import app.lares.client.data.calendar.timedEvent
+import app.lares.client.platform.EventLinks
 import app.lares.client.ui.CalendarUiFixture.E_ANNIV
 import app.lares.client.ui.CalendarUiFixture.E_DANCE
 import app.lares.client.ui.CalendarUiFixture.E_DENTIST
@@ -166,6 +167,17 @@ class EventViewModelTest {
     fun `a kid may not edit others' events`() {
         CalendarUiFixture.core(FamilyFixture.carol).use { core ->
             assertFalse(loaded(core.event(E_DANCE, week)).detail!!.canEdit)
+        }
+    }
+
+    @Test
+    fun `a tapped event opens when it is visible, else the Calendar tab with a notice (M3-08)`() {
+        CalendarUiFixture.core().use { core ->
+            val links = core.koin.get<EventLinks>()
+            runBlocking {
+                assertTrue(links.exists(E_DENTIST))
+                assertFalse(links.exists("01928c4e-0000-7000-8000-0000000000ff"), "deleted or never synced")
+            }
         }
     }
 }

@@ -121,7 +121,7 @@ localization and deployment — everything feature modules depend on.
 - **FND-052** `MVP` `done` — Each user can mute notification types.
   *Stored per member on the server (muted types are not sent), mirrored on the phone; switches in Settings ›
   Notifications. M0 shows only test notifications (M0-09); task assigned, completed, overdue and task reminders have
-  switches (M1-07).*
+  switches (M1-07); calendar events and event reminders have switches, birthdays a choice of days (M3-08).*
 
 ### Client basics
 
@@ -134,8 +134,8 @@ localization and deployment — everything feature modules depend on.
 - **FND-063** `MVP` `doing` — Home screen "Today" summarizes the sections the member can see: overdue and today's tasks,
   upcoming events and birthdays, the active shopping list, family on the map, budget of the month. Each module adds
   its block in its milestone; in M0 it is an empty state. *Header and empty state done (M0-07). Tasks block and the
-  «Добавить» button (M1-07). Active shopping list card above the tasks (M2-06). The empty state remains for members who
-  see no block.*
+  «Добавить» button (M1-07). Active shopping list card above the tasks (M2-06). «Скоро» with events, birthdays and
+  memorable dates after the tasks (M3-08). The empty state remains for members who see no block.*
 - **FND-064** `MVP` `done` — Bottom navigation: Today · Tasks · Shopping · Calendar · More; Map, Budget, Family and Tags
   are reached from "More" and from Today blocks (Q-013). *Bar and More done (M0-07); Family and Tags tiles open the Family screen (M0-08); the Calendar tab replaces its placeholder (M3-05).*
 - **FND-065** `MVP` `doing` — The UI follows the [visual style](../../design/visual-style.md) (ADR-0016).

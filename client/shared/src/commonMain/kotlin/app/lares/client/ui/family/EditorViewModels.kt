@@ -11,6 +11,8 @@ import app.lares.client.data.MembersRepository
 import app.lares.client.data.PermissionsRepository
 import app.lares.client.data.PersonsRepository
 import app.lares.client.data.PersonsWriter
+import app.lares.client.data.calendar.CalendarRepository
+import app.lares.client.data.calendar.PersonDates
 import app.lares.client.sync.LocalWriteException
 import app.lares.client.sync.SyncEngine
 import app.lares.client.ui.common.FieldError
@@ -28,12 +30,14 @@ import app.lares.contract.entities.PaletteColor
 import app.lares.contract.permissions.BuiltInGroup
 import app.lares.contract.permissions.Permission
 import app.lares.contract.validation.Validators
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -196,6 +200,10 @@ data class PersonUiState(
     val error: UiError? = null,
     /** Saved or deleted: the screen closes. */
     val done: Boolean = false,
+    /** The next birthday and memorable dates (CAL-004, CAL-005); null for a new person or without `calendar.view`. */
+    val dates: PersonDates? = null,
+    /** «Добавить памятную дату» (`calendar.create`). */
+    val canAddMemorable: Boolean = false,
 ) {
     val color: PaletteColor get() = form.color ?: fallbackColor
 }
@@ -212,20 +220,26 @@ class PersonViewModel(
     private val personsWriter: PersonsWriter,
     private val clock: Clock,
     private val personId: String?,
+    calendar: CalendarRepository? = null,
 ) : ViewModel() {
     private val me = sessionManager.me()
     private val form = MutableStateFlow(PersonUiState(loaded = personId == null, isNew = personId == null))
+    private val dates: Flow<PersonDates?> =
+        if (personId == null || calendar == null) flowOf(null) else calendar.observeForPerson(personId)
 
     val state: StateFlow<PersonUiState> =
-        combine(form, permissionsRepository.observeMine(), membersRepository.observeAll()) { form, permissions, members ->
+        combine(form, permissionsRepository.observeMine(), membersRepository.observeAll(), dates) { form, permissions, members, dates ->
             val manage = FamilyAccess.of(permissions).managePersons
             val isMember = personId != null && members.any { it.data.personId == personId }
             val isMe = personId != null && personId == me?.personId
+            val seesCalendar = permissions.has(Permission.CALENDAR_VIEW)
             form.copy(
                 isMember = isMember,
                 isMe = isMe,
                 canEdit = manage || isMe,
                 canDelete = manage && personId != null && !isMember,
+                dates = dates?.takeIf { seesCalendar },
+                canAddMemorable = seesCalendar && dates != null && permissions.has(Permission.CALENDAR_CREATE),
             )
         }.stateIn(viewModelScope, SharingStarted.Eagerly, form.value)
 

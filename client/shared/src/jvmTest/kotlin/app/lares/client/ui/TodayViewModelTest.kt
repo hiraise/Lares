@@ -1,5 +1,8 @@
 package app.lares.client.ui
 
+import app.lares.client.data.calendar.CalendarItem
+import app.lares.client.data.calendar.CalendarRepository
+import app.lares.client.data.calendar.CalendarViews
 import app.lares.client.data.shopping.ShoppingRepository
 import app.lares.client.data.shopping.ShoppingViews
 import app.lares.client.data.tasks.TaskInputs
@@ -197,6 +200,52 @@ class TodayViewModelTest {
             assertFalse(shoppingOnly.empty, "the card alone is enough")
 
             assertTrue(with(Permission.CALENDAR_VIEW).empty)
+        }
+    }
+
+    @Test
+    fun `upcoming shows events, birthdays and memorable dates of the next 7 days (CAL-019)`() {
+        CalendarUiFixture.core().use { core ->
+            val state = awaitState(core.koin.get<TodayViewModel>().state) { it.upcoming != null }
+            val upcoming = assertNotNull(state.upcoming)
+            assertEquals(CalendarUiFixture.today, upcoming.today)
+            assertEquals(CalendarViews.UPCOMING_MAX, upcoming.items.size)
+            val first = assertIs<CalendarItem.Birthday>(upcoming.items.first().item, "Grandma's birthday is today")
+            assertEquals("p4", first.person.id)
+            val events = upcoming.items.mapNotNull { (it.item as? CalendarItem.Event)?.occ?.eventId }
+            assertTrue(
+                CalendarUiFixture.E_ANNIV in events && CalendarUiFixture.E_DENTIST in events && CalendarUiFixture.E_HOLIDAY in events,
+            )
+            assertTrue(upcoming.more >= 1, "the moved dance in a week is left out")
+            assertTrue("Carol" in upcoming.allNames)
+        }
+    }
+
+    @Test
+    fun `upcoming hidden without calendar view`() {
+        CalendarUiFixture.core().use { core ->
+            val tasks = core.taskInputs()
+            val coming =
+                runBlocking {
+                    core.koin
+                        .get<CalendarRepository>()
+                        .observeUpcoming()
+                        .first { it.items.isNotEmpty() }
+                }
+            val viewer = tasks.viewer!!
+
+            fun with(vararg permissions: Permission) =
+                TodayViewModel.build(
+                    tasks.copy(viewer = viewer.copy(permissions = EffectivePermissions(false, permissions.toSet()))),
+                    null,
+                    coming,
+                )
+
+            assertNull(with(Permission.TASKS_VIEW).upcoming)
+            val calendarOnly = with(Permission.CALENDAR_VIEW)
+            assertNotNull(calendarOnly.upcoming)
+            assertFalse(calendarOnly.empty, "«Скоро» alone is enough")
+            assertNull(TodayViewModel.build(tasks, null, coming.copy(items = emptyList())).upcoming, "nothing coming: no block")
         }
     }
 }

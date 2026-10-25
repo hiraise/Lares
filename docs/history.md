@@ -310,3 +310,9 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   scenario 7, overlaps, ru/en, light/dark, smooth scrolling. Fixed after the walkthrough: hour labels cut at 130 % font
   scale, scroll position lost after returning from an event, ‹ › moving when «Сегодня» appears, the 07:00 label half
   hidden on open.
+- 2026-10-25 M3-08 Calendar everywhere: Today «Скоро» (`TodayUpcoming`, shared `DatedRow` with the date tile), the
+  tag page «События», person dates (countdown under the birthday, «Даты», «Добавить памятную дату»), Settings ›
+  Notifications event switches and the «Дни рождения» choice, notification taps for events (with occurrence), persons
+  and deleted events (`EventLinks`), user manual "Calendar" (en, ru), CHANGELOG, roadmap and spec statuses (all CAL MVP
+  requirements `done`, TSK-022 `done`). 10 new tests (client 333, multi-device 35); emulator walkthrough found no bugs
+  (the «Дни рождения» row moved before the test switch).

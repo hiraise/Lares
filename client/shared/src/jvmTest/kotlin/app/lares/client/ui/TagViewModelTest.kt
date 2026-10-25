@@ -1,5 +1,6 @@
 package app.lares.client.ui
 
+import app.lares.client.data.tasks.TasksRepository
 import app.lares.client.ui.FamilyFixture.change
 import app.lares.client.ui.family.TagArgs
 import app.lares.client.ui.family.TagViewModel
@@ -7,7 +8,11 @@ import app.lares.contract.entities.PaletteColor
 import app.lares.contract.entities.ShoppingListData
 import app.lares.contract.entities.TagData
 import app.lares.contract.entities.TaskData
+import app.lares.contract.permissions.EffectivePermissions
+import app.lares.contract.permissions.Permission
 import app.lares.contract.sync.EntityTypes
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import org.koin.core.parameter.parametersOf
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -72,6 +77,27 @@ class TagViewModelTest {
             val state = awaitState(core.page("t2").state) { it.loaded && it.tasks.isNotEmpty() }
             assertFalse(state.hasShopping)
             assertTrue(state.shoppingItems.isEmpty() && state.shoppingLists.isEmpty())
+        }
+    }
+
+    @Test
+    fun `events with the tag, only with calendar view (TAG-004)`() {
+        CalendarUiFixture.core().use { core ->
+            val state = awaitState(core.page("t1").state) { it.loaded && it.events.isNotEmpty() }
+            assertEquals(listOf(CalendarUiFixture.E_HOLIDAY), state.events.map { it.occ.eventId })
+            assertEquals(CalendarUiFixture.today, state.today)
+            val inputs =
+                runBlocking {
+                    core.koin
+                        .get<TasksRepository>()
+                        .observeInputs()
+                        .first { it.viewer != null }
+                }
+            val noCalendar =
+                inputs.copy(
+                    viewer = inputs.viewer!!.copy(permissions = EffectivePermissions(false, setOf(Permission.TASKS_VIEW))),
+                )
+            assertTrue(TagViewModel.build(noCalendar, "t1", null, state.events).events.isEmpty())
         }
     }
 }

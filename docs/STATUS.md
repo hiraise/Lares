@@ -7,7 +7,7 @@ Updated: 2026-10-25
 **M0 Foundation — all plans M0-01…M0-11 done; M0 acceptance with the customer pending.
 M1 Tasks — all plans M1-01…M1-07 done; M1 acceptance with the customer next.
 M2 Shopping lists — all plans M2-01…M2-06 done; M2 acceptance with the customer next.
-M3 Calendar — M3-01…M3-07 done; next `/plan-run M3-08`.**
+M3 Calendar — all plans M3-01…M3-08 done; M3 acceptance with the customer next, then release v0.4.0.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
@@ -22,6 +22,12 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 
 ## Last completed
 
+- 2026-10-25 M3-08 Calendar everywhere: «Скоро» on Today (date tiles, «Бабушка Валя, 78 лет · Понедельник · через 3
+  дня», «Ещё N» opens «Список»), «События» on the tag page, «Исполнится 78 · через 3 дня» and «Даты» with «Добавить
+  памятную дату» on the person page, Settings switches for calendar notifications and event reminders and the
+  «Дни рождения» choice, taps on event, birthday and memorable-date notifications open the right page; user manual
+  "Calendar" (en, ru); all CAL MVP requirements done. 10 new tests, emulator walkthrough of spec scenario 9 and the
+  reminder taps.
 - 2026-10-25 M3-07 Calendar week: «Неделя» shows seven days by hours — events as blocks in the first participant's
   color (side by side when they overlap), holidays, birthdays and memorable dates as chips on top, the "now" line;
   a tap on a free hour creates an event there, a tap on a day opens it in «Месяц». 11 new tests, emulator walkthrough
@@ -122,7 +128,8 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 3. M4 plan: re-run the load test with location uploads every 30 s (ADR-0015).
 4. After the M1 acceptance: set the tasks spec to `implemented`.
 5. M2 acceptance with the customer (checklist in the M2-06 handoff); after it set the shopping spec to `implemented`.
-6. Execute M3-08 (`/plan-run M3-08`), then M3 acceptance with the customer.
+6. M3 acceptance with the customer (checklist in the M3-08 handoff), then release v0.4.0; after it set the calendar
+   spec to `implemented`.
 
 ## Plan progress
 

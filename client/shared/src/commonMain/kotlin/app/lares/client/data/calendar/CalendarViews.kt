@@ -187,7 +187,7 @@ object CalendarViews {
                 items += DatedItem(day.date, item)
             }
         }
-        return Upcoming(items.take(UPCOMING_MAX), (items.size - UPCOMING_MAX).coerceAtLeast(0))
+        return Upcoming(items.take(UPCOMING_MAX), (items.size - UPCOMING_MAX).coerceAtLeast(0), today)
     }
 
     /** The tag page «События» (TAG-004): the next occurrence of each event with the tag within 365 days, in display order. */
@@ -214,7 +214,7 @@ object CalendarViews {
         inputs: CalendarInputs,
         personId: String,
     ): PersonDates {
-        if (!inputs.seesCalendar()) return PersonDates(null, emptyList())
+        if (!inputs.seesCalendar()) return PersonDates(null, emptyList(), inputs.today())
         val today = inputs.today()
         val person = inputs.persons.firstOrNull { it.id == personId }
         val birthday = person?.let { birthdaysIn(it, today, today.plus(DatePeriod(years = 1))).firstOrNull() }
@@ -227,7 +227,7 @@ object CalendarViews {
                         MemorableDateView(id, it.title, it.startDate, Birthdays.years(event, it.occurrence))
                     }
                 }.sortedWith(compareBy({ it.next }, { it.title }, { it.eventId }))
-        return PersonDates(birthday, memorable)
+        return PersonDates(birthday, memorable, today)
     }
 
     /**

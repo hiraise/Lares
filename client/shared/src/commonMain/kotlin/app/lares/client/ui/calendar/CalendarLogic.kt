@@ -2,19 +2,23 @@ package app.lares.client.ui.calendar
 
 import app.lares.client.data.Person
 import app.lares.client.data.calendar.CalendarItem
+import app.lares.client.data.calendar.DatedItem
 import app.lares.client.data.tasks.TaskView
 import app.lares.client.resources.Res
 import app.lares.client.resources.cal_all_day
 import app.lares.client.resources.cal_birthday
 import app.lares.client.resources.cal_from_date
+import app.lares.client.resources.cal_in_days
 import app.lares.client.resources.cal_month_year
 import app.lares.client.resources.cal_range
 import app.lares.client.resources.cal_reminder_all_day_on_day
 import app.lares.client.resources.cal_reminder_as_event_suffix
 import app.lares.client.resources.cal_reminder_at_start
+import app.lares.client.resources.cal_reminder_date_all_day
 import app.lares.client.resources.cal_reminder_years
 import app.lares.client.resources.cal_rule_until
 import app.lares.client.resources.cal_task_meta
+import app.lares.client.resources.cal_tomorrow_lower
 import app.lares.client.resources.cal_until_date
 import app.lares.client.resources.cal_until_time
 import app.lares.client.resources.cal_when_all_day
@@ -28,6 +32,10 @@ import app.lares.client.resources.day_today
 import app.lares.client.resources.day_tomorrow
 import app.lares.client.resources.months
 import app.lares.client.resources.months_standalone
+import app.lares.client.resources.person_birthday_in
+import app.lares.client.resources.person_birthday_today
+import app.lares.client.resources.person_turns
+import app.lares.client.resources.person_turns_today
 import app.lares.client.resources.task_anyone
 import app.lares.client.resources.task_reminder_none
 import app.lares.client.resources.weekdays
@@ -37,6 +45,7 @@ import app.lares.client.ui.common.uiText
 import app.lares.client.ui.tasks.TasksLogic
 import app.lares.contract.calendar.EventOccurrence
 import app.lares.contract.calendar.EventSchedule
+import app.lares.contract.entities.EventKind
 import app.lares.contract.entities.Recurrence
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.daysUntil
@@ -195,6 +204,144 @@ object CalendarLogic {
             )
         }
         return uiText(Res.string.cal_when_timed, fullDay(occ.startDate, today), start, end)
+    }
+
+    /** The title of a row outside the Calendar tab: the event title, «Годовщина свадьбы · 16 лет», «Бабушка Валя, 78 лет». */
+    fun itemTitle(item: CalendarItem): UiText =
+        when (item) {
+            is CalendarItem.Event -> {
+                if (item.kind ==
+                    EventKind.MEMORABLE_DATE
+                ) {
+                    memorableTitle(item.occ.title, item.years)
+                } else {
+                    raw(item.occ.title)
+                }
+            }
+
+            is CalendarItem.Birthday -> {
+                birthdayTitle(item.person.data.name, item.age)
+            }
+
+            is CalendarItem.Task -> {
+                raw(item.view.data.title)
+            }
+        }
+
+    /**
+     * The supporting line of a Today «Скоро» row (CAL-019), relative to the household's [today]: a birthday or memorable
+     * date «Понедельник · через 3 дня» («Сегодня», «Завтра»); an event «Сегодня, 16:00 · Клиника на Ленина», «Завтра,
+     * весь день», several days «Пятница, до 30 октября», a night continuing from yesterday «Сегодня, до 7:30».
+     */
+    fun upcomingWhen(
+        dated: DatedItem,
+        today: LocalDate,
+    ): UiText {
+        val days = today.daysUntil(dated.date)
+        val day = relativeDay(dated.date, today)
+        val item = dated.item
+        if (item !is CalendarItem.Event || item.kind == EventKind.MEMORABLE_DATE) {
+            if (days <= 1) return day
+            return UiText.Concat(listOf(day, UiText.Plural(Res.plurals.cal_in_days, days, listOf(raw(days.toString())))), " · ")
+        }
+        val occ = item.occ
+        val last = EventSchedule.lastDay(occ)
+        val time =
+            when {
+                occ.allDay && last > dated.date -> {
+                    uiText(
+                        Res.string.date_with_weekday,
+                        day,
+                        uiText(Res.string.cal_until_date, dayMonth(last, today)),
+                    )
+                }
+
+                occ.allDay -> {
+                    uiText(Res.string.cal_reminder_date_all_day, day)
+                }
+
+                item.continuesBefore -> {
+                    uiText(
+                        Res.string.date_with_weekday,
+                        day,
+                        uiText(Res.string.cal_until_time, raw(TasksLogic.time(occ.endTime!!))),
+                    )
+                }
+
+                else -> {
+                    uiText(Res.string.date_with_weekday, day, raw(TasksLogic.time(occ.startTime!!)))
+                }
+            }
+        return withPlace(time, occ.place)
+    }
+
+    /**
+     * When the next occurrence is, on the tag page (TAG-004): «Вторник, 28 октября · 16:00», «Вторник, 28 октября ·
+     * весь день», several days «10 июля – 20 июля»; a memorable date «12 июня · каждый год».
+     */
+    fun tagWhen(
+        item: CalendarItem.Event,
+        today: LocalDate,
+    ): UiText {
+        val occ = item.occ
+        if (item.kind ==
+            EventKind.MEMORABLE_DATE
+        ) {
+            return uiText(Res.string.date_with_weekday, weekday(occ.startDate), dayMonth(occ.startDate, today))
+        }
+        if (occ.allDay || occ.endDate != occ.startDate) return detailWhen(occ, today)
+        return UiText.Concat(listOf(fullDay(occ.startDate, today), raw(TasksLogic.time(occ.startTime!!))), " · ")
+    }
+
+    /**
+     * The line under the birthday on the person page (CAL-004): «Исполнится 78 · через 3 дня», «Исполнится 78 · завтра»,
+     * «Сегодня 78 лет»; without a birth year «День рождения через 3 дня», «Сегодня день рождения».
+     */
+    fun birthdayCountdown(
+        birthday: CalendarItem.Birthday,
+        today: LocalDate,
+    ): UiText {
+        val days = today.daysUntil(birthday.date)
+        val age = birthday.age
+        if (days <=
+            0
+        ) {
+            return if (age == null) uiText(Res.string.person_birthday_today) else uiText(Res.string.person_turns_today, years(age))
+        }
+        val whenText =
+            if (days ==
+                1
+            ) {
+                uiText(Res.string.cal_tomorrow_lower)
+            } else {
+                UiText.Plural(Res.plurals.cal_in_days, days, listOf(raw(days.toString())))
+            }
+        return if (age ==
+            null
+        ) {
+            uiText(Res.string.person_birthday_in, whenText)
+        } else {
+            uiText(Res.string.person_turns, raw(age.toString()), whenText)
+        }
+    }
+
+    /** «Сегодня», «Завтра», else the weekday («Понедельник»). */
+    fun relativeDay(
+        date: LocalDate,
+        today: LocalDate,
+    ): UiText =
+        when (today.daysUntil(date)) {
+            0 -> uiText(Res.string.day_today)
+            1 -> uiText(Res.string.day_tomorrow)
+            else -> weekday(date)
+        }
+
+    private fun withPlace(
+        text: UiText,
+        place: String?,
+    ): UiText {
+        val where = place?.trim()?.takeIf { it.isNotEmpty() } ?: return text
+        return UiText.Concat(listOf(text, raw(where)), " · ")
     }
 
     /** A memorable date: "June 12 · every year" (never with a year). */

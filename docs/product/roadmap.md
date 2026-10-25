@@ -12,7 +12,7 @@ Each milestone ends with a build the family can install (APK) and a short change
 | M0 | Foundation | [foundation](features/foundation.md), [tags](features/tags.md) | implemented (M0-01…M0-11); customer acceptance pending |
 | M1 | Tasks | [tasks](features/tasks.md) | implemented (M1-01…M1-07); customer acceptance pending |
 | M2 | Shopping lists | [shopping](features/shopping.md) | implemented (M2-01…M2-06); customer acceptance pending |
-| M3 | Calendar | [calendar](features/calendar.md) | not started |
+| M3 | Calendar | [calendar](features/calendar.md) | implemented (M3-01…M3-08); customer acceptance pending |
 | M4 | Location | [location](features/location.md) | not started |
 | M5 | Budget | [budget](features/budget.md) | not started |
 | M5b | Files and photos | [files](features/files.md) | not started |
@@ -51,6 +51,9 @@ Multiple shared lists, quick add, check off in store offline, suggestions from h
 ## M3 Calendar
 
 Events, participants (members and relatives), recurrence, birthdays from persons, reminders, tags.
+Implemented: month, week grid and list views with filters, the event editor with repeats and «Только это / Это и
+следующие / Все», memorable dates, own reminders, birthday reminders, tasks with a date in the calendar, «Скоро» on
+Today, the tag page section, notification settings and taps (M3-01…M3-08).
 
 ## M4 Location
 

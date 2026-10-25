@@ -2,6 +2,7 @@ package app.lares.client.ui
 
 import app.lares.client.data.Person
 import app.lares.client.data.calendar.CalendarItem
+import app.lares.client.data.calendar.DatedItem
 import app.lares.client.ui.calendar.CalendarLogic
 import app.lares.client.ui.common.UiText
 import app.lares.client.ui.common.load
@@ -165,5 +166,53 @@ class CalendarLogicTest {
         )
         assertTexts("2 hours before", "За 2 часа", CalendarLogic.myReminder(120, allDay = false, own = true))
         assertTexts("None (as in the event)", "Нет (как в событии)", CalendarLogic.myReminder(null, allDay = false, own = false))
+    }
+
+    @Test
+    fun `Today upcoming, tag page and person page texts (M3-08)`() {
+        val monday = LocalDate(2026, 10, 26)
+        val grandma = Person("p-g", PersonData("Бабушка Валя"))
+        val birthday = CalendarItem.Birthday(grandma, monday, 78)
+        assertTexts("Monday · in 3 days", "Понедельник · через 3 дня", CalendarLogic.upcomingWhen(DatedItem(monday, birthday), today))
+        assertTexts("Today", "Сегодня", CalendarLogic.upcomingWhen(DatedItem(today, birthday.copy(date = today)), today))
+        assertTexts("Tomorrow", "Завтра", CalendarLogic.upcomingWhen(DatedItem(LocalDate(2026, 10, 24), birthday), today))
+        assertTexts(
+            "Friday · in 7 days",
+            "Пятница · через 7 дней",
+            CalendarLogic.upcomingWhen(DatedItem(LocalDate(2026, 10, 30), birthday), today),
+        )
+
+        val wednesday = LocalDate(2026, 10, 28)
+        val meeting = item(occ(wednesday, startTime = LocalTime(18, 30), endTime = LocalTime(20, 0)).copy(place = "Школа №12"))
+        assertTexts(
+            "Wednesday, 18:30 · Школа №12",
+            "Среда, 18:30 · Школа №12",
+            CalendarLogic.upcomingWhen(DatedItem(wednesday, meeting), today),
+        )
+        assertTexts(
+            "Today, 16:00",
+            "Сегодня, 16:00",
+            CalendarLogic.upcomingWhen(DatedItem(today, item(occ(today, startTime = LocalTime(16, 0), endTime = LocalTime(17, 0)))), today),
+        )
+        val tomorrow = LocalDate(2026, 10, 24)
+        assertTexts("Tomorrow, all day", "Завтра, весь день", CalendarLogic.upcomingWhen(DatedItem(tomorrow, item(occ(tomorrow))), today))
+        val holiday = item(occ(tomorrow, LocalDate(2026, 10, 30)), after = true)
+        assertTexts("Tomorrow, until October 30", "Завтра, до 30 октября", CalendarLogic.upcomingWhen(DatedItem(tomorrow, holiday), today))
+        val night = item(occ(LocalDate(2026, 10, 22), today, LocalTime(22, 0), LocalTime(7, 30)), before = true)
+        assertTexts("Today, until 7:30", "Сегодня, до 7:30", CalendarLogic.upcomingWhen(DatedItem(today, night), today))
+
+        assertTexts("Wednesday, October 28 · 18:30", "Среда, 28 октября · 18:30", CalendarLogic.tagWhen(meeting, today))
+        assertTexts("Saturday, October 24 · all day", "Суббота, 24 октября · весь день", CalendarLogic.tagWhen(item(occ(tomorrow)), today))
+
+        assertTexts("Turns 78 · in 3 days", "Исполнится 78 · через 3 дня", CalendarLogic.birthdayCountdown(birthday, today))
+        assertTexts("Turns 78 · tomorrow", "Исполнится 78 · завтра", CalendarLogic.birthdayCountdown(birthday.copy(date = tomorrow), today))
+        assertTexts("78 years today", "Сегодня 78 лет", CalendarLogic.birthdayCountdown(birthday.copy(date = today), today))
+        assertTexts("Birthday in 3 days", "День рождения через 3 дня", CalendarLogic.birthdayCountdown(birthday.copy(age = null), today))
+        assertTexts(
+            "Birthday today",
+            "Сегодня день рождения",
+            CalendarLogic.birthdayCountdown(birthday.copy(date = today, age = null), today),
+        )
+        assertTexts("Бабушка Валя, 78 years", "Бабушка Валя, 78 лет", CalendarLogic.itemTitle(birthday))
     }
 }

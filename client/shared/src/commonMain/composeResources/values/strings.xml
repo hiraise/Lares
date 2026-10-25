@@ -963,4 +963,28 @@
         <item>Saturday</item>
         <item>Sunday</item>
     </string-array>
+    <!-- Calendar everywhere (M3-08) -->
+    <plurals name="cal_in_days">
+        <item quantity="one">in %1$d day</item>
+        <item quantity="other">in %1$d days</item>
+    </plurals>
+    <string name="cal_tomorrow_lower">tomorrow</string>
+    <string name="today_upcoming_title">Coming up</string>
+    <string name="today_upcoming_calendar">Calendar</string>
+    <string name="tag_events_section">Events · %1$s</string>
+    <string name="person_turns">Turns %1$s · %2$s</string>
+    <string name="person_turns_today">%1$s today</string>
+    <string name="person_birthday_in">Birthday %1$s</string>
+    <string name="person_birthday_today">Birthday today</string>
+    <string name="person_dates">Dates</string>
+    <string name="person_add_memorable">Add a memorable date</string>
+    <string name="notif_birthday_off">Don’t remind</string>
+    <string name="notif_birthday_on_day">On the day only</string>
+    <plurals name="notif_birthday_days">
+        <item quantity="one">%1$d day before</item>
+        <item quantity="other">%1$d days before</item>
+    </plurals>
+    <string name="notif_birthday_week">A week before</string>
+    <string name="notif_birthday_two_weeks">2 weeks before</string>
+    <string name="event_deleted">Event deleted</string>
 </resources>

@@ -5,6 +5,21 @@ Versioning: [SemVer](https://semver.org/) from the first release.
 
 ## [Unreleased]
 
+### Added
+
+- Family calendar (M3): the Calendar tab with «Месяц» (dots in each person's color, the chosen day's list), «Неделя»
+  (a grid by hours, overlapping events side by side, a tap on a free hour creates an event there) and «Список»; filters
+  by person and tag, and tasks with a due date ticked off right in the calendar.
+- Events with times or all day, over several days, with participants or for the whole family, place, notes, tags and a
+  reminder; repeats until a chosen day, changed or deleted «Только это», «Это и следующие» or «Все»; «Напомнить мне»
+  for your own reminder on any event.
+- Birthdays from the family's profiles with ages, memorable dates such as wedding anniversaries with the count of years,
+  and reminders about them every morning from a few days before (Settings › Notifications › «Дни рождения»).
+- Calendar everywhere (M3-08): «Скоро» on the Today screen, the «События» section on each tag's page, the next birthday
+  and memorable dates with «Добавить памятную дату» on a person's page, switches for calendar notifications and event
+  reminders; tapping an event notification or reminder opens the event, a birthday reminder opens the person. New user
+  manual "Calendar" in English and Russian.
+
 ## [0.3.0] - 2026-10-24
 
 ### Added

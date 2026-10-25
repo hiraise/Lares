@@ -9,6 +9,7 @@ import app.lares.client.ui.common.FieldError
 import app.lares.client.ui.common.UiError
 import app.lares.client.ui.main.MainTab
 import app.lares.client.ui.main.MainViewModel
+import app.lares.client.ui.settings.BirthdayChoices
 import app.lares.client.ui.settings.ChangePasswordViewModel
 import app.lares.client.ui.settings.DevicesViewModel
 import app.lares.client.ui.settings.LoginQrViewModel
@@ -91,6 +92,8 @@ class MainAndSettingsViewModelTest {
                 NotificationType.TASK_COMPLETED,
                 NotificationType.TASK_OVERDUE,
                 NotificationType.TASK_REMINDER,
+                NotificationType.EVENT_CHANGED,
+                NotificationType.EVENT_REMINDER,
                 NotificationType.SYSTEM_TEST,
             ),
             SwitchableNotificationTypes,
@@ -124,6 +127,36 @@ class MainAndSettingsViewModelTest {
             awaitState(vm.state) { it.muted == setOf(NotificationType.TASK_REMINDER) }
             val stored = runBlocking { core.koin.get<NotificationSettingsRepository>().isMuted(NotificationType.TASK_REMINDER) }
             assertTrue(stored, "mirrored on the phone for the reminder planner")
+        }
+    }
+
+    @Test
+    fun `birthday choice mutes or sets the days and survives a refresh (CAL-016, CAL-018)`() {
+        assertEquals(listOf(null, 0, 1, 3, 7, 14), BirthdayChoices)
+        var onServer = NotificationSettings()
+        loggedIn(extra = { request ->
+            if (request.url.encodedPath != "/api/v1/me/notification-settings") return@loggedIn null
+            if (request.method == HttpMethod.Put) {
+                val body = (request.body as OutgoingContent.ByteArrayContent).bytes().decodeToString()
+                onServer = LaresJson.decodeFromString(NotificationSettings.serializer(), body)
+            }
+            json(NotificationSettings.serializer(), onServer)
+        }) { core ->
+            val vm = core.koin.get<NotificationSettingsViewModel>()
+            assertEquals(3, awaitState(vm.state) { it.birthdayChoice == 3 }.birthdayChoice, "3 days by default")
+            vm.setBirthdayChoice(null)
+            awaitState(vm.state) { it.birthdayChoice == null }
+            assertEquals(setOf(NotificationType.BIRTHDAY_REMINDER), onServer.muted)
+            vm.setBirthdayChoice(7)
+            awaitState(vm.state) { it.birthdayChoice == 7 }
+            assertEquals(NotificationSettings(emptySet(), 7), onServer)
+            vm.setBirthdayChoice(0)
+            awaitState(vm.state) { it.birthdayChoice == 0 }
+
+            val again = NotificationSettingsViewModel(core.koin.get(), core.koin.get(), core.koin.get(), core.koin.get(), Clock.System)
+            Thread.sleep(300) // the refresh from the server has run
+            assertEquals(0, awaitState(again.state) { it.birthdayChoice == 0 }.birthdayChoice)
+            assertEquals(0, onServer.birthdayDaysBefore)
         }
     }
 

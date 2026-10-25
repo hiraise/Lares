@@ -26,6 +26,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.OutgoingContent
 import io.ktor.http.headersOf
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -185,6 +186,23 @@ class NotificationsTest {
         assertEquals("t1", target.id)
         assertTrue(pending.consume(target))
         assertFalse(pending.consume(target), "handled once")
+        assertNull(pending.target.value)
+    }
+
+    @Test
+    fun pendingNavigationMapsEventsAndPersons() {
+        val pending = PendingNavigation()
+        val id = "01928c4e-0000-7000-8000-00000000e001"
+        assertTrue(pending.submit(EntityTypes.EVENT, id))
+        assertEquals(NavTarget.Event(id, null), pending.target.value, "from push: the next occurrence")
+        assertTrue(pending.submit(EntityTypes.EVENT, "$id:2026-10-28"))
+        assertEquals(NavTarget.Event(id, LocalDate(2026, 10, 28)), pending.target.value, "a reminder names its occurrence")
+        assertTrue(pending.submit(EntityTypes.EVENT, "$id:garbage"))
+        assertEquals(NavTarget.Event(id, null), pending.target.value)
+        assertTrue(pending.submit(EntityTypes.PERSON, "p4"))
+        assertEquals(NavTarget.Person("p4"), pending.target.value)
+        pending.submit(NavTarget.EventGone)
+        assertTrue(pending.consume(NavTarget.EventGone))
         assertNull(pending.target.value)
     }
 

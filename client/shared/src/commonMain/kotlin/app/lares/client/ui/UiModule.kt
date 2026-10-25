@@ -7,6 +7,7 @@ import app.lares.client.notifications.notificationsModule
 import app.lares.client.platform.AppStartup
 import app.lares.client.platform.AppearanceSettings
 import app.lares.client.platform.DeepLinkHandler
+import app.lares.client.platform.EventLinks
 import app.lares.client.platform.PendingNavigation
 import app.lares.client.platform.TaskLinks
 import app.lares.client.ui.calendar.CalendarViewModel
@@ -60,6 +61,7 @@ fun uiModule(): Module =
         single { PendingNavigation() }
         single { UiNotices() }
         single { TaskLinks(get(), get()) }
+        single { EventLinks(get(), get()) }
         // Replaces the core's English fallback.
         single<TaskReminderTexts> { TaskReminderResourceTexts(getOrNull<Clock>() ?: Clock.System) }
         single<CalendarReminderTexts> { CalendarReminderResourceTexts() }
@@ -84,12 +86,12 @@ fun uiModule(): Module =
         viewModel { params -> AddMemberViewModel(get(), get(), get(), get(), get(), params.get()) }
         viewModel { params -> GroupEditorViewModel(get(), get(), get(), get(), get(), get(), params.get<GroupArgs>().groupId) }
         viewModel { params ->
-            PersonViewModel(get(), get(), get(), get(), get(), getOrNull<Clock>() ?: Clock.System, params.get<PersonArgs>().personId)
+            PersonViewModel(get(), get(), get(), get(), get(), getOrNull<Clock>() ?: Clock.System, params.get<PersonArgs>().personId, get())
         }
         viewModel { FamilySettingsViewModel(get(), get(), get(), get()) }
         viewModel { TasksViewModel(get(), get(), get()) }
-        viewModel { TodayViewModel(get(), get(), get()) }
-        viewModel { params -> TagViewModel(get(), get(), get(), get(), get(), params.get()) }
+        viewModel { TodayViewModel(get(), get(), get(), get()) }
+        viewModel { params -> TagViewModel(get(), get(), get(), get(), get(), params.get(), get()) }
         viewModel { params -> TaskDetailViewModel(get(), get(), params.get()) }
         viewModel { params -> TaskEditorViewModel(get(), get(), get(), get(), get(), params.get()) }
         viewModel { CalendarViewModel(get(), get(), get(), get(), getOrNull<Clock>() ?: Clock.System) }

@@ -995,4 +995,32 @@
         <item>суббота</item>
         <item>воскресенье</item>
     </string-array>
+    <!-- Calendar everywhere (M3-08) -->
+    <plurals name="cal_in_days">
+        <item quantity="one">через %1$d день</item>
+        <item quantity="few">через %1$d дня</item>
+        <item quantity="many">через %1$d дней</item>
+        <item quantity="other">через %1$d дня</item>
+    </plurals>
+    <string name="cal_tomorrow_lower">завтра</string>
+    <string name="today_upcoming_title">Скоро</string>
+    <string name="today_upcoming_calendar">Календарь</string>
+    <string name="tag_events_section">События · %1$s</string>
+    <string name="person_turns">Исполнится %1$s · %2$s</string>
+    <string name="person_turns_today">Сегодня %1$s</string>
+    <string name="person_birthday_in">День рождения %1$s</string>
+    <string name="person_birthday_today">Сегодня день рождения</string>
+    <string name="person_dates">Даты</string>
+    <string name="person_add_memorable">Добавить памятную дату</string>
+    <string name="notif_birthday_off">Не напоминать</string>
+    <string name="notif_birthday_on_day">Только в день</string>
+    <plurals name="notif_birthday_days">
+        <item quantity="one">За %1$d день</item>
+        <item quantity="few">За %1$d дня</item>
+        <item quantity="many">За %1$d дней</item>
+        <item quantity="other">За %1$d дня</item>
+    </plurals>
+    <string name="notif_birthday_week">За неделю</string>
+    <string name="notif_birthday_two_weeks">За 2 недели</string>
+    <string name="event_deleted">Событие удалено</string>
 </resources>

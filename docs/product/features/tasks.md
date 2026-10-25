@@ -87,7 +87,8 @@ Technical design: [architecture/tasks.md](../../architecture/tasks.md).
   for others); search by title.
   *Client core: filters and chip counts (M1-04); chips «Все · N», «Мои · N», «Поручено мной», «Метка», search,
   filters sheet (assignee, open / done) (M1-05).*
-- **TSK-022** `MVP` `todo` — Tasks with a due date also appear in the calendar agenda (after M3).
+- **TSK-022** `MVP` `done` — Tasks with a due date also appear in the calendar agenda (after M3).
+  *In «Список» and the day list under the month, ticked off there; «Показывать задачи» in the filter (M3-04, M3-05; CAL-009).*
 - **TSK-023** `MVP` `done` — "Today" home screen block: my overdue and today's tasks, ticking them off right there (FND-063).
   *UI: «Задачи на сегодня» with the open count, «Все», overdue → today → done today, at most 6 rows + «Ещё N»,
   ticking with undo; the «Добавить» button opens the editor with me as assignee (M1-07).*

@@ -29,6 +29,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.lares.client.data.calendar.PersonDates
 import app.lares.client.resources.Res
 import app.lares.client.resources.action_cancel
 import app.lares.client.resources.action_delete
@@ -53,6 +54,8 @@ import app.lares.client.resources.ic_delete
 import app.lares.client.resources.ic_lock
 import app.lares.client.resources.language_en
 import app.lares.client.resources.language_ru
+import app.lares.client.resources.person_add_memorable
+import app.lares.client.resources.person_dates
 import app.lares.client.resources.relation_suggestions
 import app.lares.client.resources.relative_birthday
 import app.lares.client.resources.relative_birthday_clear
@@ -74,9 +77,13 @@ import app.lares.client.resources.setup_currency_hint
 import app.lares.client.resources.setup_family_name
 import app.lares.client.resources.setup_language
 import app.lares.client.resources.setup_time_zone
+import app.lares.client.ui.calendar.CalendarLogic
+import app.lares.client.ui.calendar.DATED_ROW_INSET
+import app.lares.client.ui.calendar.DatedRow
 import app.lares.client.ui.common.birthdayText
 import app.lares.client.ui.common.label
 import app.lares.client.ui.common.labelRes
+import app.lares.client.ui.common.text
 import app.lares.client.ui.components.AppFilterChip
 import app.lares.client.ui.components.AppIcon
 import app.lares.client.ui.components.AppPage
@@ -265,6 +272,10 @@ data class PersonArgs(
 fun PersonRoute(
     personId: String?,
     onBack: () -> Unit,
+    /** A memorable date of the person: the event page. */
+    onEvent: (String) -> Unit = {},
+    /** «Добавить памятную дату»: the editor with the person as participant. */
+    onAddMemorable: (String) -> Unit = {},
     viewModel: PersonViewModel = koinViewModel(key = "person-$personId") { parametersOf(PersonArgs(personId)) },
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -315,6 +326,19 @@ fun PersonRoute(
                 readOnly = true,
                 enabled = false,
             )
+        }
+        state.dates?.let { dates ->
+            dates.birthday?.let {
+                Text(
+                    CalendarLogic.birthdayCountdown(it, dates.today).text(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = Spacing.l).testTag("person_birthday_countdown"),
+                )
+            }
+            if (dates.memorable.isNotEmpty() || state.canAddMemorable) {
+                PersonDatesBlock(dates, state.canAddMemorable, onEvent, onAdd = { personId?.let(onAddMemorable) })
+            }
         }
         Column(verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
             FormField(
@@ -506,5 +530,34 @@ fun FamilySettingsRoute(
             },
             onDismiss = { pickZone = false },
         )
+    }
+}
+
+/** «Даты» (CAL-005): the person's memorable dates (a tap opens the event) and «Добавить памятную дату». */
+@Composable
+private fun PersonDatesBlock(
+    dates: PersonDates,
+    canAdd: Boolean,
+    onEvent: (String) -> Unit,
+    onAdd: () -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.s), modifier = Modifier.testTag("person_dates")) {
+        Text(stringResource(Res.string.person_dates), style = MaterialTheme.typography.labelLarge)
+        if (dates.memorable.isNotEmpty()) {
+            ListGroup {
+                dates.memorable.forEachIndexed { index, date ->
+                    if (index > 0) ListDivider(inset = DATED_ROW_INSET)
+                    DatedRow(
+                        date = date.next,
+                        title = CalendarLogic.memorableTitle(date.title, date.years).text(),
+                        supporting = CalendarLogic.memorableWhen(date.next).text(),
+                        today = dates.today,
+                        onClick = { onEvent(date.eventId) },
+                        modifier = Modifier.testTag("person_memorable_${date.eventId}"),
+                    )
+                }
+            }
+        }
+        if (canAdd) LinkButton(stringResource(Res.string.person_add_memorable), onAdd, Modifier.testTag("person_add_memorable"))
     }
 }

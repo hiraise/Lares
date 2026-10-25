@@ -108,10 +108,11 @@ data class DatedItem(
     val item: CalendarItem,
 )
 
-/** Today «Скоро» (CAL-019): at most [CalendarViews.UPCOMING_MAX] rows and how many more there are. */
+/** Today «Скоро» (CAL-019): at most [CalendarViews.UPCOMING_MAX] rows, how many more there are, the household's today. */
 data class Upcoming(
     val items: List<DatedItem>,
     val more: Int,
+    val today: LocalDate,
 )
 
 data class MemorableDateView(
@@ -121,10 +122,11 @@ data class MemorableDateView(
     val years: Int?,
 )
 
-/** The person page (CAL-005): their next birthday and memorable dates, nearest first. */
+/** The person page (CAL-005): their next birthday and memorable dates, nearest first; the household's today. */
 data class PersonDates(
     val birthday: CalendarItem.Birthday?,
     val memorable: List<MemorableDateView>,
+    val today: LocalDate,
 )
 
 /**

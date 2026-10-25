@@ -11,6 +11,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import app.lares.client.auth.SessionState
 import app.lares.client.platform.DeepLinkHandler
+import app.lares.client.platform.EventLinks
 import app.lares.client.platform.NavTarget
 import app.lares.client.platform.PendingNavigation
 import app.lares.client.platform.TaskLinks
@@ -53,7 +54,6 @@ import app.lares.client.ui.tasks.TaskEditorArgs
 import app.lares.client.ui.tasks.TaskEditorRoute
 import app.lares.contract.DeepLink
 import app.lares.contract.permissions.Section
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
@@ -406,22 +406,47 @@ fun MainNavHost() {
 
 /**
  * A tapped task notification or reminder opens the task over the main screen; a task that is gone opens the Tasks tab
- * with a notice instead (plan M1-07).
+ * with a notice instead (plan M1-07). Events open their page (the reminded occurrence, else the next one), a gone
+ * event opens the Calendar tab with a notice; birthday reminders open the person (plan M3-08).
  */
 @Composable
 private fun NotificationTaps(
     navController: NavHostController,
     pending: PendingNavigation = koinInject(),
     taskLinks: TaskLinks = koinInject(),
+    eventLinks: EventLinks = koinInject(),
 ) {
     LaunchedEffect(pending) {
-        pending.target.filterIsInstance<NavTarget.Task>().collect { target ->
-            if (!pending.consume(target)) return@collect
-            if (taskLinks.exists(target.id)) {
-                navController.navigate(TaskDetailDestination(target.id)) { popUpTo<SectionsDestination>() }
-            } else {
-                navController.popBackStack<SectionsDestination>(inclusive = false)
-                pending.submit(NavTarget.TaskGone)
+        pending.target.collect { target ->
+            when (target) {
+                is NavTarget.Task -> {
+                    if (!pending.consume(target)) return@collect
+                    if (taskLinks.exists(target.id)) {
+                        navController.navigate(TaskDetailDestination(target.id)) { popUpTo<SectionsDestination>() }
+                    } else {
+                        navController.popBackStack<SectionsDestination>(inclusive = false)
+                        pending.submit(NavTarget.TaskGone)
+                    }
+                }
+
+                is NavTarget.Event -> {
+                    if (!pending.consume(target)) return@collect
+                    if (eventLinks.exists(target.id)) {
+                        navController.navigate(
+                            EventDestination(target.id, target.occurrence?.toString()),
+                        ) { popUpTo<SectionsDestination>() }
+                    } else {
+                        navController.popBackStack<SectionsDestination>(inclusive = false)
+                        pending.submit(NavTarget.EventGone)
+                    }
+                }
+
+                is NavTarget.Person -> {
+                    if (!pending.consume(target)) return@collect
+                    navController.navigate(PersonDestination(target.id)) { popUpTo<SectionsDestination>() }
+                }
+
+                else -> {}
             }
         }
     }
@@ -451,6 +476,7 @@ private fun NavGraphBuilder.familyGraph(navController: NavHostController) {
             onBack = back,
             onTask = { navController.navigate(TaskDetailDestination(it)) },
             onShoppingList = { id, tagId -> navController.navigate(ShoppingListDestination(id, tagId)) },
+            onEvent = { id, occurrence -> navController.navigate(EventDestination(id, occurrence.toString())) },
         )
     }
     composable<MemberDestination> { entry ->
@@ -476,6 +502,13 @@ private fun NavGraphBuilder.familyGraph(navController: NavHostController) {
         LoginQrRoute(onBack = back, memberId = route.memberId, memberName = route.name)
     }
     composable<GroupDestination> { entry -> GroupEditorRoute(entry.toRoute<GroupDestination>().groupId, onBack = back) }
-    composable<PersonDestination> { entry -> PersonRoute(entry.toRoute<PersonDestination>().personId, onBack = back) }
+    composable<PersonDestination> { entry ->
+        PersonRoute(
+            entry.toRoute<PersonDestination>().personId,
+            onBack = back,
+            onEvent = { navController.navigate(EventDestination(it)) },
+            onAddMemorable = { navController.navigate(EventEditorDestination.of(EventEditorArgs(memorable = true, personId = it))) },
+        )
+    }
     composable<FamilySettingsDestination> { FamilySettingsRoute(onBack = back) }
 }

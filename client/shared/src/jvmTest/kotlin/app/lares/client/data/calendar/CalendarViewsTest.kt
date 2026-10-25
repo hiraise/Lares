@@ -319,7 +319,7 @@ class CalendarViewsTest {
             assertEquals(LocalDate(2027, 3, 1), olga.birthday?.date)
             assertEquals(42, olga.birthday?.age)
             assertEquals(listOf(MemorableDateView(anniversary, "Годовщина", LocalDate(2027, 10, 10), 17)), olga.memorable)
-            assertEquals(PersonDates(null, emptyList()), CalendarViews.forPerson(i, P_ANYA).copy(birthday = null))
+            assertEquals(PersonDates(null, emptyList(), d(21)), CalendarViews.forPerson(i, P_ANYA).copy(birthday = null))
             assertNull(CalendarViews.forPerson(i, P_DIMA).birthday)
         }
 

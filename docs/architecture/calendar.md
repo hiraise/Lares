@@ -437,3 +437,24 @@ after a change of the calendar inputs, the mute set or `birthdayDaysBefore`, and
 - The scroll position of each week page is saved, so it stays after returning from an event page or the editor.
 - The header's `today` action comes before ‹ ›, so ‹ › and the filter keep their places when it appears (also in
   «Месяц»).
+
+### Implementation notes (M3-08)
+
+- `Upcoming` and `PersonDates` carry the household's `today`, so «через 3 дня» and today's highlighted tile are
+  relative to the family's zone; the tag page takes it from `TaskInputs`.
+- Rows outside the Calendar tab are one component, `DatedRow` / `DatedItemRow` (`ui/calendar/CalendarComponents.kt`):
+  the date tile (visual-style § Date tile: 48 × 52, radius 14, month uppercase; today in `primaryContainer`), title
+  (birthdays with a 16 dp `cake`), supporting line, avatars. Texts are pure functions of `CalendarLogic`:
+  `upcomingWhen`, `tagWhen`, `birthdayCountdown`, `itemTitle`, `relativeDay`. The plan named a 44 dp tile with
+  radius 12; the binding visual style and the mockup use 48 × 52 / 14, which the existing `DateTile` already had.
+- «Ещё N» under «Скоро» stores «Список» as the calendar view (`PreferencesStore.setCalendarView`) before switching to
+  the tab, so an existing `CalendarViewModel` follows the preference flow.
+- `PersonViewModel` and `TagViewModel` take `CalendarRepository` as an optional last parameter (tests that do not
+  need the calendar pass nothing). Person dates show only for an existing person and `calendar.view`; «Добавить
+  памятную дату» also needs `calendar.create` and opens the editor with `memorable = true, personId`.
+- Notification taps: `PendingNavigation.submit("event", "<id>")` or `"<id>:<date>"` (a bad date is ignored: the next
+  occurrence) and `("person", id)`. `NotificationTaps` handles all targets in one collector; `EventLinks.exists` uses
+  `observeDetail(id)` and one `syncNow()`. A gone event switches the main screen to Calendar with «Событие удалено».
+  A person that is gone closes its page by itself (`PersonViewModel` marks it done).
+- Settings: `NotificationSettingsUiState.birthdayChoice` is null when `birthday.reminder` is muted, else
+  `birthdayDaysBefore`; `BirthdayChoices = [null] + NotificationSettings.BIRTHDAY_DAYS_CHOICES`.

@@ -27,6 +27,8 @@ import androidx.lifecycle.viewModelScope
 import app.lares.client.data.Tag
 import app.lares.client.data.TagsRepository
 import app.lares.client.data.TagsWriter
+import app.lares.client.data.calendar.CalendarItem
+import app.lares.client.data.calendar.CalendarRepository
 import app.lares.client.data.shopping.ShoppingItemView
 import app.lares.client.data.shopping.ShoppingListView
 import app.lares.client.data.shopping.ShoppingRepository
@@ -40,9 +42,13 @@ import app.lares.client.resources.ic_edit
 import app.lares.client.resources.ic_sell
 import app.lares.client.resources.ic_shopping_cart
 import app.lares.client.resources.tag_action_edit
+import app.lares.client.resources.tag_events_section
 import app.lares.client.resources.tag_shopping_section
 import app.lares.client.resources.tag_tasks_empty
 import app.lares.client.resources.tag_tasks_section
+import app.lares.client.ui.calendar.CalendarLogic
+import app.lares.client.ui.calendar.DATED_ROW_INSET
+import app.lares.client.ui.calendar.DatedItemRow
 import app.lares.client.ui.common.text
 import app.lares.client.ui.components.AppIcon
 import app.lares.client.ui.components.AppPage
@@ -67,8 +73,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -89,14 +98,21 @@ data class TagPageUiState(
     val shoppingLists: List<ShoppingListView> = emptyList(),
     val canManage: Boolean = false,
     val allNames: List<String> = emptyList(),
+    /** The next occurrence of each event with the tag (TAG-004); empty without `calendar.view`. */
+    val events: List<CalendarItem.Event> = emptyList(),
+    /** The household's today, for the dates of [events]. */
+    val today: LocalDate? = null,
 ) {
     /** Deleted here or on another phone. */
     val gone: Boolean get() = loaded && tag == null
 
     val hasShopping: Boolean get() = shoppingItems.isNotEmpty() || shoppingLists.isNotEmpty()
+
+    /** Participant names of [events], for distinct initials. */
+    val eventNames: List<String> get() = events.flatMap { it.participants.map { p -> p.data.name } }.distinct()
 }
 
-/** The tag page (TAG-004): the tag's tasks and shopping. Editing the tag uses the shared tag sheet. */
+/** The tag page (TAG-004): the tag's tasks, shopping and events. Editing the tag uses the shared tag sheet. */
 class TagViewModel(
     tasksRepository: TasksRepository,
     tasksWriter: TasksWriter,
@@ -104,6 +120,7 @@ class TagViewModel(
     tagsRepository: TagsRepository,
     tagsWriter: TagsWriter,
     args: TagArgs,
+    calendar: CalendarRepository? = null,
 ) : ViewModel() {
     private val id = args.id
     private val ticker = TaskTicker(viewModelScope, tasksWriter)
@@ -113,7 +130,11 @@ class TagViewModel(
     val events: Flow<TaskEvent> = ticker.events
 
     val state: StateFlow<TagPageUiState> =
-        combine(tasksRepository.observeInputs(), shoppingRepository.observeForTag(id)) { inputs, shopping -> build(inputs, id, shopping) }
+        combine(
+            tasksRepository.observeInputs(),
+            shoppingRepository.observeForTag(id),
+            calendar?.observeForTag(id) ?: flowOf(emptyList()),
+        ) { inputs, shopping, events -> build(inputs, id, shopping, events) }
             .flowOn(Dispatchers.Default)
             .stateIn(viewModelScope, SharingStarted.Eagerly, TagPageUiState())
 
@@ -130,9 +151,11 @@ class TagViewModel(
             inputs: TaskInputs,
             tagId: String,
             shopping: ShoppingTagView? = null,
+            events: List<CalendarItem.Event> = emptyList(),
         ): TagPageUiState {
             val rows = TaskRows(inputs)
             val seesShopping = inputs.viewer?.permissions?.has(Permission.SHOPPING_VIEW) == true
+            val seesCalendar = inputs.viewer?.permissions?.has(Permission.CALENDAR_VIEW) == true
             return TagPageUiState(
                 loaded = true,
                 tag = inputs.tags.firstOrNull { it.id == tagId },
@@ -141,6 +164,8 @@ class TagViewModel(
                 shoppingLists = if (seesShopping) shopping?.lists.orEmpty() else emptyList(),
                 canManage = inputs.viewer?.permissions?.has(Permission.TAGS_MANAGE) == true,
                 allNames = rows.allNames,
+                events = if (seesCalendar) events else emptyList(),
+                today = inputs.now.toLocalDateTime(inputs.zone).date,
             )
         }
     }
@@ -153,6 +178,8 @@ fun TagRoute(
     onTask: (String) -> Unit,
     /** A shopping list page, filtered by the tag when opened from an item. */
     onShoppingList: (id: String, tagId: String?) -> Unit = { _, _ -> },
+    /** An event of the «События» section: its id and the occurrence. */
+    onEvent: (String, LocalDate) -> Unit = { _, _ -> },
     viewModel: TagViewModel = koinViewModel(key = "tag-$id") { parametersOf(TagArgs(id)) },
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -161,7 +188,15 @@ fun TagRoute(
     LaunchedEffect(state.gone) { if (state.gone) onBack() }
     TaskEventSnackbars(viewModel.events, snackbar, onUndo = viewModel::undo)
     Box(Modifier.fillMaxSize()) {
-        TagPage(state, onBack, onTask, onToggle = viewModel::toggle, onEdit = viewModel::editTag, onShoppingList = onShoppingList)
+        TagPage(
+            state,
+            onBack,
+            onTask,
+            onToggle = viewModel::toggle,
+            onEdit = viewModel::editTag,
+            onShoppingList = onShoppingList,
+            onEvent = onEvent,
+        )
         SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).windowInsetsPadding(WindowInsets.safeDrawing))
     }
     sheet?.let { TagSheetDialog(it, viewModel.tagEditor) }
@@ -175,6 +210,7 @@ fun TagPage(
     onToggle: (TaskRowUi) -> Unit = {},
     onEdit: () -> Unit = {},
     onShoppingList: (id: String, tagId: String?) -> Unit = { _, _ -> },
+    onEvent: (String, LocalDate) -> Unit = { _, _ -> },
 ) {
     val tag = state.tag
     AppPage(
@@ -206,7 +242,7 @@ fun TagPage(
     ) {
         if (!state.loaded || tag == null) return@AppPage
         // The tasks empty state only when the page has nothing else to show.
-        if (state.tasks.isNotEmpty() || !state.hasShopping) {
+        if (state.tasks.isNotEmpty() || (!state.hasShopping && state.events.isEmpty())) {
             Column(verticalArrangement = Arrangement.spacedBy(Spacing.s), modifier = Modifier.testTag("tag_tasks")) {
                 SectionHeader(stringResource(Res.string.tag_tasks_section, state.tasks.size.toString()))
                 if (state.tasks.isEmpty()) {
@@ -222,6 +258,34 @@ fun TagPage(
             }
         }
         if (state.hasShopping) TagShopping(state, tag.id, onShoppingList)
+        if (state.events.isNotEmpty() && state.today != null) TagEvents(state.events, state.today, state.eventNames, onEvent)
+    }
+}
+
+/** «События · N» (TAG-004): the next occurrence of each event with the tag, with a date tile. */
+@Composable
+private fun TagEvents(
+    events: List<CalendarItem.Event>,
+    today: LocalDate,
+    allNames: List<String>,
+    onEvent: (String, LocalDate) -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.s), modifier = Modifier.testTag("tag_events")) {
+        SectionHeader(stringResource(Res.string.tag_events_section, events.size.toString()))
+        ListGroup {
+            events.forEachIndexed { index, item ->
+                if (index > 0) ListDivider(inset = DATED_ROW_INSET)
+                DatedItemRow(
+                    date = item.occ.startDate,
+                    item = item,
+                    supporting = CalendarLogic.tagWhen(item, today).text(),
+                    today = today,
+                    allNames = allNames,
+                    onClick = { onEvent(item.occ.eventId, item.occ.occurrence) },
+                    modifier = Modifier.testTag("tag_event_${item.occ.eventId}"),
+                )
+            }
+        }
     }
 }
 
