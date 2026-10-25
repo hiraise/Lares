@@ -8,19 +8,12 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TimePicker
-import androidx.compose.material3.TimePickerDialog
-import androidx.compose.material3.rememberDatePickerState
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -43,9 +36,6 @@ import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import app.lares.client.notifications.NotificationPermissions
 import app.lares.client.resources.Res
-import app.lares.client.resources.action_cancel
-import app.lares.client.resources.action_clear
-import app.lares.client.resources.action_done
 import app.lares.client.resources.action_save
 import app.lares.client.resources.ic_alarm
 import app.lares.client.resources.ic_calendar_month
@@ -87,11 +77,13 @@ import app.lares.client.resources.task_repeat_none
 import app.lares.client.resources.task_tags_none
 import app.lares.client.resources.task_time_none
 import app.lares.client.resources.task_value_not_set
+import app.lares.client.ui.common.RepeatPreset
 import app.lares.client.ui.common.rememberNotificationPermissionRequest
 import app.lares.client.ui.common.text
 import app.lares.client.ui.components.AppIcon
 import app.lares.client.ui.components.AppPage
 import app.lares.client.ui.components.ConfirmDialog
+import app.lares.client.ui.components.DateDialog
 import app.lares.client.ui.components.DetailTopBar
 import app.lares.client.ui.components.ErrorText
 import app.lares.client.ui.components.FormField
@@ -100,20 +92,17 @@ import app.lares.client.ui.components.ListDivider
 import app.lares.client.ui.components.ListGroup
 import app.lares.client.ui.components.ListRow
 import app.lares.client.ui.components.PrimaryButton
+import app.lares.client.ui.components.TimeDialog
 import app.lares.client.ui.family.ReadOnlyHint
 import app.lares.client.ui.family.TagSheetDialog
 import app.lares.client.ui.theme.Spacing
 import app.lares.contract.entities.Recurrence
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.atStartOfDayIn
-import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
-import kotlin.time.Instant
 
 /** What the editor form can do; the defaults do nothing (screen tests). */
 class TaskEditorActions(
@@ -317,7 +306,15 @@ fun TaskEditorScreen(
         }
 
         EditorPicker.REPEAT -> {
-            RepeatSheet(form, state.today, actions.onPreset, actions.onRule) { picker = null }
+            RepeatSheet(
+                form.recurrence,
+                form.dueDate ?: state.today,
+                allowAfterCompletion = true,
+                onPreset = actions.onPreset,
+                onRule = actions.onRule,
+                onDismiss = { picker = null },
+                canStopRepeat = form.canStopRepeat,
+            )
         }
 
         EditorPicker.ASSIGNEES -> {
@@ -459,76 +456,3 @@ private fun Checklist(
         )
     }
 }
-
-/** Material 3 date picker; "Clear" removes the date (not offered for routines, which always have a start). */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun DateDialog(
-    initial: LocalDate,
-    canClear: Boolean,
-    onPick: (LocalDate?) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    val pickerState = rememberDatePickerState(initialSelectedDateMillis = initial.atStartOfDayIn(TimeZone.UTC).toEpochMilliseconds())
-    DatePickerDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            LinkButton(stringResource(Res.string.action_done), {
-                pickerState.selectedDateMillis?.let {
-                    onPick(
-                        Instant
-                            .fromEpochMilliseconds(it)
-                            .toLocalDateTime(TimeZone.UTC)
-                            .date,
-                    )
-                }
-                onDismiss()
-            })
-        },
-        dismissButton = {
-            Row {
-                if (canClear) {
-                    LinkButton(stringResource(Res.string.action_clear), {
-                        onPick(null)
-                        onDismiss()
-                    })
-                }
-                LinkButton(stringResource(Res.string.action_cancel), onDismiss)
-            }
-        },
-    ) { DatePicker(pickerState) }
-}
-
-/** Material 3 time picker (24 h by the system setting); "Clear" removes the time. */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun TimeDialog(
-    initial: LocalTime?,
-    onPick: (LocalTime?) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    val pickerState = rememberTimePickerState(initialHour = initial?.hour ?: DEFAULT_HOUR, initialMinute = initial?.minute ?: 0)
-    TimePickerDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(Res.string.task_field_time), style = MaterialTheme.typography.labelLarge) },
-        confirmButton = {
-            LinkButton(stringResource(Res.string.action_done), {
-                onPick(LocalTime(pickerState.hour, pickerState.minute))
-                onDismiss()
-            })
-        },
-        dismissButton = {
-            Row {
-                if (initial != null) {
-                    LinkButton(stringResource(Res.string.action_clear), {
-                        onPick(null)
-                        onDismiss()
-                    })
-                }
-                LinkButton(stringResource(Res.string.action_cancel), onDismiss)
-            }
-        },
-    ) { TimePicker(pickerState) }
-}
-
-private const val DEFAULT_HOUR = 9

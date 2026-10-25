@@ -1,17 +1,14 @@
 package app.lares.client.ui.tasks
 
 import app.lares.client.ui.common.FieldError
+import app.lares.client.ui.common.RepeatPreset
+import app.lares.client.ui.common.Repeats
 import app.lares.contract.api.FieldErrorCode
 import app.lares.contract.entities.Recurrence
-import app.lares.contract.entities.RecurrenceMode
-import app.lares.contract.entities.RecurrenceUnit
 import app.lares.contract.entities.TaskData
 import app.lares.contract.validation.Validators
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
-
-/** The single-choice rows of the repeat sheet; [CUSTOM] is any other rule. */
-enum class RepeatPreset { NONE, DAILY, WEEKLY, MONTHLY, YEARLY, CUSTOM }
 
 /**
  * The editable fields of the task editor (plan M1-06), pure: no clock, no database. [original] is the stored task
@@ -50,15 +47,7 @@ data class TaskForm(
         if (date == null) {
             return if (isRoutine) this else copy(dueDate = null, dueTime = null, reminderMinutesBefore = null)
         }
-        val rule = recurrence
-        val old = dueDate
-        val followed =
-            if (rule != null && old != null && rule.isWeekly() && rule.weekdays == setOf(old.dayOfWeek)) {
-                rule.copy(weekdays = setOf(date.dayOfWeek))
-            } else {
-                rule
-            }
-        return copy(dueDate = date, recurrence = followed)
+        return copy(dueDate = date, recurrence = Repeats.follow(recurrence, dueDate, date))
     }
 
     /** A time needs a date; switching between "with time" and "without time" resets a reminder that no longer fits. */
@@ -76,13 +65,7 @@ data class TaskForm(
     ): TaskForm {
         if (rule == null) return if (canStopRepeat) copy(recurrence = null) else this
         val date = dueDate ?: today
-        val fixedRule =
-            when {
-                rule.isWeekly() && rule.weekdays.isEmpty() -> rule.copy(weekdays = setOf(date.dayOfWeek))
-                !rule.isWeekly() && rule.weekdays.isNotEmpty() -> rule.copy(weekdays = emptySet())
-                else -> rule
-            }
-        return copy(dueDate = date, recurrence = fixedRule)
+        return copy(dueDate = date, recurrence = Repeats.fit(rule, date))
     }
 
     fun withPreset(
@@ -92,7 +75,7 @@ data class TaskForm(
         when (preset) {
             RepeatPreset.NONE -> withRecurrence(null, today)
             RepeatPreset.CUSTOM -> this
-            else -> withRecurrence(presetRule(preset, dueDate ?: today), today)
+            else -> withRecurrence(Repeats.presetRule(preset, dueDate ?: today), today)
         }
 
     /** "Anyone" clears the assignees; a member is toggled. */
@@ -105,16 +88,7 @@ data class TaskForm(
 
     fun withReminder(minutesBefore: Int?) = copy(reminderMinutesBefore = if (dueDate == null) null else minutesBefore)
 
-    fun preset(): RepeatPreset {
-        val rule = recurrence ?: return RepeatPreset.NONE
-        if (rule.mode != RecurrenceMode.FIXED || rule.interval != 1) return RepeatPreset.CUSTOM
-        return when (rule.unit) {
-            RecurrenceUnit.DAY -> RepeatPreset.DAILY
-            RecurrenceUnit.WEEK -> if (rule.weekdays == setOfNotNull(dueDate?.dayOfWeek)) RepeatPreset.WEEKLY else RepeatPreset.CUSTOM
-            RecurrenceUnit.MONTH -> RepeatPreset.MONTHLY
-            RecurrenceUnit.YEAR -> RepeatPreset.YEARLY
-        }
-    }
+    fun preset(): RepeatPreset = Repeats.preset(recurrence, dueDate)
 
     /** The task as the form describes it; [createdBy] for a new task (the writer sets it again). */
     fun toData(createdBy: String = original?.createdBy.orEmpty()): TaskData =
@@ -184,23 +158,8 @@ data class TaskForm(
                 original = data,
             )
 
-        fun presetRule(
-            preset: RepeatPreset,
-            date: LocalDate,
-        ): Recurrence? =
-            when (preset) {
-                RepeatPreset.NONE, RepeatPreset.CUSTOM -> null
-                RepeatPreset.DAILY -> Recurrence(RecurrenceMode.FIXED, RecurrenceUnit.DAY)
-                RepeatPreset.WEEKLY -> Recurrence(RecurrenceMode.FIXED, RecurrenceUnit.WEEK, weekdays = setOf(date.dayOfWeek))
-                RepeatPreset.MONTHLY -> Recurrence(RecurrenceMode.FIXED, RecurrenceUnit.MONTH)
-                RepeatPreset.YEARLY -> Recurrence(RecurrenceMode.FIXED, RecurrenceUnit.YEAR)
-            }
-
         /** Field errors shown on the inputs. */
         fun fieldErrors(errors: Map<String, FieldErrorCode>): Map<String, FieldError> =
             errors.filterKeys { it in FIELDS }.mapNotNull { (field, code) -> FieldError.of(code)?.let { field to it } }.toMap()
     }
 }
-
-/** Weekdays matter only for fixed weekly rules. */
-fun Recurrence.isWeekly(): Boolean = mode == RecurrenceMode.FIXED && unit == RecurrenceUnit.WEEK

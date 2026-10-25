@@ -395,3 +395,25 @@ after a change of the calendar inputs, the mute set or `birthdayDaysBefore`, and
   channel collected by `MainScaffoldRoute`).
 - The month pager composes only the visible page; neighbour pages use a plain grid until their dots are computed.
 - Row texts use the persons' full names («Бабушка Валя»), not first words.
+
+### Implementation notes (M3-06)
+
+- `EventForm` (pure) holds the editor; `EventEditorViewModel(repository, tags, tagsWriter, writer, args)` opens it from
+  the series («Все»), the effective occurrence («Только это») or the series moved to the occurrence
+  (`EventForm.shifted`, «Это и следующие»). A one-off or a memorable date always opens as «Все».
+- `applyTo` takes the time fields (dates, all-day, times) together: if one changed, all come from the form, so a
+  change of the start on this phone and of the end on another never mix into an invalid pair.
+- «Только это» passes the stored override for fields the user did not touch (`occurrenceChanges(row)`), because
+  `editOccurrence` writes the full override: an earlier change of the occurrence (another time) stays when only the
+  place is changed now.
+- «Это и следующие» from a later date opens the new series' page in place of the old one (`onSplit`), so the page does
+  not show the old series' remaining dates.
+- The editor checks the title and rights against its own form, not the combined state, so a save right after typing
+  is never dropped.
+- The repeat sheet is shared with tasks (`RepeatSheet(rule, start, allowAfterCompletion, …)`, presets in
+  `ui/common/Repeat.kt`); `DateDialog`/`TimeDialog` (`ui/components/DateTimeDialogs.kt`) and `DayMonthYearDialog`
+  (birthdays and memorable dates) are shared components.
+- A memorable date without a year is stored on this year's date (`countYears = false`); reopened, a date with
+  `countYears` or a year before this one shows its year (ASSUMPTION: an unknown year entered last year shows that year).
+- Refused by rights (a kid opening another's event by a link): the editor closes and «Нет прав на изменение этого
+  события» shows on the main screen (`UiNotices`).

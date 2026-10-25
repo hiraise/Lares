@@ -40,12 +40,15 @@ Technical design: [architecture/calendar.md](../../architecture/calendar.md).
   A new timed event lasts one hour by default; the end is after the start.
   *Server: storage, sync, validation and permissions done (M3-02).*
   *Client core: local tables, adapters with the server's checks, `CalendarWriter.create/update/delete` (M3-04).*
+  *UI: the event editor — title, «Весь день», start and end with date and time (a new event lasts an hour, changing the start keeps the length, an end before the start becomes start + 1 h), place, notes, tags (M3-06).*
 - **CAL-013** `MVP` `todo` — Several days: an all-day event runs from a start date to an end date (holiday, trip); a timed
   event may end on a later day (overnight train). It shows on every day it covers.
   *Client core: multi-day occurrences on every day with `continuesBefore/After`, week blocks clipped to the day (M3-04).*
+  *UI: the end date in the editor; all-day events over several days, timed ones ending on a later day; more than 366 days is refused with «Слишком длинное событие» (M3-06).*
 - **CAL-002** `MVP` `todo` — Participants ("who it concerns"): any persons — members and relatives. An event without
   participants concerns the whole family. ASSUMPTION: deleting a relative removes them from events; the events stay.
   *Client core: participants (unknown ids dropped), person filter incl. whole-family events (M3-04).*
+  *UI: «Участники» in the editor — the sheet «Кого касается» with «Вся семья» and every person, members first (M3-06).*
 - **CAL-014** `MVP` `todo` — Event page: title, date and time with the repeat rule, place, participants, tags, notes, the
   reminder for me, who created it; edit and delete for those who may.
   *UI: the event page — title, «Изменено только это повторение», when, repeat with its end, place, participants, tags, notes, «Напомнить мне», «Создал(а)»; edit and delete for who may (M3-05; the editor comes in M3-06).*
@@ -61,6 +64,7 @@ Technical design: [architecture/calendar.md](../../architecture/calendar.md).
   on 28 February in other years (as in tasks, TSK-010).
   *Server: repeat rule and `repeatUntil` stored and validated; changed occurrences as derived-id rows (M3-02).*
   *Client core: occurrences from `EventSchedule` in the views (M3-04).*
+  *UI: the repeat sheet of tasks without "after completion", plus «До» («Без конца» or a date, not before the start) (M3-06).*
 - **CAL-015** `MVP` `todo` — Changing or deleting a repeating event asks: «Только это», «Это и следующие», «Все».
   «Только это» changes one occurrence (another time, day, place, title, participants) or cancels it; «Это и следующие»
   splits the series at that date; «Все» changes the whole series.
@@ -69,6 +73,7 @@ Technical design: [architecture/calendar.md](../../architecture/calendar.md).
   *Server: occurrence rows, `splitFrom`, cascade on delete (M3-02).*
   *Client core: `editOccurrence`, `cancelOccurrence`, `editFollowing`, `deleteFollowing`, resets when the schedule changes; only changed fields are sent, so offline edits of one occurrence merge (M3-04).*
   *UI: «Только это · Это и следующие · Все» before editing or deleting a repeating event; «Только это» closes the page with «Повторение удалено» (M3-05).*
+  *UI: the editor for «Только это» (times, title, place, participants, notes of one occurrence; earlier changes of it stay), «Это и следующие» (from the occurrence, a split from a later date opens the new series) and «Все» (asks before resetting changed occurrences) (M3-06).*
 
 ### Birthdays and memorable dates
 
@@ -82,6 +87,7 @@ Technical design: [architecture/calendar.md](../../architecture/calendar.md).
   the editor) or from a person's page; the person's page lists their birthday and memorable dates.
   *Client core: memorable dates with years, `forPerson` (M3-04).*
   *UI: memorable rows «Годовщина свадьбы · 16 лет»; the event page shows «12 июня · каждый год» and the years; edit and delete apply to the whole date, without the scope dialog (M3-05).*
+  *UI: «Памятная дата» in the editor — day, month and year («Год неизвестен»), «Считать годы» with «16 лет в этом году», participants, tags; reminded like birthdays (M3-06).*
 
 ### Reminders and notifications
 
@@ -93,6 +99,7 @@ Technical design: [architecture/calendar.md](../../architecture/calendar.md).
   *Server: personal reminder rows, synced only to their member (M3-02).*
   *Client core: `myReminder` in the event detail, `setMyReminder` / `clearMyReminder`, local event reminders (14 days ahead, at most 100) (M3-04).*
   *UI: «Напомнить мне» on the event page — «Как в событии» (when the event reminds me), «Нет» and the editor's options; asks for notifications like the task editor (M3-05).*
+  *UI: «Напоминание» in the editor with the timed or all-day choices, «· участникам» / «· всем»; asks for notifications when they are off (M3-06).*
 - **CAL-016** `MVP` `todo` — Birthday and memorable-date reminders (Q-022): for everybody with access to Calendar, at 09:00
   every day starting N days before and including the day itself. N = 3 by default; each member chooses in Settings ›
   Notifications: off, on the day only, 1, 3, 7 or 14 days before. A person does not get reminders about their own
@@ -183,6 +190,8 @@ Agent defaults, easy to change after feedback:
 - New events created from a day in the month or the week start on that day (timed: the next full hour).
 - The person's page lists their birthday and memorable dates; «Добавить памятную дату» opens the editor with them as the
   participant.
+- A memorable date entered with «Год неизвестен» counts no years; opened for editing in a later year, it shows the year
+  it was entered (M3-06).
 
 ## Out of scope (M3)
 

@@ -1,7 +1,7 @@
 package app.lares.client.ui
 
 import app.lares.client.db.LocalDb
-import app.lares.client.ui.tasks.RepeatPreset
+import app.lares.client.ui.common.RepeatPreset
 import app.lares.client.ui.tasks.TaskEditorArgs
 import app.lares.client.ui.tasks.TaskEditorResult
 import app.lares.client.ui.tasks.TaskEditorViewModel

@@ -932,4 +932,52 @@
     <string name="cal_scope_following">Это и следующие</string>
     <string name="cal_scope_all">Все</string>
     <string name="cal_occurrence_deleted">Повторение удалено</string>
+    <!-- Event editor (M3-06) -->
+    <string name="cal_editor_edit">Изменить событие</string>
+    <string name="cal_editor_memorable">Памятная дата</string>
+    <string name="cal_kind_event">Событие</string>
+    <string name="cal_title_hint_event">Например, Стоматолог</string>
+    <string name="cal_title_hint_memorable">Например, Годовщина свадьбы</string>
+    <string name="cal_field_start">Начало</string>
+    <string name="cal_field_end">Конец</string>
+    <string name="cal_field_until">До</string>
+    <string name="cal_until_none">Без конца</string>
+    <string name="cal_field_participants">Участники</string>
+    <string name="cal_participants_title">Кого касается</string>
+    <string name="cal_participant_member">член семьи</string>
+    <string name="cal_field_place">Место</string>
+    <string name="cal_field_date">Дата</string>
+    <string name="cal_reminder_for_participants">%1$s · участникам</string>
+    <string name="cal_reminder_for_everyone">%1$s · всем</string>
+    <string name="cal_count_years">Считать годы</string>
+    <string name="cal_years_this_year">%1$s в этом году</string>
+    <string name="cal_memorable_hint">Напомним, как о днях рождения</string>
+    <string name="cal_year_unknown">Год неизвестен</string>
+    <string name="cal_scope_note_this">Изменения только %1$s, %2$s</string>
+    <string name="cal_scope_note_following">Изменения %1$s, %2$s</string>
+    <string-array name="cal_weekday_for">
+        <item>для понедельника</item>
+        <item>для вторника</item>
+        <item>для среды</item>
+        <item>для четверга</item>
+        <item>для пятницы</item>
+        <item>для субботы</item>
+        <item>для воскресенья</item>
+    </string-array>
+    <string-array name="cal_weekday_from">
+        <item>с понедельника</item>
+        <item>со вторника</item>
+        <item>со среды</item>
+        <item>с четверга</item>
+        <item>с пятницы</item>
+        <item>с субботы</item>
+        <item>с воскресенья</item>
+    </string-array>
+    <string name="cal_reset_title">Сбросить изменённые повторения?</string>
+    <string name="cal_reset_text">Изменённые отдельные повторения (%1$d) будут сброшены.</string>
+    <string name="cal_discard_text">Изменения в событии не сохранятся.</string>
+    <string name="cal_editor_no_rights">Нет прав на изменение этого события</string>
+    <string name="cal_editor_cannot_create">Нет прав на создание событий. Попросите администратора семьи.</string>
+    <string name="cal_error_too_long">Слишком длинное событие</string>
+    <string name="cal_error_before_start">Раньше начала</string>
 </resources>

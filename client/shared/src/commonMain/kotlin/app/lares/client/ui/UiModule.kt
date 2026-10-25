@@ -10,6 +10,7 @@ import app.lares.client.platform.DeepLinkHandler
 import app.lares.client.platform.PendingNavigation
 import app.lares.client.platform.TaskLinks
 import app.lares.client.ui.calendar.CalendarViewModel
+import app.lares.client.ui.calendar.EventEditorViewModel
 import app.lares.client.ui.calendar.EventViewModel
 import app.lares.client.ui.common.CalendarReminderResourceTexts
 import app.lares.client.ui.common.TaskReminderResourceTexts
@@ -93,6 +94,7 @@ fun uiModule(): Module =
         viewModel { params -> TaskEditorViewModel(get(), get(), get(), get(), get(), params.get()) }
         viewModel { CalendarViewModel(get(), get(), get(), get(), getOrNull<Clock>() ?: Clock.System) }
         viewModel { params -> EventViewModel(get(), get(), params.get()) }
+        viewModel { params -> EventEditorViewModel(get(), get(), get(), get(), params.get()) }
         viewModel { ShoppingListsViewModel(get(), get()) }
         viewModel { params -> ShoppingListViewModel(get(), get(), get(), get(), get(), params.get()) }
     }

@@ -300,6 +300,9 @@ rules would drift) and changes made on another phone meanwhile survive; `TasksWr
 fields only. A repeat chosen without a date starts today; clearing the date clears time and reminder; switching between
 "with time" and "without time" resets a reminder outside the new choice list to 0. The tag sheet logic (`TagEditor`) is
 shared with the Family screen. Unsaved changes ask before leaving (`NavigationBackHandler`, `navigationevent-compose`).
+Since M3-06 the date and time dialogs are shared components (`ui/components/DateTimeDialogs.kt`) and the repeat sheet
+takes `(rule, start, allowAfterCompletion, canStopRepeat)` so the event editor uses it too (presets in
+`ui/common/Repeat.kt`); the task editor's behavior is unchanged.
 
 ### Notification taps
 

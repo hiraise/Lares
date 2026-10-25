@@ -15,6 +15,7 @@ import app.lares.client.platform.NavTarget
 import app.lares.client.platform.PendingNavigation
 import app.lares.client.platform.TaskLinks
 import app.lares.client.ui.calendar.EventEditorArgs
+import app.lares.client.ui.calendar.EventEditorRoute
 import app.lares.client.ui.calendar.EventRoute
 import app.lares.client.ui.calendar.RepeatScope
 import app.lares.client.ui.family.AddMemberMode
@@ -193,7 +194,7 @@ data class EventDestination(
     val occurrence: String? = null,
 )
 
-/** The event editor (M3-06; a stub until then); dates are ISO strings, [scope] a [RepeatScope] name. */
+/** The event editor (M3-06); dates are ISO strings, [scope] a [RepeatScope] name. */
 @Serializable
 data class EventEditorDestination(
     val id: String? = null,
@@ -333,8 +334,19 @@ fun MainNavHost() {
                 onTag = { navController.navigate(TagDestination(it)) },
             )
         }
-        composable<EventEditorDestination> {
-            SectionPlaceholderPage(Section.CALENDAR, onBack = { navController.popBackStack() })
+        composable<EventEditorDestination> { entry ->
+            EventEditorRoute(
+                entry.toRoute<EventEditorDestination>().toArgs(),
+                onBack = { navController.popBackStack() },
+                // The new event's page replaces the editor, so Back returns to the calendar.
+                onCreated = { id ->
+                    navController.navigate(EventDestination(id)) { popUpTo<EventEditorDestination> { inclusive = true } }
+                },
+                // «Это и следующие» made a new series: its page replaces the old event's page and the editor.
+                onSplit = { id, occurrence ->
+                    navController.navigate(EventDestination(id, occurrence?.toString())) { popUpTo<EventDestination> { inclusive = true } }
+                },
+            )
         }
         composable<ShoppingListDestination> { entry ->
             val route = entry.toRoute<ShoppingListDestination>()

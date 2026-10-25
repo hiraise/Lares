@@ -292,3 +292,13 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   `filter_list`, `celebration`, `event`, `event_busy`, `ScreenHeader(singleLineTitle)`. 21 new tests
   (`CalendarLogicTest`, `CalendarViewModelTest`, `CalendarUiTest`, `EventViewModelTest`, `EventScreenTest`); emulator
   walkthrough found the month jumping to January 1970 on a cold start (pager composed before data) — fixed.
+- 2026-10-25 **M3-06** Event editor: `EventForm` (pure), `EventEditorViewModel`, `EventEditorScreen`, `ParticipantsSheet`
+  replace the M3-05 stub. Events and memorable dates: title, «Весь день», start and end (length kept, end before start
+  → +1 h, over 366 days refused), repeat with «До», participants («Вся семья»), place, reminder («· участникам» /
+  «· всем»), tags, notes; memorable date with day/month/year («Год неизвестен») and «Считать годы». Scopes: «Все» (asks
+  before resetting changed occurrences), «Только это» (keeps earlier overrides of the occurrence), «Это и следующие»
+  (a split opens the new series). Shared now: `DateDialog`/`TimeDialog`, `DayMonthYearDialog`, the repeat sheet
+  (`ui/common/Repeat.kt`); task editor unchanged. 33 new tests (`EventFormTest`, `EventEditorViewModelTest`,
+  `EventEditorUiTest`); emulator walkthrough of spec scenarios 1, 2, 4, 5, kid access, ru/en, light/dark without bugs.
+  Fixed on the way: a save right after typing could be dropped (checked the combined state); the year column clipped
+  «Год неизвестен».
