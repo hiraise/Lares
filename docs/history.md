@@ -316,3 +316,5 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   and deleted events (`EventLinks`), user manual "Calendar" (en, ru), CHANGELOG, roadmap and spec statuses (all CAL MVP
   requirements `done`, TSK-022 `done`). 10 new tests (client 333, multi-device 35); emulator walkthrough found no bugs
   (the «Дни рождения» row moved before the test switch).
+- 2026-10-25 Release **v0.4.0** (M3 Calendar): release pull request #3 merged, signed APK, server image
+  `ghcr.io/hiraise/lares-server:0.4.0`, GitHub release; branch `release/0.4.1` started for fixes.
