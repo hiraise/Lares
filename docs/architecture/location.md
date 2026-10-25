@@ -255,6 +255,17 @@ object PlaceRules {
 | `SetSharingRequest` | `status`: `INVALID_FORMAT` for NEVER; `pausedUntil`: `INVALID_FORMAT` unless PAUSED, `OUT_OF_RANGE` in the past or > 7 days; `reason`: `REQUIRED` for OFF_ON_PHONE, `INVALID_FORMAT` otherwise |
 | `LocationRuleInput` | `rules.N.subject` / `.target`: `INVALID_FORMAT` (id with EVERYONE, missing id, unknown kind); `rules`: `OUT_OF_RANGE` above 100 |
 
+### Implementation notes (M4-01)
+
+- `Validators.setSharing(request, now)` takes the current time for the `pausedUntil` checks; `Validators.positionFix`
+  checks value ranges only, the age and future-skew limits are the server's (M4-03).
+- `LocationLimits` also holds the field limits used by the validators (`PLACE_NAME_MAX`, `PLACE_ADDRESS_MAX`,
+  `MAX_ALERT_PLACES`, `MAX_ACCURACY_M`, `MAX_SPEED_MPS`, `MAX_BEARING_DEG`, `MAX_PAUSE_DAYS`); `Geo.EARTH_RADIUS_M` and
+  `Stops.MERGE_GAP_MINUTES` (15) are public constants.
+- `Stops.detect` merges only stops with the same non-null place; the merged stop's position is the mean of all its
+  points.
+- `tools/dev/seed.py` has `place_alert_row_id` with a golden value shared with `IdsTest`.
+
 ## Server (package `app.lares.server.location`)
 
 ### Configuration (`AppConfig`)

@@ -133,7 +133,7 @@ Milestone [M4 Location](../product/roadmap.md#m4-location). [Location spec](../p
 
 | Plan | Title | Depends on | Status |
 | --- | --- | --- | --- |
-| [M4-01](M4/01-location-contract.md) | Location contract: data, DTOs, visibility, geofence and stops, write rules, validators | M3 | ready |
+| [M4-01](M4/01-location-contract.md) | Location contract: data, DTOs, visibility, geofence and stops, write rules, validators | M3 | done |
 | [M4-02](M4/02-places-rules-server.md) | Places, alerts and visibility rules on the server | M4-01 | ready |
 | [M4-03](M4/03-positions-live-server.md) | Positions, sharing state and the live channel on the server | M4-02 | ready |
 | [M4-04](M4/04-geofences-notifications-addresses-server.md) | Geofences, location notifications and addresses on the server | M4-03 | ready |

@@ -447,6 +447,8 @@
     <string name="notif_type_event_changed">События календаря</string>
     <string name="notif_type_event_reminder">Напоминания о событиях</string>
     <string name="notif_type_birthday_reminder">Дни рождения</string>
+    <string name="notif_type_location_place">Места: прибытие и уход</string>
+    <string name="notif_type_location_sharing">Передача геопозиции выключена</string>
     <string name="notif_device">На этом телефоне</string>
     <string name="notif_permission">Показ уведомлений</string>
     <string name="notif_permission_off">Не разрешён</string>

@@ -16,6 +16,8 @@ data class UpdateHouseholdRequest(
     val timeZone: String? = null,
     val currency: String? = null,
     val defaultLanguage: String? = null,
+    /** One of `LocationLimits.HISTORY_DAYS_CHOICES`, else `OUT_OF_RANGE`. */
+    val locationHistoryDays: Int? = null,
 )
 
 /**

@@ -60,6 +60,8 @@ import app.lares.client.resources.notif_test_sent
 import app.lares.client.resources.notif_type_birthday_reminder
 import app.lares.client.resources.notif_type_event_changed
 import app.lares.client.resources.notif_type_event_reminder
+import app.lares.client.resources.notif_type_location_place
+import app.lares.client.resources.notif_type_location_sharing
 import app.lares.client.resources.notif_type_system_test
 import app.lares.client.resources.notif_type_task_assigned
 import app.lares.client.resources.notif_type_task_completed
@@ -461,6 +463,8 @@ private fun NotificationType.label(): StringResource =
         NotificationType.EVENT_CHANGED -> Res.string.notif_type_event_changed
         NotificationType.EVENT_REMINDER -> Res.string.notif_type_event_reminder
         NotificationType.BIRTHDAY_REMINDER -> Res.string.notif_type_birthday_reminder
+        NotificationType.LOCATION_PLACE -> Res.string.notif_type_location_place
+        NotificationType.LOCATION_SHARING -> Res.string.notif_type_location_sharing
     }
 
 private fun PushTestResult.message(): StringResource =

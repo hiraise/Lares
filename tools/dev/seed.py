@@ -325,12 +325,11 @@ def tick(name, as_login="olga", at=None):
 
 
 def derive_row_id(event_id, salt, marker):
-    """architecture/calendar.md § Derived ids, the same algorithm as Ids.kt."""
+    """architecture/calendar.md § Derived ids, the same algorithm as Ids.kt; marker is xor-ed into byte 7 (0 = none)."""
     b = bytearray(uuid.UUID(event_id).bytes)
     for i, byte in enumerate((salt & 0xFFFFFFFFFFFFFFFF).to_bytes(8, "big")):
         b[8 + i] ^= byte
-    if marker:
-        b[7] ^= 0x5A
+    b[7] ^= marker
     b[6] = (b[6] & 0x0F) | 0x80
     b[8] = (b[8] & 0x3F) | 0x80
     return str(uuid.UUID(bytes=bytes(b)))
@@ -338,12 +337,17 @@ def derive_row_id(event_id, salt, marker):
 
 def occurrence_row_id(event_id, occurrence):
     """The id of the event_occurrence row of `occurrence` (a date) of `event_id` (ADR-0022)."""
-    return derive_row_id(event_id, (occurrence - datetime.date(1970, 1, 1)).days, marker=False)
+    return derive_row_id(event_id, (occurrence - datetime.date(1970, 1, 1)).days, marker=0)
 
 
 def reminder_row_id(event_id, member_id):
     """The id of member_id's event_reminder row for event_id (ADR-0023)."""
-    return derive_row_id(event_id, int.from_bytes(uuid.UUID(member_id).bytes[8:], "big"), marker=True)
+    return derive_row_id(event_id, int.from_bytes(uuid.UUID(member_id).bytes[8:], "big"), marker=0x5A)
+
+
+def place_alert_row_id(member_id, subscriber_id):
+    """The id of subscriber_id's place_alert row for member_id (architecture/location.md § Sync data)."""
+    return derive_row_id(member_id, int.from_bytes(uuid.UUID(subscriber_id).bytes[8:], "big"), marker=0x3C)
 
 
 # Golden values of contract IdsTest (M3-01).
@@ -351,6 +355,7 @@ _GOLDEN_EVENT = "0192f3a4-5b6c-7d8e-9f01-23456789abcd"
 assert occurrence_row_id(_GOLDEN_EVENT, datetime.date(2026, 10, 28)) == "0192f3a4-5b6c-8d8e-9f01-23456789fadf"
 assert occurrence_row_id(_GOLDEN_EVENT, datetime.date(1969, 12, 31)) == "0192f3a4-5b6c-8d8e-a0fe-dcba98765432"
 assert reminder_row_id(_GOLDEN_EVENT, "0192f3a4-0000-7000-8000-00000000c0de") == "0192f3a4-5b6c-8dd4-9f01-234567896b13"
+assert place_alert_row_id(_GOLDEN_EVENT, "0192f3a4-0000-7000-8000-00000000c0de") == "0192f3a4-5b6c-8db2-9f01-234567896b13"
 
 
 def calendar():

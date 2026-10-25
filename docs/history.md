@@ -333,3 +333,9 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   background-permission paths, a client compile break from new notification types.
 - 2026-10-25 Customer approved the location spec; no bugs found in v0.4.0, so `release/0.4.1` is dropped and M4 work goes
   to `release/0.5.0` (started from `main`, the 0.4.1 status commit carried over).
+- 2026-10-25 M4-01 Location contract: sync types `place` and `place_alert` (derived id `Ids.placeAlertRowId`, `derive`
+  now takes a byte marker, existing ids unchanged), REST and live DTOs with lenient enums, `HouseholdData.locationHistoryDays`,
+  notification types `location.place` / `location.sharing` and the `location_refresh` push, `Geo` (haversine, circle),
+  `LocationVisibility` with default rules, `Geofence` hysteresis, `Stops.detect`, `PlaceRules` and `WriteRules`,
+  validators and `normalizePlace`; `seed.py place_alert_row_id`; client notification labels (en, ru). 32 new contract
+  tests (208 in the module).
