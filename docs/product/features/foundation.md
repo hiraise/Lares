@@ -96,7 +96,7 @@ localization and deployment — everything feature modules depend on.
 
 - **FND-040** `MVP` `doing` — All module data except live location is readable and editable offline.
   *Client core (M0-06): local SQLite, outbox, repositories as `Flow`s — persons and tags work offline; each module
-  reuses it as it is built.*
+  reuses it as it is built.* *Calendar: events, changed occurrences and own reminders offline (M3-04).*
 - **FND-041** `MVP` `doing` — Offline changes sync automatically when connectivity returns; no data is lost on conflict
   (design in [ADR-0008](../../adr/0008-offline-first-sync.md)).
   *Server: pull, push with idempotency and field-level merge, housekeeping (M0-05). Client sync engine with retry and

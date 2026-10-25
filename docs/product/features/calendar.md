@@ -39,14 +39,18 @@ Technical design: [architecture/calendar.md](../../architecture/calendar.md).
 - **CAL-001** `MVP` `todo` — Event: title (required), all-day or with a start and end time, place (text), notes, tags.
   A new timed event lasts one hour by default; the end is after the start.
   *Server: storage, sync, validation and permissions done (M3-02).*
+  *Client core: local tables, adapters with the server's checks, `CalendarWriter.create/update/delete` (M3-04).*
 - **CAL-013** `MVP` `todo` — Several days: an all-day event runs from a start date to an end date (holiday, trip); a timed
   event may end on a later day (overnight train). It shows on every day it covers.
+  *Client core: multi-day occurrences on every day with `continuesBefore/After`, week blocks clipped to the day (M3-04).*
 - **CAL-002** `MVP` `todo` — Participants ("who it concerns"): any persons — members and relatives. An event without
   participants concerns the whole family. ASSUMPTION: deleting a relative removes them from events; the events stay.
+  *Client core: participants (unknown ids dropped), person filter incl. whole-family events (M3-04).*
 - **CAL-014** `MVP` `todo` — Event page: title, date and time with the repeat rule, place, participants, tags, notes, the
   reminder for me, who created it; edit and delete for those who may.
 - **CAL-017** `MVP` `todo` — Works offline: events are seen, created, changed and deleted without network and sync later
   (FND-040).
+  *Client core: everything through `LocalWriter`, works offline; multi-device tests for offline edits of one occurrence, split, delete vs edit, stale permissions (M3-04).*
 
 ### Repeating events
 
@@ -54,21 +58,25 @@ Technical design: [architecture/calendar.md](../../architecture/calendar.md).
   date, every N years; optionally until an end date. Day 31 in shorter months falls on the last day; 29 February falls
   on 28 February in other years (as in tasks, TSK-010).
   *Server: repeat rule and `repeatUntil` stored and validated; changed occurrences as derived-id rows (M3-02).*
+  *Client core: occurrences from `EventSchedule` in the views (M3-04).*
 - **CAL-015** `MVP` `todo` — Changing or deleting a repeating event asks: «Только это», «Это и следующие», «Все».
   «Только это» changes one occurrence (another time, day, place, title, participants) or cancels it; «Это и следующие»
   splits the series at that date; «Все» changes the whole series.
   ASSUMPTION: when the repeat rule or the start of the whole series changes, earlier changes of single occurrences are
   reset (the app warns before saving).
   *Server: occurrence rows, `splitFrom`, cascade on delete (M3-02).*
+  *Client core: `editOccurrence`, `cancelOccurrence`, `editFollowing`, `deleteFollowing`, resets when the schedule changes; only changed fields are sent, so offline edits of one occurrence merge (M3-04).*
 
 ### Birthdays and memorable dates
 
 - **CAL-004** `MVP` `todo` — Birthdays come from the persons' profiles (members and relatives with a day and month of birth).
   The age shows when the year is known («Бабушка Валя, 78 лет»); 29 February birthdays show on 28 February in non-leap
   years. They are not edited in the calendar: a tap opens the person.
+  *Client core: birthdays with ages in the day lists, month dots, «Скоро», person dates (M3-04).*
 - **CAL-005** `MVP` `todo` — Memorable dates: a yearly date for one or more persons (wedding anniversary, memorial day),
   with the year it began, so the count shows («Годовщина свадьбы · 16 лет»). Created in the calendar («Памятная дата» in
   the editor) or from a person's page; the person's page lists their birthday and memorable dates.
+  *Client core: memorable dates with years, `forPerson` (M3-04).*
 
 ### Reminders and notifications
 
@@ -78,11 +86,13 @@ Technical design: [architecture/calendar.md](../../architecture/calendar.md).
   own reminder for it («Напомнить мне»: another time or none), also when they are not a participant. Reminders work
   offline (FND-050).
   *Server: personal reminder rows, synced only to their member (M3-02).*
+  *Client core: `myReminder` in the event detail, `setMyReminder` / `clearMyReminder`, local event reminders (14 days ahead, at most 100) (M3-04).*
 - **CAL-016** `MVP` `todo` — Birthday and memorable-date reminders (Q-022): for everybody with access to Calendar, at 09:00
   every day starting N days before and including the day itself. N = 3 by default; each member chooses in Settings ›
   Notifications: off, on the day only, 1, 3, 7 or 14 days before. A person does not get reminders about their own
   birthday. ASSUMPTION: memorable dates follow the same setting as birthdays.
   *Server: `birthdayDaysBefore` in `/me/notification-settings` (M3-02).*
+  *Client core: local reminders at 09:00 from N days before, none for one's own birthday, `birthdayDaysBefore` mirrored and saved (M3-04).*
 - **CAL-007** `MVP` `todo` — Participants who are members get a notification when they are added to an event (a new event
   or added later), when its date, time or place changes, and when it is cancelled. Not the person who made the change,
   not for past events. ASSUMPTION: changes of the title, notes or tags only do not notify; a change of a whole series
@@ -97,12 +107,15 @@ Technical design: [architecture/calendar.md](../../architecture/calendar.md).
   chosen day under it), «Неделя» (a grid by hours: seven columns, all-day events in a strip on top; Q-024), «Список»
   (days with events from today onwards, scrolling forward and back). Previous/next and «Сегодня»; the last view is
   remembered. Filters by person (events they take part in and their birthdays and dates) and by tag.
+  *Client core: `days`, `month` (42 cells, dots), `week` (column layout), person and tag filters (M3-04).*
 - **CAL-009** `MVP` `todo` — Tasks with a date appear in «Список» and in the day list under the month (Q-023): for
   repeating tasks only the current occurrence; they can be ticked off there. The filter has «Показывать задачи», on by
   default; the person filter applies to assignees, the tag filter to task tags. Only for members with access to Tasks.
   ASSUMPTION: tasks are not drawn as dots in the month grid nor in the week grid.
+  *Client core: open tasks on their date, overdue and done-today ones on today, «Показывать задачи» filter (M3-04).*
 - **CAL-019** `MVP` `todo` — Today block «Скоро» (FND-063): events of today and the next 7 days, birthdays and memorable dates,
   at most 5 rows with a date tile and «через 3 дня»; «Календарь» opens the tab.
+  *Client core: `upcoming` (M3-04).*
 
 ### Tags
 

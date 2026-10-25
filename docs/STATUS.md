@@ -7,7 +7,7 @@ Updated: 2026-10-25
 **M0 Foundation — all plans M0-01…M0-11 done; M0 acceptance with the customer pending.
 M1 Tasks — all plans M1-01…M1-07 done; M1 acceptance with the customer next.
 M2 Shopping lists — all plans M2-01…M2-06 done; M2 acceptance with the customer next.
-M3 Calendar — M3-01…M3-03 done; next `/plan-run M3-04`.**
+M3 Calendar — M3-01…M3-04 done; next `/plan-run M3-05`.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
@@ -22,6 +22,9 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 
 ## Last completed
 
+- 2026-10-25 M3-04 Calendar in the client core: events, changed occurrences and own reminders work offline; views for
+  day lists, month, week, «Скоро», tag page and person dates; one writer for «Только это» / «Это и следующие» / «Все»;
+  local reminders for events, birthdays and memorable dates; `seed.py calendar`; 29 unit and 7 multi-device tests.
 - 2026-10-25 M3-03 Event notifications on the server: participants who are members learn when they are added to an
   event, when its date, time or place changes and when it or one occurrence is cancelled — not for their own changes,
   past events or memorable dates; one muteable type `event.changed`; 8 new server tests.
@@ -105,7 +108,7 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 3. M4 plan: re-run the load test with location uploads every 30 s (ADR-0015).
 4. After the M1 acceptance: set the tasks spec to `implemented`.
 5. M2 acceptance with the customer (checklist in the M2-06 handoff); after it set the shopping spec to `implemented`.
-6. Execute M3-04…M3-08 (`/plan-run M3-04`).
+6. Execute M3-05…M3-08 (`/plan-run M3-05`).
 
 ## Plan progress
 

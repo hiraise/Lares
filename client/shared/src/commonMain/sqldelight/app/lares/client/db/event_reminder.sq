@@ -1,0 +1,28 @@
+-- The member's own reminders for events (ADR-0023): the server sends only the logged-in member's rows. The id is
+-- derived from event and member; `minutes_before` NULL = no reminder for me. Clients never delete these rows.
+CREATE TABLE event_reminder (
+    id TEXT NOT NULL PRIMARY KEY,
+    event_id TEXT NOT NULL,
+    member_id TEXT NOT NULL,
+    minutes_before INTEGER
+);
+
+CREATE INDEX event_reminder_event ON event_reminder (event_id);
+
+selectAll:
+SELECT * FROM event_reminder ORDER BY event_id, member_id;
+
+selectById:
+SELECT * FROM event_reminder WHERE id = ?;
+
+selectByEvent:
+SELECT * FROM event_reminder WHERE event_id = ? ORDER BY member_id;
+
+upsert:
+INSERT OR REPLACE INTO event_reminder (id, event_id, member_id, minutes_before) VALUES (?, ?, ?, ?);
+
+deleteById:
+DELETE FROM event_reminder WHERE id = ?;
+
+deleteAll:
+DELETE FROM event_reminder;

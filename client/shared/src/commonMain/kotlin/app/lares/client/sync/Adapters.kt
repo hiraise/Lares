@@ -1,11 +1,16 @@
 package app.lares.client.sync
 
 import app.lares.client.db.LaresDb
+import app.lares.contract.Ids
 import app.lares.contract.api.ErrorCode
 import app.lares.contract.api.FieldErrorCode
 import app.lares.contract.api.LaresJson
 import app.lares.contract.entities.ChecklistItemData
 import app.lares.contract.entities.ContactData
+import app.lares.contract.entities.EventData
+import app.lares.contract.entities.EventKind
+import app.lares.contract.entities.EventOccurrenceData
+import app.lares.contract.entities.EventReminderData
 import app.lares.contract.entities.GroupData
 import app.lares.contract.entities.HouseholdData
 import app.lares.contract.entities.LenientRecurrenceSerializer
@@ -21,6 +26,7 @@ import app.lares.contract.entities.TagData
 import app.lares.contract.entities.TaskCompletionData
 import app.lares.contract.entities.TaskData
 import app.lares.contract.permissions.BuiltInGroup
+import app.lares.contract.permissions.EventRules
 import app.lares.contract.permissions.PermissionSetSerializer
 import app.lares.contract.permissions.ShoppingRules
 import app.lares.contract.permissions.TaskRules
@@ -38,6 +44,9 @@ import kotlinx.serialization.builtins.serializer
 import kotlin.time.Clock
 import kotlin.time.Instant
 import app.lares.client.db.Checklist_item as ChecklistItemRow
+import app.lares.client.db.Event as EventRow
+import app.lares.client.db.Event_occurrence as EventOccurrenceRow
+import app.lares.client.db.Event_reminder as EventReminderRow
 import app.lares.client.db.Group_entity as GroupRow
 import app.lares.client.db.Household as HouseholdRow
 import app.lares.client.db.Member as MemberRow
@@ -696,6 +705,291 @@ private fun requireParentList(
         .executeAsOneOrNull()
         ?.toData() ?: throw LocalWriteException(ErrorCode.ENTITY_NOT_FOUND, message = "Shopping list not found")
 
+// Calendar (architecture/calendar.md § Adapters): the same EventRules checks, immutable fields and derived-id checks as
+// the server's handlers, with the parent event read from the local `event` table.
+
+internal fun EventRow.toData() =
+    EventData(
+        title = title,
+        createdBy = created_by,
+        startDate = LocalDate.parse(start_date),
+        endDate = LocalDate.parse(end_date),
+        allDay = all_day != 0L,
+        startTime = start_time?.let(LocalTime::parse),
+        endTime = end_time?.let(LocalTime::parse),
+        place = place,
+        notes = notes,
+        participantIds = LaresJson.decodeFromString(stringList, participant_ids).toSet(),
+        tagIds = LaresJson.decodeFromString(stringList, tag_ids).toSet(),
+        recurrence = recurrence?.let { LaresJson.decodeFromString(LenientRecurrenceSerializer, it) },
+        repeatUntil = repeat_until?.let(LocalDate::parse),
+        reminderMinutesBefore = reminder_minutes_before?.toInt(),
+        kind = EventKind.fromKey(kind) ?: EventKind.EVENT,
+        countYears = count_years != 0L,
+        splitFrom = split_from,
+    )
+
+internal fun EventOccurrenceRow.toData() =
+    EventOccurrenceData(
+        eventId = event_id,
+        occurrence = LocalDate.parse(occurrence),
+        cancelled = cancelled != 0L,
+        startDate = start_date?.let(LocalDate::parse),
+        endDate = end_date?.let(LocalDate::parse),
+        startTime = start_time?.let(LocalTime::parse),
+        endTime = end_time?.let(LocalTime::parse),
+        title = title,
+        place = place,
+        notes = notes,
+        participantIds = participant_ids?.let { LaresJson.decodeFromString(stringList, it).toSet() },
+    )
+
+internal fun EventReminderRow.toData() = EventReminderData(event_id, member_id, minutes_before?.toInt())
+
+/** The parent of an occurrence or reminder row; `ENTITY_NOT_FOUND` if it is not (or no longer) in the local table. */
+private fun requireParentEvent(
+    db: LaresDb,
+    eventId: String,
+): EventData =
+    db.eventQueries
+        .selectById(eventId)
+        .executeAsOneOrNull()
+        ?.toData() ?: throw LocalWriteException(ErrorCode.ENTITY_NOT_FOUND, message = "Event not found")
+
+private fun invalid(field: String): Nothing = throw LocalValidationException(mapOf(field to FieldErrorCode.INVALID_FORMAT))
+
+/** A child row's id must be the one derived from its parent (ADR-0022, ADR-0023), else `id: INVALID_FORMAT`. */
+private fun requireDerivedId(
+    id: String,
+    expected: () -> String,
+) {
+    val derived = runCatching(expected).getOrNull()
+    if (derived == null || id.lowercase() != derived.lowercase()) invalid("id")
+}
+
+class EventAdapter : EntityAdapter<EventData>(EntityTypes.EVENT, EventData.serializer(), writable = true) {
+    override fun selectTyped(
+        db: LaresDb,
+        id: String,
+    ) = db.eventQueries
+        .selectById(id)
+        .executeAsOneOrNull()
+        ?.toData()
+
+    override fun upsertTyped(
+        db: LaresDb,
+        id: String,
+        data: EventData,
+    ) {
+        db.eventQueries.upsert(
+            id = id,
+            title = data.title,
+            created_by = data.createdBy,
+            start_date = data.startDate.toString(),
+            end_date = data.endDate.toString(),
+            all_day = data.allDay.toDb(),
+            start_time = data.startTime?.toString(),
+            end_time = data.endTime?.toString(),
+            place = data.place,
+            notes = data.notes,
+            participant_ids = LaresJson.encodeToString(stringList, data.participantIds.sorted()),
+            tag_ids = LaresJson.encodeToString(stringList, data.tagIds.sorted()),
+            recurrence = data.recurrence?.let { LaresJson.encodeToString(Recurrence.serializer(), it) },
+            repeat_until = data.repeatUntil?.toString(),
+            reminder_minutes_before = data.reminderMinutesBefore?.toLong(),
+            kind = data.kind.key,
+            count_years = data.countYears.toDb(),
+            split_from = data.splitFrom,
+        )
+    }
+
+    override fun deleteTyped(
+        db: LaresDb,
+        id: String,
+    ) {
+        db.eventQueries.deleteById(id)
+    }
+
+    override fun deleteAllTyped(db: LaresDb) {
+        db.eventQueries.deleteAll()
+    }
+
+    override fun normalize(data: EventData) = Validators.normalizeEvent(data)
+
+    override fun validate(data: EventData) = Validators.event(data)
+
+    override fun authorize(
+        db: LaresDb,
+        viewer: Viewer,
+        op: MutationOp,
+        id: String,
+        current: EventData?,
+        merged: EventData?,
+    ) {
+        // Like the server: edits are checked against the stored event.
+        val allowed =
+            when {
+                current != null -> EventRules.canEdit(viewer, current)
+                merged != null -> EventRules.canCreate(viewer, merged)
+                else -> false
+            }
+        if (!allowed) forbidden(op, "event")
+        if (merged == null) return
+        if (current != null) {
+            if (current.createdBy != merged.createdBy) invalid("createdBy")
+            if (current.kind != merged.kind) invalid("kind")
+            if (current.splitFrom != merged.splitFrom) invalid("splitFrom")
+        } else {
+            // The origin of a split must be an event this phone knows (it may have been deleted since).
+            val origin = merged.splitFrom
+            if (origin != null) {
+                val known =
+                    db.eventQueries.selectById(origin).executeAsOneOrNull() != null ||
+                        db.sync_shadowQueries.get(EntityTypes.EVENT, origin).executeAsOneOrNull() != null
+                if (origin.lowercase() == id.lowercase() || !known) invalid("splitFrom")
+            }
+        }
+    }
+}
+
+class EventOccurrenceAdapter :
+    EntityAdapter<EventOccurrenceData>(EntityTypes.EVENT_OCCURRENCE, EventOccurrenceData.serializer(), writable = true) {
+    override fun selectTyped(
+        db: LaresDb,
+        id: String,
+    ) = db.event_occurrenceQueries
+        .selectById(id)
+        .executeAsOneOrNull()
+        ?.toData()
+
+    override fun upsertTyped(
+        db: LaresDb,
+        id: String,
+        data: EventOccurrenceData,
+    ) {
+        db.event_occurrenceQueries.upsert(
+            id = id,
+            event_id = data.eventId,
+            occurrence = data.occurrence.toString(),
+            cancelled = data.cancelled.toDb(),
+            start_date = data.startDate?.toString(),
+            end_date = data.endDate?.toString(),
+            start_time = data.startTime?.toString(),
+            end_time = data.endTime?.toString(),
+            title = data.title,
+            place = data.place,
+            notes = data.notes,
+            participant_ids = data.participantIds?.let { LaresJson.encodeToString(stringList, it.sorted()) },
+        )
+    }
+
+    override fun deleteTyped(
+        db: LaresDb,
+        id: String,
+    ) {
+        db.event_occurrenceQueries.deleteById(id)
+    }
+
+    override fun deleteAllTyped(db: LaresDb) {
+        db.event_occurrenceQueries.deleteAll()
+    }
+
+    override fun normalize(data: EventOccurrenceData) = Validators.normalizeEventOccurrence(data)
+
+    override fun authorize(
+        db: LaresDb,
+        viewer: Viewer,
+        op: MutationOp,
+        id: String,
+        current: EventOccurrenceData?,
+        merged: EventOccurrenceData?,
+    ) {
+        // The stored parent decides.
+        val event = requireParentEvent(db, (current ?: merged ?: return).eventId)
+        if (!EventRules.canEdit(viewer, event)) forbidden(op, "occurrence")
+        if (merged == null) return
+        if (current != null) {
+            if (current.eventId != merged.eventId) invalid("eventId")
+            if (current.occurrence != merged.occurrence) invalid("occurrence")
+        }
+        requireDerivedId(id) { Ids.occurrenceRowId(merged.eventId, merged.occurrence) }
+    }
+
+    /** Never reached: `WriteRules` refuses deletes of occurrence rows; only the event's cascade removes them. */
+    override fun checkDelete(
+        db: LaresDb,
+        id: String,
+        current: EventOccurrenceData,
+    ): Unit = throw LocalForbiddenException("Occurrence rows are removed only with their event")
+
+    override fun localConflicts(
+        db: LaresDb,
+        id: String,
+        data: EventOccurrenceData,
+    ): Map<String, FieldErrorCode> = Validators.eventOccurrence(data, requireParentEvent(db, data.eventId))
+}
+
+class EventReminderAdapter :
+    EntityAdapter<EventReminderData>(EntityTypes.EVENT_REMINDER, EventReminderData.serializer(), writable = true) {
+    override fun selectTyped(
+        db: LaresDb,
+        id: String,
+    ) = db.event_reminderQueries
+        .selectById(id)
+        .executeAsOneOrNull()
+        ?.toData()
+
+    override fun upsertTyped(
+        db: LaresDb,
+        id: String,
+        data: EventReminderData,
+    ) {
+        db.event_reminderQueries.upsert(id, data.eventId, data.memberId, data.minutesBefore?.toLong())
+    }
+
+    override fun deleteTyped(
+        db: LaresDb,
+        id: String,
+    ) {
+        db.event_reminderQueries.deleteById(id)
+    }
+
+    override fun deleteAllTyped(db: LaresDb) {
+        db.event_reminderQueries.deleteAll()
+    }
+
+    override fun validate(data: EventReminderData) = Validators.eventReminder(data)
+
+    override fun authorize(
+        db: LaresDb,
+        viewer: Viewer,
+        op: MutationOp,
+        id: String,
+        current: EventReminderData?,
+        merged: EventReminderData?,
+    ) {
+        requireParentEvent(db, (current ?: merged ?: return).eventId)
+        // Both the stored row and the result must be the writer's own.
+        val allowed =
+            (current == null || EventRules.canSetReminder(viewer, current)) &&
+                (merged == null || EventRules.canSetReminder(viewer, merged))
+        if (!allowed) forbidden(op, "reminder")
+        if (merged == null) return
+        if (current != null) {
+            if (current.eventId != merged.eventId) invalid("eventId")
+            if (current.memberId != merged.memberId) invalid("memberId")
+        }
+        requireDerivedId(id) { Ids.reminderRowId(merged.eventId, merged.memberId) }
+    }
+
+    /** Never reached: `WriteRules` refuses deletes of reminder rows; only the event's cascade removes them. */
+    override fun checkDelete(
+        db: LaresDb,
+        id: String,
+        current: EventReminderData,
+    ): Unit = throw LocalForbiddenException("Reminder rows are removed only with their event")
+}
+
 /** All adapters of this client version. */
 fun defaultEntityAdapters(clock: Clock) =
     EntityAdapters(
@@ -710,5 +1004,8 @@ fun defaultEntityAdapters(clock: Clock) =
             TaskCompletionAdapter(),
             ShoppingListAdapter(),
             ShoppingItemAdapter(),
+            EventAdapter(),
+            EventOccurrenceAdapter(),
+            EventReminderAdapter(),
         ),
     )

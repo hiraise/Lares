@@ -32,6 +32,9 @@ class LocalDb(
             task_completionQueries.deleteAll()
             shopping_listQueries.deleteAll()
             shopping_itemQueries.deleteAll()
+            eventQueries.deleteAll()
+            event_occurrenceQueries.deleteAll()
+            event_reminderQueries.deleteAll()
             sync_shadowQueries.deleteAll()
             sync_outboxQueries.deleteAll()
             sync_stateQueries.deleteAll()
@@ -39,6 +42,7 @@ class LocalDb(
             local_sessionQueries.deleteAll()
             reminderQueries.deleteAll()
             notification_muteQueries.deleteAll()
+            notification_prefQueries.deleteAll()
             push_endpointQueries.deleteAll()
         }
 }

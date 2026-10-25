@@ -1,5 +1,6 @@
 package app.lares.client.ui
 
+import app.lares.client.data.calendar.CalendarReminderTexts
 import app.lares.client.data.tasks.TaskReminderTexts
 import app.lares.client.di.AppScope
 import app.lares.client.notifications.notificationsModule
@@ -8,6 +9,7 @@ import app.lares.client.platform.AppearanceSettings
 import app.lares.client.platform.DeepLinkHandler
 import app.lares.client.platform.PendingNavigation
 import app.lares.client.platform.TaskLinks
+import app.lares.client.ui.common.CalendarReminderResourceTexts
 import app.lares.client.ui.common.TaskReminderResourceTexts
 import app.lares.client.ui.family.AddMemberViewModel
 import app.lares.client.ui.family.FamilySettingsViewModel
@@ -55,6 +57,7 @@ fun uiModule(): Module =
         single { TaskLinks(get(), get()) }
         // Replaces the core's English fallback.
         single<TaskReminderTexts> { TaskReminderResourceTexts(getOrNull<Clock>() ?: Clock.System) }
+        single<CalendarReminderTexts> { CalendarReminderResourceTexts() }
         single { AppStartup(get(), get(AppScope)) }
         single { AppearanceSettings(get(), get(), get(AppScope)) }
         viewModel { ServerViewModel(get()) }

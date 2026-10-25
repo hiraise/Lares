@@ -1,5 +1,6 @@
 package app.lares.client.notifications
 
+import app.lares.client.data.calendar.CalendarReminderPlanner
 import app.lares.client.data.tasks.TaskReminderPlanner
 import app.lares.client.db.LocalDb
 import app.lares.contract.api.notifications.NotificationChannel
@@ -71,11 +72,31 @@ class Reminders(
         return true
     }
 
-    /** Task reminders (`task:<id>`) open their task; other reminders open the app. */
+    /**
+     * Task reminders (`task:<id>`) open their task; event reminders (`event:<eventId>:<occurrence>`) the occurrence;
+     * birthday reminders (`birthday:<personId>:<day>`) the person; memorable-date reminders (`memorable:<eventId>:<day>`)
+     * the event; other reminders open the app.
+     */
     private fun target(id: String): NotificationTarget? =
-        if (id.startsWith(TaskReminderPlanner.ID_PREFIX)) {
-            NotificationTarget(EntityTypes.TASK, id.removePrefix(TaskReminderPlanner.ID_PREFIX))
-        } else {
-            null
+        when {
+            id.startsWith(TaskReminderPlanner.ID_PREFIX) -> {
+                NotificationTarget(EntityTypes.TASK, id.removePrefix(TaskReminderPlanner.ID_PREFIX))
+            }
+
+            id.startsWith(CalendarReminderPlanner.EVENT_PREFIX) -> {
+                NotificationTarget(EntityTypes.EVENT, id.removePrefix(CalendarReminderPlanner.EVENT_PREFIX))
+            }
+
+            id.startsWith(CalendarReminderPlanner.BIRTHDAY_PREFIX) -> {
+                NotificationTarget(EntityTypes.PERSON, id.removePrefix(CalendarReminderPlanner.BIRTHDAY_PREFIX).substringBefore(':'))
+            }
+
+            id.startsWith(CalendarReminderPlanner.MEMORABLE_PREFIX) -> {
+                NotificationTarget(EntityTypes.EVENT, id.removePrefix(CalendarReminderPlanner.MEMORABLE_PREFIX).substringBefore(':'))
+            }
+
+            else -> {
+                null
+            }
         }
 }

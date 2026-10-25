@@ -1,0 +1,39 @@
+-- Changed or cancelled occurrences of repeating events (ADR-0022); the id is derived from event id and `occurrence`.
+-- NULL override columns mean "as the series"; `participant_ids` is a JSON array or NULL. Clients never delete these
+-- rows; the event's cascade does. Rows of an event deleted locally stay until the cascade arrives; readers ignore them.
+CREATE TABLE event_occurrence (
+    id TEXT NOT NULL PRIMARY KEY,
+    event_id TEXT NOT NULL,
+    occurrence TEXT NOT NULL,
+    cancelled INTEGER NOT NULL,
+    start_date TEXT,
+    end_date TEXT,
+    start_time TEXT,
+    end_time TEXT,
+    title TEXT,
+    place TEXT,
+    notes TEXT,
+    participant_ids TEXT
+);
+
+CREATE INDEX event_occurrence_event ON event_occurrence (event_id);
+
+selectAll:
+SELECT * FROM event_occurrence ORDER BY event_id, occurrence;
+
+selectById:
+SELECT * FROM event_occurrence WHERE id = ?;
+
+selectByEvent:
+SELECT * FROM event_occurrence WHERE event_id = ? ORDER BY occurrence;
+
+upsert:
+INSERT OR REPLACE INTO event_occurrence (
+    id, event_id, occurrence, cancelled, start_date, end_date, start_time, end_time, title, place, notes, participant_ids
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+deleteById:
+DELETE FROM event_occurrence WHERE id = ?;
+
+deleteAll:
+DELETE FROM event_occurrence;

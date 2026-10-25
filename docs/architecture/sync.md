@@ -193,7 +193,9 @@ WebSocket `GET /api/v1/sync/events` (bearer token on the upgrade request).
 ## Client data model (SQLite)
 
 - **Typed tables** per entity type (`household`, `member`, `group_entity`, `person`, `tag`, `task`, `checklist_item`,
-  `task_completion`, `shopping_list`, `shopping_item`) — what the UI queries.
+  `task_completion`, `shopping_list`, `shopping_item`, `event`, `event_occurrence`, `event_reminder`) — what the UI
+  queries. `event_reminder` holds only the member's own rows (ADR-0023), so convergence (invariant 8) compares it with
+  the member's own pull.
 - `sync_shadow(type, id, seq, deleted, data, PK(type, id))` — last known server state as JSON.
 - `sync_outbox(local_seq INTEGER PK AUTOINCREMENT, mutation_id UNIQUE, type, entity_id, op, fields, created_at, attempts, last_error)`.
 - `sync_state(key PK, value)` — `cursor`, `accessVersion`, `epoch`, `dataSchemaVersion`, `lastSuccessAt`, `lastError`.
@@ -268,6 +270,7 @@ Code: `client/shared/src/commonMain/kotlin/app/lares/client/` (`sync`, `db`, `ap
 5. Delete vs edit race → entity ends deleted on all clients.
 6. Reset conditions 1–3 → client performs full resync and keeps its outbox.
 7. Mutation with an id from another household → rejected, no data leak.
-8. After sync, every client's typed tables equal the server state (convergence).
+8. After sync, every client's typed tables equal the server state (convergence); rows visible only to their member
+   (`event_reminder`) are compared per member.
 9. A pull racing with concurrent commits never skips a change (single snapshot, `seq ≤ S`).
 10. After a restore (new epoch), every client resets; a full sync after a purge does not loop.

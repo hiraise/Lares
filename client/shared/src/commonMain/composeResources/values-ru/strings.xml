@@ -839,4 +839,29 @@
     </plurals>
     <string name="tag_shopping_section">Покупки · %1$s</string>
     <string name="tag_shopping_left">Осталось %1$d</string>
+    <!-- Calendar reminders (M3-04). %1$s time, %2$s place -->
+    <string name="cal_reminder_today_at">Сегодня в %1$s</string>
+    <string name="cal_reminder_tomorrow_at">Завтра в %1$s</string>
+    <string name="cal_reminder_date_at">%1$s в %2$s</string>
+    <string name="cal_reminder_today_all_day">Сегодня, весь день</string>
+    <string name="cal_reminder_tomorrow_all_day">Завтра, весь день</string>
+    <string name="cal_reminder_date_all_day">%1$s, весь день</string>
+    <string name="cal_reminder_with_place">%1$s · %2$s</string>
+    <string name="cal_reminder_birthday_title">День рождения: %1$s</string>
+    <string name="cal_reminder_today">Сегодня</string>
+    <string name="cal_reminder_tomorrow">Завтра</string>
+    <plurals name="cal_reminder_in_days">
+        <item quantity="one">Через %1$d день</item>
+        <item quantity="few">Через %1$d дня</item>
+        <item quantity="many">Через %1$d дней</item>
+        <item quantity="other">Через %1$d дня</item>
+    </plurals>
+    <string name="cal_reminder_turns">%1$s, исполнится %2$d</string>
+    <plurals name="cal_reminder_years">
+        <item quantity="one">%1$d год</item>
+        <item quantity="few">%1$d года</item>
+        <item quantity="many">%1$d лет</item>
+        <item quantity="other">%1$d года</item>
+    </plurals>
+    <string name="cal_reminder_birthday_today_age">Сегодня, %1$s</string>
 </resources>

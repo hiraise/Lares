@@ -803,4 +803,25 @@
     </plurals>
     <string name="tag_shopping_section">Shopping · %1$s</string>
     <string name="tag_shopping_left">%1$d left</string>
+    <!-- Calendar reminders (M3-04). %1$s time, %2$s place -->
+    <string name="cal_reminder_today_at">Today at %1$s</string>
+    <string name="cal_reminder_tomorrow_at">Tomorrow at %1$s</string>
+    <string name="cal_reminder_date_at">%1$s at %2$s</string>
+    <string name="cal_reminder_today_all_day">Today, all day</string>
+    <string name="cal_reminder_tomorrow_all_day">Tomorrow, all day</string>
+    <string name="cal_reminder_date_all_day">%1$s, all day</string>
+    <string name="cal_reminder_with_place">%1$s · %2$s</string>
+    <string name="cal_reminder_birthday_title">Birthday: %1$s</string>
+    <string name="cal_reminder_today">Today</string>
+    <string name="cal_reminder_tomorrow">Tomorrow</string>
+    <plurals name="cal_reminder_in_days">
+        <item quantity="one">In %1$d day</item>
+        <item quantity="other">In %1$d days</item>
+    </plurals>
+    <string name="cal_reminder_turns">%1$s, turns %2$d</string>
+    <plurals name="cal_reminder_years">
+        <item quantity="one">%1$d year</item>
+        <item quantity="other">%1$d years</item>
+    </plurals>
+    <string name="cal_reminder_birthday_today_age">Today, %1$s</string>
 </resources>

@@ -41,7 +41,7 @@ class MigrationTest {
         // An M0 database (schema version 2): everything except the task and shopping tables.
         val old = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
         LaresDb.Schema.create(old)
-        (tables + SHOPPING_TABLES).forEach { old.execute(null, "DROP TABLE $it", 0) }
+        (tables + SHOPPING_TABLES + CALENDAR_TABLES).forEach { old.execute(null, "DROP TABLE $it", 0) }
         assertEquals(emptyList(), old.indexes())
 
         LaresDb.Schema.migrate(old, 2, 3)
@@ -57,16 +57,32 @@ class MigrationTest {
         // An M1 database (schema version 3): everything except the shopping tables.
         val old = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
         LaresDb.Schema.create(old)
-        SHOPPING_TABLES.forEach { old.execute(null, "DROP TABLE $it", 0) }
+        (SHOPPING_TABLES + CALENDAR_TABLES).forEach { old.execute(null, "DROP TABLE $it", 0) }
         assertEquals(emptyList(), old.indexes("shopping%"))
 
         LaresDb.Schema.migrate(old, 3, 4)
-        assertEquals(4L, LaresDb.Schema.version)
         assertEquals(fresh.schemaOf(*SHOPPING_TABLES), old.schemaOf(*SHOPPING_TABLES))
         assertEquals(listOf("shopping_item_key", "shopping_item_list"), old.indexes("shopping%"))
     }
 
+    @Test
+    fun version4DatabaseGetsTheCalendarTablesOfAFreshInstall() {
+        val fresh = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY).also { LaresDb.Schema.create(it) }
+
+        // An M2 database (schema version 4): everything except the calendar tables.
+        val old = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
+        LaresDb.Schema.create(old)
+        CALENDAR_TABLES.forEach { old.execute(null, "DROP TABLE $it", 0) }
+        assertEquals(emptyList(), old.indexes("event%"))
+
+        LaresDb.Schema.migrate(old, 4, 5)
+        assertEquals(5L, LaresDb.Schema.version)
+        assertEquals(fresh.schemaOf(*CALENDAR_TABLES), old.schemaOf(*CALENDAR_TABLES))
+        assertEquals(listOf("event_occurrence_event", "event_reminder_event"), old.indexes("event%"))
+    }
+
     private companion object {
         val SHOPPING_TABLES = arrayOf("shopping_list", "shopping_item")
+        val CALENDAR_TABLES = arrayOf("event", "event_occurrence", "event_reminder", "notification_pref")
     }
 }

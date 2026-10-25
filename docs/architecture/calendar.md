@@ -1,6 +1,6 @@
 ---
 status: accepted  # design of M3; binding for the M3 plans
-updated: 2026-10-24
+updated: 2026-10-25
 ---
 # Calendar module design (M3)
 
@@ -335,6 +335,23 @@ after a change of the calendar inputs, the mute set or `birthdayDaysBefore`, and
 `NotificationSettingsRepository` gets `birthdayDaysBefore: Flow<Int>` (local `notification_pref`, default 3) and
 `setBirthdayDaysBefore(days)` (PUT with the full settings, like `setMuted`). «Не напоминать» in the UI = mute
 `birthday.reminder`; any other choice unmutes it and stores the days.
+
+### Implementation notes (M3-04)
+
+- Every `CalendarWriter` write sends only the fields that differ from the local row (also for occurrence and reminder
+  rows), so two phones editing different fields of one occurrence offline merge field by field.
+- `editFollowing` and `deleteFollowing` check `EventRules.canEdit` before the first write, so a refused split writes
+  nothing; otherwise each step is its own `LocalWriter` call (no multi-row atomic write is needed).
+- `EventDetail.ownReminderSet` is true only when the own row differs from what the event gives the member, so after
+  `clearMyReminder` the UI shows «Как в событии».
+- Day lists: overdue tasks sit after timed items, before untimed tasks (a time from an earlier day would mislead).
+  A timed occurrence continuing from an earlier day sorts at 00:00.
+- Without `calendar.view` every view is empty (no events, birthdays or memorable dates) and the planner schedules
+  nothing.
+- Reminder bodies name the day relative to the day the reminder fires («Сегодня в 16:00» on the day of a 16:30
+  event), not to the day it was planned.
+- `setBirthdayDaysBefore(days)` also unmutes `birthday.reminder` in the same PUT; «Не напоминать» is `setMuted`.
+  Every PUT of the settings sends the mutes and `birthdayDaysBefore` together.
 
 ## UI (M3-05…M3-08)
 

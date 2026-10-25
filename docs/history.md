@@ -275,3 +275,12 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   notifier events carry the named `EventOccurrence` instead of a date (a deleted event can still be described); a series
   cut names the first not-yet-ended occurrence it removes; un-cancelling an occurrence sends nothing. 8 new server tests
   (`EventChangesTest`, `CalendarNotificationsTest`).
+- 2026-10-25 **M3-04** Calendar in the client core: tables `event`, `event_occurrence`, `event_reminder`,
+  `notification_pref` (schema 5, `DATA_SCHEMA_VERSION = 4`), adapters with the server handlers' checks (derived ids,
+  immutable fields, child rows never deleted), pure `CalendarViews` (day lists with birthdays, memorable dates and tasks;
+  month dots; week column layout; «Скоро»; tag and person dates; event detail with my reminder), `CalendarRepository`,
+  `CalendarWriter` (this / following / all; only changed fields sent so offline edits of one occurrence merge),
+  `CalendarReminderPlanner` (event, birthday and memorable-date reminders; en/ru texts), `birthdayDaysBefore` in the
+  notification settings (every PUT now sends the full settings), `seed.py calendar` with derived ids checked against the
+  contract's golden values. 29 new unit tests, 7 multi-device tests (`CalendarSyncTest`); convergence now compares
+  own-only reminder rows per member.
