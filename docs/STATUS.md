@@ -8,14 +8,14 @@ Updated: 2026-10-25
 M1 Tasks — all plans M1-01…M1-07 done; M1 acceptance with the customer next.
 M2 Shopping lists — all plans M2-01…M2-06 done; M2 acceptance with the customer next.
 M3 Calendar — all plans M3-01…M3-08 done, released as v0.4.0; M3 acceptance with the customer next.
-M4 Location — M4-01 done (location contract); next M4-02.**
+M4 Location — M4-01…M4-02 done (contract; places, alerts and visibility rules on the server); next M4-03.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
 
 [M4 Location](product/roadmap.md#m4-location): planned — [location spec](product/features/location.md) (approved,
-Q-025…Q-029 answered), [location design](architecture/location.md), [M4 plans](plans/README.md#m4-plans). Done: M4-01.
-Next: M4-02 (`/plan-run M4-02`).
+Q-025…Q-029 answered), [location design](architecture/location.md), [M4 plans](plans/README.md#m4-plans). Done: M4-01,
+M4-02. Next: M4-03 (`/plan-run M4-03`).
 Acceptance of M0–M3 is still pending.
 
 **Active release branch: `release/0.5.0`** (M4). `release/0.4.1` was not needed: the customer found no bugs in v0.4.0. Commit approved work here; `main` is protected
@@ -24,6 +24,10 @@ Acceptance of M0–M3 is still pending.
 
 ## Last completed
 
+- 2026-10-25 M4-02 Places, alerts and visibility rules on the server: places and arrive / leave alert rows sync (alerts
+  only to their subscriber), administrators read and replace the «кто кого видит» rules (`GET/PUT /location/rules`),
+  default rules for new families and (migration V9) for existing ones, rules and alerts go with deleted groups and
+  members, history retention days in the household settings; 10 new server tests.
 - 2026-10-25 M4-01 Location contract: places and arrive / leave alerts as sync data, position and live DTOs, who sees
   whom (`LocationVisibility`, default rules), distances and circles, geofence hysteresis, stops in a day's history,
   place write rules, validators, new notification types; 32 new contract tests.
@@ -136,7 +140,7 @@ Acceptance of M0–M3 is still pending.
 1. M0 and M1 acceptance with the customer (APK v0.2.0, walkthrough on real phones, Russian changelog; checklist in the M1-07
    handoff).
 2. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
-3. M4-02 on `release/0.5.0`, then the M4 plans in order (load test with location is plan M4-05).
+3. M4-03 on `release/0.5.0`, then the M4 plans in order (load test with location is plan M4-05).
 4. After the M1 acceptance: set the tasks spec to `implemented`.
 5. M2 acceptance with the customer (checklist in the M2-06 handoff); after it set the shopping spec to `implemented`.
 6. M3 acceptance with the customer on v0.4.0 (checklist in the M3-08 handoff); fixes go to `release/0.5.0`; after the

@@ -96,6 +96,7 @@ GPS trackers come later. Technical design: [architecture/location.md](../../arch
   from a strip of the retained days. ASSUMPTION: a stop is a stay of at least 10 minutes within about 100 m.
 - **LOC-005** `MVP` `todo` — History is deleted after the retention period: 30 days by default; an administrator chooses
   7, 14, 30, 60 or 90 days (Family › Геопозиция). A shorter period deletes older positions within an hour.
+  *Server: setting stored and synced (M4-02); purge in M4-03.*
 
 ### Who sees whom
 
@@ -103,6 +104,7 @@ GPS trackers come later. Technical design: [architecture/location.md](../../arch
   is a group or a member, «whom» is everybody, a group or a member; set by administrators in Family › Геопозиция. When
   several rules apply, the widest wins. Administrators see everyone with history; everybody sees their own history. The
   Map needs `location.view`. Defaults (foundation): Adults see everyone with history; Kids see Adults, where now only.
+  *Server: rules stored, `GET/PUT /location/rules` for administrators, defaults at setup and by V9 for existing families, rules of deleted groups and members removed, levels per viewer (M4-02).*
 - **LOC-015** `MVP` `todo` — Transparency: in Settings › Геопозиция every member sees who can see them (and whether
   with history) and who gets arrive / leave notifications about them (Q-028).
 
@@ -112,11 +114,13 @@ GPS trackers come later. Technical design: [architecture/location.md](../../arch
   «Дом», «Школа №12». Created by a tap on the map, «Я здесь» or a search by address (LOC-024); shown on the map as
   labelled circles and in the list behind «Места»; a tap on a place shows it and who is there. Created, changed and deleted by
   members with `location.manage_places`; seen by everybody with `location.view`.
+  *Server: storage, sync, validation and permissions done (M4-02).*
 - **LOC-021** `MVP` `todo` — Arrive / leave notifications (Q-028): everybody who sees a member turns on for themselves
   «Сообщать: прибытие и уход» for chosen places (on the member's card or on the place). Nothing is on by default.
   Texts: «Аня · Школа №12 — Прибытие в 08:52», «… — Уход в 14:20» (no gendered verbs: the app does not know genders).
   A notification goes only while the subscriber may see the member. ASSUMPTION: a change found from positions older
   than 15 minutes (sent late after a network gap) updates the map silently.
+  *Server: the subscriber's own alert rows (derived id, synced only to them), removed with either member (M4-02); notifications in M4-04.*
 - **LOC-022** `MVP` `todo` — Arrivals and departures are decided on the server from the positions, so they work for
   phones and later for trackers alike. ASSUMPTION: an inaccurate position (worse than the place's radius or 100 m, whichever is
   larger) does not decide anything; leaving needs a position clearly outside the circle, so a person sitting at the edge does not flicker in and

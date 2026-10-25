@@ -11,6 +11,9 @@ object HouseholdTable : Table("household") {
     val timeZone = text("time_zone")
     val currency = char("currency", 3)
     val defaultLanguage = text("default_language")
+
+    /** Days of location history kept (LOC-005, V9). */
+    val locationHistoryDays = integer("location_history_days").default(30)
     val seq = long("seq")
     val createdAt = timestamp("created_at")
     val updatedAt = timestamp("updated_at")

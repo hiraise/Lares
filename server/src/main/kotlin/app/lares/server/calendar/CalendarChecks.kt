@@ -6,7 +6,6 @@ import app.lares.server.platform.db.afterCommit
 import app.lares.server.platform.http.ApiException
 import app.lares.server.platform.toContract
 import app.lares.server.sync.MutationContext
-import app.lares.server.sync.invalidField
 import app.lares.server.tasks.TaskRepository
 import kotlinx.datetime.TimeZone
 import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
@@ -24,15 +23,6 @@ internal fun requireParentEvent(
     val event = CalendarRepository.get(ctx.householdId, id) ?: throw ApiException(ErrorCode.ENTITY_NOT_FOUND, "Event not found")
     if (event.deleted) throw ApiException(ErrorCode.ENTITY_DELETED, "Event was deleted")
     return event.data
-}
-
-/** A child row's id must be the one derived from its parent ([expected]; ADR-0022, ADR-0023), else `id: INVALID_FORMAT`. */
-internal fun requireDerivedId(
-    id: UUID,
-    expected: () -> String,
-) {
-    val derived = runCatching(expected).getOrNull()
-    if (derived == null || id.toString().lowercase() != derived.lowercase()) throw invalidField("id")
 }
 
 /**

@@ -348,6 +348,18 @@ passes it as `${LARES_GEOCODER_URL-https://nominatim.openstreetmap.org}` (no col
   no constructor changes there. Only `LocationVisibilityService.put` (no recorded change) publishes `VisibilityChanged`.
 - `PATCH /household` accepts `locationHistoryDays`.
 
+### Implementation notes (M4-02)
+
+- Every place write (create, edit, delete) publishes `PlacesChanged` after commit, not only the tombstone: a moved or
+  resized place changes where members are shown. `LocationHubEvent` carries `householdId`; `SessionEnded` is added in M4-03.
+- Rule rows are read and written by `LocationRuleRepository` (`all`, `replace`, `deleteNamingGroup`, `deleteNamingMember`);
+  `SetupService` and the group and member hooks call it directly. `LocationVisibilityService(db, clock, hub)`.
+- `levels()` evaluates the viewer's permissions from the same `GroupRepository.loadViews` it uses for group ids (one load).
+- A self-alert is `FORBIDDEN` (`PlaceRules.canSetAlert` in `authorize` runs before the validator).
+- `requireDerivedId` moved from `calendar/CalendarChecks.kt` to `sync/ReferenceChecks.kt` (shared by calendar and location).
+- V9 matches template names with `lower(name) IN ('взрослые', lower('Взрослые'), 'adults')`, so the exact names match
+  even under a database locale where `lower()` leaves Cyrillic unchanged.
+
 ### Positions, state, live channel (M4-03)
 
 `LocationService(db, clock, visibility, hub, notifications, notifier?)`. `LocationConfig.addresses` is false until M4-04. Endpoints in `LocationRoutes.kt`, all authenticated:

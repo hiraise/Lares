@@ -27,6 +27,11 @@ import app.lares.server.identity.crypto.PasswordHasher
 import app.lares.server.identity.crypto.TokenGenerator
 import app.lares.server.identity.identityRoutes
 import app.lares.server.identity.memberAdminRoutes
+import app.lares.server.location.LocationHub
+import app.lares.server.location.LocationVisibilityService
+import app.lares.server.location.PlaceAlertSyncHandler
+import app.lares.server.location.PlaceSyncHandler
+import app.lares.server.location.locationAdminRoutes
 import app.lares.server.notifications.NotificationService
 import app.lares.server.notifications.PushEndpointGuard
 import app.lares.server.notifications.SyncTicklePublisher
@@ -104,6 +109,8 @@ class AppDeps(
     val taskNotifier = TaskNotifier(db, permissionService, notificationService)
     val taskOverdueJob = TaskOverdueJob(db, clock, taskNotifier)
     val eventNotifier = EventNotifier(db, permissionService, notificationService)
+    val locationHub = LocationHub()
+    val locationVisibility = LocationVisibilityService(db, clock, locationHub)
 
     val syncHandlers =
         SyncHandlers(
@@ -121,6 +128,8 @@ class AppDeps(
                 EventSyncHandler(eventNotifier),
                 EventOccurrenceSyncHandler(eventNotifier),
                 EventReminderSyncHandler(),
+                PlaceSyncHandler(locationHub),
+                PlaceAlertSyncHandler(),
             ),
         )
     val syncPullService = SyncPullService(db, syncHandlers, permissionService)
@@ -175,6 +184,7 @@ fun Application.module(deps: AppDeps) {
                 householdRoutes(deps.authService, deps.householdAdminService, deps.groupAdminService)
                 syncRoutes(deps.authService, deps.syncPullService, deps.syncPushService, deps.syncEventsService)
                 notificationRoutes(deps.authService, deps.notificationService)
+                locationAdminRoutes(deps.authService, deps.locationVisibility)
             }
         }
     }

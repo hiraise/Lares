@@ -43,6 +43,7 @@ class HouseholdSyncHandler : ReadOnlySyncHandler() {
                     timeZone = row[HouseholdTable.timeZone],
                     currency = row[HouseholdTable.currency],
                     defaultLanguage = row[HouseholdTable.defaultLanguage],
+                    locationHistoryDays = row[HouseholdTable.locationHistoryDays],
                 )
             ChangeRow(
                 type,

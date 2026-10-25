@@ -97,7 +97,7 @@ Authenticated, requires `household.manage`:
 
 | Method | Path | Purpose | Spec |
 | --- | --- | --- | --- |
-| PATCH | `/api/v1/household` | Name, time zone, currency, default language | FND-003 |
+| PATCH | `/api/v1/household` | Name, time zone, currency, default language, location history days | FND-003, LOC-005 |
 | POST | `/api/v1/members` | Create member directly (no password → QR login) | FND-022 |
 | DELETE | `/api/v1/members/{id}` | Remove member | FND-025 |
 | POST | `/api/v1/members/{id}/password` | Reset member password | FND-012 |
@@ -108,6 +108,8 @@ Authenticated, requires `household.manage`:
 | POST | `/api/v1/invites` | Create invite | FND-024 |
 | GET | `/api/v1/invites` | List active invites | FND-024 |
 | DELETE | `/api/v1/invites/{id}` | Revoke invite | FND-024 |
+| GET | `/api/v1/location/rules` | Location visibility rules | LOC-006 |
+| PUT | `/api/v1/location/rules` | Replace all location visibility rules | LOC-006 |
 
 Persons and tags have no REST endpoints: they are written through sync mutations only.
 
@@ -127,6 +129,21 @@ DTOs live in `contract/…/api/admin/AdminDtos.kt`; QR/link payloads are built a
 - Taken logins answer `LOGIN_TAKEN` with `fields.login = TAKEN`.
 - `POST /login-codes` with another member's id checks `household.manage` first (403 without it, even for unknown ids),
   then the id (404).
+
+### Location endpoint details (M4)
+
+DTOs live in `contract/…/api/location/LocationDtos.kt` (architecture/location.md, ADR-0025).
+
+- `PATCH /household` accepts `locationHistoryDays` (LOC-005, M4-02): one of 7, 14, 30, 60, 90 (default 30), else
+  `VALIDATION_FAILED` with `locationHistoryDays: OUT_OF_RANGE`. The value is part of the synced `household` row.
+- `GET /location/rules` → **200** `LocationRules {rules: [LocationRule {id, subject, target, level}]}` in the saved
+  order. A party is `{kind: "everyone"|"group"|"member", id?}`; levels are `current` and `history`.
+- `PUT /location/rules` body `PutLocationRulesRequest {rules: [LocationRuleInput]}` replaces all rules (at most 100) and
+  answers **204**; every PUT gives the rules new ids. Shape errors (`Validators.locationRules`) and group or member ids
+  that are not live in the household answer `VALIDATION_FAILED` with `rules.N.subject` / `rules.N.target` (and
+  `rules.N.level` for `none`) `INVALID_FORMAT`; nothing is stored then. Rule changes record no sync change.
+- New households get the default rules (Adults see everybody with history, Kids see Adults now). Deleting a group or
+  removing a member deletes the rules naming it.
 
 ### Notification endpoint details (M0-09)
 

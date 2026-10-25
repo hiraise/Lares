@@ -339,3 +339,10 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   `LocationVisibility` with default rules, `Geofence` hysteresis, `Stops.detect`, `PlaceRules` and `WriteRules`,
   validators and `normalizePlace`; `seed.py place_alert_row_id`; client notification labels (en, ru). 32 new contract
   tests (208 in the module).
+- 2026-10-25 M4-02 Places, alerts and visibility rules on the server: V9 (`place`, `place_alert`, `location_rule`,
+  `household.location_history_days`, default rules for existing households by group name), sync handlers for places
+  (`PlaceRules`, `location.view`) and alert rows (derived id, only the subscriber writes and pulls), `LocationHub`,
+  `LocationVisibilityService` with `GET/PUT /location/rules` and per-viewer levels, defaults at setup, rules removed with
+  their group or member, alert rows tombstoned with either member, housekeeping purge, `LocationFixtures`. 10 new server
+  tests (208 in the module), rules endpoints added to the admin permission matrix. Fixed on the way: untyped NULLs in the
+  V9 default-rule insert.
