@@ -1,6 +1,6 @@
 package app.lares.client.ui
 
-import app.lares.client.ui.tasks.RepeatPreset
+import app.lares.client.ui.common.RepeatPreset
 import app.lares.client.ui.tasks.TaskForm
 import app.lares.contract.api.FieldErrorCode
 import app.lares.contract.entities.Recurrence

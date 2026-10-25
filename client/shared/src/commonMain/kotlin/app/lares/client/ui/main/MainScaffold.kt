@@ -24,6 +24,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -34,8 +35,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.lares.client.platform.DeepLinkHandler
 import app.lares.client.platform.NavTarget
 import app.lares.client.platform.PendingNavigation
+import app.lares.client.platform.PreferencesStore
 import app.lares.client.resources.Res
 import app.lares.client.resources.action_details
+import app.lares.client.resources.event_deleted
 import app.lares.client.resources.ic_apps
 import app.lares.client.resources.ic_apps_filled
 import app.lares.client.resources.ic_calendar_month
@@ -54,6 +57,11 @@ import app.lares.client.resources.nav_tasks
 import app.lares.client.resources.nav_today
 import app.lares.client.resources.sync_rejected_snackbar
 import app.lares.client.resources.task_deleted
+import app.lares.client.ui.calendar.CalendarMode
+import app.lares.client.ui.calendar.CalendarRoute
+import app.lares.client.ui.calendar.EventEditorArgs
+import app.lares.client.ui.common.UiNotices
+import app.lares.client.ui.common.load
 import app.lares.client.ui.common.messageRes
 import app.lares.client.ui.components.AppIcon
 import app.lares.client.ui.family.FamilyTab
@@ -66,6 +74,8 @@ import app.lares.client.ui.tasks.TasksViewModel
 import app.lares.client.ui.theme.LaresTheme
 import app.lares.contract.permissions.Section
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
@@ -102,6 +112,10 @@ class MainNavigation(
     /** The task editor (a new task with its defaults, or an existing one). */
     val onTaskEditor: (TaskEditorArgs) -> Unit = {},
     val onShoppingList: (String) -> Unit = {},
+    /** An event page: the event and the scheduled date of the occurrence. */
+    val onEvent: (String, LocalDate?) -> Unit = { _, _ -> },
+    val onEventEditor: (EventEditorArgs) -> Unit = {},
+    val onPerson: (String) -> Unit = {},
 )
 
 @Composable
@@ -112,12 +126,15 @@ fun MainScaffoldRoute(
     tasksViewModel: TasksViewModel = koinViewModel(),
     deepLinks: DeepLinkHandler = koinInject(),
     pendingNavigation: PendingNavigation = koinInject(),
+    notices: UiNotices = koinInject(),
+    preferences: PreferencesStore = koinInject(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val today by todayViewModel.state.collectAsStateWithLifecycle()
     val tab = rememberSaveable { mutableStateOf(MainTab.TODAY) }
     var sheetOpen by rememberSaveable { mutableStateOf(false) }
     val snackbar = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
     val shownRejections = rememberSaveable { mutableListOf<Long>() }
     NotificationPermissionPromptHost()
 
@@ -137,17 +154,22 @@ fun MainScaffoldRoute(
         }
     }
 
-    // A tapped notification of a task that is gone (plan M1-07).
+    // A tapped notification of a task or event that is gone (plans M1-07, M3-08).
     LaunchedEffect(pendingNavigation) {
         pendingNavigation.target.filterNotNull().collect { target ->
             if (target == NavTarget.TaskGone && pendingNavigation.consume(target)) {
                 tasksViewModel.resetFilters()
                 tab.value = MainTab.TASKS
                 snackbar.showSnackbar(getString(Res.string.task_deleted))
+            } else if (target == NavTarget.EventGone && pendingNavigation.consume(target)) {
+                tab.value = MainTab.CALENDAR
+                snackbar.showSnackbar(getString(Res.string.event_deleted))
             }
         }
     }
     TaskEventSnackbars(todayViewModel.events, snackbar, onUndo = todayViewModel::undo)
+    // Texts from pages that closed themselves («Повторение удалено»).
+    LaunchedEffect(notices) { notices.notices.collect { snackbar.showSnackbar(it.load()) } }
 
     MainScaffold(
         state = state,
@@ -167,6 +189,15 @@ fun MainScaffoldRoute(
                 onCreate = { navigation.onTaskEditor(TaskEditorArgs(assignToMe = true)) },
                 onShoppingList = navigation.onShoppingList,
                 onAllShopping = { tab.value = MainTab.SHOPPING },
+                onEvent = navigation.onEvent,
+                onPerson = navigation.onPerson,
+                onCalendar = { tab.value = MainTab.CALENDAR },
+                onCalendarList = {
+                    scope.launch {
+                        preferences.setCalendarView(CalendarMode.LIST.key)
+                        tab.value = MainTab.CALENDAR
+                    }
+                },
             ),
     )
     if (sheetOpen) {
@@ -216,7 +247,13 @@ fun MainScaffold(
                 }
 
                 MainTab.CALENDAR -> {
-                    SectionPlaceholder(current.section!!)
+                    CalendarRoute(
+                        snackbar,
+                        onEvent = navigation.onEvent,
+                        onEventEditor = navigation.onEventEditor,
+                        onPerson = navigation.onPerson,
+                        onTask = navigation.onTask,
+                    )
                 }
 
                 MainTab.MORE -> {

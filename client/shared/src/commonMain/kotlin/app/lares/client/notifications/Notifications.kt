@@ -2,6 +2,7 @@ package app.lares.client.notifications
 
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
+import app.cash.sqldelight.coroutines.mapToOneOrNull
 import app.lares.client.api.LaresApi
 import app.lares.client.db.LocalDb
 import app.lares.contract.api.LaresJson
@@ -38,6 +39,17 @@ class NotificationSettingsRepository(
             .mapToList(localDb.dispatcher)
             .map { keys -> keys.mapNotNull(NotificationType::fromKey).toSet() }
 
+    /** Days before a birthday or memorable date the reminders start (CAL-016); the server's default until the first load. */
+    val birthdayDaysBefore: Flow<Int> =
+        localDb.db.notification_prefQueries
+            .get(BIRTHDAY_DAYS_BEFORE)
+            .asFlow()
+            .mapToOneOrNull(localDb.dispatcher)
+            .map { it.toDays() }
+
+    suspend fun birthdayDaysBefore(): Int =
+        localDb.read { notification_prefQueries.get(BIRTHDAY_DAYS_BEFORE).executeAsOneOrNull() }.toDays()
+
     suspend fun isMuted(type: NotificationType): Boolean =
         localDb.read { notification_muteQueries.all().executeAsList() }.contains(type.key)
 
@@ -48,9 +60,37 @@ class NotificationSettingsRepository(
         type: NotificationType,
         muted: Boolean,
     ) = serverLock.withLock {
-        val current = localDb.read { notification_muteQueries.all().executeAsList() }.mapNotNull(NotificationType::fromKey).toSet()
-        store(api.setNotificationSettings(NotificationSettings(if (muted) current + type else current - type)))
+        val current = local()
+        store(api.setNotificationSettings(current.copy(muted = if (muted) current.muted + type else current.muted - type)))
     }
+
+    /**
+     * Stores the birthday reminder lead time (one of `NotificationSettings.BIRTHDAY_DAYS_CHOICES`) on the server and
+     * unmutes `birthday.reminder`: «Не напоминать» is the mute, every other choice turns the reminders on (CAL-016).
+     */
+    suspend fun setBirthdayDaysBefore(days: Int) =
+        serverLock.withLock {
+            val current = local()
+            store(
+                api.setNotificationSettings(
+                    current.copy(muted = current.muted - NotificationType.BIRTHDAY_REMINDER, birthdayDaysBefore = days),
+                ),
+            )
+        }
+
+    /** The full settings as mirrored locally; a PUT always sends all of them. */
+    private suspend fun local(): NotificationSettings =
+        localDb.read {
+            NotificationSettings(
+                muted =
+                    notification_muteQueries
+                        .all()
+                        .executeAsList()
+                        .mapNotNull(NotificationType::fromKey)
+                        .toSet(),
+                birthdayDaysBefore = notification_prefQueries.get(BIRTHDAY_DAYS_BEFORE).executeAsOneOrNull().toDays(),
+            )
+        }
 
     suspend fun sendTest(): PushTestResult = api.testPush().result
 
@@ -58,7 +98,14 @@ class NotificationSettingsRepository(
         localDb.transaction {
             notification_muteQueries.deleteAll()
             settings.muted.forEach { notification_muteQueries.put(it.key) }
+            notification_prefQueries.put(BIRTHDAY_DAYS_BEFORE, settings.birthdayDaysBefore.toString())
         }
+    }
+
+    private fun String?.toDays(): Int = this?.toIntOrNull() ?: NotificationSettings.DEFAULT_BIRTHDAY_DAYS_BEFORE
+
+    private companion object {
+        const val BIRTHDAY_DAYS_BEFORE = "birthday_days_before"
     }
 }
 

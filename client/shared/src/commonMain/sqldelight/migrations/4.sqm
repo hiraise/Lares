@@ -1,0 +1,54 @@
+-- Schema 4 → 5 (M3-04): calendar events, occurrence rows, own reminders and notification preferences
+-- (DATA_SCHEMA_VERSION 4 makes the next sync a full resync).
+
+CREATE TABLE event (
+    id TEXT NOT NULL PRIMARY KEY,
+    title TEXT NOT NULL,
+    created_by TEXT NOT NULL,
+    start_date TEXT NOT NULL,
+    end_date TEXT NOT NULL,
+    all_day INTEGER NOT NULL,
+    start_time TEXT,
+    end_time TEXT,
+    place TEXT,
+    notes TEXT,
+    participant_ids TEXT NOT NULL,
+    tag_ids TEXT NOT NULL,
+    recurrence TEXT,
+    repeat_until TEXT,
+    reminder_minutes_before INTEGER,
+    kind TEXT NOT NULL,
+    count_years INTEGER NOT NULL,
+    split_from TEXT
+);
+
+CREATE TABLE event_occurrence (
+    id TEXT NOT NULL PRIMARY KEY,
+    event_id TEXT NOT NULL,
+    occurrence TEXT NOT NULL,
+    cancelled INTEGER NOT NULL,
+    start_date TEXT,
+    end_date TEXT,
+    start_time TEXT,
+    end_time TEXT,
+    title TEXT,
+    place TEXT,
+    notes TEXT,
+    participant_ids TEXT
+);
+
+CREATE INDEX event_occurrence_event ON event_occurrence (event_id);
+
+CREATE TABLE event_reminder (
+    id TEXT NOT NULL PRIMARY KEY,
+    event_id TEXT NOT NULL,
+    member_id TEXT NOT NULL,
+    minutes_before INTEGER
+);
+
+CREATE INDEX event_reminder_event ON event_reminder (event_id);
+
+CREATE TABLE notification_pref (
+    key TEXT NOT NULL PRIMARY KEY,
+    value TEXT NOT NULL
+);

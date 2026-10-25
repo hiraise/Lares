@@ -444,6 +444,9 @@
     <string name="notif_type_task_overdue">Задача просрочена</string>
     <string name="notif_type_task_completed">Задача выполнена</string>
     <string name="notif_type_task_reminder">Напоминания о задачах</string>
+    <string name="notif_type_event_changed">События календаря</string>
+    <string name="notif_type_event_reminder">Напоминания о событиях</string>
+    <string name="notif_type_birthday_reminder">Дни рождения</string>
     <string name="notif_device">На этом телефоне</string>
     <string name="notif_permission">Показ уведомлений</string>
     <string name="notif_permission_off">Не разрешён</string>
@@ -836,4 +839,188 @@
     </plurals>
     <string name="tag_shopping_section">Покупки · %1$s</string>
     <string name="tag_shopping_left">Осталось %1$d</string>
+    <!-- Calendar reminders (M3-04). %1$s time, %2$s place -->
+    <string name="cal_reminder_today_at">Сегодня в %1$s</string>
+    <string name="cal_reminder_tomorrow_at">Завтра в %1$s</string>
+    <string name="cal_reminder_date_at">%1$s в %2$s</string>
+    <string name="cal_reminder_today_all_day">Сегодня, весь день</string>
+    <string name="cal_reminder_tomorrow_all_day">Завтра, весь день</string>
+    <string name="cal_reminder_date_all_day">%1$s, весь день</string>
+    <string name="cal_reminder_with_place">%1$s · %2$s</string>
+    <string name="cal_reminder_birthday_title">День рождения: %1$s</string>
+    <string name="cal_reminder_today">Сегодня</string>
+    <string name="cal_reminder_tomorrow">Завтра</string>
+    <plurals name="cal_reminder_in_days">
+        <item quantity="one">Через %1$d день</item>
+        <item quantity="few">Через %1$d дня</item>
+        <item quantity="many">Через %1$d дней</item>
+        <item quantity="other">Через %1$d дня</item>
+    </plurals>
+    <string name="cal_reminder_turns">%1$s, исполнится %2$d</string>
+    <plurals name="cal_reminder_years">
+        <item quantity="one">%1$d год</item>
+        <item quantity="few">%1$d года</item>
+        <item quantity="many">%1$d лет</item>
+        <item quantity="other">%1$d года</item>
+    </plurals>
+    <string name="cal_reminder_birthday_today_age">Сегодня, %1$s</string>
+    <!-- Calendar UI (M3-05) -->
+    <!-- Month names in the nominative, for "October 2026" -->
+    <string-array name="months_standalone">
+        <item>Январь</item>
+        <item>Февраль</item>
+        <item>Март</item>
+        <item>Апрель</item>
+        <item>Май</item>
+        <item>Июнь</item>
+        <item>Июль</item>
+        <item>Август</item>
+        <item>Сентябрь</item>
+        <item>Октябрь</item>
+        <item>Ноябрь</item>
+        <item>Декабрь</item>
+    </string-array>
+    <string name="cal_month_year">%1$s %2$s</string>
+    <string name="cal_view_month">Месяц</string>
+    <string name="cal_view_week">Неделя</string>
+    <string name="cal_view_list">Список</string>
+    <string name="cal_previous">Назад</string>
+    <string name="cal_next">Вперёд</string>
+    <string name="cal_go_today">К сегодняшнему дню</string>
+    <string name="cal_filter">Фильтр</string>
+    <string name="cal_filter_active">Фильтр, включён</string>
+    <string name="cal_filter_whose">Чей календарь</string>
+    <string name="cal_filter_everyone">Все</string>
+    <string name="cal_filter_tag">Метка</string>
+    <string name="cal_filter_any_tag">Любая</string>
+    <string name="cal_filter_show_tasks">Показывать задачи</string>
+    <string name="cal_filter_reset">Сбросить</string>
+    <string name="cal_chip_tag">Метка: %1$s</string>
+    <string name="cal_chip_no_tasks">Без задач</string>
+    <string name="cal_chip_remove">Убрать фильтр %1$s</string>
+    <string name="cal_new_event">Новое событие</string>
+    <string name="cal_all_day">Весь день</string>
+    <string name="cal_until_date">до %1$s</string>
+    <string name="cal_from_date">с %1$s</string>
+    <string name="cal_until_time">до %1$s</string>
+    <string name="cal_whole_family">Вся семья</string>
+    <string name="cal_birthday">День рождения: %1$s</string>
+    <string name="cal_task_meta">Задача · %1$s</string>
+    <string name="cal_overdue">Просрочено</string>
+    <string name="cal_nothing_planned">Ничего не запланировано</string>
+    <string name="cal_no_events">Событий пока нет</string>
+    <string name="cal_show_past">Показать прошлые</string>
+    <string name="cal_event_changed_note">Изменено только это повторение</string>
+    <string name="cal_when_timed">%1$s · %2$s–%3$s</string>
+    <string name="cal_when_all_day">%1$s · весь день</string>
+    <string name="cal_range">%1$s – %2$s</string>
+    <string name="cal_when_yearly">%1$s · каждый год</string>
+    <string name="cal_rule_until">%1$s · до %2$s</string>
+    <string name="cal_remind_me">Напомнить мне</string>
+    <string name="cal_reminder_as_event">Как в событии</string>
+    <string name="cal_reminder_as_event_suffix">%1$s (как в событии)</string>
+    <string name="cal_reminder_at_start">В начале</string>
+    <string name="cal_reminder_all_day_on_day">В день события в 9:00</string>
+    <string name="cal_reminder_title">Напоминание</string>
+    <string name="cal_reminder_memorable">Как дни рождения, в Настройках</string>
+    <string name="cal_created_by">Создал(а) %1$s</string>
+    <string name="cal_delete_title">Удалить событие «%1$s»?</string>
+    <string name="cal_delete_text">Оно исчезнет из календаря всей семьи.</string>
+    <string name="cal_scope_edit_title">Изменить повторяющееся событие</string>
+    <string name="cal_scope_delete_title">Удалить повторяющееся событие</string>
+    <string name="cal_scope_this">Только это</string>
+    <string name="cal_scope_following">Это и следующие</string>
+    <string name="cal_scope_all">Все</string>
+    <string name="cal_occurrence_deleted">Повторение удалено</string>
+    <!-- Event editor (M3-06) -->
+    <string name="cal_editor_edit">Изменить событие</string>
+    <string name="cal_editor_memorable">Памятная дата</string>
+    <string name="cal_kind_event">Событие</string>
+    <string name="cal_title_hint_event">Например, Стоматолог</string>
+    <string name="cal_title_hint_memorable">Например, Годовщина свадьбы</string>
+    <string name="cal_field_start">Начало</string>
+    <string name="cal_field_end">Конец</string>
+    <string name="cal_field_until">До</string>
+    <string name="cal_until_none">Без конца</string>
+    <string name="cal_field_participants">Участники</string>
+    <string name="cal_participants_title">Кого касается</string>
+    <string name="cal_participant_member">член семьи</string>
+    <string name="cal_field_place">Место</string>
+    <string name="cal_field_date">Дата</string>
+    <string name="cal_reminder_for_participants">%1$s · участникам</string>
+    <string name="cal_reminder_for_everyone">%1$s · всем</string>
+    <string name="cal_count_years">Считать годы</string>
+    <string name="cal_years_this_year">%1$s в этом году</string>
+    <string name="cal_memorable_hint">Напомним, как о днях рождения</string>
+    <string name="cal_year_unknown">Год неизвестен</string>
+    <string name="cal_scope_note_this">Изменения только %1$s, %2$s</string>
+    <string name="cal_scope_note_following">Изменения %1$s, %2$s</string>
+    <string-array name="cal_weekday_for">
+        <item>для понедельника</item>
+        <item>для вторника</item>
+        <item>для среды</item>
+        <item>для четверга</item>
+        <item>для пятницы</item>
+        <item>для субботы</item>
+        <item>для воскресенья</item>
+    </string-array>
+    <string-array name="cal_weekday_from">
+        <item>с понедельника</item>
+        <item>со вторника</item>
+        <item>со среды</item>
+        <item>с четверга</item>
+        <item>с пятницы</item>
+        <item>с субботы</item>
+        <item>с воскресенья</item>
+    </string-array>
+    <string name="cal_reset_title">Сбросить изменённые повторения?</string>
+    <string name="cal_reset_text">Изменённые отдельные повторения (%1$d) будут сброшены.</string>
+    <string name="cal_discard_text">Изменения в событии не сохранятся.</string>
+    <string name="cal_editor_no_rights">Нет прав на изменение этого события</string>
+    <string name="cal_editor_cannot_create">Нет прав на создание событий. Попросите администратора семьи.</string>
+    <string name="cal_error_too_long">Слишком длинное событие</string>
+    <string name="cal_error_before_start">Раньше начала</string>
+    <!-- Week view (M3-07) -->
+    <string name="cal_week_same_month">%1$s–%2$s %3$s</string>
+    <string name="cal_week_same_month_year">%1$s–%2$s %3$s %4$s</string>
+    <string name="date_day_month_short_year">%1$s %2$s %3$s</string>
+    <string name="cal_week_more">+%1$d</string>
+    <string name="cal_block_description">%1$s, %2$s %3$s–%4$s, %5$s</string>
+    <string-array name="weekdays_lower">
+        <item>понедельник</item>
+        <item>вторник</item>
+        <item>среда</item>
+        <item>четверг</item>
+        <item>пятница</item>
+        <item>суббота</item>
+        <item>воскресенье</item>
+    </string-array>
+    <!-- Calendar everywhere (M3-08) -->
+    <plurals name="cal_in_days">
+        <item quantity="one">через %1$d день</item>
+        <item quantity="few">через %1$d дня</item>
+        <item quantity="many">через %1$d дней</item>
+        <item quantity="other">через %1$d дня</item>
+    </plurals>
+    <string name="cal_tomorrow_lower">завтра</string>
+    <string name="today_upcoming_title">Скоро</string>
+    <string name="today_upcoming_calendar">Календарь</string>
+    <string name="tag_events_section">События · %1$s</string>
+    <string name="person_turns">Исполнится %1$s · %2$s</string>
+    <string name="person_turns_today">Сегодня %1$s</string>
+    <string name="person_birthday_in">День рождения %1$s</string>
+    <string name="person_birthday_today">Сегодня день рождения</string>
+    <string name="person_dates">Даты</string>
+    <string name="person_add_memorable">Добавить памятную дату</string>
+    <string name="notif_birthday_off">Не напоминать</string>
+    <string name="notif_birthday_on_day">Только в день</string>
+    <plurals name="notif_birthday_days">
+        <item quantity="one">За %1$d день</item>
+        <item quantity="few">За %1$d дня</item>
+        <item quantity="many">За %1$d дней</item>
+        <item quantity="other">За %1$d дня</item>
+    </plurals>
+    <string name="notif_birthday_week">За неделю</string>
+    <string name="notif_birthday_two_weeks">За 2 недели</string>
+    <string name="event_deleted">Событие удалено</string>
 </resources>

@@ -1,7 +1,12 @@
 package app.lares.contract.validation
 
 import app.lares.contract.api.FieldErrorCode
+import app.lares.contract.calendar.EventSchedule
 import app.lares.contract.entities.ChecklistItemData
+import app.lares.contract.entities.EventData
+import app.lares.contract.entities.EventKind
+import app.lares.contract.entities.EventOccurrenceData
+import app.lares.contract.entities.EventReminderData
 import app.lares.contract.entities.PersonData
 import app.lares.contract.entities.Recurrence
 import app.lares.contract.entities.RecurrenceMode
@@ -14,6 +19,9 @@ import app.lares.contract.entities.TaskCompletionData
 import app.lares.contract.entities.TaskData
 import app.lares.contract.shopping.ShoppingNames
 import kotlinx.datetime.IllegalTimeZoneException
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 
 /**
@@ -50,6 +58,13 @@ object Validators {
     const val SHOPPING_NOTE_MAX = 500
     const val SHOPPING_MAX_TAGS = 20
     const val SHOPPING_BOUGHT_COUNT_MAX = 100_000
+    const val EVENT_TITLE_MAX = 200
+    const val EVENT_PLACE_MAX = 200
+    const val EVENT_MAX_PARTICIPANTS = 30
+    const val EVENT_MAX_TAGS = 20
+
+    /** The only rule of a memorable date (CAL-005). */
+    val MEMORABLE_RECURRENCE = Recurrence(RecurrenceMode.FIXED, RecurrenceUnit.YEAR, 1)
 
     val LANGUAGES: Set<String> = setOf("en", "ru")
 
@@ -200,6 +215,150 @@ object Validators {
         }
         return errors.fields
     }
+
+    /** Trims the title; blank place and notes become null; all-day events lose their times. */
+    fun normalizeEvent(data: EventData): EventData =
+        data.copy(
+            title = data.title.trim(),
+            place = data.place?.trim()?.ifEmpty { null },
+            notes = data.notes?.trim()?.ifEmpty { null },
+            startTime = if (data.allDay) null else data.startTime,
+            endTime = if (data.allDay) null else data.endTime,
+        )
+
+    /** Trims the texts; a blank title becomes null (as the series), but place and notes keep `""` ("none here"). */
+    fun normalizeEventOccurrence(data: EventOccurrenceData): EventOccurrenceData =
+        data.copy(
+            title = data.title?.trim()?.ifEmpty { null },
+            place = data.place?.trim(),
+            notes = data.notes?.trim(),
+        )
+
+    /**
+     * Field rules of an event (architecture/calendar.md § Validation). Creator, participants, tags and `splitFrom` need
+     * the database and are checked by the server handlers.
+     */
+    fun event(data: EventData): Map<String, FieldErrorCode> {
+        val errors = ValidationErrors()
+        val memorable = data.kind == EventKind.MEMORABLE_DATE
+        if (memorable) {
+            if (!data.allDay) errors.add("allDay", FieldErrorCode.INVALID_FORMAT)
+            if (data.endDate != data.startDate) errors.add("endDate", FieldErrorCode.INVALID_FORMAT)
+            if (data.recurrence != MEMORABLE_RECURRENCE) errors.add("recurrence", FieldErrorCode.INVALID_FORMAT)
+            if (data.repeatUntil != null) errors.add("repeatUntil", FieldErrorCode.INVALID_FORMAT)
+            if (data.reminderMinutesBefore != null) errors.add("reminderMinutesBefore", FieldErrorCode.INVALID_FORMAT)
+        } else if (data.countYears) {
+            errors.add("countYears", FieldErrorCode.INVALID_FORMAT)
+        }
+        errors
+            .add("title", requiredText(data.title, EVENT_TITLE_MAX))
+            .add("place", optionalText(data.place, EVENT_PLACE_MAX))
+            .add("notes", optionalText(data.notes, NOTES_MAX))
+        // A memorable date is all-day even when the flag is wrong: its times are only checked for being absent.
+        val timed = !data.allDay && !memorable
+        times(errors, timed, data.startDate, data.endDate, data.startTime, data.endTime, required = timed)
+        val rule = data.recurrence
+        if (rule != null) {
+            errors.add("recurrence", recurrence(rule))
+            if (rule.mode == RecurrenceMode.AFTER_COMPLETION) errors.add("recurrence", FieldErrorCode.INVALID_FORMAT)
+        }
+        val until = data.repeatUntil
+        when {
+            until == null -> Unit
+            rule == null -> errors.add("repeatUntil", FieldErrorCode.INVALID_FORMAT)
+            until < data.startDate -> errors.add("repeatUntil", FieldErrorCode.OUT_OF_RANGE)
+        }
+        errors.add("reminderMinutesBefore", reminderMinutes(data.reminderMinutesBefore))
+        if (data.participantIds.size > EVENT_MAX_PARTICIPANTS) errors.add("participantIds", FieldErrorCode.OUT_OF_RANGE)
+        if (data.tagIds.size > EVENT_MAX_TAGS) errors.add("tagIds", FieldErrorCode.OUT_OF_RANGE)
+        return errors.fields
+    }
+
+    /**
+     * Field rules of an occurrence row of [event]: times all null or the full set for the event's kind of time (both dates,
+     * plus both times iff the event is timed). Id, parent and scheduled date are checked by the server handlers.
+     */
+    fun eventOccurrence(
+        data: EventOccurrenceData,
+        event: EventData,
+    ): Map<String, FieldErrorCode> {
+        val errors = ValidationErrors()
+        val timed = !event.allDay && event.kind != EventKind.MEMORABLE_DATE
+        val start = data.startDate
+        val end = data.endDate
+        val anySet = start != null || end != null || data.startTime != null || data.endTime != null
+        if (anySet) {
+            if (start == null) errors.add("startDate", FieldErrorCode.INVALID_FORMAT)
+            if (end == null) errors.add("endDate", FieldErrorCode.INVALID_FORMAT)
+            if (start != null && end != null) {
+                times(
+                    errors,
+                    timed,
+                    start,
+                    end,
+                    data.startTime,
+                    data.endTime,
+                    required = timed,
+                    requiredCode = FieldErrorCode.INVALID_FORMAT,
+                )
+            } else if (timed) {
+                if (data.startTime == null) errors.add("startTime", FieldErrorCode.INVALID_FORMAT)
+                if (data.endTime == null) errors.add("endTime", FieldErrorCode.INVALID_FORMAT)
+            }
+        }
+        errors
+            .add("title", optionalText(data.title, EVENT_TITLE_MAX))
+            .add("place", optionalText(data.place, EVENT_PLACE_MAX))
+            .add("notes", optionalText(data.notes, NOTES_MAX))
+        val participants = data.participantIds
+        if (participants != null && participants.size > EVENT_MAX_PARTICIPANTS) {
+            errors.add("participantIds", FieldErrorCode.OUT_OF_RANGE)
+        }
+        return errors.fields
+    }
+
+    /** Field rules of a personal reminder; the member and the event are checked by the server handlers. */
+    fun eventReminder(data: EventReminderData): Map<String, FieldErrorCode> =
+        ValidationErrors().add("minutesBefore", reminderMinutes(data.minutesBefore)).fields
+
+    /**
+     * Shared time rules of events and occurrence rows. Timed: both times [required] (else [requiredCode]), whole
+     * minutes. All-day: no times. `endDate` is out of range when before the start date, not after the start moment, or
+     * more than [EventSchedule.MAX_SPAN_DAYS] days away.
+     */
+    @Suppress("LongParameterList")
+    private fun times(
+        errors: ValidationErrors,
+        timed: Boolean,
+        startDate: LocalDate,
+        endDate: LocalDate,
+        startTime: LocalTime?,
+        endTime: LocalTime?,
+        required: Boolean,
+        requiredCode: FieldErrorCode? = FieldErrorCode.REQUIRED,
+    ) {
+        for ((field, time) in listOf("startTime" to startTime, "endTime" to endTime)) {
+            val code =
+                when {
+                    time == null -> if (required) requiredCode else null
+                    !timed -> FieldErrorCode.INVALID_FORMAT
+                    time.second != 0 || time.nanosecond != 0 -> FieldErrorCode.INVALID_FORMAT
+                    else -> null
+                }
+            errors.add(field, code)
+        }
+        val endBeforeStart =
+            if (timed && startTime != null && endTime != null) {
+                LocalDateTime(endDate, endTime) <= LocalDateTime(startDate, startTime)
+            } else {
+                endDate < startDate
+            }
+        val tooLong = startDate.toEpochDays() + EventSchedule.MAX_SPAN_DAYS < endDate.toEpochDays()
+        if (endBeforeStart || tooLong) errors.add("endDate", FieldErrorCode.OUT_OF_RANGE)
+    }
+
+    private fun reminderMinutes(value: Int?): FieldErrorCode? =
+        if (value != null && value !in 0..REMINDER_MINUTES_MAX) FieldErrorCode.OUT_OF_RANGE else null
 
     fun deviceName(value: String): FieldErrorCode? = requiredText(value, DEVICE_NAME_MAX)
 

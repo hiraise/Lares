@@ -19,6 +19,7 @@ import app.lares.android.LaresApplication
 import app.lares.android.R
 import app.lares.client.auth.SessionManager
 import app.lares.client.auth.SessionState
+import app.lares.client.data.calendar.CalendarReminderPlanner
 import app.lares.client.data.tasks.TaskReminderPlanner
 import app.lares.client.notifications.BackgroundSync
 import app.lares.client.platform.AppStartup
@@ -42,8 +43,9 @@ class SyncWorker(
         if (koin.get<SessionManager>().state.value !is SessionState.LoggedIn) return Result.success()
         // Failures are retried by the engine's own triggers and the next periodic run, not by WorkManager.
         koin.get<SyncEngine>().syncNow()
-        // The process may not run the UI collector: keep task reminders in step with what the sync brought.
+        // The process may not run the UI collector: keep task and calendar reminders in step with what the sync brought.
         koin.get<TaskReminderPlanner>().reconcile()
+        koin.get<CalendarReminderPlanner>().reconcile()
         return Result.success()
     }
 

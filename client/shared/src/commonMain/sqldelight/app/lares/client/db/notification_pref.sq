@@ -1,0 +1,14 @@
+-- Notification settings besides the mutes, mirrored from the server: key `birthday_days_before` (CAL-016).
+CREATE TABLE notification_pref (
+    key TEXT NOT NULL PRIMARY KEY,
+    value TEXT NOT NULL
+);
+
+get:
+SELECT value FROM notification_pref WHERE key = ?;
+
+put:
+INSERT OR REPLACE INTO notification_pref (key, value) VALUES (?, ?);
+
+deleteAll:
+DELETE FROM notification_pref;

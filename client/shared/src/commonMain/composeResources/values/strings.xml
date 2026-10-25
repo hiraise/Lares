@@ -445,6 +445,9 @@
     <string name="notif_type_task_overdue">Task overdue</string>
     <string name="notif_type_task_completed">Task completed</string>
     <string name="notif_type_task_reminder">Task reminders</string>
+    <string name="notif_type_event_changed">Calendar events</string>
+    <string name="notif_type_event_reminder">Event reminders</string>
+    <string name="notif_type_birthday_reminder">Birthdays</string>
     <string name="notif_device">On this phone</string>
     <string name="notif_permission">Show notifications</string>
     <string name="notif_permission_off">Not allowed</string>
@@ -800,4 +803,188 @@
     </plurals>
     <string name="tag_shopping_section">Shopping · %1$s</string>
     <string name="tag_shopping_left">%1$d left</string>
+    <!-- Calendar reminders (M3-04). %1$s time, %2$s place -->
+    <string name="cal_reminder_today_at">Today at %1$s</string>
+    <string name="cal_reminder_tomorrow_at">Tomorrow at %1$s</string>
+    <string name="cal_reminder_date_at">%1$s at %2$s</string>
+    <string name="cal_reminder_today_all_day">Today, all day</string>
+    <string name="cal_reminder_tomorrow_all_day">Tomorrow, all day</string>
+    <string name="cal_reminder_date_all_day">%1$s, all day</string>
+    <string name="cal_reminder_with_place">%1$s · %2$s</string>
+    <string name="cal_reminder_birthday_title">Birthday: %1$s</string>
+    <string name="cal_reminder_today">Today</string>
+    <string name="cal_reminder_tomorrow">Tomorrow</string>
+    <plurals name="cal_reminder_in_days">
+        <item quantity="one">In %1$d day</item>
+        <item quantity="other">In %1$d days</item>
+    </plurals>
+    <string name="cal_reminder_turns">%1$s, turns %2$d</string>
+    <plurals name="cal_reminder_years">
+        <item quantity="one">%1$d year</item>
+        <item quantity="other">%1$d years</item>
+    </plurals>
+    <string name="cal_reminder_birthday_today_age">Today, %1$s</string>
+    <!-- Calendar UI (M3-05) -->
+    <!-- Month names in the nominative, for "October 2026" -->
+    <string-array name="months_standalone">
+        <item>January</item>
+        <item>February</item>
+        <item>March</item>
+        <item>April</item>
+        <item>May</item>
+        <item>June</item>
+        <item>July</item>
+        <item>August</item>
+        <item>September</item>
+        <item>October</item>
+        <item>November</item>
+        <item>December</item>
+    </string-array>
+    <string name="cal_month_year">%1$s %2$s</string>
+    <string name="cal_view_month">Month</string>
+    <string name="cal_view_week">Week</string>
+    <string name="cal_view_list">List</string>
+    <string name="cal_previous">Previous</string>
+    <string name="cal_next">Next</string>
+    <string name="cal_go_today">Go to today</string>
+    <string name="cal_filter">Filter</string>
+    <string name="cal_filter_active">Filter, on</string>
+    <string name="cal_filter_whose">Whose calendar</string>
+    <string name="cal_filter_everyone">Everyone</string>
+    <string name="cal_filter_tag">Tag</string>
+    <string name="cal_filter_any_tag">Any</string>
+    <string name="cal_filter_show_tasks">Show tasks</string>
+    <string name="cal_filter_reset">Reset</string>
+    <string name="cal_chip_tag">Tag: %1$s</string>
+    <string name="cal_chip_no_tasks">No tasks</string>
+    <string name="cal_chip_remove">Remove filter %1$s</string>
+    <string name="cal_new_event">New event</string>
+    <string name="cal_all_day">All day</string>
+    <string name="cal_until_date">until %1$s</string>
+    <string name="cal_from_date">from %1$s</string>
+    <string name="cal_until_time">until %1$s</string>
+    <string name="cal_whole_family">Whole family</string>
+    <string name="cal_birthday">Birthday: %1$s</string>
+    <string name="cal_task_meta">Task · %1$s</string>
+    <string name="cal_overdue">Overdue</string>
+    <string name="cal_nothing_planned">Nothing planned</string>
+    <string name="cal_no_events">No events yet</string>
+    <string name="cal_show_past">Show earlier</string>
+    <string name="cal_event_changed_note">Only this occurrence was changed</string>
+    <string name="cal_when_timed">%1$s · %2$s–%3$s</string>
+    <string name="cal_when_all_day">%1$s · all day</string>
+    <string name="cal_range">%1$s – %2$s</string>
+    <string name="cal_when_yearly">%1$s · every year</string>
+    <string name="cal_rule_until">%1$s · until %2$s</string>
+    <string name="cal_remind_me">Remind me</string>
+    <string name="cal_reminder_as_event">As in the event</string>
+    <string name="cal_reminder_as_event_suffix">%1$s (as in the event)</string>
+    <string name="cal_reminder_at_start">At the start</string>
+    <string name="cal_reminder_all_day_on_day">On the day at 9:00</string>
+    <string name="cal_reminder_title">Reminder</string>
+    <string name="cal_reminder_memorable">Like birthdays, in Settings</string>
+    <string name="cal_created_by">Created by %1$s</string>
+    <string name="cal_delete_title">Delete the event «%1$s»?</string>
+    <string name="cal_delete_text">It disappears from the calendar of the whole family.</string>
+    <string name="cal_scope_edit_title">Edit repeating event</string>
+    <string name="cal_scope_delete_title">Delete repeating event</string>
+    <string name="cal_scope_this">Only this</string>
+    <string name="cal_scope_following">This and following</string>
+    <string name="cal_scope_all">All</string>
+    <string name="cal_occurrence_deleted">Occurrence deleted</string>
+    <!-- Event editor (M3-06) -->
+    <string name="cal_editor_edit">Edit event</string>
+    <string name="cal_editor_memorable">Memorable date</string>
+    <string name="cal_kind_event">Event</string>
+    <string name="cal_title_hint_event">For example, Dentist</string>
+    <string name="cal_title_hint_memorable">For example, Wedding anniversary</string>
+    <string name="cal_field_start">Starts</string>
+    <string name="cal_field_end">Ends</string>
+    <string name="cal_field_until">Until</string>
+    <string name="cal_until_none">No end</string>
+    <string name="cal_field_participants">Participants</string>
+    <string name="cal_participants_title">Who it concerns</string>
+    <string name="cal_participant_member">family member</string>
+    <string name="cal_field_place">Place</string>
+    <string name="cal_field_date">Date</string>
+    <!-- %1$s reminder, e.g. "1 hour before" -->
+    <string name="cal_reminder_for_participants">%1$s · participants</string>
+    <string name="cal_reminder_for_everyone">%1$s · everyone</string>
+    <string name="cal_count_years">Count the years</string>
+    <!-- %1$s e.g. "16 years" -->
+    <string name="cal_years_this_year">%1$s this year</string>
+    <string name="cal_memorable_hint">We’ll remind you as we do for birthdays</string>
+    <string name="cal_year_unknown">Year unknown</string>
+    <!-- %1$s "for Tuesday", %2$s "October 28" -->
+    <string name="cal_scope_note_this">Changes only %1$s, %2$s</string>
+    <!-- %1$s "from Tuesday", %2$s "October 28" -->
+    <string name="cal_scope_note_following">Changes %1$s, %2$s</string>
+    <string-array name="cal_weekday_for">
+        <item>for Monday</item>
+        <item>for Tuesday</item>
+        <item>for Wednesday</item>
+        <item>for Thursday</item>
+        <item>for Friday</item>
+        <item>for Saturday</item>
+        <item>for Sunday</item>
+    </string-array>
+    <string-array name="cal_weekday_from">
+        <item>from Monday</item>
+        <item>from Tuesday</item>
+        <item>from Wednesday</item>
+        <item>from Thursday</item>
+        <item>from Friday</item>
+        <item>from Saturday</item>
+        <item>from Sunday</item>
+    </string-array>
+    <string name="cal_reset_title">Reset changed occurrences?</string>
+    <!-- %1$d number of changed occurrences -->
+    <string name="cal_reset_text">Changed single occurrences (%1$d) will be reset.</string>
+    <string name="cal_discard_text">Your changes to this event will be lost.</string>
+    <string name="cal_editor_no_rights">You can’t change this event</string>
+    <string name="cal_editor_cannot_create">You can’t create events. Ask the family administrator.</string>
+    <string name="cal_error_too_long">The event is too long</string>
+    <string name="cal_error_before_start">Before the start</string>
+    <!-- Week view (M3-07) -->
+    <!-- A week inside one month: "October 19–25" (%1$s first day, %2$s last day, %3$s month) -->
+    <string name="cal_week_same_month">%3$s %1$s–%2$s</string>
+    <string name="cal_week_same_month_year">%3$s %1$s–%2$s, %4$s</string>
+    <!-- "Dec 29, 2025" -->
+    <string name="date_day_month_short_year">%2$s %1$s, %3$s</string>
+    <string name="cal_week_more">+%1$d</string>
+    <!-- A block of the week grid: "Dance, Monday 17:30–18:45, Anna" -->
+    <string name="cal_block_description">%1$s, %2$s %3$s–%4$s, %5$s</string>
+    <string-array name="weekdays_lower">
+        <item>Monday</item>
+        <item>Tuesday</item>
+        <item>Wednesday</item>
+        <item>Thursday</item>
+        <item>Friday</item>
+        <item>Saturday</item>
+        <item>Sunday</item>
+    </string-array>
+    <!-- Calendar everywhere (M3-08) -->
+    <plurals name="cal_in_days">
+        <item quantity="one">in %1$d day</item>
+        <item quantity="other">in %1$d days</item>
+    </plurals>
+    <string name="cal_tomorrow_lower">tomorrow</string>
+    <string name="today_upcoming_title">Coming up</string>
+    <string name="today_upcoming_calendar">Calendar</string>
+    <string name="tag_events_section">Events · %1$s</string>
+    <string name="person_turns">Turns %1$s · %2$s</string>
+    <string name="person_turns_today">%1$s today</string>
+    <string name="person_birthday_in">Birthday %1$s</string>
+    <string name="person_birthday_today">Birthday today</string>
+    <string name="person_dates">Dates</string>
+    <string name="person_add_memorable">Add a memorable date</string>
+    <string name="notif_birthday_off">Don’t remind</string>
+    <string name="notif_birthday_on_day">On the day only</string>
+    <plurals name="notif_birthday_days">
+        <item quantity="one">%1$d day before</item>
+        <item quantity="other">%1$d days before</item>
+    </plurals>
+    <string name="notif_birthday_week">A week before</string>
+    <string name="notif_birthday_two_weeks">2 weeks before</string>
+    <string name="event_deleted">Event deleted</string>
 </resources>

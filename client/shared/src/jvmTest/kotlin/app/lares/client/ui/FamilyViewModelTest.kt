@@ -326,4 +326,43 @@ class FamilyViewModelTest {
             )
         }
     }
+
+    @Test
+    fun `person page shows the next birthday and memorable dates, adding needs calendar create (CAL-004, CAL-005)`() {
+        fun UiTestCore.person(id: String) =
+            PersonViewModel(session, koin.get(), koin.get(), koin.get(), koin.get(), Clock.System, id, koin.get())
+        CalendarUiFixture.core().use { core ->
+            val grandma = awaitState(core.person("p4").state) { it.loaded && it.dates != null }
+            val birthday = assertNotNull(grandma.dates?.birthday)
+            assertEquals(CalendarUiFixture.today, birthday.date)
+            assertEquals(CalendarUiFixture.today.year - 1948, birthday.age)
+            assertTrue(grandma.dates!!.memorable.isEmpty())
+            assertTrue(grandma.canAddMemorable)
+
+            val olga = awaitState(core.person("p1").state) { it.loaded && it.dates?.memorable?.isNotEmpty() == true }
+            val anniversary = olga.dates!!.memorable.single()
+            assertEquals(CalendarUiFixture.E_ANNIV, anniversary.eventId)
+            assertEquals(CalendarUiFixture.today.year - 2010, anniversary.years)
+        }
+        CalendarUiFixture.core(FamilyFixture.carol, CalendarUiFixture.kidsCannotCreate).use { core ->
+            val olga = awaitState(core.person("p1").state) { it.loaded && it.dates?.memorable?.isNotEmpty() == true }
+            assertFalse(olga.canAddMemorable, "Kids without calendar.create")
+        }
+        CalendarUiFixture.core().use { core ->
+            val new =
+                PersonViewModel(
+                    core.session,
+                    core.koin.get(),
+                    core.koin.get(),
+                    core.koin.get(),
+                    core.koin.get(),
+                    Clock.System,
+                    null,
+                    core.koin.get(),
+                )
+            val state = awaitState(new.state) { it.loaded }
+            assertNull(state.dates)
+            assertFalse(state.canAddMemorable)
+        }
+    }
 }

@@ -67,6 +67,10 @@ Add terms here before using them in code.
 | Participant | Участник, «кого касается» | Person an event concerns. |
 | Birthday | День рождения | Yearly date derived from a person's birth date. |
 | Reminder | Напоминание | Per-user alert before an event or task. |
+| Occurrence | Повторение | One date of a repeating event; changed or cancelled ones are stored as occurrence rows (ADR-0022). |
+| Memorable date | Памятная дата | Yearly date for one or more persons (anniversary, memorial day), optionally counting the years. |
+| Whole family | Вся семья | An event without participants: it concerns everybody. |
+| Repeat scope | «Только это», «Это и следующие», «Все» | What a change or delete of a repeating event applies to. |
 
 ## Location
 

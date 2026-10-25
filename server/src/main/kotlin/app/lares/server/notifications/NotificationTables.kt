@@ -1,5 +1,6 @@
 package app.lares.server.notifications
 
+import app.lares.contract.api.notifications.NotificationSettings
 import app.lares.server.household.MemberTable
 import app.lares.server.identity.SessionTable
 import app.lares.server.platform.db.HouseholdTable
@@ -38,4 +39,12 @@ object NotificationSettingTable : Table("notification_setting") {
     val muted = bool("muted")
 
     override val primaryKey = PrimaryKey(memberId, type)
+}
+
+/** `notification_preference`: a member's birthday reminder lead time in days (CAL-016); missing row = default 3. */
+object NotificationPreferenceTable : Table("notification_preference") {
+    val memberId = javaUUID("member_id").references(MemberTable.id, onDelete = ReferenceOption.CASCADE)
+    val birthdayDaysBefore = integer("birthday_days_before").default(NotificationSettings.DEFAULT_BIRTHDAY_DAYS_BEFORE)
+
+    override val primaryKey = PrimaryKey(memberId)
 }

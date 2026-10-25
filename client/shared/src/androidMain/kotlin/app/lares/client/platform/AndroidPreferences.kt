@@ -27,6 +27,7 @@ class DataStorePreferencesStore(
                 theme = ThemeMode.entries.firstOrNull { it.name == prefs[THEME] } ?: ThemeMode.SYSTEM,
                 language = AppLanguage.entries.firstOrNull { it.name == prefs[LANGUAGE] } ?: AppLanguage.SYSTEM,
                 notificationPromptShown = prefs[NOTIFICATION_PROMPT_SHOWN] ?: false,
+                calendarView = prefs[CALENDAR_VIEW] ?: AppPreferences.CALENDAR_VIEW_MONTH,
             )
         }
 
@@ -42,10 +43,15 @@ class DataStorePreferencesStore(
         dataStore.edit { it[NOTIFICATION_PROMPT_SHOWN] = true }
     }
 
+    override suspend fun setCalendarView(view: String) {
+        dataStore.edit { it[CALENDAR_VIEW] = view }
+    }
+
     private companion object {
         val THEME = stringPreferencesKey("theme")
         val LANGUAGE = stringPreferencesKey("language")
         val NOTIFICATION_PROMPT_SHOWN = booleanPreferencesKey("notification_prompt_shown")
+        val CALENDAR_VIEW = stringPreferencesKey("calendar_view")
     }
 }
 

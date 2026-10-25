@@ -22,6 +22,7 @@ tools/dev/server.sh start          # dev DB + server on :8080, own database lare
 tools/dev/seed.py family           # test family Петровы (olga / olga-password is the admin)
 tools/dev/seed.py tasks            # sample tasks: routines, checklist, overdue, tag «Машина» (after family)
 tools/dev/seed.py shopping         # lists «Аптека», «Дача» (tag «Дача»), «Продукты» (active; dima ticked 2) (after family)
+tools/dev/seed.py calendar         # relatives Бабушка Валя (+3 d), Дядя Коля; «Танцы» weekly (one cancelled, one moved), «Стоматолог», «Отпуск», memorable date (after family)
 tools/dev/seed.py tick Хлеб --as dima   # another member ticks an item now: «who is shopping» for 15 min
 tools/dev/emu.sh start             # headless; run in background, boot takes about a minute
 tools/dev/emu.sh install           # build + install debug APK + launch (after every code change)

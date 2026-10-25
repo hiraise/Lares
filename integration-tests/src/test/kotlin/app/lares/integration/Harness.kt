@@ -12,6 +12,8 @@ import app.lares.client.data.PersonsRepository
 import app.lares.client.data.PersonsWriter
 import app.lares.client.data.TagsRepository
 import app.lares.client.data.TagsWriter
+import app.lares.client.data.calendar.CalendarRepository
+import app.lares.client.data.calendar.CalendarWriter
 import app.lares.client.data.shopping.ShoppingRepository
 import app.lares.client.data.shopping.ShoppingWriter
 import app.lares.client.data.tasks.TasksRepository
@@ -30,6 +32,9 @@ import app.lares.contract.api.LaresJson
 import app.lares.contract.api.admin.CreateMemberRequest
 import app.lares.contract.api.auth.DeviceInfo
 import app.lares.contract.entities.ChecklistItemData
+import app.lares.contract.entities.EventData
+import app.lares.contract.entities.EventOccurrenceData
+import app.lares.contract.entities.EventReminderData
 import app.lares.contract.entities.GroupData
 import app.lares.contract.entities.HouseholdData
 import app.lares.contract.entities.MemberData
@@ -169,6 +174,8 @@ class TestClient(
     val tasksWriter: TasksWriter = koin.get()
     val shopping: ShoppingRepository = koin.get()
     val shoppingWriter: ShoppingWriter = koin.get()
+    val calendar: CalendarRepository = koin.get()
+    val calendarWriter: CalendarWriter = koin.get()
 
     suspend fun connect() = session.connect(serverUrl)
 
@@ -203,6 +210,12 @@ class TestClient(
             taskCompletions = typedRows(EntityTypes.TASK_COMPLETION) { task_completionQueries.selectAll().executeAsList().map { it.id } },
             shoppingLists = typedRows(EntityTypes.SHOPPING_LIST) { shopping_listQueries.selectAll().executeAsList().map { it.id } },
             shoppingItems = typedRows(EntityTypes.SHOPPING_ITEM) { shopping_itemQueries.selectAll().executeAsList().map { it.id } },
+            events = typedRows(EntityTypes.EVENT) { eventQueries.selectAll().executeAsList().map { it.id } },
+            eventOccurrences =
+                typedRows(
+                    EntityTypes.EVENT_OCCURRENCE,
+                ) { event_occurrenceQueries.selectAll().executeAsList().map { it.id } },
+            eventReminders = typedRows(EntityTypes.EVENT_REMINDER) { event_reminderQueries.selectAll().executeAsList().map { it.id } },
         )
 
     @Suppress("UNCHECKED_CAST")
@@ -242,6 +255,9 @@ class TestClient(
             taskCompletions = of(EntityTypes.TASK_COMPLETION, TaskCompletionData.serializer()),
             shoppingLists = of(EntityTypes.SHOPPING_LIST, ShoppingListData.serializer()),
             shoppingItems = of(EntityTypes.SHOPPING_ITEM, ShoppingItemData.serializer()),
+            events = of(EntityTypes.EVENT, EventData.serializer()),
+            eventOccurrences = of(EntityTypes.EVENT_OCCURRENCE, EventOccurrenceData.serializer()),
+            eventReminders = of(EntityTypes.EVENT_REMINDER, EventReminderData.serializer()),
         )
     }
 
@@ -265,12 +281,19 @@ data class Snapshot(
     val taskCompletions: Map<String, TaskCompletionData>,
     val shoppingLists: Map<String, ShoppingListData>,
     val shoppingItems: Map<String, ShoppingItemData>,
+    val events: Map<String, EventData>,
+    val eventOccurrences: Map<String, EventOccurrenceData>,
+    /** Only the member's own rows (ADR-0023). */
+    val eventReminders: Map<String, EventReminderData>,
 ) {
     val isEmpty: Boolean
         get() =
             households.isEmpty() && members.isEmpty() && groups.isEmpty() && persons.isEmpty() && tags.isEmpty() &&
                 tasks.isEmpty() && checklistItems.isEmpty() && taskCompletions.isEmpty() && shoppingLists.isEmpty() &&
-                shoppingItems.isEmpty()
+                shoppingItems.isEmpty() && events.isEmpty() && eventOccurrences.isEmpty() && eventReminders.isEmpty()
+
+    /** Without the rows that only their member sees. */
+    val shared: Snapshot get() = copy(eventReminders = emptyMap())
 }
 
 /**
@@ -321,13 +344,15 @@ fun familyTest(block: suspend Family.() -> Unit) =
 
 /**
  * Invariant 8 (convergence): after every client syncs (twice, so each sees the others' last pushes), their typed tables
- * equal each other and the server state from a pull at 0.
+ * equal the server state from a pull at 0 for their member, and each other apart from the member's own reminder rows.
  */
 suspend fun assertConverged(clients: List<TestClient>) {
     repeat(2) { clients.forEach { it.sync() } }
-    val server = clients.first().serverSnapshot()
+    val shared = clients.first().serverSnapshot().shared
     for (client in clients) {
-        assertEquals(server, client.snapshot(), "client state differs from the server")
+        val local = client.snapshot()
+        assertEquals(client.serverSnapshot(), local, "client state differs from the server")
+        assertEquals(shared, local.shared, "client state differs from the other clients")
         assertEquals(0, client.pendingCount(), "client has pending mutations")
     }
 }

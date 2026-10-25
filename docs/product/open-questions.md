@@ -36,3 +36,7 @@ Q-001…Q-012 answered by the customer on 2026-10-22 during kickoff; later answe
 | Q-018 | Who sees shopping lists (2026-10-24) | Everybody with access to Shopping sees all lists. Hidden lists (e.g. gifts) later (SHP-016). |
 | Q-019 | Store departments (2026-10-24) | Chosen automatically from a built-in dictionary; a correction is remembered by the family for that name (SHP-006). |
 | Q-020 | Shopping notifications (2026-10-24) | None in M2; lists and Today show who is shopping right now from recent ticks (SHP-012). «Иду в магазин» later (SHP-017). |
+| Q-021 | Event reminders (2026-10-24) | The event's reminder goes to its member participants (everybody with Calendar if it has none); everybody can set their own reminder for any event they see (CAL-006). |
+| Q-022 | Birthday reminders (2026-10-24) | Configurable per member; by default at 09:00 every day starting 3 days before the birthday, through the day itself (CAL-016). |
+| Q-023 | Tasks in the calendar (2026-10-24) | All tasks with a date show in the calendar list and the day list (current occurrence only), with a switch, on by default (CAL-009). |
+| Q-024 | Week view (2026-10-24) | A grid by hours: seven columns, all-day events on top (CAL-008). |

@@ -12,6 +12,11 @@ import app.lares.client.data.PersonsRepository
 import app.lares.client.data.PersonsWriter
 import app.lares.client.data.TagsRepository
 import app.lares.client.data.TagsWriter
+import app.lares.client.data.calendar.CalendarReminderPlanner
+import app.lares.client.data.calendar.CalendarReminderTexts
+import app.lares.client.data.calendar.CalendarRepository
+import app.lares.client.data.calendar.CalendarWriter
+import app.lares.client.data.calendar.EnglishCalendarReminderTexts
 import app.lares.client.data.shopping.ShoppingRepository
 import app.lares.client.data.shopping.ShoppingWriter
 import app.lares.client.data.tasks.EnglishTaskReminderTexts
@@ -77,6 +82,11 @@ private fun coreModule() =
         single<TaskReminderTexts> { EnglishTaskReminderTexts(clock()) }
         // Needs the notification core (notificationsModule) for the scheduler and the mute settings.
         single { TaskReminderPlanner(get(), get(), get(), get(), get(), clock()) }
+        single { CalendarRepository(get(), get(), get(), get(), get(), get(), get(), clock()) }
+        single { CalendarWriter(get(), get(), clock()) }
+        // Overridden by the app UI with resource texts (uiModule).
+        single<CalendarReminderTexts> { EnglishCalendarReminderTexts() }
+        single { CalendarReminderPlanner(get(), get(), get(), get(), get(), clock()) }
     }
 
 private fun org.koin.core.scope.Scope.clock(): Clock = getOrNull<Clock>() ?: Clock.System

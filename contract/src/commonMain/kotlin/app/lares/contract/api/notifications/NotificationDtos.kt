@@ -47,6 +47,18 @@ enum class NotificationType(
     /** Local task reminders (TSK-030). Stored like other types so members can mute them; the server never sends it. */
     @SerialName("task.reminder")
     TASK_REMINDER(NotificationChannel.REMINDERS),
+
+    /** An event was added for, changed or cancelled for a participant (CAL-007). */
+    @SerialName("event.changed")
+    EVENT_CHANGED(NotificationChannel.FAMILY_ACTIVITY),
+
+    /** Local event reminders (CAL-006); the server never sends it. */
+    @SerialName("event.reminder")
+    EVENT_REMINDER(NotificationChannel.REMINDERS),
+
+    /** Local birthday and memorable-date reminders (CAL-016); the server never sends it. */
+    @SerialName("birthday.reminder")
+    BIRTHDAY_REMINDER(NotificationChannel.REMINDERS),
     ;
 
     /** The stable wire name, e.g. `system.test`. */
@@ -147,8 +159,18 @@ data class PushTestResponse(
     val result: PushTestResult,
 )
 
-/** `GET` and `PUT /api/v1/me/notification-settings` (FND-052): notification types the member muted. */
+/**
+ * `GET` and `PUT /api/v1/me/notification-settings` (FND-052): notification types the member muted, and how many days
+ * before a birthday or memorable date the reminders start (CAL-016; one of [BIRTHDAY_DAYS_CHOICES], 0 = on the day only;
+ * "off" is muting [NotificationType.BIRTHDAY_REMINDER]).
+ */
 @Serializable
 data class NotificationSettings(
     @Serializable(with = NotificationTypeSetSerializer::class) val muted: Set<NotificationType> = emptySet(),
-)
+    val birthdayDaysBefore: Int = DEFAULT_BIRTHDAY_DAYS_BEFORE,
+) {
+    companion object {
+        const val DEFAULT_BIRTHDAY_DAYS_BEFORE = 3
+        val BIRTHDAY_DAYS_CHOICES: List<Int> = listOf(0, 1, 3, 7, 14)
+    }
+}

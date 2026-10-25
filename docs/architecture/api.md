@@ -87,8 +87,8 @@ Authenticated, any member:
 | PUT | `/api/v1/me/push` | Register push endpoint for this session | FND-051 |
 | DELETE | `/api/v1/me/push` | Unregister push | FND-051 |
 | POST | `/api/v1/me/push/test` | Send a test notification to this session | FND-051 |
-| GET | `/api/v1/me/notification-settings` | Current muted notification types | FND-052 |
-| PUT | `/api/v1/me/notification-settings` | Set muted notification types | FND-052 |
+| GET | `/api/v1/me/notification-settings` | Current muted notification types and birthday lead time | FND-052, CAL-016 |
+| PUT | `/api/v1/me/notification-settings` | Set muted notification types and birthday lead time | FND-052, CAL-016 |
 | GET | `/api/v1/sync/changes` | Pull | FND-041 |
 | POST | `/api/v1/sync/mutations` | Push | FND-041 |
 | GET (WS) | `/api/v1/sync/events` | Realtime change events | FND-042 |
@@ -142,9 +142,11 @@ DTOs live in `contract/…/api/notifications/NotificationDtos.kt` (FND-051, FND-
 - `DELETE /me/push` → **204**. Logout and every session revocation also delete the session's registration.
 - `POST /me/push/test` → **200** `PushTestResponse {result}`: `sent`, `muted` (the member muted `system.test`),
   `not_registered`, `expired` (the push service answered 404/410; the registration was deleted), `failed`.
-- `GET /me/notification-settings` → `NotificationSettings {muted: [type…]}`; `PUT` replaces the muted set and answers the
-  stored settings. Types are `NotificationType` wire names (`system.test`, `task.assigned`, `task.overdue`,
-  `task.completed`); unknown names are dropped.
+- `GET /me/notification-settings` → `NotificationSettings {muted: [type…], birthdayDaysBefore}`; `PUT` replaces the muted
+  set, stores `birthdayDaysBefore` and answers the stored settings. Types are `NotificationType` wire names
+  (`system.test`, `task.assigned`, `task.overdue`, `task.completed`, …); unknown names are dropped.
+  `birthdayDaysBefore` (CAL-016, M3-02): one of 0, 1, 3, 7, 14, default 3; another value → `VALIDATION_FAILED` with
+  `birthdayDaysBefore: OUT_OF_RANGE` and nothing stored.
 - Sending (server): Web Push (RFC 8030) with `aes128gcm` (RFC 8291) and VAPID (RFC 8292). The VAPID key pair is generated
   on first use and kept in the `instance_secret` table. `TTL` 86400 s and `Urgency: high` for notifications, `TTL` 600 s
   for sync tickles. 404/410 deletes the registration; other failures are logged and dropped (no retry queue).

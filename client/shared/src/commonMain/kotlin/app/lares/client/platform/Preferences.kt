@@ -22,7 +22,15 @@ data class AppPreferences(
     val language: AppLanguage = AppLanguage.SYSTEM,
     /** The post-login explanation for the notification permission was shown (M0-09); it is shown once per device. */
     val notificationPromptShown: Boolean = false,
-)
+    /** The last Calendar view (CAL-008): `month`, `week` or `list`. */
+    val calendarView: String = CALENDAR_VIEW_MONTH,
+) {
+    companion object {
+        const val CALENDAR_VIEW_MONTH = "month"
+        const val CALENDAR_VIEW_WEEK = "week"
+        const val CALENDAR_VIEW_LIST = "list"
+    }
+}
 
 /** Device-level preferences; they survive logout. Android keeps them in DataStore, the JVM in memory. */
 interface PreferencesStore {
@@ -33,6 +41,8 @@ interface PreferencesStore {
     suspend fun setLanguage(language: AppLanguage)
 
     suspend fun setNotificationPromptShown()
+
+    suspend fun setCalendarView(view: String)
 }
 
 class InMemoryPreferencesStore : PreferencesStore {
@@ -45,6 +55,8 @@ class InMemoryPreferencesStore : PreferencesStore {
     override suspend fun setLanguage(language: AppLanguage) = state.update { it.copy(language = language) }
 
     override suspend fun setNotificationPromptShown() = state.update { it.copy(notificationPromptShown = true) }
+
+    override suspend fun setCalendarView(view: String) = state.update { it.copy(calendarView = view) }
 }
 
 /** Switches the UI language of the running app. Android: per-app locales via AppCompat; elsewhere a no-op for now. */

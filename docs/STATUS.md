@@ -1,12 +1,13 @@
 # Project status
 
-Updated: 2026-10-24
+Updated: 2026-10-25
 
 ## Phase
 
 **M0 Foundation — all plans M0-01…M0-11 done; M0 acceptance with the customer pending.
 M1 Tasks — all plans M1-01…M1-07 done; M1 acceptance with the customer next.
-M2 Shopping lists — all plans M2-01…M2-06 done; M2 acceptance with the customer next.**
+M2 Shopping lists — all plans M2-01…M2-06 done; M2 acceptance with the customer next.
+M3 Calendar — all plans M3-01…M3-08 done; M3 acceptance with the customer next, then release v0.4.0.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
@@ -15,12 +16,51 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 `foundation`, `tags` and `tasks` approved. Next: [M2 Shopping lists](product/roadmap.md#m2-shopping-lists) — plans ready
 ([M2 plans](plans/README.md#m2-plans)), shopping spec approved.
 
-**Active release branch: `release/0.3.0`** (next: M2). Commit approved work here; `main` is protected
-([release process](process/release.md), ADR-0020). Latest release: [v0.2.0](https://github.com/hiraise/lares/releases/tag/v0.2.0)
-(M0 + M1, 2026-10-24).
+**Active release branch: `release/0.4.0`** (next: M3). Commit approved work here; `main` is protected
+([release process](process/release.md), ADR-0020). Latest release: [v0.3.0](https://github.com/hiraise/lares/releases/tag/v0.3.0)
+(M2, 2026-10-24).
 
 ## Last completed
 
+- 2026-10-25 M3-08 Calendar everywhere: «Скоро» on Today (date tiles, «Бабушка Валя, 78 лет · Понедельник · через 3
+  дня», «Ещё N» opens «Список»), «События» on the tag page, «Исполнится 78 · через 3 дня» and «Даты» with «Добавить
+  памятную дату» on the person page, Settings switches for calendar notifications and event reminders and the
+  «Дни рождения» choice, taps on event, birthday and memorable-date notifications open the right page; user manual
+  "Calendar" (en, ru); all CAL MVP requirements done. 10 new tests, emulator walkthrough of spec scenario 9 and the
+  reminder taps.
+- 2026-10-25 M3-07 Calendar week: «Неделя» shows seven days by hours — events as blocks in the first participant's
+  color (side by side when they overlap), holidays, birthdays and memorable dates as chips on top, the "now" line;
+  a tap on a free hour creates an event there, a tap on a day opens it in «Месяц». 11 new tests, emulator walkthrough
+  of spec scenario 7 (four small issues found and fixed).
+- 2026-10-25 M3-06 Event editor: events and memorable dates are created and changed — times, several days, repeat
+  with «До», participants, place, reminder, tags, notes; a repeating event changes for «Только это», «Это и следующие»
+  or «Все» (with a warning before resetting changed occurrences). Date, time and repeat pickers shared with tasks.
+  33 new tests, emulator walkthrough of spec scenarios 1, 2, 4, 5 and kid access without bugs.
+- 2026-10-25 M3-05 Calendar tab and event page: month pager with personal-color dots and the day's list, «Список» from
+  today (growing forward, «Показать прошлые»), ‹ › and «Сегодня», filters by person, tag and «Показывать задачи» with
+  removable chips, the view remembered on the device; rows for events, birthdays (open the person), memorable dates and
+  tasks (ticked off there); the event page with facts, «Напомнить мне» and «Только это / Это и следующие / Все» for
+  edit and delete. «Неделя» and the editor are placeholders until M3-07 / M3-06. 21 new tests, emulator walkthrough
+  of spec scenarios 2–6 and 8 (cold-start month bug found and fixed).
+- 2026-10-25 M3-04 Calendar in the client core: events, changed occurrences and own reminders work offline; views for
+  day lists, month, week, «Скоро», tag page and person dates; one writer for «Только это» / «Это и следующие» / «Все»;
+  local reminders for events, birthdays and memorable dates; `seed.py calendar`; 29 unit and 7 multi-device tests.
+- 2026-10-25 M3-03 Event notifications on the server: participants who are members learn when they are added to an
+  event, when its date, time or place changes and when it or one occurrence is cancelled — not for their own changes,
+  past events or memorable dates; one muteable type `event.changed`; 8 new server tests.
+- 2026-10-24 M3-02 Calendar on the server: tables, sync handlers for events, changed occurrences and personal reminders
+  (seen only by their member), permissions, cascade on delete, housekeeping, birthday reminder lead time in the
+  notification settings; 14 new server tests.
+- 2026-10-24 M3-01 Calendar contract: event, changed-occurrence and personal-reminder data, derived row ids, occurrence
+  computation with overrides, birthdays and memorable dates, permission rules, validators, new notification types and
+  the birthday lead-time setting; 47 new contract tests.
+- 2026-10-24 M3 planning: calendar spec detailed (CAL-001…CAL-022) and approved, customer answered Q-021 (event
+  reminders to participants plus personal ones), Q-022 (birthday reminders daily from 3 days before, configurable),
+  Q-023 (tasks with a date in the calendar), Q-024 (week as a grid by hours). Design in
+  [architecture/calendar.md](architecture/calendar.md), ADR-0022 (series + occurrence rows with derived ids, household
+  time), ADR-0023 (personal reminder rows visible only to their member), plans M3-01…M3-08.
+- 2026-10-24 Release **v0.3.0** (M2 Shopping lists): release pull request #2 merged, signed APK, server image
+  `ghcr.io/hiraise/lares-server:0.3.0`, GitHub release. Fixed on the way: CI flake in `ShoppingListViewModelTest`.
 - 2026-10-24 M2-06 Shopping everywhere: the active list as the gradient hero card first on Today (count, what is left,
   who is in the store, «Открыть», «Ещё N списка»), the «Покупки» section on the tag page (an item opens its list
   filtered by the tag), user manual "Shopping lists" (en, ru); all shopping MVP requirements done; 9 new tests,
@@ -87,8 +127,9 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 2. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
 3. M4 plan: re-run the load test with location uploads every 30 s (ADR-0015).
 4. After the M1 acceptance: set the tasks spec to `implemented`.
-5. M2 acceptance with the customer (checklist in the M2-06 handoff); after it set the shopping spec to `implemented`
-   and write the M3 Calendar plans.
+5. M2 acceptance with the customer (checklist in the M2-06 handoff); after it set the shopping spec to `implemented`.
+6. M3 acceptance with the customer (checklist in the M3-08 handoff), then release v0.4.0; after it set the calendar
+   spec to `implemented`.
 
 ## Plan progress
 
@@ -113,6 +154,7 @@ See the table in [plans README](plans/README.md#m0-plans).
 | Emulator is slow on this Mac (software GPU, cold start ~9 s, ANR dialogs under load) | Walkthroughs are slow; real ANRs are hard to tell from emulator stalls | Check main-thread CPU (`/proc/<pid>/task/<pid>/stat`) and ANR traces before blaming the app; real phone for M0 acceptance |
 | Pre-release UI libraries (CMP Material3 alpha, navigation RC) | Possible API changes or bugs | Versions paired by JetBrains with CMP 1.12.2; upgrade when stable |
 | ktlint 1.8 parses only Kotlin ≤ 2.2 syntax | Lint failures on newest syntax | Avoid newest syntax; report instead of disabling lint |
+| Flaky multi-device test `SyncScenariosTest` 10 (restore reset) failed once in the full gate, passed 3 reruns | CI noise | Watch in CI; investigate if it repeats |
 | Medium-effort sessions deviate from plans | Inconsistent code | Plans fix all decisions; "stop and report" rules; customer approves each commit |
 
 ## Dev environment notes

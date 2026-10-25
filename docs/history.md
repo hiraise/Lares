@@ -246,3 +246,73 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   9 new tests (5 Today and 2 tag view model, 2 Compose UI); emulator walkthrough (spec scenarios 1–7, ru/en,
   light/dark) without bugs. Fixed on the way: CI flake in `ShoppingListViewModelTest` (quick add writes each entry
   separately; the test now waits for both).
+
+- 2026-10-24 Release **v0.3.0** (M2 Shopping lists): pull request #2 merged, signed APK, image `ghcr.io/hiraise/lares-server:0.3.0`,
+  GitHub release; next branch `release/0.4.0`.
+- 2026-10-24 M3 planning: calendar spec detailed (CAL-001…CAL-022) and approved; customer answered Q-021
+  (event reminders to member participants, everybody can set their own), Q-022 (birthday reminders every day from
+  3 days before, configurable per member), Q-023 (tasks with a date in the calendar list), Q-024 (week grid by hours).
+  Design in [architecture/calendar.md](architecture/calendar.md), ADR-0022 (a series is one row, changed occurrences are
+  rows with derived ids, household time), ADR-0023 (personal reminder rows sync only to their member), plans M3-01…M3-08.
+- 2026-10-24 M3-01 Calendar contract: `EventData`, `EventOccurrenceData`, `EventReminderData`, lenient `EventKind`
+  (→ `event`), entity types `event`, `event_occurrence`, `event_reminder`; derived version-8 ids
+  `Ids.occurrenceRowId` / `reminderRowId` (golden values in `IdsTest` for the M3-04 `seed.py` check); `EventSchedule`
+  (scheduled starts with the 2000 cap, override rows, several days, midnight ends, `next`, reminder times, display
+  order) and `Birthdays` (29 February, ages, memorable years, reminder days); `EventRules`, `WriteRules` gates (child
+  rows never deleted), event validators and normalizers; notification types `event.changed`, `event.reminder`,
+  `birthday.reminder` and `NotificationSettings.birthdayDaysBefore` (default 3); settings labels en/ru. Design detail:
+  the schedule functions take the event id as a first parameter. 47 new contract tests.
+- 2026-10-24 M3-02 Calendar on the server: migration `V8__calendar.sql` (`event`, `event_occurrence`, `event_reminder`,
+  `notification_preference`), handlers with `EventRules` checks, derived-id checks for child rows, immutable fields,
+  participant (`requireAddedPersons`), tag and `splitFrom` references, cascade tombstones with distinct seqs, reminder
+  rows pulled only by their member (tombstones by everybody with the calendar), housekeeping order, and
+  `birthdayDaysBefore` in `/me/notification-settings` (0, 1, 3, 7, 14; default 3). Testfixtures `CalendarFixtures.kt`;
+  14 new server tests (`CalendarSyncTest`, `CalendarPermissionsTest`, `NotificationSettingsTest`).
+- 2026-10-25 M3-03 Event notifications on the server (CAL-007): `EventChanges` (pure decisions by the design table),
+  `EventNotifier` (consumer like `TaskNotifier`; drops the actor, deleted members, members without `calendar.view`),
+  `EventWhenText` (fixed ru/en abbreviations), `NotificationTexts.eventAdded/eventChanged/eventCancelled`; hooks in
+  `EventSyncHandler` (create, update, tombstone) and `EventOccurrenceSyncHandler` through `afterCommit`. Design detail:
+  notifier events carry the named `EventOccurrence` instead of a date (a deleted event can still be described); a series
+  cut names the first not-yet-ended occurrence it removes; un-cancelling an occurrence sends nothing. 8 new server tests
+  (`EventChangesTest`, `CalendarNotificationsTest`).
+- 2026-10-25 **M3-04** Calendar in the client core: tables `event`, `event_occurrence`, `event_reminder`,
+  `notification_pref` (schema 5, `DATA_SCHEMA_VERSION = 4`), adapters with the server handlers' checks (derived ids,
+  immutable fields, child rows never deleted), pure `CalendarViews` (day lists with birthdays, memorable dates and tasks;
+  month dots; week column layout; «Скоро»; tag and person dates; event detail with my reminder), `CalendarRepository`,
+  `CalendarWriter` (this / following / all; only changed fields sent so offline edits of one occurrence merge),
+  `CalendarReminderPlanner` (event, birthday and memorable-date reminders; en/ru texts), `birthdayDaysBefore` in the
+  notification settings (every PUT now sends the full settings), `seed.py calendar` with derived ids checked against the
+  contract's golden values. 29 new unit tests, 7 multi-device tests (`CalendarSyncTest`); convergence now compares
+  own-only reminder rows per member.
+- 2026-10-25 **M3-05** Calendar UI: package `ui/calendar/` — `CalendarLogic` (texts), components (`MonthGrid`, `DayCell`,
+  `DayList`, event / birthday / memorable / task rows, `DateTile`, `PersonAvatars`), `CalendarViewModel` + screen (month
+  `HorizontalPager`, «Список» with growing range, filter sheet, chips, FAB), `EventViewModel` + page (facts, my
+  reminder sheet, `ScopeDialog`), routes `EventDestination` and the editor stub `EventEditorDestination`,
+  `AppPreferences.calendarView`, `UiNotices` for «Повторение удалено», `EventDetail.eventReminder`, icons `today`,
+  `filter_list`, `celebration`, `event`, `event_busy`, `ScreenHeader(singleLineTitle)`. 21 new tests
+  (`CalendarLogicTest`, `CalendarViewModelTest`, `CalendarUiTest`, `EventViewModelTest`, `EventScreenTest`); emulator
+  walkthrough found the month jumping to January 1970 on a cold start (pager composed before data) — fixed.
+- 2026-10-25 **M3-06** Event editor: `EventForm` (pure), `EventEditorViewModel`, `EventEditorScreen`, `ParticipantsSheet`
+  replace the M3-05 stub. Events and memorable dates: title, «Весь день», start and end (length kept, end before start
+  → +1 h, over 366 days refused), repeat with «До», participants («Вся семья»), place, reminder («· участникам» /
+  «· всем»), tags, notes; memorable date with day/month/year («Год неизвестен») and «Считать годы». Scopes: «Все» (asks
+  before resetting changed occurrences), «Только это» (keeps earlier overrides of the occurrence), «Это и следующие»
+  (a split opens the new series). Shared now: `DateDialog`/`TimeDialog`, `DayMonthYearDialog`, the repeat sheet
+  (`ui/common/Repeat.kt`); task editor unchanged. 33 new tests (`EventFormTest`, `EventEditorViewModelTest`,
+  `EventEditorUiTest`); emulator walkthrough of spec scenarios 1, 2, 4, 5, kid access, ru/en, light/dark without bugs.
+  Fixed on the way: a save right after typing could be dropped (checked the combined state); the year column clipped
+  «Год неизвестен».
+- 2026-10-25 **M3-07** Calendar week view: `WeekGrid.kt` (pager of weeks, day header, all-day strip, 24 h grid drawn
+  with `Canvas`, event blocks) and pure `WeekGridLogic` (block geometry, strip rows with «+N», initial scroll, week
+  titles, block descriptions for screen readers); the view model computes the shown week and its neighbours and the
+  "now" minute; a tap on a free hour opens the editor at that hour; switching from «Месяц» shows the selected day's week.
+  11 new tests (`WeekGridLogicTest`, `CalendarViewModelTest`, `CalendarUiTest` additions); emulator walkthrough of spec
+  scenario 7, overlaps, ru/en, light/dark, smooth scrolling. Fixed after the walkthrough: hour labels cut at 130 % font
+  scale, scroll position lost after returning from an event, ‹ › moving when «Сегодня» appears, the 07:00 label half
+  hidden on open.
+- 2026-10-25 M3-08 Calendar everywhere: Today «Скоро» (`TodayUpcoming`, shared `DatedRow` with the date tile), the
+  tag page «События», person dates (countdown under the birthday, «Даты», «Добавить памятную дату»), Settings ›
+  Notifications event switches and the «Дни рождения» choice, notification taps for events (with occurrence), persons
+  and deleted events (`EventLinks`), user manual "Calendar" (en, ru), CHANGELOG, roadmap and spec statuses (all CAL MVP
+  requirements `done`, TSK-022 `done`). 10 new tests (client 333, multi-device 35); emulator walkthrough found no bugs
+  (the «Дни рождения» row moved before the test switch).

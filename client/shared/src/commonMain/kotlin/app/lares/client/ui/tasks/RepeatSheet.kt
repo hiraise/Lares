@@ -56,6 +56,9 @@ import app.lares.client.resources.task_unit_weeks
 import app.lares.client.resources.task_unit_years
 import app.lares.client.resources.weekdays
 import app.lares.client.resources.weekdays_short
+import app.lares.client.ui.common.RepeatPreset
+import app.lares.client.ui.common.Repeats
+import app.lares.client.ui.common.isWeekly
 import app.lares.client.ui.common.text
 import app.lares.client.ui.components.AppIcon
 import app.lares.client.ui.components.ListDivider
@@ -75,23 +78,27 @@ import org.jetbrains.compose.resources.stringArrayResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The repeat rule (TSK-010, TSK-011): presets apply at once and close the sheet; "Custom…" shows the mode, the
- * interval with its unit and, for weekly schedules, the weekdays. Custom changes apply at once too; "Done" closes.
+ * The repeat rule (TSK-010, TSK-011, CAL-003) of a schedule starting on [start]: presets apply at once and close the
+ * sheet; "Custom…" shows the mode (only when [allowAfterCompletion]: tasks), the interval with its unit and, for weekly
+ * schedules, the weekdays. Custom changes apply at once too; "Done" closes. "Do not repeat" is disabled unless
+ * [canStopRepeat].
  */
 @Composable
 fun RepeatSheet(
-    form: TaskForm,
-    today: LocalDate,
+    rule: Recurrence?,
+    start: LocalDate,
+    allowAfterCompletion: Boolean,
     onPreset: (RepeatPreset) -> Unit,
     onRule: (Recurrence) -> Unit,
     onDismiss: () -> Unit,
+    canStopRepeat: Boolean = true,
 ) {
     EditorSheet(stringResource(Res.string.task_field_repeat), onDismiss) {
-        RepeatOptions(form, today, onPreset = {
+        RepeatOptions(rule, start, allowAfterCompletion, onPreset = {
             onPreset(it)
             onDismiss()
-        }, onRule = onRule)
-        if (form.preset() == RepeatPreset.CUSTOM || form.recurrence != null) {
+        }, onRule = onRule, canStopRepeat = canStopRepeat)
+        if (Repeats.preset(rule, start) == RepeatPreset.CUSTOM || rule != null) {
             PrimaryButton(stringResource(Res.string.action_done), onDismiss)
         }
     }
@@ -100,39 +107,40 @@ fun RepeatSheet(
 /** The preset rows and, after "Custom…", the custom rule controls. */
 @Composable
 fun RepeatOptions(
-    form: TaskForm,
-    today: LocalDate,
+    rule: Recurrence?,
+    start: LocalDate,
+    allowAfterCompletion: Boolean,
     onPreset: (RepeatPreset) -> Unit,
     onRule: (Recurrence) -> Unit,
+    canStopRepeat: Boolean = true,
 ) {
-    var custom by rememberSaveable { mutableStateOf(form.preset() == RepeatPreset.CUSTOM) }
-    val date = form.dueDate ?: today
-    val selected = if (custom) RepeatPreset.CUSTOM else form.preset()
+    val preset = Repeats.preset(rule, start)
+    var custom by rememberSaveable { mutableStateOf(preset == RepeatPreset.CUSTOM) }
+    val selected = if (custom) RepeatPreset.CUSTOM else preset
     ListGroup {
-        RepeatPreset.entries.forEachIndexed { index, preset ->
+        RepeatPreset.entries.forEachIndexed { index, option ->
             if (index > 0) ListDivider(inset = Spacing.l)
-            val disabled = preset == RepeatPreset.NONE && !form.canStopRepeat
+            val disabled = option == RepeatPreset.NONE && !canStopRepeat
             ListRow(
-                presetLabel(preset, date),
-                modifier = Modifier.testTag("repeat_${preset.name.lowercase()}"),
+                presetLabel(option, start),
+                modifier = Modifier.testTag("repeat_${option.name.lowercase()}"),
                 supporting = if (disabled) stringResource(Res.string.task_repeat_stop_hint) else null,
                 enabled = !disabled,
                 onClick = {
-                    if (preset == RepeatPreset.CUSTOM) {
+                    if (option == RepeatPreset.CUSTOM) {
                         custom = true
                         // Weekly by default: the weekday toggles show what a custom rule can do.
-                        if (form.recurrence == null) onRule(Recurrence(RecurrenceMode.FIXED, RecurrenceUnit.WEEK))
+                        if (rule == null) onRule(Recurrence(RecurrenceMode.FIXED, RecurrenceUnit.WEEK))
                     } else {
                         custom = false
-                        onPreset(preset)
+                        onPreset(option)
                     }
                 },
-                trailing = { RadioButton(selected = preset == selected, onClick = null) },
+                trailing = { RadioButton(selected = option == selected, onClick = null) },
             )
         }
     }
-    val rule = form.recurrence
-    if (custom && rule != null) CustomRule(rule, date, onRule)
+    if (custom && rule != null) CustomRule(rule, start, allowAfterCompletion, onRule)
 }
 
 @Composable
@@ -153,17 +161,20 @@ private fun presetLabel(
 private fun CustomRule(
     rule: Recurrence,
     date: LocalDate,
+    allowAfterCompletion: Boolean,
     onRule: (Recurrence) -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.l), modifier = Modifier.testTag("repeat_custom_controls")) {
-        SegmentedControl(
-            RecurrenceMode.entries,
-            rule.mode,
-            label = {
-                stringResource(if (it == RecurrenceMode.FIXED) Res.string.task_repeat_mode_fixed else Res.string.task_repeat_mode_after)
-            },
-            onSelect = { onRule(rule.copy(mode = it)) },
-        )
+        if (allowAfterCompletion) {
+            SegmentedControl(
+                RecurrenceMode.entries,
+                rule.mode,
+                label = {
+                    stringResource(if (it == RecurrenceMode.FIXED) Res.string.task_repeat_mode_fixed else Res.string.task_repeat_mode_after)
+                },
+                onSelect = { onRule(rule.copy(mode = it)) },
+            )
+        }
         Text(stringResource(Res.string.task_repeat_how_often), style = MaterialTheme.typography.labelLarge)
         IntervalStepper(rule, onRule)
         if (rule.isWeekly()) {

@@ -1,5 +1,9 @@
 package app.lares.server
 
+import app.lares.server.calendar.EventNotifier
+import app.lares.server.calendar.EventOccurrenceSyncHandler
+import app.lares.server.calendar.EventReminderSyncHandler
+import app.lares.server.calendar.EventSyncHandler
 import app.lares.server.household.GroupAdminService
 import app.lares.server.household.GroupSyncHandler
 import app.lares.server.household.HouseholdAdminService
@@ -99,6 +103,7 @@ class AppDeps(
     val notificationService = NotificationService(db, clock, pushEndpointGuard, webPushSender)
     val taskNotifier = TaskNotifier(db, permissionService, notificationService)
     val taskOverdueJob = TaskOverdueJob(db, clock, taskNotifier)
+    val eventNotifier = EventNotifier(db, permissionService, notificationService)
 
     val syncHandlers =
         SyncHandlers(
@@ -113,6 +118,9 @@ class AppDeps(
                 TaskCompletionSyncHandler(taskNotifier),
                 ShoppingListSyncHandler(),
                 ShoppingItemSyncHandler(),
+                EventSyncHandler(eventNotifier),
+                EventOccurrenceSyncHandler(eventNotifier),
+                EventReminderSyncHandler(),
             ),
         )
     val syncPullService = SyncPullService(db, syncHandlers, permissionService)
@@ -174,6 +182,7 @@ fun Application.module(deps: AppDeps) {
     deps.syncTickles.start(this)
     // Task events come from requests and jobs alike; tests await them with `taskNotifier.awaitIdle()`.
     deps.taskNotifier.start(this)
+    deps.eventNotifier.start(this)
     if (deps.backgroundJobs) {
         deps.syncHousekeeping.start(this)
         deps.taskOverdueJob.start(this)

@@ -63,6 +63,7 @@ import app.lares.client.ui.tasks.TaskRow
 import app.lares.client.ui.tasks.TaskRowUi
 import app.lares.client.ui.theme.Spacing
 import app.lares.contract.permissions.Section
+import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -78,11 +79,19 @@ class TodayActions(
     val onShoppingList: (String) -> Unit = {},
     /** «Ещё N списка»: the Shopping tab. */
     val onAllShopping: () -> Unit = {},
+    /** A «Скоро» event or memorable date: its id and the scheduled date of the occurrence. */
+    val onEvent: (String, LocalDate) -> Unit = { _, _ -> },
+    /** A «Скоро» birthday: the person page. */
+    val onPerson: (String) -> Unit = {},
+    /** «Календарь»: the Calendar tab. */
+    val onCalendar: () -> Unit = {},
+    /** «Ещё N» under «Скоро»: the Calendar tab in «Список». */
+    val onCalendarList: () -> Unit = {},
 )
 
 /**
  * FND-063: date line and title, sync indicator and own avatar (→ More), the active shopping list (SHP-013), the tasks
- * block (TSK-023) and the FAB.
+ * block (TSK-023), «Скоро» (CAL-019) and the FAB.
  */
 @Composable
 fun TodayScreen(
@@ -115,6 +124,7 @@ fun TodayScreen(
                         TodayShoppingBlock(card, onOpen = { actions.onShoppingList(card.listId) }, onOthers = actions.onAllShopping)
                     }
                     if (today.showTasks) TodayTasks(today, actions)
+                    today.upcoming?.let { TodayUpcoming(it, actions) }
                 }
             }
         }

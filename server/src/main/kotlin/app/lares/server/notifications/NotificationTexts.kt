@@ -55,7 +55,41 @@ object NotificationTexts {
             else -> Text("Task overdue", short(title))
         }
 
-    /** Task titles are cut to [MAX_TITLE] characters, the last one being `…`, so the payload stays small. */
+    /** `event.changed`, added (CAL-007): [whenText] from `EventWhenText`. */
+    fun eventAdded(
+        language: String,
+        title: String,
+        whenText: String,
+    ): Text =
+        when (language) {
+            "ru" -> Text("Новое событие", "${short(title)} · $whenText")
+            else -> Text("New event", "${short(title)} · $whenText")
+        }
+
+    /** `event.changed`, changed (CAL-007). */
+    fun eventChanged(
+        language: String,
+        title: String,
+        whenText: String,
+    ): Text =
+        when (language) {
+            "ru" -> Text("Событие изменено", "${short(title)} · $whenText")
+            else -> Text("Event changed", "${short(title)} · $whenText")
+        }
+
+    /** `event.changed`, cancelled (CAL-007); [fromDate] for a series cut short: «с …» / «from …». */
+    fun eventCancelled(
+        language: String,
+        title: String,
+        whenText: String,
+        fromDate: Boolean,
+    ): Text =
+        when (language) {
+            "ru" -> Text("Событие отменено", "${short(title)} · ${if (fromDate) "с " else ""}$whenText")
+            else -> Text("Event cancelled", "${short(title)} · ${if (fromDate) "from " else ""}$whenText")
+        }
+
+    /** Task and event titles are cut to [MAX_TITLE] characters, the last one being `…`, so the payload stays small. */
     fun short(title: String): String = if (title.length <= MAX_TITLE) title else title.take(MAX_TITLE - 1) + "…"
 
     const val MAX_TITLE = 100

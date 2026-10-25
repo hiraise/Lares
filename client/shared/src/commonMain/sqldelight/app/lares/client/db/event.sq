@@ -1,0 +1,41 @@
+-- Events and memorable dates (architecture/calendar.md § Client). Dates and times are ISO strings in the household
+-- time zone; `participant_ids` and `tag_ids` are JSON arrays of ids (empty participants = the whole family);
+-- `recurrence` is the Recurrence JSON or NULL for a one-off; `kind` is the EventKind wire name.
+CREATE TABLE event (
+    id TEXT NOT NULL PRIMARY KEY,
+    title TEXT NOT NULL,
+    created_by TEXT NOT NULL,
+    start_date TEXT NOT NULL,
+    end_date TEXT NOT NULL,
+    all_day INTEGER NOT NULL,
+    start_time TEXT,
+    end_time TEXT,
+    place TEXT,
+    notes TEXT,
+    participant_ids TEXT NOT NULL,
+    tag_ids TEXT NOT NULL,
+    recurrence TEXT,
+    repeat_until TEXT,
+    reminder_minutes_before INTEGER,
+    kind TEXT NOT NULL,
+    count_years INTEGER NOT NULL,
+    split_from TEXT
+);
+
+selectAll:
+SELECT * FROM event ORDER BY id;
+
+selectById:
+SELECT * FROM event WHERE id = ?;
+
+upsert:
+INSERT OR REPLACE INTO event (
+    id, title, created_by, start_date, end_date, all_day, start_time, end_time, place, notes, participant_ids, tag_ids,
+    recurrence, repeat_until, reminder_minutes_before, kind, count_years, split_from
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+deleteById:
+DELETE FROM event WHERE id = ?;
+
+deleteAll:
+DELETE FROM event;

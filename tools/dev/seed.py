@@ -7,6 +7,7 @@
   tools/dev/seed.py invite [group]         # invite into "Взрослые" (default) or "Дети"; prints code + payload
   tools/dev/seed.py tasks                  # sample tasks and routines (after family; skips if already seeded)
   tools/dev/seed.py shopping               # sample shopping lists (after family; skips if already seeded)
+  tools/dev/seed.py calendar               # relatives with birthdays, sample events, memorable date (after family)
   tools/dev/seed.py tick NAME [--as LOGIN] # mark the first item named NAME bought by that member (default olga)
   tools/dev/seed.py call METHOD PATH [JSON] [--as LOGIN]
 
@@ -24,6 +25,7 @@ import secrets
 import sys
 import time
 import urllib.error
+import uuid
 import urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -322,6 +324,131 @@ def tick(name, as_login="olga", at=None):
     print(f"ticked {found['data']['name']} as {as_login}")
 
 
+def derive_row_id(event_id, salt, marker):
+    """architecture/calendar.md § Derived ids, the same algorithm as Ids.kt."""
+    b = bytearray(uuid.UUID(event_id).bytes)
+    for i, byte in enumerate((salt & 0xFFFFFFFFFFFFFFFF).to_bytes(8, "big")):
+        b[8 + i] ^= byte
+    if marker:
+        b[7] ^= 0x5A
+    b[6] = (b[6] & 0x0F) | 0x80
+    b[8] = (b[8] & 0x3F) | 0x80
+    return str(uuid.UUID(bytes=bytes(b)))
+
+
+def occurrence_row_id(event_id, occurrence):
+    """The id of the event_occurrence row of `occurrence` (a date) of `event_id` (ADR-0022)."""
+    return derive_row_id(event_id, (occurrence - datetime.date(1970, 1, 1)).days, marker=False)
+
+
+def reminder_row_id(event_id, member_id):
+    """The id of member_id's event_reminder row for event_id (ADR-0023)."""
+    return derive_row_id(event_id, int.from_bytes(uuid.UUID(member_id).bytes[8:], "big"), marker=True)
+
+
+# Golden values of contract IdsTest (M3-01).
+_GOLDEN_EVENT = "0192f3a4-5b6c-7d8e-9f01-23456789abcd"
+assert occurrence_row_id(_GOLDEN_EVENT, datetime.date(2026, 10, 28)) == "0192f3a4-5b6c-8d8e-9f01-23456789fadf"
+assert occurrence_row_id(_GOLDEN_EVENT, datetime.date(1969, 12, 31)) == "0192f3a4-5b6c-8d8e-a0fe-dcba98765432"
+assert reminder_row_id(_GOLDEN_EVENT, "0192f3a4-0000-7000-8000-00000000c0de") == "0192f3a4-5b6c-8dd4-9f01-234567896b13"
+
+
+def calendar():
+    state = load_state()
+    if not state.get("members"):
+        sys.exit("no test family; run: seed.py family")
+    if state.get("calendar"):
+        print("calendar already seeded:", ", ".join(state["calendar"]))
+        return
+    token = login()
+    me = call("GET", "/me", token=token)["memberId"]
+    changes = all_changes(token)
+    persons = {c["data"]["name"]: c["id"] for c in changes if c["type"] == "person"}
+    olga, dima, anya, timur = (persons[n] for n in ("Ольга Петрова", "Дмитрий Петров", "Аня", "Тимур"))
+    # Dates in the household zone (Europe/Moscow, UTC+3 all year).
+    today = (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=3)).date()
+
+    def days(n):
+        return today + datetime.timedelta(days=n)
+
+    mutations = []
+    valya, kolya = uuid7(), uuid7()
+    born = days(3)
+    mutations.append(("person", valya, {"name": "Бабушка Валя", "relation": "Бабушка", "birthYear": 1948, "birthMonth": born.month, "birthDay": born.day}))
+    born = days(12)
+    mutations.append(("person", kolya, {"name": "Дядя Коля", "relation": "Дядя", "birthMonth": born.month, "birthDay": born.day}))
+    born = days(40)
+    mutations.append(("person", anya, {"birthYear": 2015, "birthMonth": born.month, "birthDay": born.day}))
+    tag = next((c["id"] for c in changes if c["type"] == "tag" and c["data"].get("name") == "Школа"), None)
+    if tag is None:
+        tag = uuid7()
+        mutations.append(("tag", tag, {"name": "Школа", "color": "green", "archived": False}))
+
+    def timed(start, end, start_date, end_date=None):
+        return {"startDate": str(start_date), "endDate": str(end_date or start_date), "allDay": False, "startTime": start, "endTime": end}
+
+    weekday = today.weekday()
+    last_monday = days(-weekday)
+    next_wednesday = days((2 - weekday) % 7 or 7)
+    moved_monday = next_wednesday + datetime.timedelta(days=5)
+    next_saturday = days((5 - weekday) % 7 or 7)
+    memorable = days(10)
+    samples = [
+        ("Стоматолог", {**timed("16:00", "17:00", days(1)), "participantIds": [timur], "place": "Клиника на Ленина", "reminderMinutesBefore": 60}),
+        (
+            "Танцы",
+            {
+                **timed("17:30", "18:45", last_monday),
+                "participantIds": [anya],
+                "place": "ДК «Юность»",
+                "recurrence": {"mode": "fixed", "unit": "week", "interval": 1, "weekdays": ["MONDAY", "WEDNESDAY"]},
+                "repeatUntil": str(days(180)),
+            },
+        ),
+        ("Родительское собрание", {**timed("18:30", "19:30", days(4)), "participantIds": [olga, dima], "place": "Школа №12", "tagIds": [tag]}),
+        ("Генеральная уборка", timed("11:00", "13:00", next_saturday)),
+        ("Отпуск", {"startDate": str(days(20)), "endDate": str(days(30)), "allDay": True, "participantIds": [olga, dima, anya, timur]}),
+        (
+            "Годовщина свадьбы",
+            {
+                "startDate": str(memorable.replace(year=2010)),
+                "endDate": str(memorable.replace(year=2010)),
+                "allDay": True,
+                "participantIds": [olga, dima],
+                "recurrence": {"mode": "fixed", "unit": "year", "interval": 1, "weekdays": []},
+                "kind": "memorable_date",
+                "countYears": True,
+            },
+        ),
+    ]
+    created = {}
+    for title, fields in samples:
+        eid = uuid7()
+        created[title] = eid
+        mutations.append(("event", eid, {"title": title, "createdBy": me, **fields}))
+    dances = created["Танцы"]
+    mutations.append(("event_occurrence", occurrence_row_id(dances, next_wednesday), {"eventId": dances, "occurrence": str(next_wednesday), "cancelled": True}))
+    mutations.append(
+        (
+            "event_occurrence",
+            occurrence_row_id(dances, moved_monday),
+            {
+                "eventId": dances,
+                "occurrence": str(moved_monday),
+                "startDate": str(moved_monday),
+                "endDate": str(moved_monday),
+                "startTime": "18:00",
+                "endTime": "19:15",
+            },
+        )
+    )
+    push(token, mutations)
+    state["calendar"] = created
+    save_state(state)
+    print("calendar:", ", ".join(created), "+ Бабушка Валя, Дядя Коля, birthday of Аня")
+    print(f"Танцы: {next_wednesday} cancelled, {moved_monday} moved to 18:00–19:15")
+
+
 def main(argv):
     if not argv or argv[0] in ("-h", "--help"):
         print(__doc__)
@@ -333,6 +460,8 @@ def main(argv):
         tasks()
     elif cmd == "shopping":
         shopping()
+    elif cmd == "calendar":
+        calendar()
     elif cmd == "tick":
         as_login = "olga"
         if "--as" in args:

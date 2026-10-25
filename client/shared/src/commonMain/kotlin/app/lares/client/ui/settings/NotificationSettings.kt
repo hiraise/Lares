@@ -5,6 +5,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
@@ -22,6 +27,11 @@ import app.lares.client.resources.ic_schedule
 import app.lares.client.resources.ic_schedule_send
 import app.lares.client.resources.notif_allow
 import app.lares.client.resources.notif_allowed
+import app.lares.client.resources.notif_birthday_days
+import app.lares.client.resources.notif_birthday_off
+import app.lares.client.resources.notif_birthday_on_day
+import app.lares.client.resources.notif_birthday_two_weeks
+import app.lares.client.resources.notif_birthday_week
 import app.lares.client.resources.notif_choose
 import app.lares.client.resources.notif_connected_via
 import app.lares.client.resources.notif_device
@@ -47,6 +57,9 @@ import app.lares.client.resources.notif_test_reminder_body
 import app.lares.client.resources.notif_test_reminder_set
 import app.lares.client.resources.notif_test_reminder_title
 import app.lares.client.resources.notif_test_sent
+import app.lares.client.resources.notif_type_birthday_reminder
+import app.lares.client.resources.notif_type_event_changed
+import app.lares.client.resources.notif_type_event_reminder
 import app.lares.client.resources.notif_type_system_test
 import app.lares.client.resources.notif_type_task_assigned
 import app.lares.client.resources.notif_type_task_completed
@@ -60,6 +73,7 @@ import app.lares.client.ui.common.attempt
 import app.lares.client.ui.common.rememberNotificationPermissionRequest
 import app.lares.client.ui.common.toUiError
 import app.lares.client.ui.components.AppPage
+import app.lares.client.ui.components.ChoiceDialog
 import app.lares.client.ui.components.ConfirmDialog
 import app.lares.client.ui.components.DetailTopBar
 import app.lares.client.ui.components.ErrorText
@@ -69,6 +83,7 @@ import app.lares.client.ui.components.ListGroup
 import app.lares.client.ui.components.ListRow
 import app.lares.client.ui.components.SectionHeader
 import app.lares.contract.api.notifications.NotificationChannel
+import app.lares.contract.api.notifications.NotificationSettings
 import app.lares.contract.api.notifications.NotificationType
 import app.lares.contract.api.notifications.PushTestResult
 import kotlinx.coroutines.delay
@@ -83,6 +98,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Clock
@@ -96,12 +112,18 @@ val SwitchableNotificationTypes: List<NotificationType> =
         NotificationType.TASK_COMPLETED,
         NotificationType.TASK_OVERDUE,
         NotificationType.TASK_REMINDER,
+        NotificationType.EVENT_CHANGED,
+        NotificationType.EVENT_REMINDER,
         NotificationType.SYSTEM_TEST,
     )
+
+/** The «Дни рождения» choices (CAL-016): null = «Не напоминать» (mutes `birthday.reminder`), else days before. */
+val BirthdayChoices: List<Int?> = listOf(null) + NotificationSettings.BIRTHDAY_DAYS_CHOICES
 
 data class NotificationSettingsUiState(
     val push: PushStatus = PushStatus(),
     val muted: Set<NotificationType> = emptySet(),
+    val birthdayDaysBefore: Int = NotificationSettings.DEFAULT_BIRTHDAY_DAYS_BEFORE,
     val needsRuntimePermission: Boolean = false,
     val notificationsAllowed: Boolean = true,
     val exactAlarmsAllowed: Boolean = true,
@@ -110,7 +132,10 @@ data class NotificationSettingsUiState(
     /** When the diagnostics reminder fires; null until one is set. */
     val testReminderAt: Instant? = null,
     val error: UiError? = null,
-)
+) {
+    /** The selected birthday choice: null when birthday reminders are muted. */
+    val birthdayChoice: Int? get() = if (NotificationType.BIRTHDAY_REMINDER in muted) null else birthdayDaysBefore
+}
 
 /** Settings › Notifications (FND-050…052): push status, test push, muting, device permissions, test reminder. */
 class NotificationSettingsViewModel(
@@ -123,8 +148,8 @@ class NotificationSettingsViewModel(
     private val local = MutableStateFlow(NotificationSettingsUiState())
 
     val state: StateFlow<NotificationSettingsUiState> =
-        combine(local, distributors.status, settings.muted) { state, push, muted ->
-            state.copy(push = push, muted = muted)
+        combine(local, distributors.status, settings.muted, settings.birthdayDaysBefore) { state, push, muted, days ->
+            state.copy(push = push, muted = muted, birthdayDaysBefore = days)
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), NotificationSettingsUiState())
 
     init {
@@ -174,6 +199,22 @@ class NotificationSettingsViewModel(
         }
     }
 
+    /** «Дни рождения»: null mutes birthday reminders, days unmute them and store the lead time (CAL-016). */
+    fun setBirthdayChoice(days: Int?) {
+        local.update { it.copy(error = null) }
+        viewModelScope.launch {
+            attempt {
+                if (days ==
+                    null
+                ) {
+                    settings.setMuted(NotificationType.BIRTHDAY_REMINDER, muted = true)
+                } else {
+                    settings.setBirthdayDaysBefore(days)
+                }
+            }.exceptionOrNull()?.let { e -> local.update { it.copy(error = e.toUiError()) } }
+        }
+    }
+
     /** Diagnostics: a local reminder one minute from now ([title] and [body] in the UI language). */
     fun scheduleTestReminder(
         title: String,
@@ -208,6 +249,20 @@ fun NotificationSettingsRoute(
     val requestPermission = rememberNotificationPermissionRequest { viewModel.onResume() }
     val reminderTitle = stringResource(Res.string.notif_test_reminder_title)
     val reminderBody = stringResource(Res.string.notif_test_reminder_body)
+    var birthdayDialog by rememberSaveable { mutableStateOf(false) }
+    if (birthdayDialog) {
+        ChoiceDialog(
+            title = stringResource(Res.string.notif_type_birthday_reminder),
+            options = BirthdayChoices,
+            selected = state.birthdayChoice,
+            label = { birthdayChoiceLabel(it) },
+            onSelect = {
+                birthdayDialog = false
+                viewModel.setBirthdayChoice(it)
+            },
+            onDismiss = { birthdayDialog = false },
+        )
+    }
     AppPage(topBar = { DetailTopBar(stringResource(Res.string.settings_notifications), onBack) }) {
         ErrorText(state.error)
         InstantNotifications(state, viewModel::selectDistributor, viewModel::sendTest)
@@ -216,6 +271,17 @@ fun NotificationSettingsRoute(
             SectionHeader(stringResource(Res.string.notif_types))
             ListGroup {
                 SwitchableNotificationTypes.forEachIndexed { index, type ->
+                    if (type == NotificationType.SYSTEM_TEST) {
+                        // «Дни рождения» goes with the calendar switches, before the test notifications.
+                        ListDivider(inset = 16.dp)
+                        ListRow(
+                            stringResource(Res.string.notif_type_birthday_reminder),
+                            modifier = Modifier.testTag("notif_birthdays"),
+                            supporting = birthdayChoiceLabel(state.birthdayChoice),
+                            showChevron = true,
+                            onClick = { birthdayDialog = true },
+                        )
+                    }
                     if (index > 0) ListDivider(inset = 16.dp)
                     ListRow(
                         stringResource(type.label()),
@@ -374,6 +440,17 @@ fun NotificationPermissionPrompt(
     )
 }
 
+/** «Не напоминать», «Только в день», «За 1 день», «За 3 дня», «За неделю», «За 2 недели». */
+@Composable
+private fun birthdayChoiceLabel(days: Int?): String =
+    when (days) {
+        null -> stringResource(Res.string.notif_birthday_off)
+        0 -> stringResource(Res.string.notif_birthday_on_day)
+        7 -> stringResource(Res.string.notif_birthday_week)
+        14 -> stringResource(Res.string.notif_birthday_two_weeks)
+        else -> pluralStringResource(Res.plurals.notif_birthday_days, days, days)
+    }
+
 private fun NotificationType.label(): StringResource =
     when (this) {
         NotificationType.SYSTEM_TEST -> Res.string.notif_type_system_test
@@ -381,6 +458,9 @@ private fun NotificationType.label(): StringResource =
         NotificationType.TASK_OVERDUE -> Res.string.notif_type_task_overdue
         NotificationType.TASK_COMPLETED -> Res.string.notif_type_task_completed
         NotificationType.TASK_REMINDER -> Res.string.notif_type_task_reminder
+        NotificationType.EVENT_CHANGED -> Res.string.notif_type_event_changed
+        NotificationType.EVENT_REMINDER -> Res.string.notif_type_event_reminder
+        NotificationType.BIRTHDAY_REMINDER -> Res.string.notif_type_birthday_reminder
     }
 
 private fun PushTestResult.message(): StringResource =

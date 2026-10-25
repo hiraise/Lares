@@ -33,9 +33,9 @@ class SyncHousekeeping(
 ) {
     /**
      * Deletes tombstones older than 90 days that nothing references: tags, groups (their permission and membership rows
-     * cascade), persons that no member or invite points to, checklist items, completions and tasks, and shopping items
-     * and lists (children first; the foreign keys cascade anyway). Member and household tombstones are kept (sessions,
-     * invites and login codes reference members). Moves `purge_horizon_seq` past the newest purged seq, so clients whose
+     * cascade), persons that no member or invite points to, checklist items, completions and tasks, shopping items and
+     * lists, and event reminders, occurrence rows and events (children first; the foreign keys cascade anyway). Member and
+     * household tombstones are kept (sessions, invites and login codes reference members). Moves `purge_horizon_seq` past the newest purged seq, so clients whose
      * cursor is older make a full resync. Returns the number of purged rows.
      */
     suspend fun purgeTombstones(now: Instant): Int {
@@ -67,6 +67,9 @@ class SyncHousekeeping(
                             purge("task", householdId, cutoff),
                             purge("shopping_item", householdId, cutoff),
                             purge("shopping_list", householdId, cutoff),
+                            purge("event_reminder", householdId, cutoff),
+                            purge("event_occurrence", householdId, cutoff),
+                            purge("event", householdId, cutoff),
                         )
                     val maxSeq = purged.mapNotNull { it.maxSeq }.maxOrNull()
                     if (maxSeq != null) {

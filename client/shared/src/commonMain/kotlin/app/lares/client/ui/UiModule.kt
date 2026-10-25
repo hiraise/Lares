@@ -1,14 +1,21 @@
 package app.lares.client.ui
 
+import app.lares.client.data.calendar.CalendarReminderTexts
 import app.lares.client.data.tasks.TaskReminderTexts
 import app.lares.client.di.AppScope
 import app.lares.client.notifications.notificationsModule
 import app.lares.client.platform.AppStartup
 import app.lares.client.platform.AppearanceSettings
 import app.lares.client.platform.DeepLinkHandler
+import app.lares.client.platform.EventLinks
 import app.lares.client.platform.PendingNavigation
 import app.lares.client.platform.TaskLinks
+import app.lares.client.ui.calendar.CalendarViewModel
+import app.lares.client.ui.calendar.EventEditorViewModel
+import app.lares.client.ui.calendar.EventViewModel
+import app.lares.client.ui.common.CalendarReminderResourceTexts
 import app.lares.client.ui.common.TaskReminderResourceTexts
+import app.lares.client.ui.common.UiNotices
 import app.lares.client.ui.family.AddMemberViewModel
 import app.lares.client.ui.family.FamilySettingsViewModel
 import app.lares.client.ui.family.FamilyViewModel
@@ -52,9 +59,12 @@ fun uiModule(): Module =
         includes(notificationsModule())
         single { DeepLinkHandler() }
         single { PendingNavigation() }
+        single { UiNotices() }
         single { TaskLinks(get(), get()) }
+        single { EventLinks(get(), get()) }
         // Replaces the core's English fallback.
         single<TaskReminderTexts> { TaskReminderResourceTexts(getOrNull<Clock>() ?: Clock.System) }
+        single<CalendarReminderTexts> { CalendarReminderResourceTexts() }
         single { AppStartup(get(), get(AppScope)) }
         single { AppearanceSettings(get(), get(), get(AppScope)) }
         viewModel { ServerViewModel(get()) }
@@ -76,14 +86,17 @@ fun uiModule(): Module =
         viewModel { params -> AddMemberViewModel(get(), get(), get(), get(), get(), params.get()) }
         viewModel { params -> GroupEditorViewModel(get(), get(), get(), get(), get(), get(), params.get<GroupArgs>().groupId) }
         viewModel { params ->
-            PersonViewModel(get(), get(), get(), get(), get(), getOrNull<Clock>() ?: Clock.System, params.get<PersonArgs>().personId)
+            PersonViewModel(get(), get(), get(), get(), get(), getOrNull<Clock>() ?: Clock.System, params.get<PersonArgs>().personId, get())
         }
         viewModel { FamilySettingsViewModel(get(), get(), get(), get()) }
         viewModel { TasksViewModel(get(), get(), get()) }
-        viewModel { TodayViewModel(get(), get(), get()) }
-        viewModel { params -> TagViewModel(get(), get(), get(), get(), get(), params.get()) }
+        viewModel { TodayViewModel(get(), get(), get(), get()) }
+        viewModel { params -> TagViewModel(get(), get(), get(), get(), get(), params.get(), get()) }
         viewModel { params -> TaskDetailViewModel(get(), get(), params.get()) }
         viewModel { params -> TaskEditorViewModel(get(), get(), get(), get(), get(), params.get()) }
+        viewModel { CalendarViewModel(get(), get(), get(), get(), getOrNull<Clock>() ?: Clock.System) }
+        viewModel { params -> EventViewModel(get(), get(), params.get()) }
+        viewModel { params -> EventEditorViewModel(get(), get(), get(), get(), params.get()) }
         viewModel { ShoppingListsViewModel(get(), get()) }
         viewModel { params -> ShoppingListViewModel(get(), get(), get(), get(), get(), params.get()) }
     }

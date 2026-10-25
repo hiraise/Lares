@@ -11,9 +11,14 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import app.lares.client.auth.SessionState
 import app.lares.client.platform.DeepLinkHandler
+import app.lares.client.platform.EventLinks
 import app.lares.client.platform.NavTarget
 import app.lares.client.platform.PendingNavigation
 import app.lares.client.platform.TaskLinks
+import app.lares.client.ui.calendar.EventEditorArgs
+import app.lares.client.ui.calendar.EventEditorRoute
+import app.lares.client.ui.calendar.EventRoute
+import app.lares.client.ui.calendar.RepeatScope
 import app.lares.client.ui.family.AddMemberMode
 import app.lares.client.ui.family.AddMemberRoute
 import app.lares.client.ui.family.FamilyNavigation
@@ -49,8 +54,8 @@ import app.lares.client.ui.tasks.TaskEditorArgs
 import app.lares.client.ui.tasks.TaskEditorRoute
 import app.lares.contract.DeepLink
 import app.lares.contract.permissions.Section
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 import org.koin.compose.koinInject
 
@@ -182,6 +187,52 @@ data class TaskEditorDestination(
     }
 }
 
+/** The event page (CAL-014); [occurrence] is the ISO date of the opened occurrence. */
+@Serializable
+data class EventDestination(
+    val id: String,
+    val occurrence: String? = null,
+)
+
+/** The event editor (M3-06); dates are ISO strings, [scope] a [RepeatScope] name. */
+@Serializable
+data class EventEditorDestination(
+    val id: String? = null,
+    val occurrence: String? = null,
+    val scope: String = "ALL",
+    val date: String? = null,
+    val hour: Int? = null,
+    val memorable: Boolean = false,
+    val personId: String? = null,
+    val tagId: String? = null,
+) {
+    fun toArgs() =
+        EventEditorArgs(
+            id = id,
+            occurrence = occurrence?.let(LocalDate::parse),
+            scope = RepeatScope.entries.firstOrNull { it.name == scope } ?: RepeatScope.ALL,
+            date = date?.let(LocalDate::parse),
+            hour = hour,
+            memorable = memorable,
+            personId = personId,
+            tagId = tagId,
+        )
+
+    companion object {
+        fun of(args: EventEditorArgs) =
+            EventEditorDestination(
+                args.id,
+                args.occurrence?.toString(),
+                args.scope.name,
+                args.date?.toString(),
+                args.hour,
+                args.memorable,
+                args.personId,
+                args.tagId,
+            )
+    }
+}
+
 /** Server → Setup | Login | InviteAccept, QR scanner; links (opened or scanned) continue on [LinkDestination]. */
 @Composable
 fun OnboardingNavHost(
@@ -267,7 +318,34 @@ fun MainNavHost() {
                     onTask = { navController.navigate(TaskDetailDestination(it)) },
                     onTaskEditor = { navController.navigate(TaskEditorDestination.of(it)) },
                     onShoppingList = { navController.navigate(ShoppingListDestination(it)) },
+                    onEvent = { id, occurrence -> navController.navigate(EventDestination(id, occurrence?.toString())) },
+                    onEventEditor = { navController.navigate(EventEditorDestination.of(it)) },
+                    onPerson = { navController.navigate(PersonDestination(it)) },
                 ),
+            )
+        }
+        composable<EventDestination> { entry ->
+            val route = entry.toRoute<EventDestination>()
+            EventRoute(
+                route.id,
+                route.occurrence?.let(LocalDate::parse),
+                onBack = { navController.popBackStack() },
+                onEdit = { navController.navigate(EventEditorDestination.of(it)) },
+                onTag = { navController.navigate(TagDestination(it)) },
+            )
+        }
+        composable<EventEditorDestination> { entry ->
+            EventEditorRoute(
+                entry.toRoute<EventEditorDestination>().toArgs(),
+                onBack = { navController.popBackStack() },
+                // The new event's page replaces the editor, so Back returns to the calendar.
+                onCreated = { id ->
+                    navController.navigate(EventDestination(id)) { popUpTo<EventEditorDestination> { inclusive = true } }
+                },
+                // «Это и следующие» made a new series: its page replaces the old event's page and the editor.
+                onSplit = { id, occurrence ->
+                    navController.navigate(EventDestination(id, occurrence?.toString())) { popUpTo<EventDestination> { inclusive = true } }
+                },
             )
         }
         composable<ShoppingListDestination> { entry ->
@@ -328,22 +406,47 @@ fun MainNavHost() {
 
 /**
  * A tapped task notification or reminder opens the task over the main screen; a task that is gone opens the Tasks tab
- * with a notice instead (plan M1-07).
+ * with a notice instead (plan M1-07). Events open their page (the reminded occurrence, else the next one), a gone
+ * event opens the Calendar tab with a notice; birthday reminders open the person (plan M3-08).
  */
 @Composable
 private fun NotificationTaps(
     navController: NavHostController,
     pending: PendingNavigation = koinInject(),
     taskLinks: TaskLinks = koinInject(),
+    eventLinks: EventLinks = koinInject(),
 ) {
     LaunchedEffect(pending) {
-        pending.target.filterIsInstance<NavTarget.Task>().collect { target ->
-            if (!pending.consume(target)) return@collect
-            if (taskLinks.exists(target.id)) {
-                navController.navigate(TaskDetailDestination(target.id)) { popUpTo<SectionsDestination>() }
-            } else {
-                navController.popBackStack<SectionsDestination>(inclusive = false)
-                pending.submit(NavTarget.TaskGone)
+        pending.target.collect { target ->
+            when (target) {
+                is NavTarget.Task -> {
+                    if (!pending.consume(target)) return@collect
+                    if (taskLinks.exists(target.id)) {
+                        navController.navigate(TaskDetailDestination(target.id)) { popUpTo<SectionsDestination>() }
+                    } else {
+                        navController.popBackStack<SectionsDestination>(inclusive = false)
+                        pending.submit(NavTarget.TaskGone)
+                    }
+                }
+
+                is NavTarget.Event -> {
+                    if (!pending.consume(target)) return@collect
+                    if (eventLinks.exists(target.id)) {
+                        navController.navigate(
+                            EventDestination(target.id, target.occurrence?.toString()),
+                        ) { popUpTo<SectionsDestination>() }
+                    } else {
+                        navController.popBackStack<SectionsDestination>(inclusive = false)
+                        pending.submit(NavTarget.EventGone)
+                    }
+                }
+
+                is NavTarget.Person -> {
+                    if (!pending.consume(target)) return@collect
+                    navController.navigate(PersonDestination(target.id)) { popUpTo<SectionsDestination>() }
+                }
+
+                else -> {}
             }
         }
     }
@@ -373,6 +476,7 @@ private fun NavGraphBuilder.familyGraph(navController: NavHostController) {
             onBack = back,
             onTask = { navController.navigate(TaskDetailDestination(it)) },
             onShoppingList = { id, tagId -> navController.navigate(ShoppingListDestination(id, tagId)) },
+            onEvent = { id, occurrence -> navController.navigate(EventDestination(id, occurrence.toString())) },
         )
     }
     composable<MemberDestination> { entry ->
@@ -398,6 +502,13 @@ private fun NavGraphBuilder.familyGraph(navController: NavHostController) {
         LoginQrRoute(onBack = back, memberId = route.memberId, memberName = route.name)
     }
     composable<GroupDestination> { entry -> GroupEditorRoute(entry.toRoute<GroupDestination>().groupId, onBack = back) }
-    composable<PersonDestination> { entry -> PersonRoute(entry.toRoute<PersonDestination>().personId, onBack = back) }
+    composable<PersonDestination> { entry ->
+        PersonRoute(
+            entry.toRoute<PersonDestination>().personId,
+            onBack = back,
+            onEvent = { navController.navigate(EventDestination(it)) },
+            onAddMemorable = { navController.navigate(EventEditorDestination.of(EventEditorArgs(memorable = true, personId = it))) },
+        )
+    }
     composable<FamilySettingsDestination> { FamilySettingsRoute(onBack = back) }
 }
