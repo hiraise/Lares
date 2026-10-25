@@ -14,6 +14,9 @@ import app.lares.client.platform.DeepLinkHandler
 import app.lares.client.platform.NavTarget
 import app.lares.client.platform.PendingNavigation
 import app.lares.client.platform.TaskLinks
+import app.lares.client.ui.calendar.EventEditorArgs
+import app.lares.client.ui.calendar.EventRoute
+import app.lares.client.ui.calendar.RepeatScope
 import app.lares.client.ui.family.AddMemberMode
 import app.lares.client.ui.family.AddMemberRoute
 import app.lares.client.ui.family.FamilyNavigation
@@ -51,6 +54,7 @@ import app.lares.contract.DeepLink
 import app.lares.contract.permissions.Section
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 import org.koin.compose.koinInject
 
@@ -182,6 +186,52 @@ data class TaskEditorDestination(
     }
 }
 
+/** The event page (CAL-014); [occurrence] is the ISO date of the opened occurrence. */
+@Serializable
+data class EventDestination(
+    val id: String,
+    val occurrence: String? = null,
+)
+
+/** The event editor (M3-06; a stub until then); dates are ISO strings, [scope] a [RepeatScope] name. */
+@Serializable
+data class EventEditorDestination(
+    val id: String? = null,
+    val occurrence: String? = null,
+    val scope: String = "ALL",
+    val date: String? = null,
+    val hour: Int? = null,
+    val memorable: Boolean = false,
+    val personId: String? = null,
+    val tagId: String? = null,
+) {
+    fun toArgs() =
+        EventEditorArgs(
+            id = id,
+            occurrence = occurrence?.let(LocalDate::parse),
+            scope = RepeatScope.entries.firstOrNull { it.name == scope } ?: RepeatScope.ALL,
+            date = date?.let(LocalDate::parse),
+            hour = hour,
+            memorable = memorable,
+            personId = personId,
+            tagId = tagId,
+        )
+
+    companion object {
+        fun of(args: EventEditorArgs) =
+            EventEditorDestination(
+                args.id,
+                args.occurrence?.toString(),
+                args.scope.name,
+                args.date?.toString(),
+                args.hour,
+                args.memorable,
+                args.personId,
+                args.tagId,
+            )
+    }
+}
+
 /** Server → Setup | Login | InviteAccept, QR scanner; links (opened or scanned) continue on [LinkDestination]. */
 @Composable
 fun OnboardingNavHost(
@@ -267,8 +317,24 @@ fun MainNavHost() {
                     onTask = { navController.navigate(TaskDetailDestination(it)) },
                     onTaskEditor = { navController.navigate(TaskEditorDestination.of(it)) },
                     onShoppingList = { navController.navigate(ShoppingListDestination(it)) },
+                    onEvent = { id, occurrence -> navController.navigate(EventDestination(id, occurrence?.toString())) },
+                    onEventEditor = { navController.navigate(EventEditorDestination.of(it)) },
+                    onPerson = { navController.navigate(PersonDestination(it)) },
                 ),
             )
+        }
+        composable<EventDestination> { entry ->
+            val route = entry.toRoute<EventDestination>()
+            EventRoute(
+                route.id,
+                route.occurrence?.let(LocalDate::parse),
+                onBack = { navController.popBackStack() },
+                onEdit = { navController.navigate(EventEditorDestination.of(it)) },
+                onTag = { navController.navigate(TagDestination(it)) },
+            )
+        }
+        composable<EventEditorDestination> {
+            SectionPlaceholderPage(Section.CALENDAR, onBack = { navController.popBackStack() })
         }
         composable<ShoppingListDestination> { entry ->
             val route = entry.toRoute<ShoppingListDestination>()

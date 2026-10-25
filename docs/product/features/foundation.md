@@ -137,7 +137,7 @@ localization and deployment — everything feature modules depend on.
   «Добавить» button (M1-07). Active shopping list card above the tasks (M2-06). The empty state remains for members who
   see no block.*
 - **FND-064** `MVP` `done` — Bottom navigation: Today · Tasks · Shopping · Calendar · More; Map, Budget, Family and Tags
-  are reached from "More" and from Today blocks (Q-013). *Bar and More done (M0-07); Family and Tags tiles open the Family screen (M0-08).*
+  are reached from "More" and from Today blocks (Q-013). *Bar and More done (M0-07); Family and Tags tiles open the Family screen (M0-08); the Calendar tab replaces its placeholder (M3-05).*
 - **FND-065** `MVP` `doing` — The UI follows the [visual style](../../design/visual-style.md) (ADR-0016).
   *Theme, fonts, icons, components (M0-07); applies to every later screen.*
 

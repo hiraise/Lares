@@ -114,7 +114,7 @@ by the customer on 2026-10-24 (Q-021…Q-024 answered the same day).
 | [M3-02](M3/02-calendar-server-sync.md) | Calendar on the server: tables, sync handlers, permissions, cascade, birthday setting | M3-01 | done |
 | [M3-03](M3/03-calendar-server-notifications.md) | Event notifications on the server: added, changed, cancelled | M3-02 | done |
 | [M3-04](M3/04-calendar-client-data.md) | Calendar in the client core: tables, adapters, views, repository, writer, reminders | M3-02 | done |
-| [M3-05](M3/05-calendar-month-list-event-ui.md) | Calendar UI: the Calendar tab (month, list, filters) and the event page | M3-04 | ready |
+| [M3-05](M3/05-calendar-month-list-event-ui.md) | Calendar UI: the Calendar tab (month, list, filters) and the event page | M3-04 | done |
 | [M3-06](M3/06-event-editor-ui.md) | Event editor: times, several days, repeat with end, participants, memorable dates | M3-05 | ready |
 | [M3-07](M3/07-calendar-week-grid-ui.md) | Calendar week view: the grid by hours | M3-06 | ready |
 | [M3-08](M3/08-calendar-today-tags-settings-manual.md) | Today «Скоро», tag page, person dates, settings, notification taps, manual, M3 wrap-up | M3-07, M3-03 | ready |

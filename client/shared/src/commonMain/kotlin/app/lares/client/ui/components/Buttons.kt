@@ -142,13 +142,15 @@ fun AppFilterChip(
     modifier: Modifier = Modifier,
     leadingIcon: DrawableResource? = null,
     trailingIcon: DrawableResource? = null,
+    /** Drawn instead of [leadingIcon], e.g. a person's avatar. */
+    leading: (@Composable () -> Unit)? = null,
 ) {
     val iconColor = if (selected) MaterialTheme.colorScheme.inverseOnSurface else MaterialTheme.colorScheme.onSurface
     FilterChip(
         selected = selected,
         onClick = onClick,
         label = { Text(label, style = MaterialTheme.typography.labelLarge) },
-        leadingIcon = leadingIcon?.let { { AppIcon(it, null, size = 18.dp, tint = iconColor) } },
+        leadingIcon = leading ?: leadingIcon?.let { { AppIcon(it, null, size = 18.dp, tint = iconColor) } },
         trailingIcon = trailingIcon?.let { { AppIcon(it, null, size = 18.dp, tint = iconColor) } },
         shape = CircleShape,
         colors =

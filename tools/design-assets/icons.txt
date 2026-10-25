@@ -78,3 +78,9 @@ category
 remove_shopping_cart
 add_shopping_cart
 remove_done
+# Added in M3-05 (calendar).
+today
+filter_list
+celebration
+event
+event_busy

@@ -32,6 +32,7 @@ Tags complement budget categories: car spending spread over "Fuel", "Insurance",
   *Tasks done: «Метка» chip with a tag picker in the Tasks tab (M1-05).*
   *Shopping done: tag chips «Все» / one per tag in use on the list page (M2-05); the tag page opens a list filtered by
   the tag (M2-06).*
+  *Calendar done: «Метка» in the Calendar filter sheet with a removable «Метка: …» chip (M3-05).*
   *Calendar client core: the tag filter of the day, month and week views (M3-04); chip in M3-05.*
 - **TAG-004** `MVP` `doing` — Tag page aggregates linked items across modules, grouped by module.
   *Page with the tasks section «Задачи · N» (archived tags too), opened from Family › Tags and from a tag chip on the

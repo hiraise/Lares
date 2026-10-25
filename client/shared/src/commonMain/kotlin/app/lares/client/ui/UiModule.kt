@@ -9,8 +9,11 @@ import app.lares.client.platform.AppearanceSettings
 import app.lares.client.platform.DeepLinkHandler
 import app.lares.client.platform.PendingNavigation
 import app.lares.client.platform.TaskLinks
+import app.lares.client.ui.calendar.CalendarViewModel
+import app.lares.client.ui.calendar.EventViewModel
 import app.lares.client.ui.common.CalendarReminderResourceTexts
 import app.lares.client.ui.common.TaskReminderResourceTexts
+import app.lares.client.ui.common.UiNotices
 import app.lares.client.ui.family.AddMemberViewModel
 import app.lares.client.ui.family.FamilySettingsViewModel
 import app.lares.client.ui.family.FamilyViewModel
@@ -54,6 +57,7 @@ fun uiModule(): Module =
         includes(notificationsModule())
         single { DeepLinkHandler() }
         single { PendingNavigation() }
+        single { UiNotices() }
         single { TaskLinks(get(), get()) }
         // Replaces the core's English fallback.
         single<TaskReminderTexts> { TaskReminderResourceTexts(getOrNull<Clock>() ?: Clock.System) }
@@ -87,6 +91,8 @@ fun uiModule(): Module =
         viewModel { params -> TagViewModel(get(), get(), get(), get(), get(), params.get()) }
         viewModel { params -> TaskDetailViewModel(get(), get(), params.get()) }
         viewModel { params -> TaskEditorViewModel(get(), get(), get(), get(), get(), params.get()) }
+        viewModel { CalendarViewModel(get(), get(), get(), get(), getOrNull<Clock>() ?: Clock.System) }
+        viewModel { params -> EventViewModel(get(), get(), params.get()) }
         viewModel { ShoppingListsViewModel(get(), get()) }
         viewModel { params -> ShoppingListViewModel(get(), get(), get(), get(), get(), params.get()) }
     }

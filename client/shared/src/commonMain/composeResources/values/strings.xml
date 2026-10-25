@@ -824,4 +824,72 @@
         <item quantity="other">%1$d years</item>
     </plurals>
     <string name="cal_reminder_birthday_today_age">Today, %1$s</string>
+    <!-- Calendar UI (M3-05) -->
+    <!-- Month names in the nominative, for "October 2026" -->
+    <string-array name="months_standalone">
+        <item>January</item>
+        <item>February</item>
+        <item>March</item>
+        <item>April</item>
+        <item>May</item>
+        <item>June</item>
+        <item>July</item>
+        <item>August</item>
+        <item>September</item>
+        <item>October</item>
+        <item>November</item>
+        <item>December</item>
+    </string-array>
+    <string name="cal_month_year">%1$s %2$s</string>
+    <string name="cal_view_month">Month</string>
+    <string name="cal_view_week">Week</string>
+    <string name="cal_view_list">List</string>
+    <string name="cal_previous">Previous</string>
+    <string name="cal_next">Next</string>
+    <string name="cal_go_today">Go to today</string>
+    <string name="cal_filter">Filter</string>
+    <string name="cal_filter_active">Filter, on</string>
+    <string name="cal_filter_whose">Whose calendar</string>
+    <string name="cal_filter_everyone">Everyone</string>
+    <string name="cal_filter_tag">Tag</string>
+    <string name="cal_filter_any_tag">Any</string>
+    <string name="cal_filter_show_tasks">Show tasks</string>
+    <string name="cal_filter_reset">Reset</string>
+    <string name="cal_chip_tag">Tag: %1$s</string>
+    <string name="cal_chip_no_tasks">No tasks</string>
+    <string name="cal_chip_remove">Remove filter %1$s</string>
+    <string name="cal_new_event">New event</string>
+    <string name="cal_all_day">All day</string>
+    <string name="cal_until_date">until %1$s</string>
+    <string name="cal_from_date">from %1$s</string>
+    <string name="cal_until_time">until %1$s</string>
+    <string name="cal_whole_family">Whole family</string>
+    <string name="cal_birthday">Birthday: %1$s</string>
+    <string name="cal_task_meta">Task · %1$s</string>
+    <string name="cal_overdue">Overdue</string>
+    <string name="cal_nothing_planned">Nothing planned</string>
+    <string name="cal_no_events">No events yet</string>
+    <string name="cal_show_past">Show earlier</string>
+    <string name="cal_event_changed_note">Only this occurrence was changed</string>
+    <string name="cal_when_timed">%1$s · %2$s–%3$s</string>
+    <string name="cal_when_all_day">%1$s · all day</string>
+    <string name="cal_range">%1$s – %2$s</string>
+    <string name="cal_when_yearly">%1$s · every year</string>
+    <string name="cal_rule_until">%1$s · until %2$s</string>
+    <string name="cal_remind_me">Remind me</string>
+    <string name="cal_reminder_as_event">As in the event</string>
+    <string name="cal_reminder_as_event_suffix">%1$s (as in the event)</string>
+    <string name="cal_reminder_at_start">At the start</string>
+    <string name="cal_reminder_all_day_on_day">On the day at 9:00</string>
+    <string name="cal_reminder_title">Reminder</string>
+    <string name="cal_reminder_memorable">Like birthdays, in Settings</string>
+    <string name="cal_created_by">Created by %1$s</string>
+    <string name="cal_delete_title">Delete the event «%1$s»?</string>
+    <string name="cal_delete_text">It disappears from the calendar of the whole family.</string>
+    <string name="cal_scope_edit_title">Edit repeating event</string>
+    <string name="cal_scope_delete_title">Delete repeating event</string>
+    <string name="cal_scope_this">Only this</string>
+    <string name="cal_scope_following">This and following</string>
+    <string name="cal_scope_all">All</string>
+    <string name="cal_occurrence_deleted">Occurrence deleted</string>
 </resources>

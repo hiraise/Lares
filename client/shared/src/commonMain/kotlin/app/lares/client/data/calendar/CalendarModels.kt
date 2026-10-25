@@ -130,7 +130,8 @@ data class PersonDates(
 /**
  * The event page (CAL-014). [occ] is the given occurrence, else the next one (null if none is left).
  * [myReminder] is what fires for the viewer; [ownReminderSet] is true when the viewer's own row differs from what the
- * event gives them («Как в событии» otherwise). [changedCount] counts changed or cancelled occurrences.
+ * event gives them («Как в событии» otherwise); [eventReminder] is what the event alone gives them (null: the event has no
+ * reminder for them). [changedCount] counts changed or cancelled occurrences.
  */
 data class EventDetail(
     val id: String,
@@ -143,6 +144,7 @@ data class EventDetail(
     val years: Int?,
     val myReminder: Int?,
     val ownReminderSet: Boolean,
+    val eventReminder: Int? = null,
     val canEdit: Boolean,
     val changedCount: Int,
 )

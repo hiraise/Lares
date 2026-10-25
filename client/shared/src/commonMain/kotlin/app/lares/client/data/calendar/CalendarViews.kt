@@ -262,6 +262,7 @@ object CalendarViews {
             years = occ?.let { Birthdays.years(event, it.occurrence) },
             myReminder = myReminder,
             ownReminderSet = own != null && own.minutesBefore != eventDefault,
+            eventReminder = eventDefault,
             canEdit = viewer?.let { EventRules.canEdit(it, event) } ?: false,
             changedCount = rows.count { !it.isEmpty() },
         )

@@ -7,7 +7,7 @@ Updated: 2026-10-25
 **M0 Foundation — all plans M0-01…M0-11 done; M0 acceptance with the customer pending.
 M1 Tasks — all plans M1-01…M1-07 done; M1 acceptance with the customer next.
 M2 Shopping lists — all plans M2-01…M2-06 done; M2 acceptance with the customer next.
-M3 Calendar — M3-01…M3-04 done; next `/plan-run M3-05`.**
+M3 Calendar — M3-01…M3-05 done; next `/plan-run M3-06`.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
@@ -22,6 +22,12 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 
 ## Last completed
 
+- 2026-10-25 M3-05 Calendar tab and event page: month pager with personal-color dots and the day's list, «Список» from
+  today (growing forward, «Показать прошлые»), ‹ › and «Сегодня», filters by person, tag and «Показывать задачи» with
+  removable chips, the view remembered on the device; rows for events, birthdays (open the person), memorable dates and
+  tasks (ticked off there); the event page with facts, «Напомнить мне» and «Только это / Это и следующие / Все» for
+  edit and delete. «Неделя» and the editor are placeholders until M3-07 / M3-06. 21 new tests, emulator walkthrough
+  of spec scenarios 2–6 and 8 (cold-start month bug found and fixed).
 - 2026-10-25 M3-04 Calendar in the client core: events, changed occurrences and own reminders work offline; views for
   day lists, month, week, «Скоро», tag page and person dates; one writer for «Только это» / «Это и следующие» / «Все»;
   local reminders for events, birthdays and memorable dates; `seed.py calendar`; 29 unit and 7 multi-device tests.
@@ -108,7 +114,7 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 3. M4 plan: re-run the load test with location uploads every 30 s (ADR-0015).
 4. After the M1 acceptance: set the tasks spec to `implemented`.
 5. M2 acceptance with the customer (checklist in the M2-06 handoff); after it set the shopping spec to `implemented`.
-6. Execute M3-05…M3-08 (`/plan-run M3-05`).
+6. Execute M3-06…M3-08 (`/plan-run M3-06`).
 
 ## Plan progress
 
@@ -133,6 +139,7 @@ See the table in [plans README](plans/README.md#m0-plans).
 | Emulator is slow on this Mac (software GPU, cold start ~9 s, ANR dialogs under load) | Walkthroughs are slow; real ANRs are hard to tell from emulator stalls | Check main-thread CPU (`/proc/<pid>/task/<pid>/stat`) and ANR traces before blaming the app; real phone for M0 acceptance |
 | Pre-release UI libraries (CMP Material3 alpha, navigation RC) | Possible API changes or bugs | Versions paired by JetBrains with CMP 1.12.2; upgrade when stable |
 | ktlint 1.8 parses only Kotlin ≤ 2.2 syntax | Lint failures on newest syntax | Avoid newest syntax; report instead of disabling lint |
+| Flaky multi-device test `SyncScenariosTest` 10 (restore reset) failed once in the full gate, passed 3 reruns | CI noise | Watch in CI; investigate if it repeats |
 | Medium-effort sessions deviate from plans | Inconsistent code | Plans fix all decisions; "stop and report" rules; customer approves each commit |
 
 ## Dev environment notes

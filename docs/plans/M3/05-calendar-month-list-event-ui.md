@@ -1,6 +1,6 @@
 ---
 id: M3-05
-status: ready
+status: done
 depends_on: [M3-04]
 requirements: [CAL-004, CAL-005, CAL-006, CAL-008, CAL-009, CAL-014, CAL-015, CAL-017, TAG-003, FND-064]
 ---

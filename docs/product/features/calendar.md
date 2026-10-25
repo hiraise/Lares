@@ -1,7 +1,7 @@
 ---
 status: approved  # customer, 2026-10-24 (Q-021…Q-024 answered the same day)
 milestone: M3
-updated: 2026-10-24
+updated: 2026-10-25
 ---
 # Calendar (CAL)
 
@@ -48,9 +48,11 @@ Technical design: [architecture/calendar.md](../../architecture/calendar.md).
   *Client core: participants (unknown ids dropped), person filter incl. whole-family events (M3-04).*
 - **CAL-014** `MVP` `todo` — Event page: title, date and time with the repeat rule, place, participants, tags, notes, the
   reminder for me, who created it; edit and delete for those who may.
+  *UI: the event page — title, «Изменено только это повторение», when, repeat with its end, place, participants, tags, notes, «Напомнить мне», «Создал(а)»; edit and delete for who may (M3-05; the editor comes in M3-06).*
 - **CAL-017** `MVP` `todo` — Works offline: events are seen, created, changed and deleted without network and sync later
   (FND-040).
   *Client core: everything through `LocalWriter`, works offline; multi-device tests for offline edits of one occurrence, split, delete vs edit, stale permissions (M3-04).*
+  *UI: the tab and the event page read local data and write through the local writer, so they work offline (M3-05).*
 
 ### Repeating events
 
@@ -66,6 +68,7 @@ Technical design: [architecture/calendar.md](../../architecture/calendar.md).
   reset (the app warns before saving).
   *Server: occurrence rows, `splitFrom`, cascade on delete (M3-02).*
   *Client core: `editOccurrence`, `cancelOccurrence`, `editFollowing`, `deleteFollowing`, resets when the schedule changes; only changed fields are sent, so offline edits of one occurrence merge (M3-04).*
+  *UI: «Только это · Это и следующие · Все» before editing or deleting a repeating event; «Только это» closes the page with «Повторение удалено» (M3-05).*
 
 ### Birthdays and memorable dates
 
@@ -73,10 +76,12 @@ Technical design: [architecture/calendar.md](../../architecture/calendar.md).
   The age shows when the year is known («Бабушка Валя, 78 лет»); 29 February birthdays show on 28 February in non-leap
   years. They are not edited in the calendar: a tap opens the person.
   *Client core: birthdays with ages in the day lists, month dots, «Скоро», person dates (M3-04).*
+  *UI: birthday rows «Бабушка Валя, 78 лет» / «День рождения: …» with the relation; a tap opens the person (M3-05).*
 - **CAL-005** `MVP` `todo` — Memorable dates: a yearly date for one or more persons (wedding anniversary, memorial day),
   with the year it began, so the count shows («Годовщина свадьбы · 16 лет»). Created in the calendar («Памятная дата» in
   the editor) or from a person's page; the person's page lists their birthday and memorable dates.
   *Client core: memorable dates with years, `forPerson` (M3-04).*
+  *UI: memorable rows «Годовщина свадьбы · 16 лет»; the event page shows «12 июня · каждый год» and the years; edit and delete apply to the whole date, without the scope dialog (M3-05).*
 
 ### Reminders and notifications
 
@@ -87,6 +92,7 @@ Technical design: [architecture/calendar.md](../../architecture/calendar.md).
   offline (FND-050).
   *Server: personal reminder rows, synced only to their member (M3-02).*
   *Client core: `myReminder` in the event detail, `setMyReminder` / `clearMyReminder`, local event reminders (14 days ahead, at most 100) (M3-04).*
+  *UI: «Напомнить мне» on the event page — «Как в событии» (when the event reminds me), «Нет» and the editor's options; asks for notifications like the task editor (M3-05).*
 - **CAL-016** `MVP` `todo` — Birthday and memorable-date reminders (Q-022): for everybody with access to Calendar, at 09:00
   every day starting N days before and including the day itself. N = 3 by default; each member chooses in Settings ›
   Notifications: off, on the day only, 1, 3, 7 or 14 days before. A person does not get reminders about their own
@@ -108,11 +114,13 @@ Technical design: [architecture/calendar.md](../../architecture/calendar.md).
   (days with events from today onwards, scrolling forward and back). Previous/next and «Сегодня»; the last view is
   remembered. Filters by person (events they take part in and their birthdays and dates) and by tag.
   *Client core: `days`, `month` (42 cells, dots), `week` (column layout), person and tag filters (M3-04).*
+  *UI: the Calendar tab — month pager with dots and the day's list, «Список» growing forward and back, ‹ › and «Сегодня», filter sheet with removable chips, the view remembered on the device; «Неделя» is a placeholder until M3-07 (M3-05).*
 - **CAL-009** `MVP` `todo` — Tasks with a date appear in «Список» and in the day list under the month (Q-023): for
   repeating tasks only the current occurrence; they can be ticked off there. The filter has «Показывать задачи», on by
   default; the person filter applies to assignees, the tag filter to task tags. Only for members with access to Tasks.
   ASSUMPTION: tasks are not drawn as dots in the month grid nor in the week grid.
   *Client core: open tasks on their date, overdue and done-today ones on today, «Показывать задачи» filter (M3-04).*
+  *UI: task rows «Задача · Дмитрий» («Просрочено») ticked off in the day list and «Список», «Показывать задачи» in the filter (M3-05).*
 - **CAL-019** `MVP` `todo` — Today block «Скоро» (FND-063): events of today and the next 7 days, birthdays and memorable dates,
   at most 5 rows with a date tile and «через 3 дня»; «Календарь» opens the tab.
   *Client core: `upcoming` (M3-04).*

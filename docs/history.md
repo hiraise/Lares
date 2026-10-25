@@ -284,3 +284,11 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   notification settings (every PUT now sends the full settings), `seed.py calendar` with derived ids checked against the
   contract's golden values. 29 new unit tests, 7 multi-device tests (`CalendarSyncTest`); convergence now compares
   own-only reminder rows per member.
+- 2026-10-25 **M3-05** Calendar UI: package `ui/calendar/` — `CalendarLogic` (texts), components (`MonthGrid`, `DayCell`,
+  `DayList`, event / birthday / memorable / task rows, `DateTile`, `PersonAvatars`), `CalendarViewModel` + screen (month
+  `HorizontalPager`, «Список» with growing range, filter sheet, chips, FAB), `EventViewModel` + page (facts, my
+  reminder sheet, `ScopeDialog`), routes `EventDestination` and the editor stub `EventEditorDestination`,
+  `AppPreferences.calendarView`, `UiNotices` for «Повторение удалено», `EventDetail.eventReminder`, icons `today`,
+  `filter_list`, `celebration`, `event`, `event_busy`, `ScreenHeader(singleLineTitle)`. 21 new tests
+  (`CalendarLogicTest`, `CalendarViewModelTest`, `CalendarUiTest`, `EventViewModelTest`, `EventScreenTest`); emulator
+  walkthrough found the month jumping to January 1970 on a cold start (pager composed before data) — fixed.

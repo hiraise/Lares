@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -18,6 +20,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import app.lares.client.resources.Res
 import app.lares.client.resources.action_back
 import app.lares.client.resources.ic_arrow_back
@@ -30,6 +33,8 @@ fun ScreenHeader(
     title: String,
     modifier: Modifier = Modifier,
     contextLine: String? = null,
+    /** Keep the title on one line, shrinking it when the actions leave little room (Calendar: «Сентябрь 2026»). */
+    singleLineTitle: Boolean = false,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
     Row(
@@ -44,7 +49,18 @@ fun ScreenHeader(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            Text(title, style = MaterialTheme.typography.headlineLarge, modifier = Modifier.semantics { heading() })
+            if (singleLineTitle) {
+                val style = MaterialTheme.typography.headlineLarge
+                BasicText(
+                    title,
+                    style = style.copy(color = MaterialTheme.colorScheme.onSurface),
+                    maxLines = 1,
+                    autoSize = TextAutoSize.StepBased(minFontSize = 18.sp, maxFontSize = style.fontSize),
+                    modifier = Modifier.semantics { heading() },
+                )
+            } else {
+                Text(title, style = MaterialTheme.typography.headlineLarge, modifier = Modifier.semantics { heading() })
+            }
         }
         Row(
             modifier = Modifier.padding(top = 4.dp),

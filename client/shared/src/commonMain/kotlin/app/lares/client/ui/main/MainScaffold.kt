@@ -54,6 +54,10 @@ import app.lares.client.resources.nav_tasks
 import app.lares.client.resources.nav_today
 import app.lares.client.resources.sync_rejected_snackbar
 import app.lares.client.resources.task_deleted
+import app.lares.client.ui.calendar.CalendarRoute
+import app.lares.client.ui.calendar.EventEditorArgs
+import app.lares.client.ui.common.UiNotices
+import app.lares.client.ui.common.load
 import app.lares.client.ui.common.messageRes
 import app.lares.client.ui.components.AppIcon
 import app.lares.client.ui.family.FamilyTab
@@ -66,6 +70,7 @@ import app.lares.client.ui.tasks.TasksViewModel
 import app.lares.client.ui.theme.LaresTheme
 import app.lares.contract.permissions.Section
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
@@ -102,6 +107,10 @@ class MainNavigation(
     /** The task editor (a new task with its defaults, or an existing one). */
     val onTaskEditor: (TaskEditorArgs) -> Unit = {},
     val onShoppingList: (String) -> Unit = {},
+    /** An event page: the event and the scheduled date of the occurrence. */
+    val onEvent: (String, LocalDate?) -> Unit = { _, _ -> },
+    val onEventEditor: (EventEditorArgs) -> Unit = {},
+    val onPerson: (String) -> Unit = {},
 )
 
 @Composable
@@ -112,6 +121,7 @@ fun MainScaffoldRoute(
     tasksViewModel: TasksViewModel = koinViewModel(),
     deepLinks: DeepLinkHandler = koinInject(),
     pendingNavigation: PendingNavigation = koinInject(),
+    notices: UiNotices = koinInject(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val today by todayViewModel.state.collectAsStateWithLifecycle()
@@ -148,6 +158,8 @@ fun MainScaffoldRoute(
         }
     }
     TaskEventSnackbars(todayViewModel.events, snackbar, onUndo = todayViewModel::undo)
+    // Texts from pages that closed themselves («Повторение удалено»).
+    LaunchedEffect(notices) { notices.notices.collect { snackbar.showSnackbar(it.load()) } }
 
     MainScaffold(
         state = state,
@@ -216,7 +228,13 @@ fun MainScaffold(
                 }
 
                 MainTab.CALENDAR -> {
-                    SectionPlaceholder(current.section!!)
+                    CalendarRoute(
+                        snackbar,
+                        onEvent = navigation.onEvent,
+                        onEventEditor = navigation.onEventEditor,
+                        onPerson = navigation.onPerson,
+                        onTask = navigation.onTask,
+                    )
                 }
 
                 MainTab.MORE -> {

@@ -382,3 +382,16 @@ after a change of the calendar inputs, the mute set or `birthdayDaysBefore`, and
 - **Today «Скоро»** after the tasks block; **tag page «События»** after shopping; **person page** «Даты» with the next
   birthday (age) and memorable dates + «Добавить памятную дату»; **Settings › Notifications** switches «События
   календаря» (`event.changed`), «Напоминания о событиях» (`event.reminder`) and the row «Дни рождения» (choice).
+
+### Implementation notes (M3-05)
+
+- `CalendarViewModel(repository, tasks, tasksWriter, preferences, clock)` also reads `TasksRepository.observeInputs()`:
+  task rows need `TaskRows` (done state, who may tick) like Today. Only the active view is computed: the month view the
+  grids of the shown month and its neighbours plus the selected day, the list view its range.
+- `EventDetail.eventReminder` is what the event alone gives the member (null: none for them); the «Напомнить мне» sheet
+  shows «Как в событии» only when it is set.
+- Memorable dates are edited and deleted as a whole: no scope dialog.
+- After «Только это» the page closes and «Повторение удалено» shows on the main screen through `UiNotices` (a buffered
+  channel collected by `MainScaffoldRoute`).
+- The month pager composes only the visible page; neighbour pages use a plain grid until their dots are computed.
+- Row texts use the persons' full names («Бабушка Валя»), not first words.

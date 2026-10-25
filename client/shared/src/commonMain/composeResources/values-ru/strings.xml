@@ -864,4 +864,72 @@
         <item quantity="other">%1$d года</item>
     </plurals>
     <string name="cal_reminder_birthday_today_age">Сегодня, %1$s</string>
+    <!-- Calendar UI (M3-05) -->
+    <!-- Month names in the nominative, for "October 2026" -->
+    <string-array name="months_standalone">
+        <item>Январь</item>
+        <item>Февраль</item>
+        <item>Март</item>
+        <item>Апрель</item>
+        <item>Май</item>
+        <item>Июнь</item>
+        <item>Июль</item>
+        <item>Август</item>
+        <item>Сентябрь</item>
+        <item>Октябрь</item>
+        <item>Ноябрь</item>
+        <item>Декабрь</item>
+    </string-array>
+    <string name="cal_month_year">%1$s %2$s</string>
+    <string name="cal_view_month">Месяц</string>
+    <string name="cal_view_week">Неделя</string>
+    <string name="cal_view_list">Список</string>
+    <string name="cal_previous">Назад</string>
+    <string name="cal_next">Вперёд</string>
+    <string name="cal_go_today">К сегодняшнему дню</string>
+    <string name="cal_filter">Фильтр</string>
+    <string name="cal_filter_active">Фильтр, включён</string>
+    <string name="cal_filter_whose">Чей календарь</string>
+    <string name="cal_filter_everyone">Все</string>
+    <string name="cal_filter_tag">Метка</string>
+    <string name="cal_filter_any_tag">Любая</string>
+    <string name="cal_filter_show_tasks">Показывать задачи</string>
+    <string name="cal_filter_reset">Сбросить</string>
+    <string name="cal_chip_tag">Метка: %1$s</string>
+    <string name="cal_chip_no_tasks">Без задач</string>
+    <string name="cal_chip_remove">Убрать фильтр %1$s</string>
+    <string name="cal_new_event">Новое событие</string>
+    <string name="cal_all_day">Весь день</string>
+    <string name="cal_until_date">до %1$s</string>
+    <string name="cal_from_date">с %1$s</string>
+    <string name="cal_until_time">до %1$s</string>
+    <string name="cal_whole_family">Вся семья</string>
+    <string name="cal_birthday">День рождения: %1$s</string>
+    <string name="cal_task_meta">Задача · %1$s</string>
+    <string name="cal_overdue">Просрочено</string>
+    <string name="cal_nothing_planned">Ничего не запланировано</string>
+    <string name="cal_no_events">Событий пока нет</string>
+    <string name="cal_show_past">Показать прошлые</string>
+    <string name="cal_event_changed_note">Изменено только это повторение</string>
+    <string name="cal_when_timed">%1$s · %2$s–%3$s</string>
+    <string name="cal_when_all_day">%1$s · весь день</string>
+    <string name="cal_range">%1$s – %2$s</string>
+    <string name="cal_when_yearly">%1$s · каждый год</string>
+    <string name="cal_rule_until">%1$s · до %2$s</string>
+    <string name="cal_remind_me">Напомнить мне</string>
+    <string name="cal_reminder_as_event">Как в событии</string>
+    <string name="cal_reminder_as_event_suffix">%1$s (как в событии)</string>
+    <string name="cal_reminder_at_start">В начале</string>
+    <string name="cal_reminder_all_day_on_day">В день события в 9:00</string>
+    <string name="cal_reminder_title">Напоминание</string>
+    <string name="cal_reminder_memorable">Как дни рождения, в Настройках</string>
+    <string name="cal_created_by">Создал(а) %1$s</string>
+    <string name="cal_delete_title">Удалить событие «%1$s»?</string>
+    <string name="cal_delete_text">Оно исчезнет из календаря всей семьи.</string>
+    <string name="cal_scope_edit_title">Изменить повторяющееся событие</string>
+    <string name="cal_scope_delete_title">Удалить повторяющееся событие</string>
+    <string name="cal_scope_this">Только это</string>
+    <string name="cal_scope_following">Это и следующие</string>
+    <string name="cal_scope_all">Все</string>
+    <string name="cal_occurrence_deleted">Повторение удалено</string>
 </resources>
