@@ -11,6 +11,7 @@ import app.lares.contract.api.location.VisibilityLevel
 import app.lares.contract.location.LocationVisibility
 import app.lares.contract.location.VisibilityTarget
 import app.lares.contract.location.VisibilityViewer
+import app.lares.contract.permissions.GroupView
 import app.lares.contract.permissions.Permission
 import app.lares.contract.permissions.PermissionEvaluator
 import app.lares.contract.validation.Validators
@@ -70,25 +71,54 @@ class LocationVisibilityService(
         householdId: UUID,
         viewerMemberId: UUID,
     ): Map<UUID, VisibilityLevel> {
-        val rules = rules(tx, householdId)
+        val context = context(tx, householdId)
+        val viewer = context.viewer(viewerMemberId)
+        return context.memberIds.associateWith { LocationVisibility.level(viewer, context.target(it), context.rules) }
+    }
+
+    /** Every live member's level for [targetMemberId] (the target included); empty for a member that is not live. */
+    fun viewersOf(
+        tx: JdbcTransaction,
+        householdId: UUID,
+        targetMemberId: UUID,
+    ): Map<UUID, VisibilityLevel> {
+        val context = context(tx, householdId)
+        if (targetMemberId !in context.memberIds) return emptyMap()
+        val target = context.target(targetMemberId)
+        return context.memberIds.associateWith { LocationVisibility.level(context.viewer(it), target, context.rules) }
+    }
+
+    /** Rules, groups and live members of a household, loaded once. */
+    private class Context(
+        val rules: List<LocationRule>,
+        val groups: List<GroupView>,
+        val groupsOf: Map<String, Set<String>>,
+        val memberIds: List<UUID>,
+    ) {
+        fun viewer(memberId: UUID): VisibilityViewer {
+            val id = memberId.toString()
+            val permissions = PermissionEvaluator.evaluate(id, groups)
+            return VisibilityViewer(
+                memberId = id,
+                isAdmin = permissions.isAdmin,
+                canView = permissions.has(Permission.LOCATION_VIEW),
+                groupIds = groupsOf[id].orEmpty(),
+            )
+        }
+
+        fun target(memberId: UUID) = VisibilityTarget(memberId.toString(), groupsOf[memberId.toString()].orEmpty())
+    }
+
+    private fun context(
+        tx: JdbcTransaction,
+        householdId: UUID,
+    ): Context {
         val groups = GroupRepository.loadViews(householdId)
         val groupsOf = mutableMapOf<String, MutableSet<String>>()
         groups.filterNot { it.deleted }.forEach { group ->
             group.memberIds.forEach { groupsOf.getOrPut(it) { mutableSetOf() } += group.id }
         }
-        val viewerId = viewerMemberId.toString()
-        val permissions = PermissionEvaluator.evaluate(viewerId, groups)
-        val viewer =
-            VisibilityViewer(
-                memberId = viewerId,
-                isAdmin = permissions.isAdmin,
-                canView = permissions.has(Permission.LOCATION_VIEW),
-                groupIds = groupsOf[viewerId].orEmpty(),
-            )
-        return liveMemberIds(householdId).associateWith { memberId ->
-            val target = VisibilityTarget(memberId.toString(), groupsOf[memberId.toString()].orEmpty())
-            LocationVisibility.level(viewer, target, rules)
-        }
+        return Context(rules(tx, householdId), groups, groupsOf, liveMemberIds(householdId))
     }
 
     /** The viewer's level for one member; NONE for a member that is not live in the household. */

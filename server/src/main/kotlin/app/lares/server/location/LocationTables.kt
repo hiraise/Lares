@@ -9,7 +9,7 @@ import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.core.java.javaUUID
 import org.jetbrains.exposed.v1.javatime.timestamp
 
-// Tables of the location module (V9__location_places.sql, architecture/location.md § Server › Tables).
+// Tables of the location module (V9__location_places.sql, V10__location_positions.sql, architecture/location.md § Server › Tables).
 
 /** `place`: a family place (LOC-020). */
 object PlaceTable : Table("place") {
@@ -68,4 +68,49 @@ object LocationRuleTable : Table("location_rule") {
     val createdAt = timestamp("created_at")
 
     override val primaryKey = PrimaryKey(id)
+}
+
+/** `position`: an uploaded fix (V10, ADR-0024). Never synced; deleted after the retention period. */
+object PositionTable : Table("position") {
+    val id = long("id").autoIncrement()
+    val householdId = javaUUID("household_id").references(HouseholdTable.id)
+    val memberId = javaUUID("member_id").references(MemberTable.id)
+    val sessionId = javaUUID("session_id").nullable()
+    val recordedAt = timestamp("recorded_at")
+    val latitude = double("latitude")
+    val longitude = double("longitude")
+    val accuracyM = float("accuracy_m")
+    val speedMps = float("speed_mps").nullable()
+    val bearingDeg = float("bearing_deg").nullable()
+    val altitudeM = double("altitude_m").nullable()
+    val battery = short("battery").nullable()
+    val charging = bool("charging").nullable()
+    val receivedAt = timestamp("received_at")
+
+    override val primaryKey = PrimaryKey(id)
+}
+
+/** `location_state`: a member's sharing state and newest fix (V10). Status and reason are wire names. */
+object LocationStateTable : Table("location_state") {
+    val memberId = javaUUID("member_id").references(MemberTable.id)
+    val householdId = javaUUID("household_id").references(HouseholdTable.id)
+    val status = text("status")
+    val pausedUntil = timestamp("paused_until").nullable()
+    val offReason = text("off_reason").nullable()
+    val statusSince = timestamp("status_since")
+    val sharingSessionId = javaUUID("sharing_session_id").nullable()
+    val lastRecordedAt = timestamp("last_recorded_at").nullable()
+    val lastLatitude = double("last_latitude").nullable()
+    val lastLongitude = double("last_longitude").nullable()
+    val lastAccuracyM = float("last_accuracy_m").nullable()
+    val lastSpeedMps = float("last_speed_mps").nullable()
+    val lastBearingDeg = float("last_bearing_deg").nullable()
+    val lastAltitudeM = double("last_altitude_m").nullable()
+    val lastBattery = short("last_battery").nullable()
+    val lastCharging = bool("last_charging").nullable()
+    val refreshRequestedAt = timestamp("refresh_requested_at").nullable()
+    val refreshSentAt = timestamp("refresh_sent_at").nullable()
+    val updatedAt = timestamp("updated_at")
+
+    override val primaryKey = PrimaryKey(memberId)
 }

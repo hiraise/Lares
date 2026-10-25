@@ -191,6 +191,8 @@ WebSocket `GET /api/v1/sync/events` (bearer token on the upgrade request).
   after household changes the server sends it to every registered session of the household, the originating one
   included, **at most once per 30 s per household with a trailing send** (changes inside a window are pushed when it
   ends). The phone enqueues an expedited one-time sync work; WorkManager also syncs every 15 min while logged in.
+- Live locations do not use this channel: they have their own per-viewer WebSocket `/api/v1/location/live` (ADR-0024,
+  [api.md § Location endpoint details](api.md#location-endpoint-details-m4)).
 
 ## Client data model (SQLite)
 

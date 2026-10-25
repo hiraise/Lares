@@ -171,6 +171,19 @@ they arrive within seconds, and still without Google services.
 
 The ntfy server only accepts the app's own push topics; it cannot be used by strangers for anything else.
 
+## Map (optional)
+
+The map in the app is drawn from free [OpenFreeMap](https://openfreemap.org) styles: no account, no key, no tracking.
+To use other MapLibre-compatible styles (for example your own tile server), set in `.env`:
+
+```sh
+LARES_MAP_STYLE_URL=https://tiles.example.com/styles/light.json
+LARES_MAP_STYLE_DARK_URL=https://tiles.example.com/styles/dark.json
+```
+
+Both addresses must start with `https://`. Restart with `docker compose up -d`; the app picks up the new styles the next
+time it opens the map.
+
 ## Already running a web server?
 
 If nginx or Traefik already uses ports 80 and 443 on this machine, remove the `caddy` service from your setup and proxy

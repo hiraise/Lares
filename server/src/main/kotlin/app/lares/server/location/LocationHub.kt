@@ -25,6 +25,12 @@ sealed interface LocationHubEvent {
     data class PlacesChanged(
         override val householdId: UUID,
     ) : LocationHubEvent
+
+    /** A session was revoked (logout, revoke, password reset): its live sockets close (M4-03). */
+    data class SessionEnded(
+        override val householdId: UUID,
+        val sessionId: UUID,
+    ) : LocationHubEvent
 }
 
 /** The bus the live channel listens to besides `HouseholdChangeBus`; a slow listener loses the oldest events. */

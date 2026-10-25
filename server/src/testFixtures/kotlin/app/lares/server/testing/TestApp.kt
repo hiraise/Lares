@@ -30,12 +30,22 @@ fun testDeps(
     TestDatabase.reset()
     val changeBus = HouseholdChangeBus()
     return AppDeps(
-        config = configure(AppConfig.fromEnv(emptyMap()).copy(db = TestDatabase.dbConfig, setupCode = TEST_SETUP_CODE)),
+        config = configure(testConfig()),
         db = AppDatabase(TestDatabase.database, changeBus),
         changeBus = changeBus,
         buildInfo = BuildInfo.load(),
         clock = clock,
         backgroundJobs = false,
+    )
+}
+
+/** The test configuration: shared database, setup code, no address lookup (tests never reach the internet). */
+fun testConfig(): AppConfig {
+    val base = AppConfig.fromEnv(emptyMap())
+    return base.copy(
+        db = TestDatabase.dbConfig,
+        setupCode = TEST_SETUP_CODE,
+        location = base.location.copy(geocoderUrl = null),
     )
 }
 

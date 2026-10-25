@@ -28,10 +28,15 @@ import app.lares.server.identity.crypto.TokenGenerator
 import app.lares.server.identity.identityRoutes
 import app.lares.server.identity.memberAdminRoutes
 import app.lares.server.location.LocationHub
+import app.lares.server.location.LocationLiveService
+import app.lares.server.location.LocationRetentionJob
+import app.lares.server.location.LocationService
+import app.lares.server.location.LocationSessions
 import app.lares.server.location.LocationVisibilityService
 import app.lares.server.location.PlaceAlertSyncHandler
 import app.lares.server.location.PlaceSyncHandler
 import app.lares.server.location.locationAdminRoutes
+import app.lares.server.location.locationRoutes
 import app.lares.server.notifications.NotificationService
 import app.lares.server.notifications.PushEndpointGuard
 import app.lares.server.notifications.SyncTicklePublisher
@@ -82,7 +87,7 @@ class AppDeps(
     val buildInfo: BuildInfo,
     val clock: Clock = Clock.System,
     val passwordHasher: PasswordHasher = PasswordHasher(),
-    /** Sync housekeeping and the overdue job; tests switch them off and call the job functions directly. */
+    /** Sync housekeeping, the overdue and the location retention jobs; tests switch them off and call the job functions directly. */
     val backgroundJobs: Boolean = true,
 ) {
     val tokenGenerator = TokenGenerator()
@@ -92,12 +97,14 @@ class AppDeps(
     val setupCode = SetupCodeProvider(config.setupCode, codeGenerator)
     val permissionService = PermissionService(db)
     val meQuery = MeQuery(permissionService)
-    val authService = AuthService(db, clock, passwordHasher, tokenGenerator, loginLimiter, meQuery)
+    val locationHub = LocationHub()
+    val locationSessions = LocationSessions(clock, locationHub)
+    val authService = AuthService(db, clock, passwordHasher, tokenGenerator, loginLimiter, meQuery, locationSessions)
     val setupService = SetupService(db, clock, passwordHasher, setupLimiter, setupCode, authService)
-    val accountService = AccountService(db, clock, passwordHasher, loginLimiter, meQuery)
+    val accountService = AccountService(db, clock, passwordHasher, loginLimiter, meQuery, locationSessions)
     val householdAdminService = HouseholdAdminService(db, clock)
     val groupAdminService = GroupAdminService(db, clock)
-    val memberAdminService = MemberAdminService(db, clock, passwordHasher)
+    val memberAdminService = MemberAdminService(db, clock, passwordHasher, locationSessions)
 
     /** Wrong invite and login codes count per IP like failed logins (10 per 15 minutes); keys have their own prefixes. */
     val inviteService = InviteService(db, clock, passwordHasher, codeGenerator, authService, loginLimiter, config.publicUrl)
@@ -109,8 +116,11 @@ class AppDeps(
     val taskNotifier = TaskNotifier(db, permissionService, notificationService)
     val taskOverdueJob = TaskOverdueJob(db, clock, taskNotifier)
     val eventNotifier = EventNotifier(db, permissionService, notificationService)
-    val locationHub = LocationHub()
     val locationVisibility = LocationVisibilityService(db, clock, locationHub)
+    val locationService =
+        LocationService(db, clock, config.location, locationVisibility, locationHub, notificationService, permissionService)
+    val locationLiveService = LocationLiveService(db, locationService, permissionService, locationHub, changeBus)
+    val locationRetentionJob = LocationRetentionJob(db, clock)
 
     val syncHandlers =
         SyncHandlers(
@@ -185,6 +195,7 @@ fun Application.module(deps: AppDeps) {
                 syncRoutes(deps.authService, deps.syncPullService, deps.syncPushService, deps.syncEventsService)
                 notificationRoutes(deps.authService, deps.notificationService)
                 locationAdminRoutes(deps.authService, deps.locationVisibility)
+                locationRoutes(deps.authService, deps.locationService, deps.locationLiveService)
             }
         }
     }
@@ -196,5 +207,6 @@ fun Application.module(deps: AppDeps) {
     if (deps.backgroundJobs) {
         deps.syncHousekeeping.start(this)
         deps.taskOverdueJob.start(this)
+        deps.locationRetentionJob.start(this)
     }
 }

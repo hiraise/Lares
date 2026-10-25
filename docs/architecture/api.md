@@ -145,6 +145,40 @@ DTOs live in `contract/…/api/location/LocationDtos.kt` (architecture/location.
 - New households get the default rules (Adults see everybody with history, Kids see Adults now). Deleting a group or
   removing a member deletes the rules naming it.
 
+Positions, sharing state and the live channel (M4-03, ADR-0024; behaviour in
+[location.md § Positions, state, live channel](location.md#positions-state-live-channel-m4-03)). All need a session.
+
+- `PUT /location/me/sharing` body `SetSharingRequest {status, pausedUntil?, reason?}` → **204**. `sharing` makes the
+  calling session the sharing one (another phone of the member learns it on its next upload); `paused` needs
+  `location.pause_own` (`FORBIDDEN`), `pausedUntil` in the future and at most 7 days ahead; `off_on_phone` needs a
+  `reason` and changes something only when sent by the sharing session. `never`, a misplaced `pausedUntil` or
+  `reason` → `VALIDATION_FAILED` (`Validators.setSharing`).
+- `POST /location/positions` body `UploadPositionsRequest {positions: [PositionFix]}` (1…200, any order, else
+  `VALIDATION_FAILED` `positions: OUT_OF_RANGE`) → **200** `UploadPositionsResponse {accepted, sharingHere, paused,
+  pausedUntil?, refreshRequested}`. `accepted` counts fixes stored by this request; invalid fixes, fixes older than
+  24 h or more than 5 min in the future and fixes already stored (same member and `recordedAt`) are skipped silently.
+  `sharingHere = false`: this session does not share (stop). `paused`: nothing was stored. `refreshRequested`:
+  somebody pressed «Обновить» and this request stored no fix.
+- `GET /location/now` (`location.view`) → **200** `LocationNow {members: [MemberLocation], serverTime}`: every live member
+  the caller sees (level `current` or `history`), the caller included; members who never shared have status `never`.
+- `GET /location/history?memberId=…&date=YYYY-MM-DD` (`location.view`) → **200** `LocationHistory {memberId, date,
+  points: [TrackPoint]}`: that household-local day, oldest first, accuracy ≤ 200 m, at most 3 000 points (first and
+  last kept), empty outside the retention period. Member not visible, unknown or of another household → `NOT_FOUND`;
+  visible only now → `FORBIDDEN`; bad date → `VALIDATION_FAILED`.
+- `POST /location/members/{id}/refresh` (`location.view`) → **202**, no body. Not visible → `NOT_FOUND`; not sharing
+  (paused, off, never) → `CONFLICT`. Sends a data-only push `{"kind":"location_refresh"}` to the sharing session at most
+  once per 60 s; the request also rides on that phone's next upload response.
+- `GET /location/me/watchers` → **200** `LocationWatchers {viewers: [Watcher {memberId, level}], alerts: [AlertWatcher
+  {memberId, placeIds}]}`: who sees the caller (the caller left out) and whose arrive / leave alerts about the caller
+  name live places, only for subscribers who still see the caller.
+- `GET /location/config` → **200** `LocationConfig {mapStyleUrl, mapDarkStyleUrl, addresses, historyDays}`
+  (`addresses` is false until M4-04).
+- WebSocket `GET /location/live` (bearer token on the upgrade request; `location.view`, else the socket closes with code
+  4403). Server → client JSON `LiveMessage`: `{"type":"snapshot","now":LocationNow}` on connect and after visibility or
+  place changes; `{"type":"member","member":MemberLocation}` when a visible member's position or state changes;
+  `{"type":"gone","memberId":…}` when a member is no longer visible (a snapshot follows). Clients send nothing; ping
+  every 30 s. Code 4401 closes it when the session ends or the member is removed.
+
 ### Notification endpoint details (M0-09)
 
 DTOs live in `contract/…/api/notifications/NotificationDtos.kt` (FND-051, FND-052; plan M0-09).

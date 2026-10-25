@@ -427,6 +427,26 @@ reuse detection) → `onSessionEnded(tx, sessionId)`; `MemberAdminService.resetP
 clears the `last_*` columns of `location_state` rows whose `last_recorded_at` is before the same cutoff (their `/now`
 entry then has a status and no `last`). `runOnce(now)` for tests. Positions are never in logs (conventions).
 
+### Implementation notes (M4-03)
+
+- History thinning keeps exactly `MAX_HISTORY_POINTS` evenly spaced points by index (first and last included,
+  `PositionRepository.thin`): the "every k-th" formula of the plan gives about 2 000 points for 6 000, not the
+  3 000 the plan's test expects. The day's lower bound is also clamped to the retention cutoff.
+- `accepted` counts fixes stored by this request; a re-sent fix (same member and `recordedAt`) is not counted and does
+  not answer «Обновить» (it arrived before the request).
+- `LocationService(db, clock, config, visibility, hub, notifications, permissions)`: `permissions` checks
+  `location.pause_own`; `snapshot(tx, …)` and `memberFor(tx, …)` are shared by `GET /now` and the live channel.
+- `LocationVisibilityService.viewersOf(tx, household, target)` evaluates every live member's level for one target from
+  one load of rules and groups (watchers; M4-04 notifications reuse it).
+- `onUserSessionsEnded` runs before `revokeAllOfUser`, so only sessions that were live get `SessionEnded`.
+- An upload or refresh for a member without a state row inserts the NEVER row first (the lock); a rejected refresh rolls it back.
+- The refresh push is sent after the commit and before the 202 answer.
+- The retention job clears `last_*` without publishing `MemberChanged`; open maps show the old point until reconnect.
+- Live channel: changed members queue in a channel (256, drop oldest), recomputes are conflated; close codes are
+  `LocationLiveService.CLOSE_SIGNED_OUT` (4401) and `CLOSE_FORBIDDEN` (4403). `location.view` is checked once on connect;
+  losing it later gives `gone` for everybody and an empty snapshot on the next recompute.
+- `AppConfig.location: LocationConfigValues`; tests use `testConfig()` (testFixtures), which switches addresses off.
+
 ### Geofences, notifications, addresses (M4-04)
 
 - `LocationGeofencing.apply(tx, householdId, memberId, fixes)`: loads live places of the household and the member's

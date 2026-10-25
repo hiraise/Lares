@@ -346,3 +346,12 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   their group or member, alert rows tombstoned with either member, housekeeping purge, `LocationFixtures`. 10 new server
   tests (208 in the module), rules endpoints added to the admin permission matrix. Fixed on the way: untyped NULLs in the
   V9 default-rule insert.
+- 2026-10-25 M4-03 Positions, sharing state and the live channel on the server: V10 (`position`, `location_state`),
+  `PUT /location/me/sharing`, `POST /location/positions` (idempotent on member + time, per-member row lock),
+  `GET /location/now`, `/history` (household-local day, accuracy ≤ 200 m, thinned to 3 000 evenly spaced points),
+  `POST /location/members/{id}/refresh` (`NotificationService.sendToSession`, once per 60 s), `/me/watchers`, `/config`,
+  WS `/location/live` (snapshot / member / gone, per-viewer levels, close 4401 / 4403), `LocationSessions` hooks in
+  logout, session revoke, refresh-token revoke and password reset, member removal deletes location rows,
+  `LocationRetentionJob`, `AppConfig.location` and the map style variables in deploy, `LocationFixtures` upload and
+  sharing helpers. 28 new server tests (236 in the module). Deviation: history thinning by even spacing, because the
+  plan's "every k-th" formula could not give the 3 000 points its test expects.

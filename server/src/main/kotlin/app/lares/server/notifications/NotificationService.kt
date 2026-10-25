@@ -33,6 +33,7 @@ import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.upsert
 import java.util.UUID
 import kotlin.time.Clock
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
 
@@ -174,6 +175,19 @@ class NotificationService(
         val targets = db.dbQuery { activeTargets(PushRegistrationTable.householdId eq householdId) }
         val payload = PushPayload(PushPayload.KIND_SYNC, seq = seq)
         return sendAll(targets) { sender.send(it, payload, SYNC_TTL, WebPush.Urgency.Normal) }
+    }
+
+    /**
+     * A data-only push to one session (e.g. «Обновить», LOC-011); null when the session has no active registration.
+     */
+    suspend fun sendToSession(
+        sessionId: UUID,
+        payload: PushPayload,
+        ttl: Duration,
+        urgency: WebPush.Urgency,
+    ): PushSendResult? {
+        val target = db.dbQuery { activeTargets(PushRegistrationTable.sessionId eq sessionId).singleOrNull() } ?: return null
+        return sender.send(target, payload, ttl, urgency)
     }
 
     private suspend fun sendNotification(

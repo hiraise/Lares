@@ -10,6 +10,7 @@ import app.lares.server.household.HouseholdRefs
 import app.lares.server.household.MemberRepository
 import app.lares.server.household.setGroupsOfMember
 import app.lares.server.identity.crypto.PasswordHasher
+import app.lares.server.location.LocationSessions
 import app.lares.server.platform.db.AppDatabase
 import app.lares.server.platform.http.validate
 import app.lares.server.platform.notFound
@@ -26,6 +27,7 @@ class MemberAdminService(
     private val db: AppDatabase,
     private val clock: Clock,
     private val hasher: PasswordHasher,
+    private val locationSessions: LocationSessions,
 ) {
     /** A member without a login logs in by QR code only (FND-010, FND-014). */
     suspend fun create(
@@ -76,6 +78,8 @@ class MemberAdminService(
             val userId = member.userId ?: throw notFound("Member")
             val now = clock.nowForDb()
             UserRepository.setPasswordHash(userId, hash)
+            // Before the revoke: only live sessions are told.
+            locationSessions.onUserSessionsEnded(this, userId)
             SessionRepository.revokeAllOfUser(userId, now)
             // `hasPassword` is part of the member's sync data.
             MemberRepository.stampSeq(householdId, member.id, recordChange(householdId), now)

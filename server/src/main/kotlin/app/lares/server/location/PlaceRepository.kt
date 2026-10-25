@@ -39,6 +39,32 @@ object PlaceRepository {
             .where { (PlaceTable.householdId eq householdId) and (PlaceTable.id inList ids) and (PlaceTable.deleted eq false) }
             .count()
 
+    /** Which of [ids] are live places of the household. */
+    fun liveIds(
+        householdId: UUID,
+        ids: Set<UUID>,
+    ): Set<UUID> =
+        if (ids.isEmpty()) {
+            emptySet()
+        } else {
+            PlaceTable
+                .select(PlaceTable.id)
+                .where { (PlaceTable.householdId eq householdId) and (PlaceTable.id inList ids) and (PlaceTable.deleted eq false) }
+                .mapTo(mutableSetOf()) { it[PlaceTable.id] }
+        }
+
+    /** Subscriber and place ids of the live alert rows about [memberId] (LOC-015). */
+    fun liveAlertsAbout(
+        householdId: UUID,
+        memberId: UUID,
+    ): List<Pair<UUID, Set<String>>> =
+        PlaceAlertTable
+            .select(PlaceAlertTable.subscriberId, PlaceAlertTable.placeIds)
+            .where {
+                (PlaceAlertTable.householdId eq householdId) and (PlaceAlertTable.deleted eq false) and
+                    (PlaceAlertTable.memberId eq memberId)
+            }.map { it[PlaceAlertTable.subscriberId] to LaresJson.decodeFromString(idSet, it[PlaceAlertTable.placeIds]) }
+
     /** The alert row by id in any household. */
     fun loadAlert(id: UUID): StoredEntity<PlaceAlertData>? =
         PlaceAlertTable.selectAll().where { PlaceAlertTable.id eq id }.singleOrNull()?.let {

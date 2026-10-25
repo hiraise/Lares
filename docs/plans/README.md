@@ -135,7 +135,7 @@ Milestone [M4 Location](../product/roadmap.md#m4-location). [Location spec](../p
 | --- | --- | --- | --- |
 | [M4-01](M4/01-location-contract.md) | Location contract: data, DTOs, visibility, geofence and stops, write rules, validators | M3 | done |
 | [M4-02](M4/02-places-rules-server.md) | Places, alerts and visibility rules on the server | M4-01 | done |
-| [M4-03](M4/03-positions-live-server.md) | Positions, sharing state and the live channel on the server | M4-02 | ready |
+| [M4-03](M4/03-positions-live-server.md) | Positions, sharing state and the live channel on the server | M4-02 | done |
 | [M4-04](M4/04-geofences-notifications-addresses-server.md) | Geofences, location notifications and addresses on the server | M4-03 | ready |
 | [M4-05](M4/05-load-test-with-location.md) | Load simulation with location uploads (ADR-0015) | M4-04 | ready |
 | [M4-06](M4/06-location-client-core.md) | Location in the client core: places, live map data, sharing, queue, tracking policy | M4-04 | ready |

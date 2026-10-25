@@ -48,6 +48,7 @@ GPS trackers come later. Technical design: [architecture/location.md](../../arch
   asks for precise location «Всегда» (background) and notifications; without background permission sharing is not
   started and the app explains why. After that the phone sends positions in the background, also after a restart of the
   phone.
+  *Server: positions upload, sharing state (M4-03).*
 - **LOC-002** `MVP` `todo` — While sharing is on, the phone shows a persistent notification «Вы делитесь геопозицией»
   (with «Пауза» for those who may pause). Inside the app Map shows «Вы делитесь местоположением · Пауза».
 - **LOC-007** `MVP` `todo` — Battery-aware tracking: while moving, a position about every 30 seconds (or every 50 m);
@@ -59,10 +60,13 @@ GPS trackers come later. Technical design: [architecture/location.md](../../arch
   (until 08:00) or «Пока не включу». Nothing is sent during the pause; it ends by itself at the chosen time.
   Others see «на паузе до 15:30» (or «на паузе») and the last position before the pause in grey. A member without the
   permission has neither «Пауза» nor a way to turn sharing off in the app.
+  *Server: pause with end time; fixes dropped while paused, last position kept (M4-03).*
 - **LOC-019** `MVP` `todo` — One phone per member shares. ASSUMPTION: turning sharing on on another phone of the same
   member moves sharing there; the first phone stops and says so.
+  *Server: the session that last turned sharing on shares; others are told to stop (M4-03).*
 - **LOC-027** `MVP` `todo` — Without network the phone keeps its positions (up to 24 hours) and sends them when the network
   is back, so the history has no gap; the map then shows the newest one.
+  *Server: batches up to 200 fixes, up to 24 h old, idempotent re-upload (M4-03).*
 
 ### Map
 
@@ -70,17 +74,20 @@ GPS trackers come later. Technical design: [architecture/location.md](../../arch
   the avatar in the personal color, the accuracy circle, the places. Under the map, a list of these members: place or
   address, how long ago («сейчас», «3 мин назад», «с 15:10» when in a place), battery level. A tap on a member centres
   the map on them and opens their card. «Моё местоположение» centres on the viewer.
+  *Server: `GET /location/now` and the live channel filtered by visibility (M4-03).*
 - **LOC-009** `MVP` `todo` — Map tiles from an OpenStreetMap-based source configured on the server (ADR-0006); the map
   follows the light and dark theme. The map needs a network connection; offline it shows the last known positions with
   «Нет связи».
 - **LOC-011** `MVP` `todo` — «Обновить» (Q-027): everybody who sees a member can ask their phone for a fresh precise
   position; it arrives within about a minute if the phone is online. Not available while the member is paused. At most
   once a minute per member.
+  *Server: refresh request, push to the sharing phone at most once a minute, flag in upload responses (M4-03).*
 - **LOC-012** `MVP` `todo` — Sharing turned off (Q-026): when a member without `location.pause_own` turns off location
   in the phone's settings, takes the app's location permission away or stops its sharing, and the phone can still tell
   the server, the map shows «геопозиция выключена на телефоне · последнее место в 14:20» and administrators get a
   notification «Геопозиция выключена — Тимур · геопозиция выключена на телефоне» (or «нет доступа к геопозиции»,
   «передача остановлена», «выход из приложения»). When it is back on, they get «Геопозиция снова передаётся — Тимур».
+  *Server: off on the phone with a reason; signing out, revoking the session or a password reset turn sharing off (M4-03); notices in M4-04.*
 - **LOC-013** `MVP` `todo` — Stale positions: when nothing arrived for 30 minutes from a member who shares, the map shows
   «нет данных с 18:05» and the last battery level; no notification (Q-026). A member who never turned sharing on shows as
   «не делится геопозицией».
@@ -94,9 +101,10 @@ GPS trackers come later. Technical design: [architecture/location.md](../../arch
 - **LOC-004** `MVP` `todo` — Movement history per member and day: the track on the map and the list of stops under it
   («Школа №12 08:25–14:40», addresses for stops outside places); a tap on a stop shows it on the map. Days are picked
   from a strip of the retained days. ASSUMPTION: a stop is a stay of at least 10 minutes within about 100 m.
+  *Server: `GET /location/history` by household-local day, thinned to 3 000 points (M4-03).*
 - **LOC-005** `MVP` `todo` — History is deleted after the retention period: 30 days by default; an administrator chooses
   7, 14, 30, 60 or 90 days (Family › Геопозиция). A shorter period deletes older positions within an hour.
-  *Server: setting stored and synced (M4-02); purge in M4-03.*
+  *Server: setting stored and synced (M4-02); hourly purge, member removal deletes positions (M4-03).*
 
 ### Who sees whom
 
@@ -107,6 +115,7 @@ GPS trackers come later. Technical design: [architecture/location.md](../../arch
   *Server: rules stored, `GET/PUT /location/rules` for administrators, defaults at setup and by V9 for existing families, rules of deleted groups and members removed, levels per viewer (M4-02).*
 - **LOC-015** `MVP` `todo` — Transparency: in Settings › Геопозиция every member sees who can see them (and whether
   with history) and who gets arrive / leave notifications about them (Q-028).
+  *Server: `GET /location/me/watchers` (M4-03).*
 
 ### Places and notifications
 

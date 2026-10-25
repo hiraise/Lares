@@ -11,6 +11,7 @@ import app.lares.contract.validation.Validators
 import app.lares.server.household.MemberRepository
 import app.lares.server.identity.crypto.PasswordHasher
 import app.lares.server.identity.crypto.TokenGenerator
+import app.lares.server.location.LocationSessions
 import app.lares.server.platform.db.AppDatabase
 import app.lares.server.platform.http.ApiException
 import app.lares.server.platform.http.validate
@@ -36,6 +37,7 @@ class AuthService(
     private val tokens: TokenGenerator,
     private val loginLimiter: FailedAttemptLimiter,
     private val meQuery: MeQuery,
+    private val locationSessions: LocationSessions,
 ) {
     /** A token pair in plain text; only returned to the client, never stored. */
     class IssuedSession(
@@ -105,6 +107,7 @@ class AuthService(
                     if (current.revokedAt != null) return@dbQuery RefreshOutcome.Revoked
                     if (current.refreshExpiresAt <= now) {
                         SessionRepository.revoke(current.id, now)
+                        locationSessions.onSessionEnded(this, current.id)
                         return@dbQuery RefreshOutcome.Revoked
                     }
                     val issued = rotate(current, presented, rotatedAt = now, now = now)
@@ -123,6 +126,7 @@ class AuthService(
                 } else {
                     // Token theft suspected (architecture/auth.md): end the session for everyone holding it.
                     SessionRepository.revoke(previous.id, now)
+                    locationSessions.onSessionEnded(this, previous.id)
                     RefreshOutcome.Revoked
                 }
             }
@@ -134,7 +138,10 @@ class AuthService(
     }
 
     suspend fun logout(principal: MemberPrincipal) {
-        db.dbQuery { SessionRepository.revoke(principal.sessionId, clock.nowForDb()) }
+        db.dbQuery {
+            SessionRepository.revoke(principal.sessionId, clock.nowForDb())
+            locationSessions.onSessionEnded(this, principal.sessionId)
+        }
     }
 
     /** Checks an access token on every authenticated request; revocation therefore takes effect immediately. */
