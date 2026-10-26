@@ -17,11 +17,12 @@ import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import io.ktor.server.websocket.webSocket
 
-/** Positions, sharing state, now, history, «Обновить», watchers and the live channel (M4-03). Mounted under `/api/v1`. */
+/** Positions, sharing state, now, history, «Обновить», watchers, addresses and the live channel. Mounted under `/api/v1`. */
 fun Route.locationRoutes(
     authService: AuthService,
     locations: LocationService,
     live: LocationLiveService,
+    addresses: AddressEndpoints,
 ) {
     authenticated(authService) {
         route("/location") {
@@ -48,6 +49,15 @@ fun Route.locationRoutes(
             }
             get("/me/watchers") {
                 call.respond(locations.watchers(call.memberPrincipal))
+            }
+            get("/address") {
+                call.requirePermission(Permission.LOCATION_VIEW)
+                val parameters = call.request.queryParameters
+                call.respond(addresses.address(call.memberPrincipal, parameters["lat"], parameters["lon"]))
+            }
+            get("/search") {
+                call.requirePermission(Permission.LOCATION_MANAGE_PLACES)
+                call.respond(addresses.search(call.memberPrincipal, call.request.queryParameters["q"]))
             }
             get("/config") {
                 call.respond(locations.config(call.memberPrincipal))

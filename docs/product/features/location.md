@@ -74,7 +74,7 @@ GPS trackers come later. Technical design: [architecture/location.md](../../arch
   the avatar in the personal color, the accuracy circle, the places. Under the map, a list of these members: place or
   address, how long ago («сейчас», «3 мин назад», «с 15:10» when in a place), battery level. A tap on a member centres
   the map on them and opens their card. «Моё местоположение» centres on the viewer.
-  *Server: `GET /location/now` and the live channel filtered by visibility (M4-03).*
+  *Server: `GET /location/now` and the live channel filtered by visibility (M4-03); the place a member is in and since when (M4-04).*
 - **LOC-009** `MVP` `todo` — Map tiles from an OpenStreetMap-based source configured on the server (ADR-0006); the map
   follows the light and dark theme. The map needs a network connection; offline it shows the last known positions with
   «Нет связи».
@@ -87,7 +87,7 @@ GPS trackers come later. Technical design: [architecture/location.md](../../arch
   the server, the map shows «геопозиция выключена на телефоне · последнее место в 14:20» and administrators get a
   notification «Геопозиция выключена — Тимур · геопозиция выключена на телефоне» (or «нет доступа к геопозиции»,
   «передача остановлена», «выход из приложения»). When it is back on, they get «Геопозиция снова передаётся — Тимур».
-  *Server: off on the phone with a reason; signing out, revoking the session or a password reset turn sharing off (M4-03); notices in M4-04.*
+  *Server: off on the phone with a reason; signing out, revoking the session or a password reset turn sharing off (M4-03); notices to administrators when it goes off and when it is back (M4-04).*
 - **LOC-013** `MVP` `todo` — Stale positions: when nothing arrived for 30 minutes from a member who shares, the map shows
   «нет данных с 18:05» and the last battery level; no notification (Q-026). A member who never turned sharing on shows as
   «не делится геопозицией».
@@ -95,6 +95,7 @@ GPS trackers come later. Technical design: [architecture/location.md](../../arch
   their position («ул. Ленина, 12»), found by the server through an OpenStreetMap address service. While moving it shows
   «В пути». The server administrator can turn addresses off or use another address service; then the list shows the
   distance to the nearest place («2 км от Дома»).
+  *Server: `GET /location/address` through the configured geocoder, cached, one request per second, can be turned off (M4-04).*
 
 ### History
 
@@ -129,13 +130,15 @@ GPS trackers come later. Technical design: [architecture/location.md](../../arch
   Texts: «Аня · Школа №12 — Прибытие в 08:52», «… — Уход в 14:20» (no gendered verbs: the app does not know genders).
   A notification goes only while the subscriber may see the member. ASSUMPTION: a change found from positions older
   than 15 minutes (sent late after a network gap) updates the map silently.
-  *Server: the subscriber's own alert rows (derived id, synced only to them), removed with either member (M4-02); notifications in M4-04.*
+  *Server: the subscriber's own alert rows (derived id, synced only to them), removed with either member (M4-02); arrive / leave notifications to subscribers who still see the member, none for positions older than 15 minutes (M4-04).*
 - **LOC-022** `MVP` `todo` — Arrivals and departures are decided on the server from the positions, so they work for
   phones and later for trackers alike. ASSUMPTION: an inaccurate position (worse than the place's radius or 100 m, whichever is
   larger) does not decide anything; leaving needs a position clearly outside the circle, so a person sitting at the edge does not flicker in and
   out.
+  *Server: presence per member and place with the hysteresis above, from uploaded positions (M4-04).*
 - **LOC-024** `MVP` `todo` — Address search in the place editor (Q-029): type an address, press search, pick a result;
   the map moves there.
+  *Server: `GET /location/search`, 5 results with the city (M4-04).*
 - **LOC-023** `later` `todo` — Schedule-aware alerts ("not at school by 8:30 on a weekday").
 
 ### Everywhere

@@ -8,6 +8,7 @@ import app.lares.contract.api.location.LocationHistory
 import app.lares.contract.api.location.LocationNow
 import app.lares.contract.api.location.LocationWatchers
 import app.lares.contract.api.location.MemberLocation
+import app.lares.contract.api.location.OffReason
 import app.lares.contract.api.location.SetSharingRequest
 import app.lares.contract.api.location.SharingStatus
 import app.lares.contract.api.location.UploadPositionsRequest
@@ -62,6 +63,7 @@ class LocationService(
     private val hub: LocationHub,
     private val notifications: NotificationService,
     private val permissions: PermissionService,
+    private val notifier: LocationNotifier,
 ) {
     /** `PUT /location/me/sharing` (LOC-010, LOC-012, LOC-019). */
     suspend fun setSharing(
@@ -122,8 +124,29 @@ class LocationService(
                 LocationStateRepository.writeStatus(next, now)
                 afterCommit { hub.publish(LocationHubEvent.MemberChanged(principal.householdId, principal.memberId)) }
             }
+            sharingEvent(principal, current.status, next)?.let { event -> afterCommit { notifier.enqueue(event) } }
         }
     }
+
+    /** LOC-012: one notice per change into OFF_ON_PHONE (from SHARING or PAUSED) and back to SHARING. */
+    private fun sharingEvent(
+        principal: MemberPrincipal,
+        before: SharingStatus,
+        after: LocationState,
+    ): LocationNotifier.Event? =
+        when {
+            after.status == SharingStatus.OFF_ON_PHONE && (before == SharingStatus.SHARING || before == SharingStatus.PAUSED) -> {
+                LocationNotifier.SharingOff(principal.householdId, principal.memberId, after.offReason ?: OffReason.STOPPED)
+            }
+
+            after.status == SharingStatus.SHARING && before == SharingStatus.OFF_ON_PHONE -> {
+                LocationNotifier.SharingBack(principal.householdId, principal.memberId)
+            }
+
+            else -> {
+                null
+            }
+        }
 
     /** `POST /location/positions` (LOC-001, LOC-010, LOC-011, LOC-019, LOC-027); the numbered steps of the design. */
     suspend fun upload(
@@ -172,16 +195,34 @@ class LocationService(
                 val lastChanged = newestFix != null && (lastAt == null || newestFix.recordedAt.toDb() > lastAt.toDb())
                 if (lastChanged) LocationStateRepository.writeLast(principal.memberId, newestFix, now)
                 if (inserted.isNotEmpty() && state.status == SharingStatus.OFF_ON_PHONE) {
-                    // The phone shares again (the "back" notice follows in M4-04).
-                    state = state.copy(status = SharingStatus.SHARING, offReason = null, statusSince = now)
+                    // The phone shares again.
+                    val back = state.copy(status = SharingStatus.SHARING, offReason = null, statusSince = now)
+                    sharingEvent(principal, state.status, back)?.let { event -> afterCommit { notifier.enqueue(event) } }
+                    state = back
                 }
                 if (state != stored) LocationStateRepository.writeStatus(state, now)
+                // Arrivals and departures; a late backlog (older than 15 minutes) only updates presence (LOC-021).
+                val recent = nowInstant - NOTIFY_TRANSITIONS_WITHIN
+                val transitions =
+                    LocationGeofencing
+                        .apply(this, principal.householdId, principal.memberId, inserted)
+                        .filter { it.at >= recent }
+                        .map {
+                            LocationNotifier.PlaceTransition(
+                                principal.householdId,
+                                principal.memberId,
+                                it.placeId,
+                                it.transition,
+                                it.at,
+                            )
+                        }
+                if (transitions.isNotEmpty()) afterCommit { transitions.forEach(notifier::enqueue) }
                 // Server times only: a fix stored now arrived after the request, whatever the device clock says.
                 val refreshRequested = state.refreshRequestedAt != null && inserted.isEmpty()
                 if (state.refreshRequestedAt != null && inserted.isNotEmpty()) {
                     LocationStateRepository.writeRefresh(principal.memberId, requestedAt = null, sentAt = state.refreshSentAt)
                 }
-                if (lastChanged || state != stored) {
+                if (inserted.isNotEmpty() || state != stored) {
                     afterCommit { hub.publish(LocationHubEvent.MemberChanged(principal.householdId, principal.memberId)) }
                 }
                 UploadPositionsResponse(accepted = inserted.size, sharingHere = true, refreshRequested = refreshRequested)
@@ -206,16 +247,17 @@ class LocationService(
         val now = clock.nowForDb()
         val levels = visibility.levels(tx, householdId, viewerMemberId)
         val states = LocationStateRepository.load(householdId)
+        val visible = levels.filterValues { it >= VisibilityLevel.CURRENT }
+        val places = LocationGeofencing.currentPlaces(householdId, visible.keys)
         val members =
-            levels
-                .filterValues { it >= VisibilityLevel.CURRENT }
-                .map { (memberId, level) ->
-                    LocationStateRepository.memberLocation(
-                        memberId,
-                        level,
-                        states[memberId]?.let { LocationStateRepository.effective(it, now) },
-                    )
-                }
+            visible.map { (memberId, level) ->
+                LocationStateRepository.memberLocation(
+                    memberId,
+                    level,
+                    states[memberId]?.let { LocationStateRepository.effective(it, now) },
+                    places[memberId],
+                )
+            }
         return levels to LocationNow(members, now.toContract())
     }
 
@@ -233,6 +275,7 @@ class LocationService(
             memberId,
             level,
             state?.let { LocationStateRepository.effective(it, clock.nowForDb()) },
+            LocationGeofencing.currentPlaces(householdId, listOf(memberId))[memberId],
         )
     }
 
@@ -310,12 +353,12 @@ class LocationService(
             )
         }
 
-    /** `GET /location/config`. Addresses come with M4-04. */
+    /** `GET /location/config`. */
     suspend fun config(principal: MemberPrincipal): LocationConfig =
         LocationConfig(
             mapStyleUrl = config.mapStyleUrl,
             mapDarkStyleUrl = config.mapDarkStyleUrl,
-            addresses = false,
+            addresses = config.geocoderUrl != null,
             historyDays = db.dbQuery { historyDays(principal.householdId) },
         )
 
@@ -335,5 +378,8 @@ class LocationService(
         const val MAX_HISTORY_ACCURACY_M = 200f
         val REFRESH_PUSH_INTERVAL: java.time.Duration = LocationLimits.REFRESH_COOLDOWN_SECONDS.seconds.toJavaDuration()
         val REFRESH_TTL = 2.minutes
+
+        /** Transitions found from older positions update presence without a notice (LOC-021 assumption). */
+        val NOTIFY_TRANSITIONS_WITHIN = 15.minutes
     }
 }

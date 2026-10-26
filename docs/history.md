@@ -355,3 +355,12 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   `LocationRetentionJob`, `AppConfig.location` and the map style variables in deploy, `LocationFixtures` upload and
   sharing helpers. 28 new server tests (236 in the module). Deviation: history thinning by even spacing, because the
   plan's "every k-th" formula could not give the 3 000 points its test expects.
+- 2026-10-25 **M4-04** Geofences, location notifications and addresses on the server: `V11` `place_presence`,
+  `LocationGeofencing` (contract hysteresis per member and place, lazy rows, reset on a moved / resized place, deleted
+  with the place and the member), `MemberLocation.placeId/placeSince` in `GET /now` and the live channel;
+  `LocationNotifier` (`location.place` to subscribers who still see the member, nothing for transitions older than
+  15 min; `location.sharing` off / back about members without `location.pause_own` to other administrators, also on
+  signing out) with en/ru texts; `NominatimLookup`, `AddressService` (LRU caches, rounding to 4 decimals, one request per
+  second, 5 s wait limit, failures kept 10 min), `GET /location/address` and `/location/search` with permissions,
+  per-member limits and validation; `LARES_GEOCODER_URL` / `_EMAIL` in deploy; install manual "Addresses" (en, ru).
+  27 new server tests (263 in the module), a fake Nominatim with recorded responses; tests never reach the internet.

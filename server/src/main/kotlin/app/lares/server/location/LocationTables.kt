@@ -9,7 +9,7 @@ import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.core.java.javaUUID
 import org.jetbrains.exposed.v1.javatime.timestamp
 
-// Tables of the location module (V9__location_places.sql, V10__location_positions.sql, architecture/location.md § Server › Tables).
+// Tables of the location module (V9…V11, architecture/location.md § Server › Tables).
 
 /** `place`: a family place (LOC-020). */
 object PlaceTable : Table("place") {
@@ -113,4 +113,17 @@ object LocationStateTable : Table("location_state") {
     val updatedAt = timestamp("updated_at")
 
     override val primaryKey = PrimaryKey(memberId)
+}
+
+/** `place_presence`: whether a member is inside a place and since when (V11, LOC-022). */
+object PlacePresenceTable : Table("place_presence") {
+    val memberId = javaUUID("member_id").references(MemberTable.id)
+    val placeId = javaUUID("place_id").references(PlaceTable.id, onDelete = ReferenceOption.CASCADE)
+    val householdId = javaUUID("household_id").references(HouseholdTable.id)
+    val inside = bool("inside").nullable()
+    val since = timestamp("since").nullable()
+    val candidate = bool("candidate").nullable()
+    val candidateSince = timestamp("candidate_since").nullable()
+
+    override val primaryKey = PrimaryKey(memberId, placeId)
 }

@@ -362,7 +362,7 @@ passes it as `${LARES_GEOCODER_URL-https://nominatim.openstreetmap.org}` (no col
 
 ### Positions, state, live channel (M4-03)
 
-`LocationService(db, clock, visibility, hub, notifications, notifier?)`. `LocationConfig.addresses` is false until M4-04. Endpoints in `LocationRoutes.kt`, all authenticated:
+`LocationService(db, clock, visibility, hub, notifications, notifier?)`. `LocationConfig.addresses` is true when a geocoder is configured (M4-04). Endpoints in `LocationRoutes.kt`, all authenticated:
 
 | Method, path | Who | Behaviour |
 | --- | --- | --- |
@@ -492,6 +492,26 @@ entry then has a status and no `last`). `runOnce(now)` for tests. Positions are 
     `AddressSearch`. Geocoder off → `label = null` / empty results. Language: the member's push language or the
     household's `defaultLanguage`.
   - The server never geocodes on its own (no job, no per-fix lookup): only when a phone asks for a shown position.
+
+### Implementation notes (M4-04)
+
+- `LocationGeofencing` keeps presence for every live place of the household; `currentPlaces` fills
+  `MemberLocation.placeId/placeSince` in `GET /now`, the live channel and its snapshots, whatever the sharing status
+  (a paused member shows the place of the last position). Every upload that stores a fix publishes `MemberChanged`.
+- Rows of a place go when it is tombstoned (`PlaceSyncHandler.tombstone`) and by `ON DELETE CASCADE` when housekeeping
+  purges it; rows of a member go in `MemberRemoval`.
+- `LocationNotifier(db, visibility, notifications)` loads the household's groups once per event; recipients of
+  `location.place` are the subscribers whose level from `viewersOf` is ≥ CURRENT (NONE covers gone members and missing
+  `location.view`). `LocationNotifier.ENTITY_TYPE = "location"`. `LocationSessions` needs the notifier, so
+  `AppDeps` builds the push and notification services first.
+- `AddressLookup.reverse` / `search` give null for a failure and also for "nothing found"; `AddressService` keeps both
+  (and an empty search) for 10 minutes. The one-request-per-second gate reserves a time slot and waits for it outside
+  any lock, so a slow answer does not hold the next request; `interval` and `maxWait` are constructor parameters (tests
+  use milliseconds), the slot uses the monotonic clock, cache expiry the server clock.
+- Search prefers the area of the household's first live place (by creation), rounded to 0.1° before it is sent
+  (`viewbox` ±0.5°); without places no `viewbox`. The language is normalized to `en` / `ru` like notification texts.
+- Rate limits reuse `FailedAttemptLimiter` (every request counts, per member). `NominatimLookup` follows redirects
+  (not https → http) and takes a `timeout` parameter (5 s; tests shorter).
 
 ## Client
 

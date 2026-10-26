@@ -114,6 +114,11 @@ class PlaceSyncHandler(
         data: PlaceData,
         seq: Long,
     ) {
+        val before = PlaceRepository.load(id)?.data
+        // A moved or resized place: presence there is unknown again, so the next reading decides without a notice.
+        if (before != null && (before.latitude != data.latitude || before.longitude != data.longitude || before.radiusM != data.radiusM)) {
+            LocationGeofencing.resetPlace(id)
+        }
         PlaceTable.update({ (PlaceTable.householdId eq ctx.householdId) and (PlaceTable.id eq id) }) {
             PlaceRepository.writePlace(it, data)
             it[PlaceTable.seq] = seq
@@ -122,12 +127,13 @@ class PlaceSyncHandler(
         publishAfterCommit(ctx)
     }
 
-    /** Alert rows keep the id of a deleted place; readers ignore it. */
+    /** Alert rows keep the id of a deleted place; readers ignore it. Presence rows go. */
     override fun tombstone(
         ctx: MutationContext,
         id: UUID,
         seq: Long,
     ) {
+        LocationGeofencing.deleteOfPlace(id)
         PlaceTable.update({ (PlaceTable.householdId eq ctx.householdId) and (PlaceTable.id eq id) }) {
             it[deleted] = true
             it[PlaceTable.seq] = seq

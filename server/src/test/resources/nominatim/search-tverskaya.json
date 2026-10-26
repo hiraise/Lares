@@ -1,0 +1,4 @@
+[{"place_id":120372891,"lat":"55.7580891","lon":"37.6107024","category":"building","type":"yes","addresstype":"building","name":"","display_name":"7, Тверская улица, Тверской район, Москва, Россия","address":{"house_number":"7","road":"Тверская улица","suburb":"Тверской район","city":"Москва","country":"Россия","country_code":"ru"}},
+ {"place_id":2,"lat":"56.8587","lon":"35.9176","category":"highway","type":"residential","addresstype":"road","name":"Тверская улица","display_name":"Тверская улица, Тверь, Россия","address":{"road":"Тверская улица","town":"Тверь","country":"Россия"}},
+ {"place_id":3,"lat":"55.75","lon":"37.61","category":"place","type":"city","addresstype":"city","name":"Москва","display_name":"Москва, Россия","address":{"city":"Москва","country":"Россия"}},
+ {"place_id":4,"display_name":"broken, no coordinates"}]

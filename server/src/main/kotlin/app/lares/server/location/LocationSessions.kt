@@ -23,6 +23,7 @@ import kotlin.time.Clock
 class LocationSessions(
     private val clock: Clock,
     private val hub: LocationHub,
+    private val notifier: LocationNotifier,
 ) {
     /** One session ended (logout, revoke, refresh-token expiry or reuse). */
     fun onSessionEnded(
@@ -56,12 +57,18 @@ class LocationSessions(
         sessionIds: List<UUID>,
     ) {
         val now = clock.nowForDb()
-        val members =
+        val rows =
             LocationStateTable
                 .selectAll()
                 .where { LocationStateTable.sharingSessionId inList sessionIds }
                 .forUpdate()
-                .map { it[LocationStateTable.memberId] }
+                .map { it[LocationStateTable.memberId] to it[LocationStateTable.status] }
+        val members = rows.map { it.first }
+        // Only a phone that was sharing or paused tells administrators; one already off changes its reason silently.
+        val stopped =
+            rows
+                .filter { (_, status) -> status == SharingStatus.SHARING.key || status == SharingStatus.PAUSED.key }
+                .map { (memberId, _) -> LocationNotifier.SharingOff(householdId, memberId, OffReason.SIGNED_OUT) }
         members.forEach { memberId ->
             LocationStateTable.update({ LocationStateTable.memberId eq memberId }) {
                 it[status] = SharingStatus.OFF_ON_PHONE.key
@@ -73,6 +80,7 @@ class LocationSessions(
             }
         }
         tx.afterCommit {
+            stopped.forEach(notifier::enqueue)
             members.forEach { hub.publish(LocationHubEvent.MemberChanged(householdId, it)) }
             sessionIds.forEach { hub.publish(LocationHubEvent.SessionEnded(householdId, it)) }
         }

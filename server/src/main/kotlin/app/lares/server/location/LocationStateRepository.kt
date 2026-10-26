@@ -157,11 +157,15 @@ object LocationStateRepository {
         LocationStateTable.deleteWhere { LocationStateTable.memberId eq memberId }
     }
 
-    /** What a viewer with [level] gets of the member; members without a state row are NEVER. */
+    /**
+     * What a viewer with [level] gets of the member; members without a state row are NEVER. [place] is the place the
+     * member is in and since when (`LocationGeofencing.currentPlaces`).
+     */
     fun memberLocation(
         memberId: UUID,
         level: VisibilityLevel,
         state: LocationState?,
+        place: Pair<UUID, kotlin.time.Instant>? = null,
     ): MemberLocation =
         if (state == null) {
             MemberLocation(memberId = memberId.toString(), level = level, status = SharingStatus.NEVER)
@@ -174,6 +178,8 @@ object LocationStateRepository {
                 offReason = state.offReason,
                 statusSince = state.statusSince.toContract(),
                 last = state.last,
+                placeId = place?.first?.toString(),
+                placeSince = place?.second,
             )
         }
 

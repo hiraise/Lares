@@ -5,6 +5,7 @@ import app.lares.server.household.AccessVersionService
 import app.lares.server.household.GroupRepository
 import app.lares.server.household.MemberRepository
 import app.lares.server.household.MemberRow
+import app.lares.server.location.LocationGeofencing
 import app.lares.server.location.LocationRuleRepository
 import app.lares.server.location.LocationStateRepository
 import app.lares.server.location.PlaceRepository
@@ -44,6 +45,7 @@ internal fun JdbcTransaction.removeMember(
     // Positions and the sharing state go without a "stopped sharing" notice (architecture/location.md § Sessions ending).
     PositionRepository.deleteOfMember(member.id)
     LocationStateRepository.deleteOfMember(member.id)
+    LocationGeofencing.deleteOfMember(member.id)
     PlaceRepository.liveAlertIdsOf(householdId, member.id).forEach { id ->
         PlaceRepository.tombstoneAlert(householdId, id, recordChange(householdId), now)
     }

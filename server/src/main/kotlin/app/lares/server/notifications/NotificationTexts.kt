@@ -1,5 +1,7 @@
 package app.lares.server.notifications
 
+import app.lares.contract.api.location.OffReason
+
 /** Notification texts rendered on the server in the device's language (en, ru); English is the fallback. */
 object NotificationTexts {
     val supportedLanguages = setOf("en", "ru")
@@ -88,6 +90,75 @@ object NotificationTexts {
             "ru" -> Text("Событие отменено", "${short(title)} · ${if (fromDate) "с " else ""}$whenText")
             else -> Text("Event cancelled", "${short(title)} · ${if (fromDate) "from " else ""}$whenText")
         }
+
+    /** `location.place`, arrived (LOC-021): «Аня · Школа №12» — «Прибытие в 08:52»; [time] is `HH:mm` in the household zone. */
+    fun placeArrived(
+        language: String,
+        member: String,
+        place: String,
+        time: String,
+    ): Text =
+        when (language) {
+            "ru" -> Text(placeTitle(member, place), "Прибытие в $time")
+            else -> Text(placeTitle(member, place), "Arrived at $time")
+        }
+
+    /** `location.place`, left (LOC-021). */
+    fun placeLeft(
+        language: String,
+        member: String,
+        place: String,
+        time: String,
+    ): Text =
+        when (language) {
+            "ru" -> Text(placeTitle(member, place), "Уход в $time")
+            else -> Text(placeTitle(member, place), "Left at $time")
+        }
+
+    /** `location.sharing`, off on the phone (LOC-012), with the reason the phone gave. */
+    fun sharingOff(
+        language: String,
+        member: String,
+        reason: OffReason,
+    ): Text =
+        when (language) {
+            "ru" -> {
+                val text =
+                    when (reason) {
+                        OffReason.LOCATION_DISABLED -> "геопозиция выключена на телефоне"
+                        OffReason.PERMISSION_REVOKED -> "у приложения нет доступа к геопозиции"
+                        OffReason.STOPPED -> "передача остановлена"
+                        OffReason.SIGNED_OUT -> "выход из приложения"
+                    }
+                Text("Геопозиция выключена", "${short(member)} · $text")
+            }
+
+            else -> {
+                val text =
+                    when (reason) {
+                        OffReason.LOCATION_DISABLED -> "location is off on the phone"
+                        OffReason.PERMISSION_REVOKED -> "the app has no location access"
+                        OffReason.STOPPED -> "sharing was stopped"
+                        OffReason.SIGNED_OUT -> "signed out of the app"
+                    }
+                Text("Location off", "${short(member)} · $text")
+            }
+        }
+
+    /** `location.sharing`, back (LOC-012). */
+    fun sharingBack(
+        language: String,
+        member: String,
+    ): Text =
+        when (language) {
+            "ru" -> Text("Геопозиция снова передаётся", short(member))
+            else -> Text("Location sharing is back", short(member))
+        }
+
+    private fun placeTitle(
+        member: String,
+        place: String,
+    ) = short("$member · $place")
 
     /** Task and event titles are cut to [MAX_TITLE] characters, the last one being `…`, so the payload stays small. */
     fun short(title: String): String = if (title.length <= MAX_TITLE) title else title.take(MAX_TITLE - 1) + "…"
