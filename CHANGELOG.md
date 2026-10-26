@@ -5,6 +5,8 @@ Versioning: [SemVer](https://semver.org/) from the first release.
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-10-26
+
 ### Changed
 
 - The map now comes through the family server (M4-11): the server fetches map data from VersaTiles (OpenStreetMap)
