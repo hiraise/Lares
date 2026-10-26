@@ -5,6 +5,8 @@ Versioning: [SemVer](https://semver.org/) from the first release.
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-26
+
 ### Added
 
 - Location sharing on Android (M4-07): Settings › «Геопозиция» turns on sharing with a short setup — precise location,
