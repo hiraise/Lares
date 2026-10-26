@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import app.lares.client.ui.theme.LaresTheme
 import app.lares.contract.location.Geo
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
@@ -50,8 +51,8 @@ import org.maplibre.compose.util.DpPadding
 import org.maplibre.spatialk.geojson.BoundingBox
 import org.maplibre.spatialk.geojson.Position
 
-/** OpenFreeMap glyphs; the library's default fonts are not on its glyph server. */
-private val LABEL_FONT = listOf("Noto Sans Bold")
+/** Servers before ADR-0029 hand out OpenFreeMap styles, whose glyph server has this font. */
+private const val FALLBACK_LABEL_FONT = "Noto Sans Bold"
 
 /**
  * The map with maplibre-compose (ADR-0027, architecture/location.md § Map rendering): the server's style, places as
@@ -71,10 +72,14 @@ actual fun FamilyMapView(
     onCenterChange: (Double, Double) -> Unit,
 ) {
     val styleUrl = state.styleUrl ?: return
+    val labelFont = listOf(state.labelFont ?: FALLBACK_LABEL_FONT)
     val scheme = MaterialTheme.colorScheme
     val primary = scheme.primary
     val secondary = scheme.secondary
     val grey = scheme.outline
+    val darkLabels = LaresTheme.colors.isDark
+    val labelText = scheme.onSurface
+    val labelHalo = scheme.surface.copy(alpha = 0.85f)
     val memberClick by rememberUpdatedState(onMemberClick)
     val placeClick by rememberUpdatedState(onPlaceClick)
     val mapClick by rememberUpdatedState(onMapClick)
@@ -132,10 +137,11 @@ actual fun FamilyMapView(
                 id = "lares-place-label",
                 source = placeLabelSource,
                 textField = format(span(feature["name"].asString())),
-                textFont = const(LABEL_FONT),
+                textFont = const(labelFont),
                 textSize = const(12.sp),
-                textColor = color,
-                textHaloColor = const(Color.White.copy(alpha = 0.85f)),
+                // Dark styles: the place colours are too dark to read on the map, so the label follows the theme.
+                textColor = if (darkLabels) const(labelText) else color,
+                textHaloColor = const(labelHalo),
                 textHaloWidth = const(2.dp),
                 textAnchor = const(SymbolAnchor.Top),
                 onClick = onPlace,
@@ -169,7 +175,7 @@ actual fun FamilyMapView(
                 id = "lares-pin-initials",
                 source = initialsSource,
                 textField = format(span(feature["initials"].asString())),
-                textFont = const(LABEL_FONT),
+                textFont = const(labelFont),
                 textSize = const(16.sp),
                 textColor = const(Color.White),
                 textAllowOverlap = const(true),

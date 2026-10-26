@@ -315,7 +315,7 @@ private fun MapLayer(
     }
     val view =
         remember(state.members, state.places, styleUrl, dark) {
-            MapViewState(styleUrl, MapLogic.pins(state.members, dark), MapLogic.places(state.places))
+            MapViewState(styleUrl, MapLogic.pins(state.members, dark), MapLogic.places(state.places), labelFont = state.config?.labelFont)
         }
     val top = with(LocalDensity.current) { WindowInsets.statusBars.getTop(this).toDp() } + 80.dp
     if (styleUrl != null || view.pins.isNotEmpty()) {

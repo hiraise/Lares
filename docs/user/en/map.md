@@ -105,7 +105,8 @@ and who gets arrive / leave notifications about them (**Notified about you**: "M
   public Nominatim. Phones never contact it directly.
 - The server administrator can turn addresses off (`LARES_GEOCODER_URL=` in `.env`, see
   [Installing the server](install-server.md)); the map then shows the distance to the nearest place.
-- Map tiles come from the configured tile server; it learns which map areas are viewed, not who is where.
+- The map itself also comes through your family server, which fetches it from an OpenStreetMap source (VersaTiles by
+  default) and keeps it for a week; the source learns which map areas are viewed, not who views them or who is where.
 - Positions are deleted after the history period; removing a member deletes their positions at once.
 
 ## Who may do what

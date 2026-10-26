@@ -197,6 +197,15 @@ class MapViewModelTest {
     }
 
     @Test
+    fun `LOC-003 age texts follow the minute without new positions`() {
+        val vm = setUp()
+        socket.trySend(snapshot(member(ANYA, at = now - 3.minutes, speed = 3f)))
+        awaitState(vm.state) { s -> s.rows.any { it.status == "On the way · 3 min ago" } }
+        f.setNow(now + 1.minutes)
+        awaitState(vm.state) { s -> s.rows.any { it.status == "On the way · 4 min ago" } }
+    }
+
+    @Test
     fun `LOC-003 the card follows the selection and back closes it, the camera goes to the member`() {
         val vm = setUp()
         socket.trySend(snapshot(member(ANYA), member(DIMA)))

@@ -113,6 +113,13 @@ ntfy_status() { curl -sk -o /dev/null -w '%{http_code}' --resolve ntfy.localhost
 [ "$(ntfy_status upSmokeTest1)" = 200 ] || fail "ntfy should accept anonymous publish to an up* topic"
 [ "$(ntfy_status smoketopic)" = 403 ] || fail "ntfy should deny other topics"
 
+step "map cache: /map/ goes to nginx, the server hands out proxied style URLs (ADR-0029)"
+# Any status: the CI network may not reach the upstream; the header shows the request reached the cache.
+curl -sk -D - -o /dev/null "https://localhost/map/assets/styles/colorful/style.json" | grep -qi '^x-lares-map:' \
+    || fail "/map/ did not reach the map cache"
+api GET /location/config '' "$token" | grep -q '"mapStyleUrl":"https://localhost/map/assets/styles/colorful/style.json"' \
+    || fail "the server should hand out the style through /map/"
+
 step "server memory (limit 300 MiB)"
 docker stats --no-stream --format '{{.Name}}: {{.MemUsage}} ({{.MemPerc}})' "$(docker compose ps -q server)"
 

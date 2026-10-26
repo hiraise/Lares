@@ -184,4 +184,17 @@ class AddressRoutesTest {
             val config = client.send(HttpMethod.Get, "/api/v1/location/config", family.kid.accessToken).body<LocationConfig>()
             assertEquals(false, config.addresses)
         }
+
+    @Test
+    fun loc009StylesThroughTheMapCacheWithTheirFont() =
+        testApp(
+            configure = { it.copy(location = it.location.copy(mapProxyBase = "https://family.example.org/map")) },
+        ) { deps ->
+            val client = jsonClient()
+            val family = client.locationFamily(deps)
+            val config = client.send(HttpMethod.Get, "/api/v1/location/config", family.kid.accessToken).body<LocationConfig>()
+            assertEquals("https://family.example.org/map/assets/styles/colorful/style.json", config.mapStyleUrl)
+            assertEquals("https://family.example.org/map/assets/styles/colorful-dark/style.json", config.mapDarkStyleUrl)
+            assertEquals("noto_sans_bold", config.labelFont)
+        }
 }

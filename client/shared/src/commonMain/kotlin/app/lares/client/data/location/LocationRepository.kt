@@ -103,6 +103,7 @@ class LocationRepository(
                         else -> Connection.POLLING
                     },
                 updatedAt = remote.updatedAt,
+                tick = now,
             )
         }.distinctUntilChanged().shareIn(scope, SharingStarted.WhileSubscribed(SHARE_TIMEOUT_MS), replay = 1)
 
@@ -243,9 +244,10 @@ class LocationRepository(
             /** `FORBIDDEN` or no `location.view`: nothing hidden stays on the phone. */
             suspend fun forbidden() =
                 lock.withLock {
-                    state.update { it.copy(members = emptyMap(), updatedAt = null) }
+                    // The stored snapshot first: once the screen shows nobody, nothing hidden is left on the phone.
                     localDb.transaction { location_snapshotQueries.remove(SNAPSHOT_KEY) }
                     dirty = false
+                    state.update { it.copy(members = emptyMap(), updatedAt = null) }
                 }
 
             launch { state.collect { send(it) } }

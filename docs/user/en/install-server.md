@@ -173,16 +173,31 @@ The ntfy server only accepts the app's own push topics; it cannot be used by str
 
 ## Map (optional)
 
-The map in the app is drawn from free [OpenFreeMap](https://openfreemap.org) styles: no account, no key, no tracking.
-To use other MapLibre-compatible styles (for example your own tile server), set in `.env`:
+The phones load the map only from your server (`https://<your domain>/map/…`). The `mapcache` container fetches the
+map from a free OpenStreetMap source — by default [VersaTiles](https://versatiles.org): no account, no key — the first
+time somebody looks at an area, keeps it on the server and deletes what nobody looked at for **7 days**. So the app
+also works on networks that block public map servers, and areas the family views often load from your server.
 
-```sh
-LARES_MAP_STYLE_URL=https://tiles.example.com/styles/light.json
-LARES_MAP_STYLE_DARK_URL=https://tiles.example.com/styles/dark.json
-```
+- Disk: at most `LARES_MAP_CACHE_SIZE` (default `2g`); when it is full, the least recently viewed parts go first.
+- What the map source learns: your server's address and which map areas are viewed — not who views them and not
+  where anybody is.
+- Another source, e.g. OpenFreeMap (it is blocked on some networks, for example in Russia):
 
-Both addresses must start with `https://`. Restart with `docker compose up -d`; the app picks up the new styles the next
-time it opens the map.
+  ```sh
+  LARES_MAP_UPSTREAM=https://tiles.openfreemap.org
+  LARES_MAP_UPSTREAM_HOST=tiles.openfreemap.org
+  LARES_MAP_STYLE_URL=https://tiles.openfreemap.org/styles/liberty
+  LARES_MAP_STYLE_DARK_URL=https://tiles.openfreemap.org/styles/dark
+  LARES_MAP_LABEL_FONT="Noto Sans Bold"
+  ```
+
+  `LARES_MAP_LABEL_FONT` is the font of the initials on the pins, as the source's font server names it.
+- Your own tile server: set `LARES_MAP_STYLE_URL` and `LARES_MAP_STYLE_DARK_URL` to its styles; styles that are not on
+  `LARES_MAP_UPSTREAM` are loaded by the phones directly.
+
+All addresses must start with `https://`. Restart with `docker compose up -d`; the app picks up the change the next
+time it starts. To empty the cache:
+`docker compose exec mapcache sh -c 'rm -rf /var/cache/lares-map/*' && docker compose restart mapcache`.
 
 ### Addresses
 

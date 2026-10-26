@@ -356,10 +356,11 @@ class LocationService(
     /** `GET /location/config`. */
     suspend fun config(principal: MemberPrincipal): LocationConfig =
         LocationConfig(
-            mapStyleUrl = config.mapStyleUrl,
-            mapDarkStyleUrl = config.mapDarkStyleUrl,
+            mapStyleUrl = config.clientUrl(config.mapStyleUrl),
+            mapDarkStyleUrl = config.clientUrl(config.mapDarkStyleUrl),
             addresses = config.geocoderUrl != null,
             historyDays = db.dbQuery { historyDays(principal.householdId) },
+            labelFont = config.labelFont,
         )
 
     private fun historyDays(householdId: UUID): Int =

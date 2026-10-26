@@ -175,16 +175,33 @@ docker compose up -d
 
 ## Карта (по желанию)
 
-Карта в приложении рисуется по бесплатным стилям [OpenFreeMap](https://openfreemap.org): без регистрации, ключей и
-слежки. Чтобы использовать другие стили, совместимые с MapLibre (например, свой сервер плиток), укажите в `.env`:
+Телефоны загружают карту только с вашего сервера (`https://<ваш домен>/map/…`). Контейнер `mapcache` берёт карту у
+бесплатного источника OpenStreetMap — по умолчанию [VersaTiles](https://versatiles.org): без регистрации и ключей —
+в тот момент, когда кто-то впервые смотрит на этот район, хранит её на сервере и удаляет то, что никто не открывал
+**7 дней**. Поэтому приложение работает и в сетях, где публичные серверы карт заблокированы, а часто просматриваемые
+районы загружаются с вашего сервера.
 
-```sh
-LARES_MAP_STYLE_URL=https://tiles.example.com/styles/light.json
-LARES_MAP_STYLE_DARK_URL=https://tiles.example.com/styles/dark.json
-```
+- Диск: не больше `LARES_MAP_CACHE_SIZE` (по умолчанию `2g`); когда место кончается, первыми удаляются районы, которые
+  смотрели давнее всего.
+- Что узнаёт источник карты: адрес вашего сервера и какие районы карты смотрят — но не кто смотрит и не где кто
+  находится.
+- Другой источник, например OpenFreeMap (в некоторых сетях, например в России, он заблокирован):
 
-Оба адреса должны начинаться с `https://`. Перезапустите `docker compose up -d`; приложение возьмёт новые стили, когда в
-следующий раз откроет карту.
+  ```sh
+  LARES_MAP_UPSTREAM=https://tiles.openfreemap.org
+  LARES_MAP_UPSTREAM_HOST=tiles.openfreemap.org
+  LARES_MAP_STYLE_URL=https://tiles.openfreemap.org/styles/liberty
+  LARES_MAP_STYLE_DARK_URL=https://tiles.openfreemap.org/styles/dark
+  LARES_MAP_LABEL_FONT="Noto Sans Bold"
+  ```
+
+  `LARES_MAP_LABEL_FONT` — шрифт букв на значках людей, как его называет сервер шрифтов источника.
+- Свой сервер плиток: укажите его стили в `LARES_MAP_STYLE_URL` и `LARES_MAP_STYLE_DARK_URL`; стили не с
+  `LARES_MAP_UPSTREAM` телефоны загружают напрямую.
+
+Все адреса должны начинаться с `https://`. Перезапустите `docker compose up -d`; приложение возьмёт изменения при
+следующем запуске. Очистить кэш:
+`docker compose exec mapcache sh -c 'rm -rf /var/cache/lares-map/*' && docker compose restart mapcache`.
 
 ### Адреса
 

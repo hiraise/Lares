@@ -51,4 +51,43 @@ class AppConfigTest {
         assertFalse(text.contains("s3cret"))
         assertFalse(text.contains("654321"))
     }
+
+    @Test
+    fun mapTilesThroughTheCache() {
+        val defaults = AppConfig.fromEnv(emptyMap()).location
+        assertEquals("https://tiles.versatiles.org/assets/styles/colorful/style.json", defaults.mapStyleUrl)
+        assertEquals("https://tiles.versatiles.org/assets/styles/colorful-dark/style.json", defaults.mapDarkStyleUrl)
+        assertEquals("noto_sans_bold", defaults.labelFont)
+        assertNull(defaults.mapProxyBase, "the dev server hands out direct URLs")
+        assertEquals(defaults.mapStyleUrl, defaults.clientUrl(defaults.mapStyleUrl))
+
+        val proxied =
+            AppConfig
+                .fromEnv(mapOf("LARES_PUBLIC_URL" to "https://family.example.org/", "LARES_MAP_PROXY" to "true"))
+                .location
+        assertEquals("https://family.example.org/map", proxied.mapProxyBase)
+        assertEquals("https://family.example.org/map/assets/styles/colorful/style.json", proxied.clientUrl(proxied.mapStyleUrl))
+        assertEquals(
+            "https://tiles.example.com/light.json",
+            proxied.clientUrl("https://tiles.example.com/light.json"),
+            "other origins stay direct",
+        )
+        assertEquals("https://tiles.versatiles.org.evil/x.json", proxied.clientUrl("https://tiles.versatiles.org.evil/x.json"))
+
+        val own =
+            AppConfig
+                .fromEnv(
+                    mapOf(
+                        "LARES_MAP_PROXY" to "true",
+                        "LARES_MAP_UPSTREAM" to "https://tiles.openfreemap.org/",
+                        "LARES_MAP_STYLE_URL" to "https://tiles.openfreemap.org/styles/liberty",
+                        "LARES_MAP_LABEL_FONT" to " ",
+                    ),
+                ).location
+        assertEquals("http://localhost:8080/map/styles/liberty", own.clientUrl(own.mapStyleUrl))
+        assertNull(own.labelFont, "blank: the app's fallback font")
+
+        assertFailsWith<IllegalArgumentException> { AppConfig.fromEnv(mapOf("LARES_MAP_PROXY" to "yes")) }
+        assertFailsWith<IllegalArgumentException> { AppConfig.fromEnv(mapOf("LARES_MAP_UPSTREAM" to "ftp://tiles.example.com")) }
+    }
 }
