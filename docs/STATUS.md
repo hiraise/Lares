@@ -18,12 +18,16 @@ Q-025…Q-029 answered), [location design](architecture/location.md), [M4 plans]
 M4-10. Next: M4 acceptance.
 Acceptance of M0–M3 is still pending.
 
-**Active release branch: `release/0.5.1`** (fixes from the M4 acceptance; the next milestone gets `release/0.6.0`). Commit approved work here; `main` is protected
-([release process](process/release.md), ADR-0020). Latest release: [v0.5.0](https://github.com/hiraise/Lares/releases/tag/v0.5.0)
+**Active release branch: `release/0.5.2`** (fixes from the M4 acceptance; the next milestone gets `release/0.6.0`). Commit approved work here; `main` is protected
+([release process](process/release.md), ADR-0020). Latest release: [v0.5.1](https://github.com/hiraise/Lares/releases/tag/v0.5.1)
 (M3, 2026-10-25).
 
 ## Last completed
 
+- 2026-10-26 Release **v0.5.1**: map through the family server (M4-11), pin initials, minute-by-minute ages, readable
+  dark-theme place labels, stored snapshot removed before an emptied map on FORBIDDEN. Pull request #5. Next branch
+  `release/0.5.2`. Servers with an edited `docker-compose.yml` need the `mapcache` service, its template and the Caddy
+  `/map/*` route merged by hand.
 - 2026-10-26 M4-11 Map through the family server: phones load the map only from the server, which fetches it from
   VersaTiles on demand and drops what was not viewed for 7 days (ADR-0029); pins show initials again. On
   `release/0.5.1`.
@@ -183,10 +187,10 @@ Acceptance of M0–M3 is still pending.
 2. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
 3. M4 acceptance with the customer (checklist in the M4-10 handoff): real phones with ntfy for arrive / leave
    notifications, battery over a day (Xiaomi / Samsung); then set the location spec to `implemented`; fixes go to
-   `release/0.5.1`.
+   `release/0.5.2`.
 4. After the M1 acceptance: set the tasks spec to `implemented`.
 5. M2 acceptance with the customer (checklist in the M2-06 handoff); after it set the shopping spec to `implemented`.
-6. M3 acceptance with the customer on v0.4.0 (checklist in the M3-08 handoff); fixes go to `release/0.5.1`; after the
+6. M3 acceptance with the customer on v0.4.0 (checklist in the M3-08 handoff); fixes go to `release/0.5.2`; after the
    acceptance set the calendar spec to `implemented`.
 
 ## Plan progress

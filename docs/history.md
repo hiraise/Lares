@@ -430,3 +430,5 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   deleted, 2 GB cap, stale on upstream errors); the server hands out proxied style URLs and `labelFont`; the app uses
   it for pin initials and place labels; dark-theme place labels readable. Smoke test checks the route; emulator: the
   first real map on this Mac, initials on pins, MISS then HIT. 3 new server tests.
+- 2026-10-26 Release **v0.5.1** (map through the family server, CI fixes): pull request #5, signed APK, server image
+  0.5.1, GitHub release. Next branch `release/0.5.2`.
