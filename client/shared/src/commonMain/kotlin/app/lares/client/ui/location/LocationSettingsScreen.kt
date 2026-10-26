@@ -2,6 +2,7 @@ package app.lares.client.ui.location
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,9 +25,14 @@ import app.lares.client.resources.loc_action_enable
 import app.lares.client.resources.loc_action_pause
 import app.lares.client.resources.loc_action_resume
 import app.lares.client.resources.loc_action_turn_on_location
+import app.lares.client.resources.loc_alert_watcher
+import app.lares.client.resources.loc_alert_watchers_none
+import app.lares.client.resources.loc_alert_watchers_title
 import app.lares.client.resources.loc_battery_restricted
 import app.lares.client.resources.loc_battery_row
 import app.lares.client.resources.loc_battery_unrestricted
+import app.lares.client.resources.loc_level_current
+import app.lares.client.resources.loc_level_history
 import app.lares.client.resources.loc_me_location_off_text
 import app.lares.client.resources.loc_me_needs_permission
 import app.lares.client.resources.loc_me_needs_permission_text
@@ -40,19 +46,25 @@ import app.lares.client.resources.loc_me_sharing_text
 import app.lares.client.resources.loc_me_stale
 import app.lares.client.resources.loc_me_stale_text
 import app.lares.client.resources.loc_no_pause_note
+import app.lares.client.resources.loc_online_only
 import app.lares.client.resources.loc_settings_this_phone
 import app.lares.client.resources.loc_settings_title
 import app.lares.client.resources.loc_status_off_location_disabled
+import app.lares.client.resources.loc_watchers_admins
+import app.lares.client.resources.loc_watchers_none
+import app.lares.client.resources.loc_watchers_title
 import app.lares.client.ui.common.rememberTimeFormatter
 import app.lares.client.ui.components.AppPage
 import app.lares.client.ui.components.DetailTopBar
 import app.lares.client.ui.components.ErrorText
+import app.lares.client.ui.components.ListDivider
 import app.lares.client.ui.components.ListGroup
 import app.lares.client.ui.components.ListRow
 import app.lares.client.ui.components.PrimaryButton
 import app.lares.client.ui.components.SectionHeader
 import app.lares.client.ui.components.TonalButton
 import app.lares.client.ui.theme.LaresTheme
+import app.lares.client.ui.theme.Spacing
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -65,6 +77,7 @@ fun LocationSettingsRoute(
     val state by viewModel.state.collectAsStateWithLifecycle()
     LifecycleResumeEffect(Unit) {
         viewModel.onResume()
+        viewModel.loadTransparency()
         onPauseOrDispose { }
     }
     LocationSettingsScreen(
@@ -207,6 +220,60 @@ fun LocationSettingsScreen(
                 showChevron = true,
                 onClick = actions.onBattery,
             )
+        }
+        TransparencySections(state.transparency)
+    }
+}
+
+/** «Кто меня видит» and «О вас сообщают» (LOC-015); online only. */
+@Composable
+private fun TransparencySections(transparency: Transparency) {
+    val muted = MaterialTheme.colorScheme.onSurfaceVariant
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        SectionHeader(stringResource(Res.string.loc_watchers_title))
+        when (transparency) {
+            Transparency.Loading -> {}
+
+            Transparency.Unavailable -> {
+                Text(
+                    stringResource(Res.string.loc_online_only),
+                    Modifier.testTag("loc_watchers_offline"),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = muted,
+                )
+            }
+
+            is Transparency.Loaded -> {
+                ListGroup(Modifier.testTag("loc_watchers")) {
+                    if (transparency.viewers.isEmpty()) ListRow(stringResource(Res.string.loc_watchers_none))
+                    transparency.viewers.forEachIndexed { index, viewer ->
+                        if (index > 0) ListDivider(inset = 16.dp)
+                        ListRow(
+                            viewer.name,
+                            supporting =
+                                stringResource(if (viewer.history) Res.string.loc_level_history else Res.string.loc_level_current),
+                        )
+                    }
+                }
+            }
+        }
+        Text(
+            stringResource(Res.string.loc_watchers_admins),
+            Modifier.padding(horizontal = Spacing.xs),
+            style = MaterialTheme.typography.bodySmall,
+            color = muted,
+        )
+    }
+    if (transparency is Transparency.Loaded) {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            SectionHeader(stringResource(Res.string.loc_alert_watchers_title))
+            ListGroup(Modifier.testTag("loc_alert_watchers")) {
+                if (transparency.alerts.isEmpty()) ListRow(stringResource(Res.string.loc_alert_watchers_none))
+                transparency.alerts.forEachIndexed { index, row ->
+                    if (index > 0) ListDivider(inset = 16.dp)
+                    ListRow(stringResource(Res.string.loc_alert_watcher, row.name, row.places.joinToString(", ")))
+                }
+            }
         }
     }
 }

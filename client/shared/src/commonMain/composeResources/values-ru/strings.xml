@@ -1169,4 +1169,54 @@
         <item quantity="many">%1$s здесь</item>
         <item quantity="other">%1$s здесь</item>
     </plurals>
+    <!-- Alerts, rules, Today, person page (M4-10) -->
+    <string name="alerts_title">Сообщать: прибытие и уход</string>
+    <string name="alerts_me">Сообщать мне</string>
+    <string name="alerts_text">Уведомления приходят только вам.</string>
+    <string name="alerts_here_now">сейчас здесь</string>
+    <string name="alerts_no_places">Мест пока нет. Добавьте место на карте.</string>
+    <string name="alerts_no_members">Нет никого, о ком можно сообщать.</string>
+    <string name="alerts_off">Выключено</string>
+    <string name="loc_watchers_title">Кто меня видит</string>
+    <string name="loc_watchers_none">Никто</string>
+    <string name="loc_watchers_admins">Администраторы видят всех с историей.</string>
+    <string name="loc_level_current">где сейчас</string>
+    <string name="loc_level_history">с историей</string>
+    <string name="loc_level_current_title">Где сейчас</string>
+    <string name="loc_level_history_title">С историей</string>
+    <string name="loc_alert_watchers_title">О вас сообщают</string>
+    <string name="loc_alert_watchers_none">Никто</string>
+    <string name="loc_alert_watcher">%1$s — %2$s</string>
+    <string name="loc_online_only">Доступно, когда есть связь</string>
+    <string name="rules_entry">Геопозиция: кто кого видит</string>
+    <string name="rules_title">Кто кого видит</string>
+    <string name="rules_note">Администраторы всегда видят всех с историей. Каждый видит свою историю.</string>
+    <string name="rules_section">Правила</string>
+    <string name="rules_none">Правил нет: других видят только администраторы.</string>
+    <string name="rules_add">Добавить правило</string>
+    <string name="rules_error_party">Этой группы или участника больше нет</string>
+    <string name="rules_history_title">Хранить историю</string>
+    <plurals name="rules_history_days">
+        <item quantity="one">%1$d день</item>
+        <item quantity="few">%1$d дня</item>
+        <item quantity="many">%1$d дней</item>
+        <item quantity="other">%1$d дня</item>
+    </plurals>
+    <string name="rules_history_text">Более старые позиции удаляются в течение часа.</string>
+    <string name="rule_editor_new">Новое правило</string>
+    <string name="rule_editor_title">Правило</string>
+    <string name="rule_editor_subject">Кто</string>
+    <string name="rule_editor_target">Кого видит</string>
+    <string name="rule_editor_level">Что видно</string>
+    <string name="rule_everyone">Все</string>
+    <string name="rule_unknown">Неизвестно</string>
+    <string name="rule_group_sees_all">%1$s видят всех · %2$s</string>
+    <string name="rule_group_sees">%1$s видят: %2$s · %3$s</string>
+    <string name="rule_member_sees_all">%1$s видит всех · %2$s</string>
+    <string name="rule_member_sees">%1$s видит: %2$s · %3$s</string>
+    <string name="rule_everyone_sees_all">Все видят всех · %1$s</string>
+    <string name="rule_everyone_sees">Все видят: %1$s · %2$s</string>
+    <string name="today_family_title">Семья сейчас</string>
+    <string name="today_family_map">Карта</string>
+    <string name="person_where_now">Где сейчас</string>
 </resources>

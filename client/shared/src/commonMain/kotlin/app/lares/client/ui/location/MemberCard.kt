@@ -20,6 +20,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.lares.client.resources.Res
 import app.lares.client.resources.action_back
+import app.lares.client.resources.alerts_off
+import app.lares.client.resources.alerts_title
 import app.lares.client.resources.ic_arrow_back
 import app.lares.client.resources.ic_battery_1_bar
 import app.lares.client.resources.ic_battery_3_bar
@@ -28,6 +30,7 @@ import app.lares.client.resources.ic_battery_6_bar
 import app.lares.client.resources.ic_battery_charging_full
 import app.lares.client.resources.ic_battery_full
 import app.lares.client.resources.ic_history
+import app.lares.client.resources.ic_notifications
 import app.lares.client.resources.ic_refresh
 import app.lares.client.resources.loc_status_kilometers
 import app.lares.client.resources.loc_status_meters
@@ -41,6 +44,8 @@ import app.lares.client.resources.map_refresh_paused
 import app.lares.client.resources.map_refresh_waiting
 import app.lares.client.ui.common.message
 import app.lares.client.ui.components.Avatar
+import app.lares.client.ui.components.ListGroup
+import app.lares.client.ui.components.ListRow
 import app.lares.client.ui.components.TonalButton
 import app.lares.client.ui.theme.LaresTheme
 import app.lares.client.ui.theme.Spacing
@@ -50,7 +55,7 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * The member card (plan M4-08, LOC-011): the sheet's content after a pin or row tap — name, status line, accuracy,
- * battery, «Обновить» and «История» (M4-09); the alerts come with M4-10.
+ * battery, «Обновить», «История» (M4-09) and «Сообщать: прибытие и уход» (M4-10).
  */
 @Composable
 fun MemberCardContent(
@@ -60,6 +65,7 @@ fun MemberCardContent(
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier,
     onHistory: () -> Unit = {},
+    onAlerts: () -> Unit = {},
 ) {
     val member = card.row.member
     Column(modifier.fillMaxWidth().testTag("member_card"), verticalArrangement = Arrangement.spacedBy(Spacing.m)) {
@@ -106,8 +112,31 @@ fun MemberCardContent(
                 icon = Res.drawable.ic_history,
             )
         }
+        if (card.canAlerts) {
+            ListGroup {
+                AlertsRow(card.alertPlaces, onAlerts)
+            }
+        }
         Spacer(Modifier.size(Spacing.s))
     }
+}
+
+/** «Сообщать: прибытие и уход» with the chosen places («Школа №12, Дом») or «Выключено»; opens the alerts sheet. */
+@Composable
+fun AlertsRow(
+    names: List<String>,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    title: String = stringResource(Res.string.alerts_title),
+) {
+    ListRow(
+        title,
+        modifier.testTag("alerts"),
+        icon = Res.drawable.ic_notifications,
+        supporting = if (names.isEmpty()) stringResource(Res.string.alerts_off) else names.joinToString(", "),
+        showChevron = true,
+        onClick = onClick,
+    )
 }
 
 @Composable

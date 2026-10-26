@@ -87,6 +87,8 @@ class TodayActions(
     val onCalendar: () -> Unit = {},
     /** «Ещё N» under «Скоро»: the Calendar tab in «Список». */
     val onCalendarList: () -> Unit = {},
+    /** «Семья сейчас»: the Map, centred on the member when given. */
+    val onMap: (String?) -> Unit = {},
 )
 
 /**
@@ -100,6 +102,7 @@ fun TodayScreen(
     onOpenMore: () -> Unit,
     today: TodayUiState = TodayUiState(),
     actions: TodayActions = TodayActions(),
+    familyNow: TodayFamilyNowUi? = null,
 ) {
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
@@ -113,7 +116,7 @@ fun TodayScreen(
                     Avatar(initialsFor(state.name), state.color, size = 32.dp, ring = true)
                 }
             }
-            if (today.empty) {
+            if (today.empty && familyNow == null) {
                 EmptyState(Res.drawable.ic_home, stringResource(Res.string.today_empty))
             } else if (today.loaded) {
                 Column(
@@ -125,6 +128,7 @@ fun TodayScreen(
                     }
                     if (today.showTasks) TodayTasks(today, actions)
                     today.upcoming?.let { TodayUpcoming(it, actions) }
+                    familyNow?.let { TodayFamilyNow(it, actions) }
                 }
             }
         }

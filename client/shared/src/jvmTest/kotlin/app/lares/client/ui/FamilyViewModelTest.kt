@@ -23,6 +23,12 @@ import app.lares.contract.api.admin.CreateInviteRequest
 import app.lares.contract.api.admin.InviteCreated
 import app.lares.contract.api.admin.InviteInfo
 import app.lares.contract.api.admin.UpdateGroupRequest
+import app.lares.contract.api.location.AddressLabel
+import app.lares.contract.api.location.LocationNow
+import app.lares.contract.api.location.MemberLocation
+import app.lares.contract.api.location.PositionFix
+import app.lares.contract.api.location.SharingStatus
+import app.lares.contract.api.location.VisibilityLevel
 import app.lares.contract.entities.PaletteColor
 import app.lares.contract.entities.TagData
 import app.lares.contract.permissions.EffectivePermissions
@@ -32,6 +38,9 @@ import io.ktor.client.engine.mock.respond
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.OutgoingContent
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.builtins.ListSerializer
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -364,5 +373,51 @@ class FamilyViewModelTest {
             assertNull(state.dates)
             assertFalse(state.canAddMemorable)
         }
+    }
+
+    @Test
+    fun `LOC-017 where now only for members the viewer sees, history only with the history level`() {
+        val now = Clock.System.now()
+
+        fun at(
+            id: String,
+            level: VisibilityLevel,
+        ) = MemberLocation(id, level, SharingStatus.SHARING, last = PositionFix(now, 55.79, 37.53, 10f))
+        val locations =
+            LocationNow(
+                listOf(at("m1", VisibilityLevel.HISTORY), at("m2", VisibilityLevel.HISTORY), at("m3", VisibilityLevel.CURRENT)),
+                now,
+            )
+        FamilyFixture
+            .core(FamilyFixture.olga, extra = { request ->
+                when (request.url.encodedPath) {
+                    "/api/v1/location/now" -> json(LocationNow.serializer(), locations)
+                    "/api/v1/location/address" -> json(AddressLabel.serializer(), AddressLabel("Lenina 12"))
+                    else -> null
+                }
+            })
+            .use { core ->
+                fun person(id: String) =
+                    PersonViewModel(
+                        core.session,
+                        core.koin.get(),
+                        core.koin.get(),
+                        core.koin.get(),
+                        core.koin.get(),
+                        Clock.System,
+                        id,
+                        core.koin.get(),
+                        core.koin.get(),
+                    )
+                val boris = awaitState(person("p2").whereNow) { it != null }!!
+                assertEquals("m2", boris.memberId)
+                assertTrue(boris.canHistory)
+                assertTrue(boris.status.isNotBlank())
+                assertFalse(awaitState(person("p3").whereNow) { it != null }!!.canHistory, "Carol is seen where now only")
+                for (id in listOf("p4", "p1")) {
+                    val shown = runBlocking { withTimeoutOrNull(1_500) { person(id).whereNow.first { it != null } } }
+                    assertNull(shown, "no row for $id: a relative, or oneself")
+                }
+            }
     }
 }

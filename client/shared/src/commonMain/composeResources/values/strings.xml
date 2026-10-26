@@ -1130,4 +1130,52 @@
         <item quantity="one">%1$s is here</item>
         <item quantity="other">%1$s are here</item>
     </plurals>
+    <!-- Alerts, rules, Today, person page (M4-10) -->
+    <string name="alerts_title">Notify me: arrive and leave</string>
+    <string name="alerts_me">Notify me</string>
+    <string name="alerts_text">Only you get these notifications.</string>
+    <string name="alerts_here_now">here now</string>
+    <string name="alerts_no_places">No places yet. Add one on the map.</string>
+    <string name="alerts_no_members">There is nobody to be notified about.</string>
+    <string name="alerts_off">Off</string>
+    <string name="loc_watchers_title">Who can see me</string>
+    <string name="loc_watchers_none">Nobody</string>
+    <string name="loc_watchers_admins">Administrators see everybody with history.</string>
+    <string name="loc_level_current">where now</string>
+    <string name="loc_level_history">with history</string>
+    <string name="loc_level_current_title">Where now</string>
+    <string name="loc_level_history_title">With history</string>
+    <string name="loc_alert_watchers_title">Notified about you</string>
+    <string name="loc_alert_watchers_none">Nobody</string>
+    <string name="loc_alert_watcher">%1$s — %2$s</string>
+    <string name="loc_online_only">Available when online</string>
+    <string name="rules_entry">Location: who sees whom</string>
+    <string name="rules_title">Who sees whom</string>
+    <string name="rules_note">Administrators always see everybody with history. Everybody sees their own history.</string>
+    <string name="rules_section">Rules</string>
+    <string name="rules_none">No rules: only administrators see the others.</string>
+    <string name="rules_add">Add rule</string>
+    <string name="rules_error_party">This group or member no longer exists</string>
+    <string name="rules_history_title">Keep history</string>
+    <plurals name="rules_history_days">
+        <item quantity="one">%1$d day</item>
+        <item quantity="other">%1$d days</item>
+    </plurals>
+    <string name="rules_history_text">Older positions are deleted within an hour.</string>
+    <string name="rule_editor_new">New rule</string>
+    <string name="rule_editor_title">Rule</string>
+    <string name="rule_editor_subject">Who</string>
+    <string name="rule_editor_target">Sees whom</string>
+    <string name="rule_editor_level">What is visible</string>
+    <string name="rule_everyone">Everybody</string>
+    <string name="rule_unknown">Unknown</string>
+    <string name="rule_group_sees_all">%1$s see everybody · %2$s</string>
+    <string name="rule_group_sees">%1$s see: %2$s · %3$s</string>
+    <string name="rule_member_sees_all">%1$s sees everybody · %2$s</string>
+    <string name="rule_member_sees">%1$s sees: %2$s · %3$s</string>
+    <string name="rule_everyone_sees_all">Everybody sees everybody · %1$s</string>
+    <string name="rule_everyone_sees">Everybody sees: %1$s · %2$s</string>
+    <string name="today_family_title">Family now</string>
+    <string name="today_family_map">Map</string>
+    <string name="person_where_now">Where now</string>
 </resources>

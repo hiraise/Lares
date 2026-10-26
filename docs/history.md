@@ -410,3 +410,11 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   address search on «Найти» only, offline save of changed fields only). Map seam: `CameraKind.Bounds`,
   `onCenterChange`. Icons `work`, `fitness_center`. 24 new tests (logic, view models, UI). Walkthrough found one
   issue: «Добавить место» under the navigation bar with 4+ places (sheet now opens fully).
+- 2026-10-26 M4-10 Alerts, rules, everywhere, manual (M4 wrap-up): «Сообщать: прибытие и уход» on the member card,
+  the person page and the place sheet («Сообщать мне»), `AlertsLogic` writes one full set per member; Settings ›
+  Геопозиция «Кто меня видит» / «О вас сообщают»; Family settings › «Геопозиция: кто кого видит» (rules as sentences,
+  edit sheet, one `PUT`, row errors, history period 7–90 days); Today «Семья сейчас» and the person page «Где сейчас»
+  through the new `LiveLocations` (socket only while visible); location notification switches (sharing-off for
+  administrators); `"location"` taps open the Map at the member; user manual "Map" (en, ru). All LOC MVP requirements
+  done. 19 new tests. Walkthrough: all scenarios pass; the push itself is not testable on the emulator (no ntfy, the
+  server detected arrival and departure); fixed: history chips offline looked active, the rule sheet opened half.

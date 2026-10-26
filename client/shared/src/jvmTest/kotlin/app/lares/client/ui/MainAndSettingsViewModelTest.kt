@@ -16,6 +16,7 @@ import app.lares.client.ui.settings.LoginQrViewModel
 import app.lares.client.ui.settings.NotificationSettingsViewModel
 import app.lares.client.ui.settings.SettingsViewModel
 import app.lares.client.ui.settings.SwitchableNotificationTypes
+import app.lares.client.ui.settings.notificationTypesFor
 import app.lares.contract.api.ErrorCode
 import app.lares.contract.api.FieldErrorCode
 import app.lares.contract.api.LaresJson
@@ -94,6 +95,8 @@ class MainAndSettingsViewModelTest {
                 NotificationType.TASK_REMINDER,
                 NotificationType.EVENT_CHANGED,
                 NotificationType.EVENT_REMINDER,
+                NotificationType.LOCATION_PLACE,
+                NotificationType.LOCATION_SHARING,
                 NotificationType.SYSTEM_TEST,
             ),
             SwitchableNotificationTypes,
@@ -277,5 +280,37 @@ class MainAndSettingsViewModelTest {
             core.session.login("olga", "secret123")
         }
         block(core)
+    }
+
+    @Test
+    fun `LOC-018 location switches - places with location view, sharing off for administrators only`() {
+        val adult = EffectivePermissions(false, setOf(Permission.LOCATION_VIEW, Permission.TASKS_VIEW))
+        val admin = EffectivePermissions(true, emptySet())
+        val none = EffectivePermissions(false, setOf(Permission.TASKS_VIEW))
+        val place = NotificationType.LOCATION_PLACE
+        val sharing = NotificationType.LOCATION_SHARING
+        assertEquals(listOf(true, false), notificationTypesFor(adult).let { listOf(place in it, sharing in it) })
+        assertEquals(listOf(true, true), notificationTypesFor(admin).let { listOf(place in it, sharing in it) })
+        assertEquals(listOf(false, false), notificationTypesFor(none).let { listOf(place in it, sharing in it) })
+        assertEquals(NotificationType.SYSTEM_TEST, notificationTypesFor(admin).last())
+    }
+
+    @Test
+    fun `LOC-018 the settings screen shows the sharing switch to administrators only`() {
+        for ((me, shown) in listOf(FamilyFixture.olga to true, FamilyFixture.boris to false)) {
+            FamilyFixture.core(me).use { core ->
+                val vm =
+                    NotificationSettingsViewModel(
+                        core.koin.get(),
+                        core.koin.get(),
+                        core.koin.get(),
+                        core.koin.get(),
+                        Clock.System,
+                        core.koin.get(),
+                    )
+                val state = awaitState(vm.state) { NotificationType.LOCATION_PLACE in it.types }
+                assertEquals(shown, NotificationType.LOCATION_SHARING in state.types, me.login)
+            }
+        }
     }
 }

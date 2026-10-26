@@ -30,6 +30,8 @@ import app.lares.client.ui.family.PersonArgs
 import app.lares.client.ui.family.PersonViewModel
 import app.lares.client.ui.family.TagViewModel
 import app.lares.client.ui.location.HistoryViewModel
+import app.lares.client.ui.location.LiveLocations
+import app.lares.client.ui.location.LocationRulesViewModel
 import app.lares.client.ui.location.LocationSettingsViewModel
 import app.lares.client.ui.location.MapArgs
 import app.lares.client.ui.location.MapViewModel
@@ -76,6 +78,7 @@ fun uiModule(): Module =
         single<CalendarReminderTexts> { CalendarReminderResourceTexts() }
         single<LocationTextResources> { LocationResourceTexts() }
         single { AppStartup(get(), get(AppScope)) }
+        factory { LiveLocations(get(), get(), get(), get(), get(), get(), get(), getOrNull<Clock>() ?: Clock.System) }
         single { AppearanceSettings(get(), get(), get(AppScope)) }
         viewModel { ServerViewModel(get()) }
         viewModel { params -> SetupViewModel(get(), params.get()) }
@@ -88,9 +91,9 @@ fun uiModule(): Module =
         viewModel { ChangePasswordViewModel(get(), get()) }
         viewModel { params -> LoginQrViewModel(get(), getOrNull<Clock>() ?: Clock.System, params.getOrNull<String>()) }
         viewModel { DevicesViewModel(get()) }
-        viewModel { NotificationSettingsViewModel(get(), get(), get(), get(), getOrNull<Clock>() ?: Clock.System) }
+        viewModel { NotificationSettingsViewModel(get(), get(), get(), get(), getOrNull<Clock>() ?: Clock.System, get()) }
         viewModel { NotificationPromptViewModel(get(), get()) }
-        viewModel { LocationSettingsViewModel(get(), getOrNull<LocationDevice>() ?: AllowAllLocationDevice(), get(), get(), get()) }
+        viewModel { LocationSettingsViewModel(get(), getOrNull<LocationDevice>() ?: AllowAllLocationDevice(), get(), get(), get(), get()) }
         viewModel { params ->
             MapViewModel(
                 get(),
@@ -101,8 +104,11 @@ fun uiModule(): Module =
                 get(),
                 getOrNull<Clock>() ?: Clock.System,
                 params.getOrNull<MapArgs>() ?: MapArgs(),
+                MapViewModel.REFRESH_TIMEOUT,
+                get(),
             )
         }
+        viewModel { LocationRulesViewModel(get(), get(), get(), get(), get(), get()) }
         viewModel { params -> HistoryViewModel(get(), get(), get(), get(), getOrNull<Clock>() ?: Clock.System, params.get()) }
         viewModel { params -> PlaceEditorViewModel(get(), get(), get(), get(), get(), params.get()) }
         viewModel { AboutViewModel(get(), get(), get()) }
@@ -111,11 +117,21 @@ fun uiModule(): Module =
         viewModel { params -> AddMemberViewModel(get(), get(), get(), get(), get(), params.get()) }
         viewModel { params -> GroupEditorViewModel(get(), get(), get(), get(), get(), get(), params.get<GroupArgs>().groupId) }
         viewModel { params ->
-            PersonViewModel(get(), get(), get(), get(), get(), getOrNull<Clock>() ?: Clock.System, params.get<PersonArgs>().personId, get())
+            PersonViewModel(
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                getOrNull<Clock>() ?: Clock.System,
+                params.get<PersonArgs>().personId,
+                get(),
+                get(),
+            )
         }
         viewModel { FamilySettingsViewModel(get(), get(), get(), get()) }
         viewModel { TasksViewModel(get(), get(), get()) }
-        viewModel { TodayViewModel(get(), get(), get(), get()) }
+        viewModel { TodayViewModel(get(), get(), get(), get(), get()) }
         viewModel { params -> TagViewModel(get(), get(), get(), get(), get(), params.get(), get()) }
         viewModel { params -> TaskDetailViewModel(get(), get(), params.get()) }
         viewModel { params -> TaskEditorViewModel(get(), get(), get(), get(), get(), params.get()) }

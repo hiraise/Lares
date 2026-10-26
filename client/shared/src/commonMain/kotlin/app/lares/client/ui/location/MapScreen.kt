@@ -147,8 +147,10 @@ fun MapRoute(
                 onLongPress = { lat, lon -> onPlaceEditor(PlaceEditorArgs(lat = lat, lon = lon)) },
                 onHistory = onHistory,
                 onCenter = viewModel::onCenter,
+                onAlerts = viewModel::openAlerts,
             ),
     )
+    state.alerts?.let { AlertsSheet(it, onSave = viewModel::saveAlerts, onDismiss = viewModel::closeAlerts) }
     if (sharingState.setupOpen) {
         SharingSetupSheet(
             device = sharing.device,
@@ -183,6 +185,7 @@ class MapActions(
     val onLongPress: (Double, Double) -> Unit = { _, _ -> },
     val onHistory: (String) -> Unit = {},
     val onCenter: (Double, Double) -> Unit = { _, _ -> },
+    val onAlerts: (AlertsTarget) -> Unit = {},
 )
 
 private val SHEET_HANDLE = 20.dp
@@ -232,6 +235,7 @@ fun MapScreen(
                         onBack = actions.onCloseCard,
                         onRefresh = { actions.onRefresh(card.row.member.memberId) },
                         onHistory = { actions.onHistory(card.row.member.memberId) },
+                        onAlerts = { actions.onAlerts(AlertsTarget.Member(card.row.member.memberId)) },
                         modifier = Modifier.onGloballyPositioned { peekContent = with(density) { it.size.height.toDp() } },
                     )
                 } else {
@@ -277,6 +281,8 @@ fun MapScreen(
             onEdit = { actions.onEditPlace(place.id) },
             onDelete = { actions.onDeletePlace(place.id) },
             onDismiss = actions.onClosePlace,
+            alertNames = state.placeAlertNames,
+            onAlerts = { actions.onAlerts(AlertsTarget.Place(place.id)) },
         )
     }
 }

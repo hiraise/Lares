@@ -147,7 +147,7 @@ class LocationFixture(
             clock,
         )
     private val scope = CoroutineScope(Job())
-    private val engine = SyncEngine(api, localDb, adapters, Materializer(adapters), clock, scope)
+    val engine = SyncEngine(api, localDb, adapters, Materializer(adapters), clock, scope)
     val writer = LocalWriter(localDb, adapters, clock, engine)
     val permissions = PermissionsRepository(localDb)
     val placesRepository = PlacesRepository(localDb, permissions)

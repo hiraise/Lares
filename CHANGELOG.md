@@ -23,6 +23,13 @@ Versioning: [SemVer](https://semver.org/) from the first release.
   lists the places with who is there now; a place shows its address and who is there. Those allowed to manage places
   create them by a long press on the map, «Я здесь» or a search by address, choose an icon and the circle size
   (50–1000 m), change and delete them; this works offline too.
+- Arrive and leave notifications, who sees whom (M4-10): on a member's card, their page or a place, «Сообщать: прибытие
+  и уход» turns on «Аня · Школа №12 — Прибытие в 08:52» / «Уход в 14:20» for chosen places, for yourself only; a tap
+  opens the map at the member. Settings › «Геопозиция» shows «Кто меня видит» and «О вас сообщают». Administrators set
+  «кто кого видит» as rules («Дети видят: Взрослые · где сейчас») and how long history is kept (7–90 days) in Family
+  settings › «Геопозиция: кто кого видит». Today shows «Семья сейчас»; a member's page shows «Где сейчас» and «История».
+  Settings › Notifications has «Места: прибытие и уход» and, for administrators, «Передача геопозиции выключена».
+  New manual "Map" (en, ru).
 
 ## [0.4.0] - 2026-10-25
 

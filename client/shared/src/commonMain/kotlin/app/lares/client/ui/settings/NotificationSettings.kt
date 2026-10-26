@@ -15,6 +15,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
+import app.lares.client.data.PermissionsRepository
 import app.lares.client.notifications.NotificationPermissions
 import app.lares.client.notifications.NotificationSettingsRepository
 import app.lares.client.notifications.PushDistributors
@@ -88,11 +89,14 @@ import app.lares.contract.api.notifications.NotificationChannel
 import app.lares.contract.api.notifications.NotificationSettings
 import app.lares.contract.api.notifications.NotificationType
 import app.lares.contract.api.notifications.PushTestResult
+import app.lares.contract.permissions.EffectivePermissions
+import app.lares.contract.permissions.Permission
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -116,8 +120,23 @@ val SwitchableNotificationTypes: List<NotificationType> =
         NotificationType.TASK_REMINDER,
         NotificationType.EVENT_CHANGED,
         NotificationType.EVENT_REMINDER,
+        NotificationType.LOCATION_PLACE,
+        NotificationType.LOCATION_SHARING,
         NotificationType.SYSTEM_TEST,
     )
+
+/**
+ * The switches this member gets (LOC-018): «Места: прибытие и уход» with `location.view`, «Передача геопозиции
+ * выключена» for administrators only (only they get it).
+ */
+fun notificationTypesFor(permissions: EffectivePermissions?): List<NotificationType> =
+    SwitchableNotificationTypes.filter {
+        when (it) {
+            NotificationType.LOCATION_PLACE -> permissions?.has(Permission.LOCATION_VIEW) == true
+            NotificationType.LOCATION_SHARING -> permissions?.isAdmin == true
+            else -> true
+        }
+    }
 
 /** The «Дни рождения» choices (CAL-016): null = «Не напоминать» (mutes `birthday.reminder`), else days before. */
 val BirthdayChoices: List<Int?> = listOf(null) + NotificationSettings.BIRTHDAY_DAYS_CHOICES
@@ -134,6 +153,8 @@ data class NotificationSettingsUiState(
     /** When the diagnostics reminder fires; null until one is set. */
     val testReminderAt: Instant? = null,
     val error: UiError? = null,
+    /** The switches shown, by the member's permissions. */
+    val types: List<NotificationType> = notificationTypesFor(null),
 ) {
     /** The selected birthday choice: null when birthday reminders are muted. */
     val birthdayChoice: Int? get() = if (NotificationType.BIRTHDAY_REMINDER in muted) null else birthdayDaysBefore
@@ -146,12 +167,14 @@ class NotificationSettingsViewModel(
     private val permissions: NotificationPermissions,
     private val reminders: ReminderScheduler,
     private val clock: Clock,
+    permissionsRepository: PermissionsRepository? = null,
 ) : ViewModel() {
     private val local = MutableStateFlow(NotificationSettingsUiState())
+    private val mine = permissionsRepository?.observeMine() ?: flowOf(null)
 
     val state: StateFlow<NotificationSettingsUiState> =
-        combine(local, distributors.status, settings.muted, settings.birthdayDaysBefore) { state, push, muted, days ->
-            state.copy(push = push, muted = muted, birthdayDaysBefore = days)
+        combine(local, distributors.status, settings.muted, settings.birthdayDaysBefore, mine) { state, push, muted, days, mine ->
+            state.copy(push = push, muted = muted, birthdayDaysBefore = days, types = notificationTypesFor(mine))
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), NotificationSettingsUiState())
 
     init {
@@ -272,9 +295,18 @@ fun NotificationSettingsRoute(
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             SectionHeader(stringResource(Res.string.notif_types))
             ListGroup {
-                SwitchableNotificationTypes.forEachIndexed { index, type ->
-                    if (type == NotificationType.SYSTEM_TEST) {
-                        // «Дни рождения» goes with the calendar switches, before the test notifications.
+                state.types.forEachIndexed { index, type ->
+                    if (index > 0) ListDivider(inset = 16.dp)
+                    ListRow(
+                        stringResource(type.label()),
+                        modifier = Modifier.testTag("notif_${type.key}"),
+                        onClick = { viewModel.setEnabled(type, type in state.muted) },
+                        trailing = {
+                            Switch(checked = type !in state.muted, onCheckedChange = { viewModel.setEnabled(type, it) })
+                        },
+                    )
+                    if (type == NotificationType.EVENT_REMINDER) {
+                        // «Дни рождения» goes with the calendar switches.
                         ListDivider(inset = 16.dp)
                         ListRow(
                             stringResource(Res.string.notif_type_birthday_reminder),
@@ -284,14 +316,6 @@ fun NotificationSettingsRoute(
                             onClick = { birthdayDialog = true },
                         )
                     }
-                    if (index > 0) ListDivider(inset = 16.dp)
-                    ListRow(
-                        stringResource(type.label()),
-                        onClick = { viewModel.setEnabled(type, type in state.muted) },
-                        trailing = {
-                            Switch(checked = type !in state.muted, onCheckedChange = { viewModel.setEnabled(type, it) })
-                        },
-                    )
                 }
             }
         }

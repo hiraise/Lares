@@ -11,6 +11,8 @@ import app.lares.client.data.location.LocationTexts
 import app.lares.client.data.location.MapState
 import app.lares.client.data.location.MemberOnMap
 import app.lares.client.data.location.Place
+import app.lares.client.data.location.PlaceAlert
+import app.lares.client.data.location.PlacesRepository
 import app.lares.client.data.location.PlacesWriter
 import app.lares.client.data.observeViewer
 import app.lares.client.data.tasks.householdZone
@@ -29,6 +31,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
@@ -72,6 +75,10 @@ data class MemberCard(
     val refresh: RefreshUi?,
     /** «История»: the viewer sees this member with history (LOC-004). */
     val canHistory: Boolean = false,
+    /** «Сообщать: прибытие и уход» (LOC-021): not for the viewer themselves. */
+    val canAlerts: Boolean = false,
+    /** Names of the places the viewer gets alerts on about this member. */
+    val alertPlaces: List<String> = emptyList(),
 )
 
 data class MapUiState(
@@ -90,6 +97,10 @@ data class MapUiState(
     val place: Place? = null,
     /** `location.manage_places`: «Добавить место», long press, edit and delete. */
     val canManagePlaces: Boolean = false,
+    /** The open alerts sheet (LOC-021). */
+    val alerts: AlertsSheetUi? = null,
+    /** Names of the members the viewer gets alerts about on the open place. */
+    val placeAlertNames: List<String> = emptyList(),
 ) {
     val offline: Boolean get() = connection == Connection.OFFLINE
 
@@ -105,6 +116,7 @@ private data class Local(
     val placeId: String? = null,
     val refresh: RefreshUi? = null,
     val config: LocationConfig? = null,
+    val alerts: AlertsTarget? = null,
 )
 
 /**
@@ -122,6 +134,7 @@ class MapViewModel(
     private val clock: Clock,
     private val args: MapArgs = MapArgs(),
     private val refreshTimeout: Duration = REFRESH_TIMEOUT,
+    placesRepository: PlacesRepository? = null,
 ) : ViewModel() {
     private val local = MutableStateFlow(Local())
 
@@ -141,6 +154,8 @@ class MapViewModel(
     private val viewer = observeViewer(localDb, permissions)
     private val me = viewer.map { it?.memberId }.distinctUntilChanged()
     private val canManage = viewer.map { it != null && PlaceRules.canManage(it) }.distinctUntilChanged()
+    private val myAlerts = placesRepository?.observeMyAlerts() ?: flowOf(emptyList())
+    private var latestAlerts: List<PlaceAlert> = emptyList()
 
     /** The camera centre the map last reported: «Добавить место» from the list starts there. */
     private var center: Pair<Double, Double>? = null
@@ -148,11 +163,11 @@ class MapViewModel(
     val state: StateFlow<MapUiState> =
         combine(
             location.observeNow().onEach(::onMapState),
-            combine(me, canManage, ::Pair),
+            combine(me, canManage, myAlerts.onEach { latestAlerts = it }, ::Triple),
             zone,
             addresses,
             local,
-        ) { map, (me, canManage), zone, addresses, local ->
+        ) { map, (me, canManage, alerts), zone, addresses, local ->
             val now = clock.now()
             val rows =
                 MapLogic.rows(map.members, me).map { member ->
@@ -171,8 +186,11 @@ class MapViewModel(
                         canRefresh = MapLogic.canRefresh(member, me),
                         refresh = local.refresh?.takeIf { it.memberId == member.memberId }?.let { done(it, member) },
                         canHistory = member.level == VisibilityLevel.HISTORY,
+                        canAlerts = member.memberId != me,
+                        alertPlaces = AlertsLogic.memberRows(member, map.places, alerts).filter { it.checked }.map { it.title },
                     )
                 }
+            val place = local.placeId?.let { id -> map.places.firstOrNull { it.id == id } }
             MapUiState(
                 loaded = true,
                 me = me,
@@ -184,8 +202,14 @@ class MapViewModel(
                 card = card,
                 camera = local.camera,
                 placesOpen = local.placesOpen,
-                place = local.placeId?.let { id -> map.places.firstOrNull { it.id == id } },
+                place = place,
                 canManagePlaces = canManage,
+                alerts = local.alerts?.let { alertsSheet(it, map, me, alerts) },
+                placeAlertNames =
+                    place
+                        ?.let { p ->
+                            AlertsLogic.placeRows(p.id, map.members, me, alerts).filter { it.checked }.map { it.title }
+                        }.orEmpty(),
             )
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), MapUiState())
 
@@ -217,6 +241,39 @@ class MapViewModel(
         local.update { it.copy(placesOpen = false, placeId = placeId, selected = null, camera = request(CameraKind.Place(placeId))) }
 
     fun closePlace() = local.update { it.copy(placeId = null) }
+
+    /** «Сообщать: прибытие и уход» about a member (from the card) or on a place (from the place sheet). */
+    fun openAlerts(target: AlertsTarget) = local.update { it.copy(alerts = target) }
+
+    fun closeAlerts() = local.update { it.copy(alerts = null) }
+
+    /** Writes the viewer's alert rows for the sheet's choice (works offline). */
+    fun saveAlerts(selected: Set<String>) {
+        val sheet = state.value.alerts ?: return
+        local.update { it.copy(alerts = null) }
+        val changes = AlertsLogic.changes(sheet.target, sheet.rows, selected, latestAlerts)
+        viewModelScope.launch { attempt { AlertsLogic.save(placesWriter, changes) } }
+    }
+
+    private fun alertsSheet(
+        target: AlertsTarget,
+        map: MapState,
+        me: String?,
+        alerts: List<PlaceAlert>,
+    ): AlertsSheetUi? =
+        when (target) {
+            is AlertsTarget.Member -> {
+                map.members
+                    .firstOrNull { it.memberId == target.memberId }
+                    ?.let { AlertsSheetUi(target, it.name, AlertsLogic.memberRows(it, map.places, alerts)) }
+            }
+
+            is AlertsTarget.Place -> {
+                map.places
+                    .firstOrNull { it.id == target.placeId }
+                    ?.let { AlertsSheetUi(target, it.data.name, AlertsLogic.placeRows(it.id, map.members, me, alerts)) }
+            }
+        }
 
     /** Deletes the place (after the confirmation in the sheet); works offline. */
     fun deletePlace(placeId: String) {

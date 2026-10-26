@@ -786,6 +786,48 @@ interface LocationDevice {            // permissions and settings, Android imple
 - Tests: `TestViewModels` (jvmTest) clears view models and waits for their coroutines before `resetMain()`; without it a
   late `WhileSubscribed` timeout failed whichever UI test ran next.
 
+### Implementation notes (M4-10)
+
+- **Alerts** (`ui/location/AlertsSheet.kt`): `AlertsLogic` (pure) builds the check rows — places by name for a member
+  (`memberRows`, «сейчас здесь» for the member's current place), the members the viewer sees (not the viewer) for a
+  place (`placeRows`) — and `changes(target, rows, selected, alerts)`: the new full set per member, only members whose
+  set changes; `save` writes them with `PlacesWriter.setAlert` (an empty set turns alerts off). `MapViewModel` takes
+  `PlacesRepository` as an optional last parameter for the own alerts; the card and the place sheet show the chosen
+  names («Школа №12, Дом» / «Выключено»). The alerts sheet may stack over the place sheet.
+- **`LiveLocations`** (`ui/location/LiveLocations.kt`, a Koin factory): the map data outside the Map — members with
+  status lines (addresses through `LocationRepository.address()`, asked once per rounded position, like the Map), places
+  and own alerts, plus `saveAlerts`. Without `location.view` it never calls `observeNow()` (no socket, no request).
+  `TodayViewModel` and `PersonViewModel` take it as their optional last parameter (instead of `LocationRepository`
+  alone: the status lines also need `LocationTexts`, the household zone and the viewer) and expose `familyNow` /
+  `whereNow` with `WhileSubscribed(5_000)`; `MainScaffold` collects `familyNow` inside the Today tab only, so the
+  socket closes on the other tabs. Today rows: `LiveLocations.todayRows` (others, SHARING or PAUSED, by name, ≤ 4);
+  the block is hidden when empty, and Today's empty state shows only when this block is hidden too.
+- **Person page**: «Где сейчас» (tap → `MapDestination(memberId)`), «История» (HISTORY level →
+  `LocationHistoryDestination`), «Сообщать: прибытие и уход» (the same alerts sheet). Not for relatives, oneself or
+  members the viewer does not see.
+- **Settings › Геопозиция**: `LocationSettingsViewModel.loadTransparency()` on every resume of that screen (not of the
+  Map, which shares the view model) reads `/location/me/watchers`; `Transparency` is `Loading`, `Unavailable` (offline
+  or an error: «Доступно, когда есть связь») or `Loaded(viewers, alerts)` with names by name and alert places by name
+  (places the phone does not know are left out). The setup's «Вас видят» uses the same answer.
+- **Rules** (`LocationRulesDestination` from Family settings, administrators): `LocationRulesLogic` (pure) —
+  `sentence` (group subjects «видят», member subjects «видит», «Все»; EVERYONE targets «всех»; a gone group or member
+  «Неизвестно»), `RuleDraft` with a stable key, `put` / `delete` / `changed`, `rowErrors` (`rules.N.subject|target` →
+  «Этой группы или участника больше нет», other fields → their message). `LocationRulesViewModel(location, api,
+  syncEngine, groups, members, permissions)`: loads on start and again when back online; a failed load leaves the
+  screen read-only with «Нужно подключение к интернету»; «Сохранить» sends the whole list with one `PUT`;
+  `VALIDATION_FAILED` keeps the list and marks the rows. The Administrators group is named by the app. Actions read the
+  latest edits from the form, not from the combined state (it may lag a dispatch behind).
+- **History period**: chips 7–90 days on the rules screen (only the current value as text while not editable); `PATCH /household { locationHistoryDays }`, then
+  `config(reload = true)`; shown from the cached config offline (not editable).
+- **Notifications**: `notificationTypesFor(permissions)` — «Места: прибытие и уход» with `location.view`, «Передача
+  геопозиции выключена» for administrators only; the «Дни рождения» row now follows «Напоминания о событиях».
+  `NotificationSettingsViewModel` takes `PermissionsRepository` as an optional last parameter.
+- **Taps**: `PendingNavigation.LOCATION` (`"location"`, the server's `LocationNotifier.ENTITY_TYPE`) →
+  `NavTarget.MapMember(memberId)` → `MapDestination(memberId)` over the main screen; the sharing notification uses the
+  same constant with the own member id.
+- Tests: a Compose UI test with two lifecycle collectors on one page sets `Dispatchers.Main` to `Unconfined`; on the
+  multi-threaded test "main" their observers were added to the lifecycle concurrently.
+
 ### UI (M4-07…M4-10)
 
 - **Map** (`MapDestination(memberId?, placeId?)`, More › Карта; replaces `SectionPlaceholderPage` for `Section.MAP`):

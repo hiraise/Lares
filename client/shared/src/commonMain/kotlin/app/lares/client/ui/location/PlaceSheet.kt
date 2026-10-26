@@ -33,6 +33,7 @@ import app.lares.client.data.location.MemberOnMap
 import app.lares.client.data.location.Place
 import app.lares.client.resources.Res
 import app.lares.client.resources.action_delete
+import app.lares.client.resources.alerts_me
 import app.lares.client.resources.ic_add
 import app.lares.client.resources.ic_delete
 import app.lares.client.resources.ic_edit
@@ -72,7 +73,7 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * One place (plan M4-09): name, address, who is there now; «Изменить» and «Удалить» for members with
- * `location.manage_places`. Alerts on the place come with M4-10.
+ * `location.manage_places`; «Сообщать мне» opens the alerts sheet with the members the viewer sees (M4-10).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,6 +84,8 @@ fun PlaceSheet(
     onEdit: () -> Unit,
     onDelete: () -> Unit,
     onDismiss: () -> Unit,
+    alertNames: List<String> = emptyList(),
+    onAlerts: () -> Unit = {},
 ) {
     var confirmDelete by remember { mutableStateOf(false) }
     ModalBottomSheet(
@@ -118,6 +121,9 @@ fun PlaceSheet(
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.testTag("place_here"),
             )
+            ListGroup {
+                AlertsRow(alertNames, onAlerts, title = stringResource(Res.string.alerts_me))
+            }
             if (canManage) {
                 ListGroup {
                     ListRow(

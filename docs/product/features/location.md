@@ -59,9 +59,10 @@ GPS trackers come later. Technical design: [architecture/location.md](../../arch
   with each position.
   *Client core: tracking policy (moving / still, what to record and when to upload) (M4-06).*
   *Android: the service drives the policy with the platform `fused` (API 31+) or `gps` provider, `passive` and the significant-motion sensor, with battery on every fix (M4-07).*
-- **LOC-008** `MVP` `todo` — The app guides the member to turn off battery optimization (with brand-specific hints for
+- **LOC-008** `MVP` `done` — The app guides the member to turn off battery optimization (with brand-specific hints for
   Xiaomi, Huawei, Samsung and others) and shows a warning on the phone when it could not send positions for a long time.
   *Android: battery step in the setup and the «Экономия заряда» row with vendor hints (Xiaomi, Huawei/Honor, Samsung, OnePlus/Oppo/Realme, others); «Не удаётся передать геопозицию» after an hour without uploads (M4-07). Real-phone checks of Xiaomi / Samsung battery behaviour pending for the M4 acceptance.*
+  *Manual: brand hints in the user manual "Map" (M4-10).*
 - **LOC-010** `MVP` `done` — Pause (Q-025): a member with `location.pause_own` pauses sharing «На 1 час», «До утра»
   (until 08:00) or «Пока не включу». Nothing is sent during the pause; it ends by itself at the chosen time.
   Others see «на паузе до 15:30» (or «на паузе») and the last position before the pause in grey. A member without the
@@ -130,21 +131,23 @@ GPS trackers come later. Technical design: [architecture/location.md](../../arch
   *Server: `GET /location/history` by household-local day, thinned to 3 000 points (M4-03).*
   *Client core: day history with stops (M4-06).*
   *UI: «История» on the member card; day strip of the retained days, the track and stops on the map, the stop list with places, addresses or «Без адреса», «с 16:50» while ongoing; a tap centres a stop (M4-09).*
-- **LOC-005** `MVP` `todo` — History is deleted after the retention period: 30 days by default; an administrator chooses
+- **LOC-005** `MVP` `done` — History is deleted after the retention period: 30 days by default; an administrator chooses
   7, 14, 30, 60 or 90 days (Family › Геопозиция). A shorter period deletes older positions within an hour.
   *Server: setting stored and synced (M4-02); hourly purge, member removal deletes positions (M4-03).*
-  *UI: the history's day strip follows the period from the server (M4-09); the administrator's choice comes with M4-10.*
+  *UI: the history's day strip follows the period from the server (M4-09); «Хранить историю: 7 · 14 · 30 · 60 · 90 дней» on the rules screen for administrators (M4-10).*
 
 ### Who sees whom
 
-- **LOC-006** `MVP` `todo` — Visibility rules by groups and members: `<who> sees <whom>: where now | with history`; «who»
+- **LOC-006** `MVP` `done` — Visibility rules by groups and members: `<who> sees <whom>: where now | with history`; «who»
   is a group or a member, «whom» is everybody, a group or a member; set by administrators in Family › Геопозиция. When
   several rules apply, the widest wins. Administrators see everyone with history; everybody sees their own history. The
   Map needs `location.view`. Defaults (foundation): Adults see everyone with history; Kids see Adults, where now only.
   *Server: rules stored, `GET/PUT /location/rules` for administrators, defaults at setup and by V9 for existing families, rules of deleted groups and members removed, levels per viewer (M4-02).*
-- **LOC-015** `MVP` `todo` — Transparency: in Settings › Геопозиция every member sees who can see them (and whether
+  *UI: Family settings › «Геопозиция: кто кого видит» — rules as sentences («Дети видят: Взрослые · где сейчас»), the edit sheet (who, whom, «Где сейчас» / «С историей», delete), «Добавить правило», one save of the whole list with errors on their rows; online only (M4-10).*
+- **LOC-015** `MVP` `done` — Transparency: in Settings › Геопозиция every member sees who can see them (and whether
   with history) and who gets arrive / leave notifications about them (Q-028).
   *Server: `GET /location/me/watchers` (M4-03).*
+  *UI: Settings › Геопозиция «Кто меня видит» (names with «где сейчас» / «с историей», «Администраторы видят всех с историей.») and «О вас сообщают» («Мама — Школа №12, Дом»); offline «Доступно, когда есть связь» (M4-10).*
 
 ### Places and notifications
 
@@ -155,18 +158,20 @@ GPS trackers come later. Technical design: [architecture/location.md](../../arch
   *Server: storage, sync, validation and permissions done (M4-02).*
   *Client core: places sync and are created, changed and deleted offline with the same rules (M4-06).*
   *UI: «Места» list with who is there, the place sheet (address, who is here, edit / delete), the editor (name, icon, map tap, long press on the Map, «Я здесь», radius 50–1000 m in steps of 10); read-only without `location.manage_places` (M4-09).*
-- **LOC-021** `MVP` `todo` — Arrive / leave notifications (Q-028): everybody who sees a member turns on for themselves
+- **LOC-021** `MVP` `done` — Arrive / leave notifications (Q-028): everybody who sees a member turns on for themselves
   «Сообщать: прибытие и уход» for chosen places (on the member's card or on the place). Nothing is on by default.
   Texts: «Аня · Школа №12 — Прибытие в 08:52», «… — Уход в 14:20» (no gendered verbs: the app does not know genders).
   A notification goes only while the subscriber may see the member. ASSUMPTION: a change found from positions older
   than 15 minutes (sent late after a network gap) updates the map silently.
   *Server: the subscriber's own alert rows (derived id, synced only to them), removed with either member (M4-02); arrive / leave notifications to subscribers who still see the member, none for positions older than 15 minutes (M4-04).*
   *Client core: own alert rows (derived id, full set of places) written offline (M4-06).*
-- **LOC-022** `MVP` `todo` — Arrivals and departures are decided on the server from the positions, so they work for
+  *UI: «Сообщать: прибытие и уход» on the member card and the person page (places as check rows, «сейчас здесь»), «Сообщать мне» on the place sheet (members as check rows); a notification tap opens the Map at the member (M4-10).*
+- **LOC-022** `MVP` `done` — Arrivals and departures are decided on the server from the positions, so they work for
   phones and later for trackers alike. ASSUMPTION: an inaccurate position (worse than the place's radius or 100 m, whichever is
   larger) does not decide anything; leaving needs a position clearly outside the circle, so a person sitting at the edge does not flicker in and
   out.
   *Server: presence per member and place with the hysteresis above, from uploaded positions (M4-04).*
+  *M4-10 walkthrough: arrival and departure detected on the server from `seed.py move`; the push itself needs a phone with ntfy (M4 acceptance).*
 - **LOC-024** `MVP` `done` — Address search in the place editor (Q-029): type an address, press search, pick a result;
   the map moves there.
   *Server: `GET /location/search`, 5 results with the city (M4-04).*
@@ -175,14 +180,17 @@ GPS trackers come later. Technical design: [architecture/location.md](../../arch
 
 ### Everywhere
 
-- **LOC-016** `MVP` `todo` — Today «Семья сейчас» (FND-063, mockup): the members the viewer sees with their place or
+- **LOC-016** `MVP` `done` — Today «Семья сейчас» (FND-063, mockup): the members the viewer sees with their place or
   address; a tap opens Map. Only with `location.view`.
-- **LOC-017** `MVP` `todo` — A member's page shows «Где сейчас» (place or address, how long ago) for viewers who see them;
+  *UI: after «Скоро», up to 4 others who share or pause, by name, with the status line; «Карта»; the live data only while Today is visible (M4-10).*
+- **LOC-017** `MVP` `done` — A member's page shows «Где сейчас» (place or address, how long ago) for viewers who see them;
   a tap opens Map centred on them; «История» for viewers with history.
-- **LOC-018** `MVP` `todo` — Settings › Notifications has switches for arrive / leave notifications («Места: прибытие и
+  *UI: «Где сейчас», «История» (history level) and «Сообщать: прибытие и уход» on the person page; not for relatives, oneself or members out of sight (M4-10).*
+- **LOC-018** `MVP` `done` — Settings › Notifications has switches for arrive / leave notifications («Места: прибытие и
   уход») and, for
   administrators, for «передача геопозиции выключена» (FND-052). Settings › Геопозиция: sharing on/off or pause, the
   battery optimization guide, «Кто меня видит».
+  *UI: «Места: прибытие и уход» (with `location.view`) and «Передача геопозиции выключена» (administrators) in Settings › Notifications; Settings › Геопозиция from M4-07 with «Кто меня видит» (M4-10).*
 
 ## GPS trackers (later)
 

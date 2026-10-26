@@ -22,6 +22,8 @@ import app.lares.contract.calendar.EventOccurrence
 import app.lares.contract.entities.EventKind
 import app.lares.contract.entities.PaletteColor
 import app.lares.contract.entities.PersonData
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.test.setMain
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import java.util.Locale
@@ -31,7 +33,7 @@ import kotlin.test.assertEquals
 import kotlin.time.Clock
 
 /** Today «Скоро» (CAL-019, mockup `Main.dc.html`) and the person page dates (CAL-004, CAL-005), plan M3-08. */
-@OptIn(ExperimentalTestApi::class)
+@OptIn(ExperimentalTestApi::class, kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class TodayUpcomingUiTest {
     private val today = LocalDate(2026, 10, 23) // Friday
 
@@ -126,6 +128,9 @@ class TodayUpcomingUiTest {
                         core.koin.get(),
                     )
                 awaitState(vm.state) { it.loaded && it.dates?.memorable?.isNotEmpty() == true }
+                // The route collects two flows with the lifecycle; on a multi-threaded "main" their observers would be
+                // added to the lifecycle concurrently (on a phone Main is one thread).
+                Dispatchers.setMain(Dispatchers.Unconfined)
                 val opened = mutableListOf<String>()
                 setContent {
                     LaresTheme(darkTheme = false) {

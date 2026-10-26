@@ -31,6 +31,7 @@ import app.lares.client.ui.family.PersonRoute
 import app.lares.client.ui.family.TagRoute
 import app.lares.client.ui.location.HistoryArgs
 import app.lares.client.ui.location.HistoryRoute
+import app.lares.client.ui.location.LocationRulesRoute
 import app.lares.client.ui.location.LocationSettingsRoute
 import app.lares.client.ui.location.MapArgs
 import app.lares.client.ui.location.MapRoute
@@ -122,6 +123,10 @@ data object NotificationSettingsDestination
 
 @Serializable
 data object LocationSettingsDestination
+
+/** Family › «Геопозиция: кто кого видит» (M4-10, administrators). */
+@Serializable
+data object LocationRulesDestination
 
 /** The Map (M4-08), centred on a member or a place when given. */
 @Serializable
@@ -361,6 +366,7 @@ fun MainNavHost() {
                     onEvent = { id, occurrence -> navController.navigate(EventDestination(id, occurrence?.toString())) },
                     onEventEditor = { navController.navigate(EventEditorDestination.of(it)) },
                     onPerson = { navController.navigate(PersonDestination(it)) },
+                    onMap = { navController.navigate(MapDestination(memberId = it)) },
                 ),
             )
         }
@@ -476,7 +482,8 @@ fun MainNavHost() {
 /**
  * A tapped task notification or reminder opens the task over the main screen; a task that is gone opens the Tasks tab
  * with a notice instead (plan M1-07). Events open their page (the reminded occurrence, else the next one), a gone
- * event opens the Calendar tab with a notice; birthday reminders open the person (plan M3-08).
+ * event opens the Calendar tab with a notice; birthday reminders open the person (plan M3-08); location notifications
+ * open the Map at the member (plan M4-10).
  */
 @Composable
 private fun NotificationTaps(
@@ -513,6 +520,11 @@ private fun NotificationTaps(
                 is NavTarget.Person -> {
                     if (!pending.consume(target)) return@collect
                     navController.navigate(PersonDestination(target.id)) { popUpTo<SectionsDestination>() }
+                }
+
+                is NavTarget.MapMember -> {
+                    if (!pending.consume(target)) return@collect
+                    navController.navigate(MapDestination(memberId = target.memberId)) { popUpTo<SectionsDestination>() }
                 }
 
                 else -> {}
@@ -577,7 +589,12 @@ private fun NavGraphBuilder.familyGraph(navController: NavHostController) {
             onBack = back,
             onEvent = { navController.navigate(EventDestination(it)) },
             onAddMemorable = { navController.navigate(EventEditorDestination.of(EventEditorArgs(memorable = true, personId = it))) },
+            onMap = { navController.navigate(MapDestination(memberId = it)) },
+            onHistory = { navController.navigate(LocationHistoryDestination(it)) },
         )
     }
-    composable<FamilySettingsDestination> { FamilySettingsRoute(onBack = back) }
+    composable<FamilySettingsDestination> {
+        FamilySettingsRoute(onBack = back, onLocationRules = { navController.navigate(LocationRulesDestination) })
+    }
+    composable<LocationRulesDestination> { LocationRulesRoute(onBack = back) }
 }

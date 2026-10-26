@@ -15,6 +15,8 @@ import app.lares.client.data.tasks.TaskScope
 import app.lares.client.data.tasks.TaskViews
 import app.lares.client.data.tasks.TasksRepository
 import app.lares.client.data.tasks.TasksWriter
+import app.lares.client.ui.location.LiveLocations
+import app.lares.client.ui.location.LiveLocationsState
 import app.lares.client.ui.tasks.TaskEvent
 import app.lares.client.ui.tasks.TaskRowUi
 import app.lares.client.ui.tasks.TaskRows
@@ -26,7 +28,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.datetime.LocalDate
 
@@ -89,6 +93,7 @@ class TodayViewModel(
     writer: TasksWriter,
     shopping: ShoppingRepository,
     calendar: CalendarRepository,
+    live: LiveLocations? = null,
 ) : ViewModel() {
     private val ticker = TaskTicker(viewModelScope, writer)
 
@@ -99,12 +104,26 @@ class TodayViewModel(
             .flowOn(Dispatchers.Default)
             .stateIn(viewModelScope, SharingStarted.Eagerly, TodayUiState())
 
+    /**
+     * «Семья сейчас» (LOC-016), apart from [state]: [state] is eager, and the live location socket must close when
+     * Today is not visible, so this one is shared `WhileSubscribed` and collected by the Today tab only.
+     */
+    val familyNow: StateFlow<TodayFamilyNowUi?> =
+        (live?.observe()?.map(::familyNow) ?: flowOf(null))
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
     fun toggle(row: TaskRowUi) = ticker.toggle(row)
 
     fun undo(completionId: String) = ticker.undo(completionId)
 
     companion object {
         const val MAX_ROWS = 6
+
+        /** Null hides the block: no `location.view` or nobody else shares. */
+        fun familyNow(state: LiveLocationsState): TodayFamilyNowUi? {
+            val rows = LiveLocations.todayRows(state)
+            return if (rows.isEmpty()) null else TodayFamilyNowUi(rows, state.members.map { it.member.name })
+        }
 
         fun build(
             inputs: TaskInputs,

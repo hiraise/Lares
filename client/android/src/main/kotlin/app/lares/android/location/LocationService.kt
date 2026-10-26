@@ -35,6 +35,7 @@ import app.lares.client.data.location.SharingController
 import app.lares.client.data.location.TrackingPolicy
 import app.lares.client.notifications.NotificationPoster
 import app.lares.client.platform.AppStartup
+import app.lares.client.platform.PendingNavigation
 import app.lares.contract.api.location.OffReason
 import app.lares.contract.api.notifications.NotificationChannel
 import app.lares.contract.permissions.Permission
@@ -416,8 +417,8 @@ class LocationService : Service() {
         const val ACTION_PAUSE_CHANGED = "app.lares.android.location.PAUSE_CHANGED"
         const val ACTION_STOP = "app.lares.android.location.STOP"
 
-        /** The notification-tap target type (the Map, M4-08). */
-        const val ENTITY_LOCATION = "location"
+        /** The notification-tap target type: the Map at this member (M4-10, like location notifications). */
+        const val ENTITY_LOCATION = PendingNavigation.LOCATION
         private const val NOTIFICATION_ID = 1002
         private const val STALE_ID = "location.stale_uploads"
         private val TICK = 1.minutes

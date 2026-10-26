@@ -1,15 +1,27 @@
 package app.lares.client.ui
 
+import app.lares.client.data.HouseholdRepository
 import app.lares.client.data.calendar.CalendarItem
 import app.lares.client.data.calendar.CalendarRepository
 import app.lares.client.data.calendar.CalendarViews
+import app.lares.client.data.location.DIMA
+import app.lares.client.data.location.EnglishLocationTexts
+import app.lares.client.data.location.LocationFixture
+import app.lares.client.data.location.LocationTexts
+import app.lares.client.data.location.MemberOnMap
 import app.lares.client.data.shopping.ShoppingRepository
 import app.lares.client.data.shopping.ShoppingViews
 import app.lares.client.data.tasks.TaskInputs
 import app.lares.client.data.tasks.TasksRepository
 import app.lares.client.ui.FamilyFixture.change
+import app.lares.client.ui.location.LiveLocations
+import app.lares.client.ui.location.LiveLocationsState
+import app.lares.client.ui.location.LocatedMember
 import app.lares.client.ui.main.TodayViewModel
 import app.lares.client.ui.tasks.TaskEvent
+import app.lares.contract.api.location.SharingStatus
+import app.lares.contract.api.location.VisibilityLevel
+import app.lares.contract.entities.PaletteColor
 import app.lares.contract.entities.ProductCategory
 import app.lares.contract.entities.ShoppingItemData
 import app.lares.contract.entities.ShoppingListData
@@ -246,6 +258,68 @@ class TodayViewModelTest {
             assertNotNull(calendarOnly.upcoming)
             assertFalse(calendarOnly.empty, "«Скоро» alone is enough")
             assertNull(TodayViewModel.build(tasks, null, coming.copy(items = emptyList())).upcoming, "nothing coming: no block")
+        }
+    }
+
+    private fun located(
+        id: String,
+        name: String,
+        status: SharingStatus = SharingStatus.SHARING,
+    ) = LocatedMember(
+        MemberOnMap(id, null, name, PaletteColor.GREEN, VisibilityLevel.CURRENT, status, null, null, null, null, null, false, false),
+        "$name · now",
+    )
+
+    @Test
+    fun `LOC-016 family now - the others who share or pause, by name, at most four`() {
+        val state =
+            LiveLocationsState(
+                me = "me",
+                members =
+                    listOf(
+                        located("me", "Ольга"),
+                        located("m5", "Тимур"),
+                        located("m2", "Аня"),
+                        located("m3", "Дима", SharingStatus.PAUSED),
+                        located("m4", "Бабушка", SharingStatus.NEVER),
+                        located("m6", "Вера"),
+                        located("m7", "Глеб", SharingStatus.OFF_ON_PHONE),
+                        located("m8", "Яна"),
+                    ),
+            )
+        val block = assertNotNull(TodayViewModel.familyNow(state))
+        assertEquals(listOf("Аня", "Вера", "Дима", "Тимур"), block.rows.map { it.member.name })
+        assertEquals("Аня · now", block.rows.first().status)
+        assertNull(TodayViewModel.familyNow(state.copy(members = listOf(located("me", "Ольга")))), "nobody else: no block")
+        assertNull(TodayViewModel.familyNow(LiveLocationsState(me = "me")), "no location.view: no members, no block")
+    }
+
+    @Test
+    fun `LOC-016 without location view nothing is asked from the server`() {
+        val f = LocationFixture()
+        try {
+            runBlocking {
+                f.family()
+                f.loginAs(DIMA, Permission.TASKS_VIEW)
+                val live =
+                    LiveLocations(
+                        f.repository(),
+                        LocationTexts(EnglishLocationTexts()),
+                        HouseholdRepository(f.localDb),
+                        f.localDb,
+                        f.permissions,
+                        f.placesRepository,
+                        f.placesWriter,
+                        f.clock,
+                    )
+                val state = live.observe().first()
+                assertTrue(state.members.isEmpty())
+                assertNull(TodayViewModel.familyNow(state))
+                assertEquals(0, f.liveConnects)
+                assertTrue(f.requests.none { it.url.encodedPath.startsWith("/api/v1/location") })
+            }
+        } finally {
+            f.close()
         }
     }
 }

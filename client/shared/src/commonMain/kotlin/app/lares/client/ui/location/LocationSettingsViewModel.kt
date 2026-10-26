@@ -9,9 +9,11 @@ import app.lares.client.data.location.LocationDevice
 import app.lares.client.data.location.LocationRepository
 import app.lares.client.data.location.MySharing
 import app.lares.client.data.location.PauseChoice
+import app.lares.client.data.location.PlacesRepository
 import app.lares.client.data.location.SharingController
 import app.lares.client.ui.common.UiError
 import app.lares.client.ui.common.toUiError
+import app.lares.contract.api.location.VisibilityLevel
 import app.lares.contract.permissions.Permission
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -60,6 +62,30 @@ fun statusText(
         }
     }
 
+/** A member who sees the viewer (LOC-015): «где сейчас» or «с историей». */
+data class WatcherRow(
+    val name: String,
+    val history: Boolean,
+)
+
+/** A member who gets the viewer's arrive / leave alerts, with the place names («Мама — Школа №12, Дом»). */
+data class AlertWatcherRow(
+    val name: String,
+    val places: List<String>,
+)
+
+/** «Кто меня видит» and «О вас сообщают» come from the server only (online). */
+sealed interface Transparency {
+    data object Loading : Transparency
+
+    data object Unavailable : Transparency
+
+    data class Loaded(
+        val viewers: List<WatcherRow>,
+        val alerts: List<AlertWatcherRow>,
+    ) : Transparency
+}
+
 data class LocationSettingsUiState(
     val loaded: Boolean = false,
     val sharing: MySharing = MySharing.Off,
@@ -71,6 +97,7 @@ data class LocationSettingsUiState(
     val enabling: Boolean = false,
     val enableError: UiError? = null,
     val watchers: List<String>? = null,
+    val transparency: Transparency = Transparency.Loading,
     val error: UiError? = null,
 ) {
     val status: SharingStatusText get() = statusText(sharing, device)
@@ -88,7 +115,8 @@ data class LocationSettingsUiState(
 
 /**
  * Settings › Геопозиция (plan M4-07, LOC-001, LOC-008, LOC-010): this phone's sharing and its actions, the sharing
- * setup and the battery row. The phone's permissions are read again whenever the screen is visible again.
+ * setup and the battery row. The phone's permissions are read again whenever the screen is visible again. «Кто меня
+ * видит» and «О вас сообщают» (M4-10, LOC-015) are asked from the server on every visit.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class LocationSettingsViewModel(
@@ -97,6 +125,7 @@ class LocationSettingsViewModel(
     permissions: PermissionsRepository,
     private val location: LocationRepository,
     private val members: MembersRepository,
+    private val places: PlacesRepository? = null,
 ) : ViewModel() {
     private val local = MutableStateFlow(LocationSettingsUiState())
 
@@ -168,12 +197,38 @@ class LocationSettingsViewModel(
 
     fun openBatterySettings() = device.openBatterySettings()
 
-    /** Who will see the member, for the explanation; nothing offline. */
+    /** «Кто меня видит», «О вас сообщают»: asked on every visit of Settings › Геопозиция. */
+    fun loadTransparency() = loadWatchers()
+
+    /** Who sees the member and who gets alerts about them; for the setup's explanation too. Nothing offline. */
     private fun loadWatchers() {
         viewModelScope.launch {
-            val viewers = location.watchers().getOrNull()?.viewers ?: return@launch
+            val watchers = location.watchers().getOrNull()
+            if (watchers == null) {
+                local.update { if (it.transparency is Transparency.Loaded) it else it.copy(transparency = Transparency.Unavailable) }
+                return@launch
+            }
             val names = members.observeAll().first().associate { it.id to it.name }
-            local.update { state -> state.copy(watchers = viewers.mapNotNull { names[it.memberId] }) }
+            val placeNames =
+                places
+                    ?.observePlaces()
+                    ?.first()
+                    .orEmpty()
+                    .associate { it.id to it.data.name }
+            val viewers =
+                watchers.viewers
+                    .mapNotNull { w -> names[w.memberId]?.let { WatcherRow(it, w.level == VisibilityLevel.HISTORY) } }
+                    .sortedBy { it.name.lowercase() }
+            val alerts =
+                watchers.alerts
+                    .mapNotNull { a ->
+                        val name = names[a.memberId] ?: return@mapNotNull null
+                        val list = a.placeIds.mapNotNull { placeNames[it] }.sortedBy { it.lowercase() }
+                        if (list.isEmpty()) null else AlertWatcherRow(name, list)
+                    }.sortedBy { it.name.lowercase() }
+            local.update { state ->
+                state.copy(watchers = viewers.map { it.name }, transparency = Transparency.Loaded(viewers, alerts))
+            }
         }
     }
 }

@@ -4,18 +4,21 @@ import app.lares.client.data.MembersRepository
 import app.lares.client.data.location.ANYA
 import app.lares.client.data.location.DIMA
 import app.lares.client.data.location.FakeLocationDevice
+import app.lares.client.data.location.HOME_ID
 import app.lares.client.data.location.LOC_ADULT
 import app.lares.client.data.location.LOC_KID
 import app.lares.client.data.location.LocationFixture
 import app.lares.client.data.location.MySharing
 import app.lares.client.data.location.OLGA
 import app.lares.client.data.location.PauseChoice
+import app.lares.client.data.location.SCHOOL_ID
 import app.lares.client.data.location.bodyText
 import app.lares.client.data.location.fixAt
 import app.lares.client.data.location.json
 import app.lares.client.ui.awaitState
 import app.lares.client.ui.common.UiError
 import app.lares.contract.api.LaresJson
+import app.lares.contract.api.location.AlertWatcher
 import app.lares.contract.api.location.LocationWatchers
 import app.lares.contract.api.location.SetSharingRequest
 import app.lares.contract.api.location.SharingStatus
@@ -76,7 +79,10 @@ class LocationSettingsViewModelTest {
                     "/api/v1/location/me/watchers" -> {
                         json(
                             LocationWatchers.serializer(),
-                            LocationWatchers(listOf(Watcher(OLGA, VisibilityLevel.HISTORY)), emptyList()),
+                            LocationWatchers(
+                                listOf(Watcher(OLGA, VisibilityLevel.HISTORY), Watcher(ANYA, VisibilityLevel.CURRENT)),
+                                listOf(AlertWatcher(OLGA, setOf(SCHOOL_ID, HOME_ID, "gone-place"))),
+                            ),
                         )
                     }
 
@@ -85,7 +91,8 @@ class LocationSettingsViewModelTest {
                     }
                 }
             }
-            LocationSettingsViewModel(f.controller, device, f.permissions, f.repository(), MembersRepository(f.localDb))
+            f.putPlaces()
+            LocationSettingsViewModel(f.controller, device, f.permissions, f.repository(), MembersRepository(f.localDb), f.placesRepository)
                 .also { it.onResume() }
         }
 
@@ -201,7 +208,7 @@ class LocationSettingsViewModelTest {
         val vm = setUp()
         vm.openSetup()
         val open = awaitState(vm.state) { it.setupOpen && it.watchers != null }
-        assertEquals(listOf("Ольга"), open.watchers)
+        assertEquals(listOf("Аня", "Ольга"), open.watchers)
 
         online = false
         vm.enable()
@@ -214,5 +221,19 @@ class LocationSettingsViewModelTest {
         vm.enable()
         awaitState(vm.state) { !it.setupOpen && it.status == SharingStatusText.SHARING }
         assertEquals(listOf("start"), f.tracking.calls)
+    }
+
+    @Test
+    fun `LOC-015 who sees me and who gets alerts about me, unavailable offline`() {
+        val vm = setUp()
+        vm.loadTransparency()
+        val loaded = awaitState(vm.state) { it.transparency is Transparency.Loaded }.transparency as Transparency.Loaded
+        assertEquals(listOf(WatcherRow("Аня", history = false), WatcherRow("Ольга", history = true)), loaded.viewers)
+        assertEquals(listOf(AlertWatcherRow("Ольга", listOf("Дом", "Школа №12"))), loaded.alerts, "by name; unknown places left out")
+
+        online = false
+        val offline = setUp()
+        offline.loadTransparency()
+        awaitState(offline.state) { it.transparency == Transparency.Unavailable }
     }
 }
