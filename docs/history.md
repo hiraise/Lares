@@ -421,3 +421,6 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
 - 2026-10-26 Release **v0.5.0** (M4 Location): pull request #4, signed APK, server image 0.5.0, GitHub release. CI flake
   in `MapUiTest` fixed (`LocationSettingsViewModelTest` now clears its view models before resetting Main); test
   failures are logged in full. Next branch `release/0.5.1`.
+- 2026-10-26 CI fixes on `release/0.5.1`: the «Скоро» test failed every evening after 18:45 Moscow (today's dance left
+  the list), made independent of the time of day; location age texts («3 мин назад») did not advance without new
+  positions (`MapState` now carries its minute tick), which also caused a `MapViewModelTest` flake. 1 new test.
