@@ -51,8 +51,16 @@ fun createNotificationChannels(context: Context) {
                 this.description = context.getString(description)
             }
         }
-    manager.createNotificationChannels(channels)
+    // The persistent «Вы делитесь геопозицией» notification of the location service (M4-07); Android only.
+    val location =
+        NotificationChannel(LOCATION_CHANNEL_ID, context.getString(R.string.channel_location), NotificationManager.IMPORTANCE_LOW).apply {
+            description = context.getString(R.string.channel_location_description)
+            setShowBadge(false)
+        }
+    manager.createNotificationChannels(channels + location)
 }
+
+const val LOCATION_CHANNEL_ID = "location"
 
 /**
  * Shows notifications; a tap opens the app, or the notification's target (plan M1-07). Without the permission

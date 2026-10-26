@@ -154,8 +154,11 @@ class SharingController(
         if (expired) tracking.pauseChanged()
     }
 
-    /** The phone cannot share (LOC-012): told once per reason until sharing works again; pending when offline. */
-    suspend fun reportOff(reason: OffReason) {
+    /**
+     * The phone cannot share (LOC-012): told once per reason until sharing works again; pending when offline. True
+     * when this reason is new (the caller posts its phone notice once).
+     */
+    suspend fun reportOff(reason: OffReason): Boolean {
         val changed =
             lock.withLock {
                 localDb.transaction {
@@ -167,6 +170,7 @@ class SharingController(
                 }
             }
         if (changed) send()
+        return changed
     }
 
     /** Stops sharing here without telling the server: sign-out (the server ends it with the session) or another phone took over. */

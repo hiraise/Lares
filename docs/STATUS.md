@@ -8,14 +8,14 @@ Updated: 2026-10-26
 M1 Tasks — all plans M1-01…M1-07 done; M1 acceptance with the customer next.
 M2 Shopping lists — all plans M2-01…M2-06 done; M2 acceptance with the customer next.
 M3 Calendar — all plans M3-01…M3-08 done, released as v0.4.0; M3 acceptance with the customer next.
-M4 Location — M4-01…M4-06 done (server side complete and load-tested; client core done); next M4-07 (Android sharing service).**
+M4 Location — M4-01…M4-07 done (server side complete and load-tested; client core; Android sharing service); next M4-08 (Map screen).**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
 
 [M4 Location](product/roadmap.md#m4-location): planned — [location spec](product/features/location.md) (approved,
 Q-025…Q-029 answered), [location design](architecture/location.md), [M4 plans](plans/README.md#m4-plans). Done: M4-01…
-M4-06. Next: M4-07 (Android sharing service).
+M4-07. Next: M4-08 (Map screen).
 Acceptance of M0–M3 is still pending.
 
 **Active release branch: `release/0.5.0`** (M4). `release/0.4.1` was not needed: the customer found no bugs in v0.4.0. Commit approved work here; `main` is protected
@@ -24,6 +24,10 @@ Acceptance of M0–M3 is still pending.
 
 ## Last completed
 
+- 2026-10-26 M4-07 Android location sharing: Settings › Геопозиция with the setup (precise location, «Разрешить в
+  любом режиме», notifications, battery with vendor hints), the foreground service with «Вы делитесь геопозицией»,
+  pause and «Продолжить» (not for kids), restart after reboot, «Обновить», location off / permission revoked reported.
+  20 new tests; emulator walkthrough of all scenarios (the emulator uses `gps`: its `fused` passes no `geo fix`).
 - 2026-10-26 M4-06 Location in the client core: places and own alerts work offline; the map data comes live (socket,
   then polling, offline the last snapshot); status lines «Дома · с 15:10», «Нет данных с 18:05», «В пути · сейчас»
   (en, ru); this phone's sharing — enable, pause, resume, report off, another phone takes over — remembered and sent
@@ -158,8 +162,8 @@ Acceptance of M0–M3 is still pending.
 1. M0 and M1 acceptance with the customer (APK v0.2.0, walkthrough on real phones, Russian changelog; checklist in the M1-07
    handoff).
 2. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
-3. M4-07 (Android sharing service; first confirm the emulator's `geo fix` reaches `fused`) and the rest of M4 on
-   `release/0.5.0`, in order.
+3. M4-08 (Map screen) and the rest of M4 on `release/0.5.0`, in order; real-phone battery checks (Xiaomi / Samsung)
+   in the M4 acceptance.
 4. After the M1 acceptance: set the tasks spec to `implemented`.
 5. M2 acceptance with the customer (checklist in the M2-06 handoff); after it set the shopping spec to `implemented`.
 6. M3 acceptance with the customer on v0.4.0 (checklist in the M3-08 handoff); fixes go to `release/0.5.0`; after the

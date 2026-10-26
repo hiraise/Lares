@@ -1,6 +1,8 @@
 package app.lares.client.ui
 
 import app.lares.client.data.calendar.CalendarReminderTexts
+import app.lares.client.data.location.AllowAllLocationDevice
+import app.lares.client.data.location.LocationDevice
 import app.lares.client.data.location.LocationTextResources
 import app.lares.client.data.tasks.TaskReminderTexts
 import app.lares.client.di.AppScope
@@ -27,6 +29,7 @@ import app.lares.client.ui.family.MemberDetailViewModel
 import app.lares.client.ui.family.PersonArgs
 import app.lares.client.ui.family.PersonViewModel
 import app.lares.client.ui.family.TagViewModel
+import app.lares.client.ui.location.LocationSettingsViewModel
 import app.lares.client.ui.main.MainViewModel
 import app.lares.client.ui.main.TodayViewModel
 import app.lares.client.ui.onboarding.InviteAcceptViewModel
@@ -83,6 +86,7 @@ fun uiModule(): Module =
         viewModel { DevicesViewModel(get()) }
         viewModel { NotificationSettingsViewModel(get(), get(), get(), get(), getOrNull<Clock>() ?: Clock.System) }
         viewModel { NotificationPromptViewModel(get(), get()) }
+        viewModel { LocationSettingsViewModel(get(), getOrNull<LocationDevice>() ?: AllowAllLocationDevice(), get(), get(), get()) }
         viewModel { AboutViewModel(get(), get(), get()) }
         viewModel { FamilyViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
         viewModel { params -> MemberDetailViewModel(get(), get(), get(), get(), get(), get(), params.get()) }

@@ -11,4 +11,17 @@
     <string name="channel_system">System</string>
     <string name="channel_system_description">Test notifications and background sync.</string>
     <string name="sync_in_progress">Syncing…</string>
+    <!-- Location sharing (M4-07): channel, persistent notification, phone notices. -->
+    <string name="channel_location">Location sharing</string>
+    <string name="channel_location_description">Shown while this phone shares its location with the family.</string>
+    <string name="location_sharing_title">You are sharing your location</string>
+    <string name="location_paused_title">Paused</string>
+    <string name="location_paused_until_title">Paused until %1$s</string>
+    <string name="location_off_title">Location is off on the phone</string>
+    <string name="location_action_pause_hour">Pause for 1 hour</string>
+    <string name="location_action_resume">Resume</string>
+    <string name="location_stopped_title">Location sharing stopped — open Lares</string>
+    <string name="location_stale_title">Can\'t send your location</string>
+    <string name="location_stale_text">No connection to the family server for an hour. Positions are kept on the phone.</string>
+    <string name="location_background_option">Allow all the time</string>
 </resources>

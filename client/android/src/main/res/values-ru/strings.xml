@@ -7,4 +7,16 @@
     <string name="channel_system">Системные</string>
     <string name="channel_system_description">Тестовые уведомления и фоновая синхронизация.</string>
     <string name="sync_in_progress">Синхронизация…</string>
+    <string name="channel_location">Передача геопозиции</string>
+    <string name="channel_location_description">Показывается, пока этот телефон делится геопозицией с семьёй.</string>
+    <string name="location_sharing_title">Вы делитесь геопозицией</string>
+    <string name="location_paused_title">Пауза</string>
+    <string name="location_paused_until_title">Пауза до %1$s</string>
+    <string name="location_off_title">Геопозиция выключена на телефоне</string>
+    <string name="location_action_pause_hour">Пауза на 1 час</string>
+    <string name="location_action_resume">Продолжить</string>
+    <string name="location_stopped_title">Передача геопозиции остановлена — откройте Lares</string>
+    <string name="location_stale_title">Не удаётся передать геопозицию</string>
+    <string name="location_stale_text">Час нет связи с сервером семьи. Позиции сохраняются на телефоне.</string>
+    <string name="location_background_option">Разрешить в любом режиме</string>
 </resources>

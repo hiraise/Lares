@@ -29,6 +29,7 @@ import app.lares.client.ui.family.GroupEditorRoute
 import app.lares.client.ui.family.MemberDetailRoute
 import app.lares.client.ui.family.PersonRoute
 import app.lares.client.ui.family.TagRoute
+import app.lares.client.ui.location.LocationSettingsRoute
 import app.lares.client.ui.main.MainNavigation
 import app.lares.client.ui.main.MainScaffoldRoute
 import app.lares.client.ui.main.SectionPlaceholderPage
@@ -112,6 +113,9 @@ data object DevicesDestination
 
 @Serializable
 data object NotificationSettingsDestination
+
+@Serializable
+data object LocationSettingsDestination
 
 @Serializable
 data object AboutDestination
@@ -381,6 +385,7 @@ fun MainNavHost() {
                     onProfile = { navController.navigate(ProfileDestination) },
                     onDevices = { navController.navigate(DevicesDestination) },
                     onNotifications = { navController.navigate(NotificationSettingsDestination) },
+                    onLocation = { navController.navigate(LocationSettingsDestination) },
                     onAbout = { navController.navigate(AboutDestination) },
                 ),
             )
@@ -396,6 +401,7 @@ fun MainNavHost() {
         composable<LoginQrDestination> { LoginQrRoute(onBack = { navController.popBackStack() }) }
         composable<DevicesDestination> { DevicesRoute(onBack = { navController.popBackStack() }) }
         composable<NotificationSettingsDestination> { NotificationSettingsRoute(onBack = { navController.popBackStack() }) }
+        composable<LocationSettingsDestination> { LocationSettingsRoute(onBack = { navController.popBackStack() }) }
         composable<AboutDestination> {
             AboutRoute(onBack = { navController.popBackStack() }, onLicenses = { navController.navigate(LicensesDestination) })
         }

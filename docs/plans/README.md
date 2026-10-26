@@ -139,7 +139,7 @@ Milestone [M4 Location](../product/roadmap.md#m4-location). [Location spec](../p
 | [M4-04](M4/04-geofences-notifications-addresses-server.md) | Geofences, location notifications and addresses on the server | M4-03 | done |
 | [M4-05](M4/05-load-test-with-location.md) | Load simulation with location uploads (ADR-0015) | M4-04 | done |
 | [M4-06](M4/06-location-client-core.md) | Location in the client core: places, live map data, sharing, queue, tracking policy | M4-04 | done |
-| [M4-07](M4/07-android-sharing-service.md) | Android sharing: foreground service, permissions, setup, pause, Settings › Геопозиция | M4-06 | ready |
+| [M4-07](M4/07-android-sharing-service.md) | Android sharing: foreground service, permissions, setup, pause, Settings › Геопозиция | M4-06 | done |
 | [M4-08](M4/08-map-screen.md) | The Map screen: MapLibre, pins, places, family sheet, member card, «Обновить» | M4-07 | ready |
 | [M4-09](M4/09-history-and-places-ui.md) | History with stops; place list and editor with address search | M4-08 | ready |
 | [M4-10](M4/10-alerts-rules-everywhere-manual.md) | Alerts, visibility rules, Today, person page, settings, taps, manual, M4 wrap-up | M4-09, M4-05 | ready |

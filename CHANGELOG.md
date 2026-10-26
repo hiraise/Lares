@@ -5,6 +5,14 @@ Versioning: [SemVer](https://semver.org/) from the first release.
 
 ## [Unreleased]
 
+### Added
+
+- Location sharing on Android (M4-07): Settings › «Геопозиция» turns on sharing with a short setup — precise location,
+  «Allow all the time», notifications and battery saving with hints for Xiaomi, Huawei/Honor, Samsung, OnePlus/Oppo/
+  Realme. While sharing, the notification «Вы делитесь геопозицией» is always shown; pause «На 1 час», «До утра» or
+  «Пока не включу» for those allowed to pause, «Продолжить». Sharing continues after a restart of the phone, answers
+  «Обновить», and tells the family when location is turned off or the permission is taken away. The map follows.
+
 ## [0.4.0] - 2026-10-25
 
 ### Added

@@ -84,3 +84,11 @@ filter_list
 celebration
 event
 event_busy
+# Added in M4-07 (sharing on the phone).
+battery_alert
+battery_charging_full
+battery_1_bar
+battery_full
+location_off
+play_arrow
+refresh

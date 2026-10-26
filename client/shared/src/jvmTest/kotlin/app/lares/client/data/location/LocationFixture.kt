@@ -63,6 +63,39 @@ val LOC_KID = arrayOf(Permission.LOCATION_VIEW)
 val HOME = PlaceData("Дом", PlaceIcon.HOME, 55.7963, 37.5378, 120, createdBy = OLGA)
 val SCHOOL = PlaceData("Школа №12", PlaceIcon.SCHOOL, 55.8001, 37.5329, 150, createdBy = OLGA)
 
+/** A phone whose permissions the test sets; records the settings it was asked to open. */
+class FakeLocationDevice(
+    var current: DeviceLocationStatus = ALL_ALLOWED,
+    override val manufacturer: String = "Google",
+) : LocationDevice {
+    val calls = mutableListOf<String>()
+
+    override fun status() = current
+
+    override fun backgroundOptionLabel() = "Allow all the time"
+
+    override fun openAppSettings() {
+        calls += "appSettings"
+    }
+
+    override fun openLocationSettings() {
+        calls += "locationSettings"
+    }
+
+    override fun requestIgnoreBatteryOptimizations() {
+        calls += "battery"
+    }
+
+    override fun openBatterySettings() {
+        calls += "batterySettings"
+    }
+
+    companion object {
+        val ALL_ALLOWED = DeviceLocationStatus(true, true, true, true, true, true)
+        val NOTHING = DeviceLocationStatus(false, false, true, false, false, true)
+    }
+}
+
 /** Records tracking calls. */
 class FakeTracking : LocationTracking {
     val calls = mutableListOf<String>()
@@ -91,6 +124,7 @@ class FakeTracking : LocationTracking {
  */
 class LocationFixture(
     start: Instant = Instant.parse("2026-10-21T10:00:00Z"),
+    val device: LocationDevice = AllowAllLocationDevice(),
 ) {
     val clock = TestClock(start)
     val localDb = testLocalDb()
@@ -127,7 +161,7 @@ class LocationFixture(
             api,
             localDb,
             tracking,
-            AllowAllLocationDevice(),
+            device,
             queue,
             NotificationPoster { _, channel, title, _, _ -> posted += channel to title },
             EnglishLocationTexts(),

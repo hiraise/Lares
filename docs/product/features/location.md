@@ -49,28 +49,35 @@ GPS trackers come later. Technical design: [architecture/location.md](../../arch
   started and the app explains why. After that the phone sends positions in the background, also after a restart of the
   phone.
   *Server: positions upload, sharing state (M4-03).*
+  *Android: Settings › Геопозиция › «Включить передачу» walks the setup (precise location, «{background option}», notifications, battery) and starts the location foreground service; without background location it does not start; after a reboot, an update or process death the service comes back (M4-07). The Map entry comes in M4-08.*
 - **LOC-002** `MVP` `todo` — While sharing is on, the phone shows a persistent notification «Вы делитесь геопозицией»
   (with «Пауза» for those who may pause). Inside the app Map shows «Вы делитесь местоположением · Пауза».
-- **LOC-007** `MVP` `todo` — Battery-aware tracking: while moving, a position about every 30 seconds (or every 50 m);
+  *Android: persistent notification «Вы делитесь геопозицией» (paused «Пауза до 15:30» with «Продолжить»), «Пауза на 1 час» only with `location.pause_own` (M4-07).*
+- **LOC-007** `MVP` `done` — Battery-aware tracking: while moving, a position about every 30 seconds (or every 50 m);
   while staying in one place, one position every 15 minutes with the battery level. Accuracy, speed and battery are sent
   with each position.
   *Client core: tracking policy (moving / still, what to record and when to upload) (M4-06).*
+  *Android: the service drives the policy with the platform `fused` (API 31+) or `gps` provider, `passive` and the significant-motion sensor, with battery on every fix (M4-07).*
 - **LOC-008** `MVP` `todo` — The app guides the member to turn off battery optimization (with brand-specific hints for
   Xiaomi, Huawei, Samsung and others) and shows a warning on the phone when it could not send positions for a long time.
+  *Android: battery step in the setup and the «Экономия заряда» row with vendor hints (Xiaomi, Huawei/Honor, Samsung, OnePlus/Oppo/Realme, others); «Не удаётся передать геопозицию» after an hour without uploads (M4-07). Real-phone checks of Xiaomi / Samsung battery behaviour pending for the M4 acceptance.*
 - **LOC-010** `MVP` `todo` — Pause (Q-025): a member with `location.pause_own` pauses sharing «На 1 час», «До утра»
   (until 08:00) or «Пока не включу». Nothing is sent during the pause; it ends by itself at the chosen time.
   Others see «на паузе до 15:30» (or «на паузе») and the last position before the pause in grey. A member without the
   permission has neither «Пауза» nor a way to turn sharing off in the app.
   *Server: pause with end time; fixes dropped while paused, last position kept (M4-03).*
   *Client core: pause «На 1 час» / «До утра» / «Пока не включу» kept on the phone, sent when online, ends by itself (M4-06).*
-- **LOC-019** `MVP` `todo` — One phone per member shares. ASSUMPTION: turning sharing on on another phone of the same
+  *Android: «Пауза» sheet in Settings › Геопозиция and «Пауза на 1 час» in the notification, «Продолжить»; members without `location.pause_own` see neither, only «Передачу нельзя выключить в приложении» (M4-07).*
+- **LOC-019** `MVP` `done` — One phone per member shares. ASSUMPTION: turning sharing on on another phone of the same
   member moves sharing there; the first phone stops and says so.
   *Server: the session that last turned sharing on shares; others are told to stop (M4-03).*
   *Client core: a phone told that another phone shares stops and shows «Геопозицией теперь делится другой телефон» (M4-06).*
-- **LOC-027** `MVP` `todo` — Without network the phone keeps its positions (up to 24 hours) and sends them when the network
+  *Android: the service stops when the server says another phone shares (M4-07).*
+- **LOC-027** `MVP` `done` — Without network the phone keeps its positions (up to 24 hours) and sends them when the network
   is back, so the history has no gap; the map then shows the newest one.
   *Server: batches up to 200 fixes, up to 24 h old, idempotent re-upload (M4-03).*
   *Client core: queue of up to 24 h / 5 000 fixes, uploads in batches of 200, pending sharing changes first (M4-06).*
+  *Android: the service queues and uploads itself, also when the network comes back (M4-07).*
 
 ### Map
 
@@ -88,12 +95,14 @@ GPS trackers come later. Technical design: [architecture/location.md](../../arch
   once a minute per member.
   *Server: refresh request, push to the sharing phone at most once a minute, flag in upload responses (M4-03).*
   *Client core: «Обновить» call; a push or upload response asks this phone for a fresh fix only while it shares and is not paused (M4-06).*
+  *Android: a refresh request (push or upload response) makes the running service take one precise fix and upload it at once (M4-07).*
 - **LOC-012** `MVP` `todo` — Sharing turned off (Q-026): when a member without `location.pause_own` turns off location
   in the phone's settings, takes the app's location permission away or stops its sharing, and the phone can still tell
   the server, the map shows «геопозиция выключена на телефоне · последнее место в 14:20» and administrators get a
   notification «Геопозиция выключена — Тимур · геопозиция выключена на телефоне» (or «нет доступа к геопозиции»,
   «передача остановлена», «выход из приложения»). When it is back on, they get «Геопозиция снова передаётся — Тимур».
   *Server: off on the phone with a reason; signing out, revoking the session or a password reset turn sharing off (M4-03); notices to administrators when it goes off and when it is back (M4-04).*
+  *Android: location turned off (reported at once while the service runs), the permission revoked or the service not allowed to start are reported with their reason; the phone shows «Передача геопозиции остановлена — откройте Lares» (M4-07).*
 - **LOC-013** `MVP` `todo` — Stale positions: when nothing arrived for 30 minutes from a member who shares, the map shows
   «нет данных с 18:05» and the last battery level; no notification (Q-026). A member who never turned sharing on shows as
   «не делится геопозицией».

@@ -17,6 +17,7 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import app.lares.android.LaresApplication
 import app.lares.android.R
+import app.lares.android.location.LocationResume
 import app.lares.client.auth.SessionManager
 import app.lares.client.auth.SessionState
 import app.lares.client.data.calendar.CalendarReminderPlanner
@@ -46,6 +47,8 @@ class SyncWorker(
         // The process may not run the UI collector: keep task and calendar reminders in step with what the sync brought.
         koin.get<TaskReminderPlanner>().reconcile()
         koin.get<CalendarReminderPlanner>().reconcile()
+        // Location sharing stopped by the system comes back (or is reported) at least every 15 minutes (M4-07).
+        koin.get<LocationResume>().check()
         return Result.success()
     }
 

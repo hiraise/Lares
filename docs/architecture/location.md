@@ -663,6 +663,38 @@ interface LocationDevice {            // permissions and settings, Android imple
 - `NotificationsCoordinator` (gets `SharingController?` as an optional last parameter) on logout: `SharingController.disable()` (stops the service; the server marks SIGNED_OUT
   via the session end).
 
+### Implementation notes (M4-07)
+
+- Package `client/android/…/location/`: `LocationService`, `AndroidLocationSource` (`LocationManagerCompat`; the
+  `passive` request uses `PASSIVE_INTERVAL`; «Обновить» is `getCurrentLocation` with our own 45 s timeout),
+  `MotionTrigger`, `BatteryReader`, `AndroidLocationTracking`, `AndroidLocationDevice`, `LocationResume`,
+  `LocationActionReceiver`, `androidLocationModule()` (after `androidNotificationsModule` in `LaresApplication`; the
+  core's `SharingController` picks up `LocationTracking` / `LocationDevice` with `getOrNull`).
+- **Emulator: `gps`, not `fused`.** The AOSP emulator's platform `fused` provider never passes on `geo fix` positions
+  (the app's fused request got 0 locations in 6 minutes of `emu.sh route`), only `gps` gets them. `AndroidLocationSource`
+  reports no `fused` on the emulator (`Build.HARDWARE` `ranchu` / `goldfish`), so the policy picks `gps` there; real
+  phones use `fused` on API 31+ as designed.
+- When location is switched on again, the service goes back to MOVING (a STILL phone would wait up to 15 minutes for the
+  fix that brings the server back to SHARING). The «stopped» phone notice is cancelled when the service runs again.
+- The service waits for `AppStartup.ready` and stops itself when nobody is logged in or sharing is not enabled here
+  (a sticky restart after sign-out). It keeps the policy and the platform requests under one mutex; a 1-minute tick runs
+  `checkPause()`, an upload when due (an empty queue still sends a pending sharing change) and the stale-uploads check
+  (one notice per stale period, kept in memory). `PROVIDERS_CHANGED` and every pause change re-apply the mode; location
+  off → no requests, the notification «Геопозиция выключена на телефоне» and `reportOff(LOCATION_DISABLED)`.
+- The persistent notification's tap carries `EXTRA_ENTITY_TYPE = "location"` and the own member id;
+  `PendingNavigation` ignores it until the Map exists (M4-08), so the tap just opens the app.
+- `SharingController.reportOff()` returns whether the reason is new; `LocationResume` posts
+  «Передача геопозиции остановлена — откройте Lares» (channel `system`, one id) only then. `LocationResume.check()` also
+  runs from `MainActivity.onStart` (the visible app may always start the service) besides app start, boot / update and
+  `SyncWorker`.
+- Shared UI `ui/location/`: `SharingSetupLogic` is a pure step machine over `DeviceLocationStatus` (no SDK level: the
+  Android device reports background = fine below API 29 and notifications = granted below 33); a step's system answer
+  for a step already left is ignored (the resume after a dialog may come first); the background step counts as refused
+  when the app is back without it. The location-on switch is not a setup step: Settings shows «Геопозиция выключена на
+  телефоне» with «Включить геопозицию». The setup's «Вас видят: …» comes from `GET /me/watchers` (nothing offline).
+- `LocationSettingsViewModel` re-reads `SharingController.observe()` on every resume (`flatMapLatest`), so a permission
+  changed in the system settings shows at once, not at the next minute tick.
+
 ### Map rendering (ADR-0027)
 
 - `ui/location/FamilyMap.kt`: `@Composable expect fun FamilyMapView(state: MapViewState, camera: MapCameraRequest?,

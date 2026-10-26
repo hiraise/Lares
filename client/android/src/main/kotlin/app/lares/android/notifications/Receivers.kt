@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import app.lares.android.LaresApplication
+import app.lares.android.location.LocationResume
 import app.lares.client.di.AppScope
 import app.lares.client.notifications.ReminderScheduler
 import app.lares.client.notifications.Reminders
@@ -50,6 +51,8 @@ class RescheduleRemindersReceiver : BroadcastReceiver() {
         koin.get<CoroutineScope>(AppScope).launch {
             try {
                 koin.get<ReminderScheduler>().rescheduleAll()
+                // Location sharing comes back after a reboot or an update (M4-07).
+                if (intent.action != AlarmManager.ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED) koin.get<LocationResume>().check()
             } finally {
                 pending.finish()
             }

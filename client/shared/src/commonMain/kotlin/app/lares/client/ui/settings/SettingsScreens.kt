@@ -47,6 +47,7 @@ import app.lares.client.resources.ic_delete
 import app.lares.client.resources.ic_devices
 import app.lares.client.resources.ic_info
 import app.lares.client.resources.ic_language
+import app.lares.client.resources.ic_location_on
 import app.lares.client.resources.ic_lock
 import app.lares.client.resources.ic_logout
 import app.lares.client.resources.ic_notifications
@@ -55,6 +56,7 @@ import app.lares.client.resources.ic_person
 import app.lares.client.resources.ic_qr_code_2
 import app.lares.client.resources.language_title
 import app.lares.client.resources.licenses_text
+import app.lares.client.resources.loc_settings_title
 import app.lares.client.resources.login_qr_code
 import app.lares.client.resources.login_qr_expired
 import app.lares.client.resources.login_qr_expires
@@ -123,6 +125,7 @@ class SettingsNavigation(
     val onProfile: () -> Unit,
     val onDevices: () -> Unit,
     val onNotifications: () -> Unit,
+    val onLocation: () -> Unit,
     val onAbout: () -> Unit,
 )
 
@@ -154,6 +157,14 @@ fun SettingsRoute(
                 icon = Res.drawable.ic_notifications,
                 showChevron = true,
                 onClick = navigation.onNotifications,
+            )
+            // Every member: everybody shares and may see who sees them (plan M4-07).
+            ListDivider()
+            ListRow(
+                stringResource(Res.string.loc_settings_title),
+                icon = Res.drawable.ic_location_on,
+                showChevron = true,
+                onClick = navigation.onLocation,
             )
         }
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {

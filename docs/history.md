@@ -382,3 +382,15 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   `TrackingPolicy`; `location_refresh` push; dev tools `seed.py location|move`, stored seed sessions for `call --as`,
   `emu.sh geo|route home-school`. 53 new unit tests, 4 multi-device tests. Open for M4-07: confirm that the emulator's
   `geo fix` reaches the `fused` provider.
+- 2026-10-26 **M4-07** Android location sharing: `LocationService` (a `location` foreground service with the persistent
+  notification «Вы делитесь геопозицией» / «Пауза до 15:30», «Пауза на 1 час» only with `location.pause_own`,
+  «Продолжить»), platform providers through `LocationManagerCompat` (`fused` on API 31+, `gps` below and on the
+  emulator, `passive` in STILL), significant-motion trigger, battery on every fix, its own queue uploads, network-back
+  and location-switch receivers, minute tick for pause expiry and the stale-uploads notice; `LocationResume` after boot,
+  update, process death, app start and from `SyncWorker` (reports PERMISSION_REVOKED / LOCATION_DISABLED / STOPPED once
+  with «Передача геопозиции остановлена — откройте Lares»). Shared UI: sharing setup sheet (pure `SharingSetupLogic`:
+  explanation with who sees you, precise, background, notifications, battery with vendor hints), pause sheet,
+  Settings › Геопозиция with status, actions and the «Экономия заряда» guide. 7 new icons. 20 new tests (setup logic,
+  battery vendors, view model, UI). Emulator walkthrough: the AOSP `fused` provider passes no `geo fix` positions, so
+  the emulator uses `gps`; three small bugs (location-off status, stale «stopped» notice, slow recovery after location
+  on) found and fixed, all seven scenarios pass.
