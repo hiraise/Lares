@@ -80,6 +80,8 @@ kotlin {
             implementation(libs.androidx.camera.lifecycle)
             implementation(libs.androidx.camera.view)
             implementation(libs.zxing.core)
+            // The map (ADR-0027); never the location-runtime-gms / -hms artifacts.
+            implementation(libs.maplibre.compose)
         }
         jvmMain.dependencies {
             implementation(libs.sqldelight.sqlite.driver)

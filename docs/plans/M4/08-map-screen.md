@@ -1,6 +1,6 @@
 ---
 id: M4-08
-status: ready
+status: done
 depends_on: [M4-07]
 requirements: [LOC-002, LOC-003, LOC-009, LOC-010, LOC-011, LOC-012, LOC-013, LOC-014]
 ---

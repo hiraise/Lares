@@ -30,6 +30,8 @@ import app.lares.client.ui.family.MemberDetailRoute
 import app.lares.client.ui.family.PersonRoute
 import app.lares.client.ui.family.TagRoute
 import app.lares.client.ui.location.LocationSettingsRoute
+import app.lares.client.ui.location.MapArgs
+import app.lares.client.ui.location.MapRoute
 import app.lares.client.ui.main.MainNavigation
 import app.lares.client.ui.main.MainScaffoldRoute
 import app.lares.client.ui.main.SectionPlaceholderPage
@@ -116,6 +118,13 @@ data object NotificationSettingsDestination
 
 @Serializable
 data object LocationSettingsDestination
+
+/** The Map (M4-08), centred on a member or a place when given. */
+@Serializable
+data class MapDestination(
+    val memberId: String? = null,
+    val placeId: String? = null,
+)
 
 @Serializable
 data object AboutDestination
@@ -317,7 +326,15 @@ fun MainNavHost() {
                     onSettings = { navController.navigate(SettingsDestination) },
                     onProfile = { navController.navigate(ProfileDestination) },
                     onDevices = { navController.navigate(DevicesDestination) },
-                    onSection = { navController.navigate(SectionPageDestination(it)) },
+                    onSection = {
+                        if (it ==
+                            Section.MAP
+                        ) {
+                            navController.navigate(MapDestination())
+                        } else {
+                            navController.navigate(SectionPageDestination(it))
+                        }
+                    },
                     onFamily = { navController.navigate(FamilyDestination(it)) },
                     onTask = { navController.navigate(TaskDetailDestination(it)) },
                     onTaskEditor = { navController.navigate(TaskEditorDestination.of(it)) },
@@ -376,7 +393,16 @@ fun MainNavHost() {
             )
         }
         composable<SectionPageDestination> { entry ->
-            SectionPlaceholderPage(entry.toRoute<SectionPageDestination>().section, onBack = { navController.popBackStack() })
+            val section = entry.toRoute<SectionPageDestination>().section
+            if (section == Section.MAP) {
+                MapRoute(MapArgs(), onBack = { navController.popBackStack() })
+            } else {
+                SectionPlaceholderPage(section, onBack = { navController.popBackStack() })
+            }
+        }
+        composable<MapDestination> { entry ->
+            val route = entry.toRoute<MapDestination>()
+            MapRoute(MapArgs(route.memberId, route.placeId), onBack = { navController.popBackStack() })
         }
         composable<SettingsDestination> {
             SettingsRoute(

@@ -12,6 +12,12 @@ Versioning: [SemVer](https://semver.org/) from the first release.
   Realme. While sharing, the notification «Вы делитесь геопозицией» is always shown; pause «На 1 час», «До утра» or
   «Пока не включу» for those allowed to pause, «Продолжить». Sharing continues after a restart of the phone, answers
   «Обновить», and tells the family when location is turned off or the permission is taken away. The map follows.
+- The map (M4-08): More › «Карта» shows the family on an OpenStreetMap map (light and dark style from the server) —
+  places as circles, each member as a pin in their color (grey when paused, off or without fresh data), and a list
+  under the map: where each one is (place, street address or «В пути»), how long ago and the battery. A tap opens the
+  member's card with «Обновить» to ask their phone for a fresh position. Your own sharing row with «Пауза» /
+  «Продолжить» / «Включить передачу геопозиции» is always on the map. Offline the last known positions show with
+  «Нет связи». The APK is larger because of the map renderer.
 
 ## [0.4.0] - 2026-10-25
 

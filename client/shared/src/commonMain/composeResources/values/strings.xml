@@ -260,7 +260,7 @@
     <string name="about_server_version">Server version</string>
     <string name="about_server_address">Server address</string>
     <string name="about_licenses">Open-source licenses</string>
-    <string name="licenses_text">Lares is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, version 3 or (at your option) any later version. It is distributed WITHOUT ANY WARRANTY. The source code is available from the project repository.\n\nBundled assets:\n\n• Manrope font — Copyright 2018 The Manrope Project Authors. SIL Open Font License 1.1.\n\n• Material Symbols icons — Copyright Google LLC. Apache License 2.0.\n\nLibraries: Kotlin, kotlinx, Compose Multiplatform, AndroidX, Ktor, SQLDelight, Koin, ZXing — Apache License 2.0. qrose — MIT License.</string>
+    <string name="licenses_text">Lares is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, version 3 or (at your option) any later version. It is distributed WITHOUT ANY WARRANTY. The source code is available from the project repository.\n\nBundled assets:\n\n• Manrope font — Copyright 2018 The Manrope Project Authors. SIL Open Font License 1.1.\n\n• Material Symbols icons — Copyright Google LLC. Apache License 2.0.\n\nLibraries: Kotlin, kotlinx, Compose Multiplatform, AndroidX, Ktor, SQLDelight, Koin, ZXing — Apache License 2.0. qrose — MIT License. MapLibre Compose — Copyright MapLibre contributors, BSD 3-Clause License. MapLibre Native — Copyright MapLibre contributors, BSD 2-Clause License. spatial-k — MIT License.</string>
     <!-- Family (M0-08) -->
     <string name="action_done">Done</string>
     <string name="action_delete">Delete</string>
@@ -1075,4 +1075,24 @@
     <string name="loc_battery_hint_samsung">Battery → Unrestricted; remove Lares from «Sleeping apps».</string>
     <string name="loc_battery_hint_oneplus">Battery → Don't optimize; allow background activity.</string>
     <string name="loc_battery_hint_other">Find Lares in the battery settings and allow it to run in the background without restrictions.</string>
+    <!-- Map (M4-08) -->
+    <string name="map_content_description">Family map</string>
+    <string name="map_places">Places</string>
+    <string name="map_no_places">No places yet</string>
+    <string name="map_show_all">Show everybody</string>
+    <string name="map_my_location">My location</string>
+    <string name="map_sharing">You are sharing your location</string>
+    <string name="map_enable">Turn on location sharing</string>
+    <string name="map_offline">No connection. Showing the last known places.</string>
+    <string name="map_no_style">The map appears when there is a connection</string>
+    <string name="map_accuracy">Accuracy %1$s</string>
+    <string name="map_battery">%1$s%</string>
+    <string name="map_refresh">Refresh</string>
+    <string name="map_refresh_waiting">Asking the phone…</string>
+    <string name="map_refresh_done">Updated</string>
+    <string name="map_refresh_no_answer">The phone did not answer</string>
+    <string name="map_refresh_paused">Paused</string>
+    <string name="map_history">History</string>
+    <string name="map_nobody">Nobody to show yet</string>
+    <string name="map_tile_subtitle">Where the family is now</string>
 </resources>

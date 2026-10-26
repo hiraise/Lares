@@ -715,6 +715,46 @@ interface LocationDevice {            // permissions and settings, Android imple
   `org.maplibre.compose:maplibre-compose-runtime-opengl-android:0.20.0` `runtimeOnly` in `client/android`; never the
   `location-runtime-gms` / `-hms` artifacts.
 
+### Implementation notes (M4-08)
+
+- **maplibre-compose 0.20 API:** the map is `MaplibreMap(state = rememberMapState(baseStyle, initialCameraPosition) {
+  sources and layers })`; the style follows the theme through `rememberMapState(baseStyle = …)`. Sources are
+  `rememberGeoJsonSource(GeoJsonData.JsonString(…))` built from our own state (a new source when the data changes);
+  colors are feature properties (`feature["color"].convertToColor()`); clicks: `onClick` per layer (pins, initials,
+  place fills, labels), `MapInteractions { callbacks { click { onUnhandled }; longClick { onEvent } } }` for the map.
+  It renders through `org.maplibre.nativeffi:maplibre-native-ffi` (BSD-2-Clause) plus spatial-k (MIT); no
+  `com.google.android.gms` artifact (`:client:android:dependencies` checked). Licenses listed in About › Licenses.
+- Pin initials have their own GeoJSON source: when glyphs fail to load, MapLibre drops the whole tile of a source, so
+  text on the pin source hid the pins (found on the emulator). Pin taps are hit-tested in the map's click callback on
+  screen positions (28 dp around a pin), not through the layer's rendered-feature query, which did not report pin taps.
+- Emulator on this Mac: the network intercepts TLS (a firewall CA), which the native renderer (rustls, own roots)
+  rejects, so the OpenFreeMap style does not load there. The walkthrough used plain local styles over
+  `http://localhost:8090` (`LARES_MAP_STYLE_URL`, `LARES_MAP_STYLE_DARK_URL`, `adb reverse`); labels on the real style
+  remain to be seen on a real phone.
+- Labels use the `Noto Sans Bold` font of OpenFreeMap's glyph server (the library's default font stack is not there).
+  A place label sits at the circle's southern edge (`textAnchor = Top`).
+- `FamilyMapView` has one more parameter than the design: `contentPadding` (the part covered by the top row and the
+  sheet), passed as the map's `viewportInsets`, so camera moves keep pins out from under the sheet.
+  `MapCameraRequest(kind: CameraKind, serial)`: `CameraKind.All | Member(id) | Place(id) | Point(lat, lon, zoom)`;
+  a new `serial` repeats a move. `All` fits the pins (the places when nobody has a pin); one point is centred at zoom 15.
+- `MapViewModel(location, texts, household, localDb, permissions, clock, args, refreshTimeout = 90 s)`: the own member
+  comes from `observeViewer`, the household zone from `HouseholdRepository`; the first camera is chosen when the first
+  map data arrives (`MapArgs(memberId, placeId)` → that member's card opens too). Addresses are asked once per
+  position rounded to 4 decimals for members that `MapLogic.needsAddress` (sharing, fresh, outside places, not moving);
+  a null answer keeps the distance to the nearest place. The config (style URLs) is loaded once and again while
+  missing when the connection is not OFFLINE.
+- «Обновить»: WAITING until a fix newer than the one shown when pressed arrives (DONE), else NO_ANSWER after 90 s;
+  `CONFLICT` → PAUSED («На паузе»), other errors → the error text. Not offered for oneself.
+- The sharing row and its sheets reuse `LocationSettingsViewModel` (same setup, pause and resume as Settings ›
+  Геопозиция); the row also shows «Нужны разрешения» / «Геопозиция выключена на телефоне» with their actions.
+- The title pill has a back arrow (the Map is a pushed page without the bottom bar here). The sheet's peek height is
+  measured: the sharing row plus up to three member rows, or the whole card.
+- Pins: personal color, grey (`outline`) for every status other than SHARING and for stale positions; members without a
+  position have a row but no pin. The JVM stand-in lists `pin_<id>` / `place_<id>` texts for UI tests.
+- **APK size:** the debug APK grew from 28 MB to 69 MB: `libmaplibre-native-c.so` is 9–14 MB per ABI (arm64-v8a,
+  armeabi-v7a, x86_64) and is stored uncompressed (about 17 MB compressed). ADR-0027's estimate of 10–15 MB holds per
+  ABI only; per-ABI release APKs or compressed native libraries are a release-process decision (handoff).
+
 ### UI (M4-07…M4-10)
 
 - **Map** (`MapDestination(memberId?, placeId?)`, More › Карта; replaces `SectionPlaceholderPage` for `Section.MAP`):

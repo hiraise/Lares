@@ -394,3 +394,11 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   battery vendors, view model, UI). Emulator walkthrough: the AOSP `fused` provider passes no `geo fix` positions, so
   the emulator uses `gps`; three small bugs (location-off status, stale «stopped» notice, slow recovery after location
   on) found and fixed, all seven scenarios pass.
+- 2026-10-26 **M4-08 Map screen**: More › Карта shows the real map — maplibre-compose 0.20.0 (OpenGL runtime, BSD;
+  no Google artifacts) behind `FamilyMapView` (Android actual with GeoJSON layers for places, labels, accuracy
+  circles, pins with initials, track and stops; JVM stand-in for tests). Family sheet with the own sharing row
+  (pause / resume / turn on, reusing the M4-07 sheets) and the other members (status line, address once per rounded
+  position, battery), member card with accuracy and «Обновить» (done on a newer fix, «Телефон не ответил» after 90 s,
+  «На паузе»), «Места» sheet, «Показать всех» / «Моё местоположение», offline banner, no-style placeholder; light /
+  dark style by theme. 18 new tests (logic, view model, UI). Debug APK 28 → 69 MB (uncompressed native renderer).
+

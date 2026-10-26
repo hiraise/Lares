@@ -251,7 +251,7 @@
     <string name="about_server_version">Версия сервера</string>
     <string name="about_server_address">Адрес сервера</string>
     <string name="about_licenses">Лицензии открытого ПО</string>
-    <string name="licenses_text">Lares — свободная программа: её можно распространять и изменять на условиях GNU Affero General Public License, опубликованной Free Software Foundation, версии 3 или (по вашему выбору) любой более поздней версии. Программа распространяется БЕЗ КАКИХ-ЛИБО ГАРАНТИЙ. Исходный код доступен в репозитории проекта.\n\nВстроенные ресурсы:\n\n• Шрифт Manrope — Copyright 2018 The Manrope Project Authors. SIL Open Font License 1.1.\n\n• Значки Material Symbols — Copyright Google LLC. Apache License 2.0.\n\nБиблиотеки: Kotlin, kotlinx, Compose Multiplatform, AndroidX, Ktor, SQLDelight, Koin, ZXing — Apache License 2.0. qrose — MIT License.</string>
+    <string name="licenses_text">Lares — свободная программа: её можно распространять и изменять на условиях GNU Affero General Public License, опубликованной Free Software Foundation, версии 3 или (по вашему выбору) любой более поздней версии. Программа распространяется БЕЗ КАКИХ-ЛИБО ГАРАНТИЙ. Исходный код доступен в репозитории проекта.\n\nВстроенные ресурсы:\n\n• Шрифт Manrope — Copyright 2018 The Manrope Project Authors. SIL Open Font License 1.1.\n\n• Значки Material Symbols — Copyright Google LLC. Apache License 2.0.\n\nБиблиотеки: Kotlin, kotlinx, Compose Multiplatform, AndroidX, Ktor, SQLDelight, Koin, ZXing — Apache License 2.0. qrose — MIT License. MapLibre Compose — Copyright MapLibre contributors, BSD 3-Clause License. MapLibre Native — Copyright MapLibre contributors, BSD 2-Clause License. spatial-k — MIT License.</string>
     <!-- Семья (M0-08) -->
     <string name="action_done">Готово</string>
     <string name="action_delete">Удалить</string>
@@ -1113,4 +1113,24 @@
     <string name="loc_battery_hint_samsung">Батарея → Без ограничений; уберите Lares из «Спящих приложений».</string>
     <string name="loc_battery_hint_oneplus">Батарея → Не оптимизировать; разрешите работу в фоне.</string>
     <string name="loc_battery_hint_other">Найдите Lares в настройках батареи и разрешите работу в фоне без ограничений.</string>
+    <!-- Map (M4-08) -->
+    <string name="map_content_description">Карта семьи</string>
+    <string name="map_places">Места</string>
+    <string name="map_no_places">Мест пока нет</string>
+    <string name="map_show_all">Показать всех</string>
+    <string name="map_my_location">Моё местоположение</string>
+    <string name="map_sharing">Вы делитесь местоположением</string>
+    <string name="map_enable">Включить передачу геопозиции</string>
+    <string name="map_offline">Нет связи. Показаны последние известные места.</string>
+    <string name="map_no_style">Карта появится, когда будет связь</string>
+    <string name="map_accuracy">Точность %1$s</string>
+    <string name="map_battery">%1$s %</string>
+    <string name="map_refresh">Обновить</string>
+    <string name="map_refresh_waiting">Запрашиваем телефон…</string>
+    <string name="map_refresh_done">Обновлено</string>
+    <string name="map_refresh_no_answer">Телефон не ответил</string>
+    <string name="map_refresh_paused">На паузе</string>
+    <string name="map_history">История</string>
+    <string name="map_nobody">Пока никого нет</string>
+    <string name="map_tile_subtitle">Где сейчас семья</string>
 </resources>

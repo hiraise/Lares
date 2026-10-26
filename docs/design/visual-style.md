@@ -184,7 +184,9 @@ M3 `NavigationBar`: container `surfaceContainer` with a 1 dp `divider` top borde
   when the member is sharing.
 - **Map:** OpenStreetMap tiles from the admin-configured source (ADR-0006), avatar pins with a white 3 dp border,
   places as translucent circles with a dashed outline in `primary` (home) or `secondary` (others), a bottom sheet with
-  the family list.
+  the family list. As built (M4-08): top row = a 48 dp pill (back arrow + «Карта») and a 48 dp round «Места»
+  (`push_pin`), no «layers» button (the style follows the app theme); `my_location` is a 48 dp rounded square (radius
+  16) above the sheet; the sheet (radius 28, `surfaceContainerLowest`) peeks at the sharing row plus three members.
 
 ## App icon
 
