@@ -72,6 +72,11 @@ data class MapState(
     val connection: Connection,
     /** Server time of the data (or when the cached snapshot was fetched); null before anything arrived. */
     val updatedAt: Instant?,
+    /**
+     * The minute tick this state was computed at: a new tick is a new state, so age texts («3 мин назад») are
+     * computed again every minute even when no position changed.
+     */
+    val tick: Instant? = null,
 )
 
 /** One member's day: the thinned track and the stops found in it (LOC-004). */

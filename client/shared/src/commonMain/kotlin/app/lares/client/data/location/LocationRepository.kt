@@ -103,6 +103,7 @@ class LocationRepository(
                         else -> Connection.POLLING
                     },
                 updatedAt = remote.updatedAt,
+                tick = now,
             )
         }.distinctUntilChanged().shareIn(scope, SharingStarted.WhileSubscribed(SHARE_TIMEOUT_MS), replay = 1)
 

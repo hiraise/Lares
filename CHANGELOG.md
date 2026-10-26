@@ -5,6 +5,11 @@ Versioning: [SemVer](https://semver.org/) from the first release.
 
 ## [Unreleased]
 
+### Fixed
+
+- «3 мин назад» and similar ages on the map, in «Семья сейчас» and on a member's page now advance every minute; before,
+  they stayed until a new position arrived.
+
 ## [0.5.0] - 2026-10-26
 
 ### Added
