@@ -117,4 +117,11 @@ compose.resources {
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+    // CI keeps no test reports: print the whole failure, causes included.
+    testLogging {
+        events("failed")
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        showCauses = true
+        showStackTraces = true
+    }
 }

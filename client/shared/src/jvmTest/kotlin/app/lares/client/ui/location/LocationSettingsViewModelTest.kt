@@ -56,8 +56,12 @@ class LocationSettingsViewModelTest {
     @BeforeTest
     fun main() = Dispatchers.setMain(Dispatchers.Default)
 
+    private val vms = TestViewModels()
+
     @AfterTest
     fun close() {
+        // Clear the view models first: a late `WhileSubscribed` stop on a reset Main fails the next UI test.
+        vms.clear()
         f.close()
         Dispatchers.resetMain()
     }
@@ -92,8 +96,17 @@ class LocationSettingsViewModelTest {
                 }
             }
             f.putPlaces()
-            LocationSettingsViewModel(f.controller, device, f.permissions, f.repository(), MembersRepository(f.localDb), f.placesRepository)
-                .also { it.onResume() }
+            vms
+                .keep(
+                    LocationSettingsViewModel(
+                        f.controller,
+                        device,
+                        f.permissions,
+                        f.repository(),
+                        MembersRepository(f.localDb),
+                        f.placesRepository,
+                    ),
+                ).also { it.onResume() }
         }
 
     /** Waits for a condition that no state flow announces (requests sent in the background). */
