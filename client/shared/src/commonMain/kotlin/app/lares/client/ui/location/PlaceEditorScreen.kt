@@ -232,6 +232,7 @@ private fun EditorMap(
                 places = MapLogic.places(state.others),
                 draftPlace =
                     MapPlace("draft", form.latitude, form.longitude, form.radiusM.toDouble(), form.name, form.icon == PlaceIcon.HOME),
+                labelFont = state.config?.labelFont,
             )
         }
     val description = stringResource(Res.string.map_content_description)

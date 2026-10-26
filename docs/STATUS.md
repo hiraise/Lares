@@ -24,6 +24,9 @@ Acceptance of M0–M3 is still pending.
 
 ## Last completed
 
+- 2026-10-26 M4-11 Map through the family server: phones load the map only from the server, which fetches it from
+  VersaTiles on demand and drops what was not viewed for 7 days (ADR-0029); pins show initials again. On
+  `release/0.5.1`.
 - 2026-10-26 Release **v0.5.0** (M4 Location): release pull request #4 merged, signed APK, server image
   `ghcr.io/hiraise/lares-server:0.5.0`, GitHub release. Fixed on the way: CI flake in `MapUiTest` (a location settings
   view model outliving its test). Next branch `release/0.5.1` for the customer's fixes.

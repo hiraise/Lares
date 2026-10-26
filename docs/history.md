@@ -424,3 +424,9 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
 - 2026-10-26 CI fixes on `release/0.5.1`: the «Скоро» test failed every evening after 18:45 Moscow (today's dance left
   the list), made independent of the time of day; location age texts («3 мин назад») did not advance without new
   positions (`MapState` now carries its minute tick), which also caused a `MapViewModelTest` flake. 1 new test.
+- 2026-10-26 M4-11 Map tiles through the family server (ADR-0029, customer's report: black map / bare streets and pins
+  without initials on Huawei and Xiaomi in Russia — `tiles.openfreemap.org` is blocked): nginx `mapcache` in the Compose
+  stack, on-demand cache of VersaTiles (style, tiles, glyphs, sprites; URLs rewritten to `/map/`; unused for 7 days =
+  deleted, 2 GB cap, stale on upstream errors); the server hands out proxied style URLs and `labelFont`; the app uses
+  it for pin initials and place labels; dark-theme place labels readable. Smoke test checks the route; emulator: the
+  first real map on this Mac, initials on pins, MISS then HIT. 3 new server tests.

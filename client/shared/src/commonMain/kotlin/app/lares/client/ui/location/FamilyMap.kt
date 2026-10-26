@@ -47,6 +47,8 @@ data class MapViewState(
     val trackColor: Color? = null,
     val stops: List<MapStop> = emptyList(),
     val draftPlace: MapPlace? = null,
+    /** The style's font for pin initials and place labels (`LocationConfig.labelFont`, ADR-0029). */
+    val labelFont: String? = null,
 )
 
 /** Where the camera should go. */

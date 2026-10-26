@@ -143,6 +143,7 @@ Milestone [M4 Location](../product/roadmap.md#m4-location). [Location spec](../p
 | [M4-08](M4/08-map-screen.md) | The Map screen: MapLibre, pins, places, family sheet, member card, «Обновить» | M4-07 | done |
 | [M4-09](M4/09-history-and-places-ui.md) | History with stops; place list and editor with address search | M4-08 | done |
 | [M4-10](M4/10-alerts-rules-everywhere-manual.md) | Alerts, visibility rules, Today, person page, settings, taps, manual, M4 wrap-up | M4-09, M4-05 | done |
+| [M4-11](M4/11-map-tiles-through-server-cache.md) | Map tiles through a caching proxy on the family server (ADR-0029) | M4-10 | done |
 
 M4-05 may run any time after M4-04 (it needs only the server). M4 acceptance (after all plans): APK on the family's
 phones against the real server, sharing on every phone for a few days, a school day with arrive / leave alerts, pause,

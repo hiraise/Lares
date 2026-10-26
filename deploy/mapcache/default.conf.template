@@ -1,0 +1,57 @@
+# Map cache (ADR-0029): phones load the map only from https://<domain>/map/…; nginx fetches style, tiles, glyphs and
+# sprites from one upstream on demand, keeps them, revalidates them after the upstream's max-age and deletes what nobody
+# asked for in 7 days. Rendered by the nginx image from LARES_* variables (docker-compose.yml).
+
+proxy_cache_path /var/cache/lares-map levels=1:2 keys_zone=map:16m max_size=${LARES_MAP_CACHE_SIZE} inactive=7d
+                 use_temp_path=off;
+limit_req_zone $binary_remote_addr zone=mapreq:1m rate=50r/s;
+# Docker's DNS; the upstream is resolved per request, so a DNS failure at start does not stop nginx.
+resolver 127.0.0.11 valid=300s ipv6=off;
+
+server {
+    listen 8080;
+    server_tokens off;
+    access_log off;
+
+    # Shared by both locations below.
+    proxy_ssl_server_name on;
+    proxy_set_header Host ${LARES_MAP_UPSTREAM_HOST};
+    proxy_set_header User-Agent "Lares-mapcache (+https://github.com/hiraise/Lares)";
+    proxy_set_header Cookie "";
+    proxy_ignore_headers Set-Cookie;
+    proxy_hide_header Set-Cookie;
+    proxy_cache map;
+    proxy_cache_key $map_path$is_args$args;
+    proxy_cache_valid 200 6h;
+    proxy_cache_valid 404 5m;
+    proxy_cache_revalidate on;
+    proxy_cache_lock on;
+    proxy_cache_use_stale error timeout updating http_429 http_500 http_502 http_503 http_504;
+    proxy_connect_timeout 10s;
+    proxy_read_timeout 30s;
+
+    # Styles, TileJSON, sprite index: fetched uncompressed, the upstream origin replaced with ours.
+    location ~ ^/map(/.+\.json)$ {
+        set $map_path $1;
+        limit_req zone=mapreq burst=400 nodelay;
+        add_header X-Lares-Map $upstream_cache_status always;
+        proxy_set_header Accept-Encoding "";
+        sub_filter_types application/json;
+        sub_filter_once off;
+        sub_filter '${LARES_MAP_UPSTREAM}' '${LARES_PUBLIC_URL}/map';
+        proxy_pass ${LARES_MAP_UPSTREAM}$map_path$is_args$args;
+    }
+
+    # Tiles, glyphs, sprite images: kept compressed as the upstream sends them.
+    location ~ ^/map(/.+)$ {
+        set $map_path $1;
+        limit_req zone=mapreq burst=400 nodelay;
+        add_header X-Lares-Map $upstream_cache_status always;
+        proxy_set_header Accept-Encoding gzip;
+        proxy_pass ${LARES_MAP_UPSTREAM}$map_path$is_args$args;
+    }
+
+    location / {
+        return 404;
+    }
+}

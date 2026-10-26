@@ -5,6 +5,13 @@ Versioning: [SemVer](https://semver.org/) from the first release.
 
 ## [Unreleased]
 
+### Changed
+
+- The map now comes through the family server (M4-11): the server fetches map data from VersaTiles (OpenStreetMap)
+  when someone first looks at an area, keeps it and drops what nobody looked at for a week. The map works on networks
+  that block public map servers (black map or bare streets, pins without initials on some phones in Russia). The
+  source can be changed in `.env`.
+
 ### Fixed
 
 - «3 мин назад» and similar ages on the map, in «Семья сейчас» and on a member's page now advance every minute; before,

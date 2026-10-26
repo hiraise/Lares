@@ -1,5 +1,11 @@
 # Lares server behind automatic HTTPS (Let's Encrypt). With LARES_DOMAIN=localhost Caddy uses its own local CA.
 {$LARES_DOMAIN} {
 	encode zstd gzip
-	reverse_proxy server:8080
+	# Map cache (ADR-0029).
+	handle /map/* {
+		reverse_proxy mapcache:8080
+	}
+	handle {
+		reverse_proxy server:8080
+	}
 }

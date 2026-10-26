@@ -47,6 +47,10 @@ data class AppConfig(
             require(isLocationUrl(mapStyleUrl)) { "LARES_MAP_STYLE_URL must be an https URL, got '$mapStyleUrl'" }
             val mapDarkStyleUrl = value("LARES_MAP_STYLE_DARK_URL", LocationConfigValues.DEFAULT_MAP_DARK_STYLE_URL).trim()
             require(isLocationUrl(mapDarkStyleUrl)) { "LARES_MAP_STYLE_DARK_URL must be an https URL, got '$mapDarkStyleUrl'" }
+            val mapUpstream = value("LARES_MAP_UPSTREAM", LocationConfigValues.DEFAULT_MAP_UPSTREAM).trim().trimEnd('/')
+            require(isLocationUrl(mapUpstream)) { "LARES_MAP_UPSTREAM must be an https URL, got '$mapUpstream'" }
+            val mapProxyText = value("LARES_MAP_PROXY", "false").trim().lowercase()
+            require(mapProxyText in setOf("true", "false")) { "LARES_MAP_PROXY must be 'true' or 'false', got '$mapProxyText'" }
             // Not read with value(): set but empty switches addresses off.
             val geocoderUrl =
                 (env["LARES_GEOCODER_URL"] ?: LocationConfigValues.DEFAULT_GEOCODER_URL).trim().trimEnd('/').takeIf { it.isNotEmpty() }
@@ -76,6 +80,10 @@ data class AppConfig(
                     LocationConfigValues(
                         mapStyleUrl = mapStyleUrl,
                         mapDarkStyleUrl = mapDarkStyleUrl,
+                        mapUpstream = mapUpstream,
+                        mapProxyBase = if (mapProxyText == "true") "$publicUrl/map" else null,
+                        labelFont =
+                            (env["LARES_MAP_LABEL_FONT"] ?: LocationConfigValues.DEFAULT_LABEL_FONT).trim().takeIf { it.isNotEmpty() },
                         geocoderUrl = geocoderUrl,
                         geocoderEmail = env["LARES_GEOCODER_EMAIL"]?.trim()?.takeIf { it.isNotEmpty() },
                     ),
@@ -107,21 +115,38 @@ data class DbConfig(
     override fun toString(): String = "DbConfig(url=$url, user=$user, password=***)"
 }
 
-/** Map styles for the clients and the Nominatim-compatible address lookup (null = addresses off). */
+/**
+ * Map styles for the clients and the Nominatim-compatible address lookup (null = addresses off). With [mapProxyBase]
+ * (`<public URL>/map`, ADR-0029) styles on [mapUpstream] are handed out through the server's map cache.
+ */
 data class LocationConfigValues(
     val mapStyleUrl: String = DEFAULT_MAP_STYLE_URL,
     val mapDarkStyleUrl: String = DEFAULT_MAP_DARK_STYLE_URL,
+    val mapUpstream: String = DEFAULT_MAP_UPSTREAM,
+    val mapProxyBase: String? = null,
+    /** The font of pin initials and place labels; a style's glyph server knows only its own names. */
+    val labelFont: String? = DEFAULT_LABEL_FONT,
     val geocoderUrl: String? = DEFAULT_GEOCODER_URL,
     val geocoderEmail: String? = null,
 ) {
     // The contact address stays out of logs.
     override fun toString(): String =
-        "LocationConfigValues(mapStyleUrl=$mapStyleUrl, mapDarkStyleUrl=$mapDarkStyleUrl, geocoderUrl=$geocoderUrl, " +
+        "LocationConfigValues(mapStyleUrl=$mapStyleUrl, mapDarkStyleUrl=$mapDarkStyleUrl, mapUpstream=$mapUpstream, " +
+            "mapProxyBase=$mapProxyBase, labelFont=$labelFont, geocoderUrl=$geocoderUrl, " +
             "geocoderEmail=${if (geocoderEmail == null) "unset" else "***"})"
 
+    /** The URL a phone loads: through the map cache when [url] is on the upstream, else unchanged. */
+    fun clientUrl(url: String): String {
+        val base = mapProxyBase ?: return url
+        val prefix = "$mapUpstream/"
+        return if (url.startsWith(prefix)) "$base/${url.removePrefix(prefix)}" else url
+    }
+
     companion object {
-        const val DEFAULT_MAP_STYLE_URL = "https://tiles.openfreemap.org/styles/liberty"
-        const val DEFAULT_MAP_DARK_STYLE_URL = "https://tiles.openfreemap.org/styles/dark"
+        const val DEFAULT_MAP_UPSTREAM = "https://tiles.versatiles.org"
+        const val DEFAULT_MAP_STYLE_URL = "$DEFAULT_MAP_UPSTREAM/assets/styles/colorful/style.json"
+        const val DEFAULT_MAP_DARK_STYLE_URL = "$DEFAULT_MAP_UPSTREAM/assets/styles/colorful-dark/style.json"
+        const val DEFAULT_LABEL_FONT = "noto_sans_bold"
         const val DEFAULT_GEOCODER_URL = "https://nominatim.openstreetmap.org"
     }
 }

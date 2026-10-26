@@ -273,6 +273,8 @@ data class LocationConfig(
     /** The address service is configured. */
     val addresses: Boolean,
     val historyDays: Int,
+    /** The font of pin initials and place labels on this style's glyph server (ADR-0029); null = `Noto Sans Bold`. */
+    val labelFont: String? = null,
 )
 
 /** Reverse lookup result; null label = unknown. */

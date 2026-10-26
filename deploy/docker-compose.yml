@@ -42,12 +42,32 @@ services:
       LARES_SETUP_CODE: ${LARES_SETUP_CODE:-}
       LARES_LOG_FORMAT: ${LARES_LOG_FORMAT:-json}
       LARES_PUSH_ALLOWED_HOSTS: ${LARES_PUSH_ALLOWED_HOSTS:-}
-      LARES_MAP_STYLE_URL: ${LARES_MAP_STYLE_URL:-https://tiles.openfreemap.org/styles/liberty}
-      LARES_MAP_STYLE_DARK_URL: ${LARES_MAP_STYLE_DARK_URL:-https://tiles.openfreemap.org/styles/dark}
+      LARES_MAP_STYLE_URL: ${LARES_MAP_STYLE_URL:-https://tiles.versatiles.org/assets/styles/colorful/style.json}
+      LARES_MAP_STYLE_DARK_URL: ${LARES_MAP_STYLE_DARK_URL:-https://tiles.versatiles.org/assets/styles/colorful-dark/style.json}
+      # Styles on the upstream are handed out through the map cache (ADR-0029).
+      LARES_MAP_PROXY: "true"
+      LARES_MAP_UPSTREAM: ${LARES_MAP_UPSTREAM:-https://tiles.versatiles.org}
+      LARES_MAP_LABEL_FONT: ${LARES_MAP_LABEL_FONT:-noto_sans_bold}
       # No colon: LARES_GEOCODER_URL set but empty stays empty and turns addresses off.
       LARES_GEOCODER_URL: ${LARES_GEOCODER_URL-https://nominatim.openstreetmap.org}
       LARES_GEOCODER_EMAIL: ${LARES_GEOCODER_EMAIL:-}
     mem_limit: 300m # measured max RSS 237 MiB + ~25 %, docs/architecture/perf/M0-baseline.md
+    logging: *logging
+
+  # Map cache (ADR-0029): style, tiles, glyphs and sprites fetched on demand, unused ones dropped after 7 days.
+  mapcache:
+    image: nginx:1.29.3-alpine
+    restart: unless-stopped
+    environment:
+      NGINX_ENVSUBST_FILTER: "^LARES_"
+      LARES_MAP_UPSTREAM: ${LARES_MAP_UPSTREAM:-https://tiles.versatiles.org}
+      LARES_MAP_UPSTREAM_HOST: ${LARES_MAP_UPSTREAM_HOST:-tiles.versatiles.org}
+      LARES_MAP_CACHE_SIZE: ${LARES_MAP_CACHE_SIZE:-2g}
+      LARES_PUBLIC_URL: ${LARES_PUBLIC_URL:-https://${LARES_DOMAIN:?set LARES_DOMAIN in .env}}
+    volumes:
+      - ./mapcache/default.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - map_cache:/var/cache/lares-map
+    mem_limit: 32m
     logging: *logging
 
   caddy:
@@ -55,6 +75,7 @@ services:
     restart: unless-stopped
     depends_on:
       - server
+      - mapcache
     command: ["caddy", "run", "--config", "/etc/caddy/${LARES_CADDYFILE:-Caddyfile}", "--adapter", "caddyfile"]
     environment:
       LARES_DOMAIN: ${LARES_DOMAIN:?set LARES_DOMAIN in .env}
@@ -86,6 +107,7 @@ services:
 
 volumes:
   pgdata:
+  map_cache:
   caddy_data:
   caddy_config:
   ntfy_cache:

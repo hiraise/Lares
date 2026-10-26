@@ -168,6 +168,7 @@ private fun HistoryMap(
                 track = state.track,
                 trackColor = trackColor,
                 stops = HistoryLogic.mapStops(state.rows),
+                labelFont = state.config?.labelFont,
             )
         }
     val description = stringResource(Res.string.map_content_description)

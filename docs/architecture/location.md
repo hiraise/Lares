@@ -272,8 +272,11 @@ object PlaceRules {
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
-| `LARES_MAP_STYLE_URL` | `https://tiles.openfreemap.org/styles/liberty` | Map style (light) |
-| `LARES_MAP_STYLE_DARK_URL` | `https://tiles.openfreemap.org/styles/dark` | Map style (dark) |
+| `LARES_MAP_STYLE_URL` | `https://tiles.versatiles.org/assets/styles/colorful/style.json` | Map style (light); OpenFreeMap before ADR-0029 |
+| `LARES_MAP_STYLE_DARK_URL` | `https://tiles.versatiles.org/assets/styles/colorful-dark/style.json` | Map style (dark) |
+| `LARES_MAP_UPSTREAM` | `https://tiles.versatiles.org` | Origin the map cache fetches from (ADR-0029) |
+| `LARES_MAP_PROXY` | `false` (`true` in Compose) | Hand out styles on the upstream as `<public URL>/map/…` |
+| `LARES_MAP_LABEL_FONT` | `noto_sans_bold` | Font of pin initials and place labels (`LocationConfig.labelFont`; blank = app fallback) |
 | `LARES_GEOCODER_URL` | `https://nominatim.openstreetmap.org` | Nominatim-compatible base URL; set but empty = addresses off |
 | `LARES_GEOCODER_EMAIL` | — | Optional contact sent as `email=` (Nominatim policy) |
 
@@ -827,6 +830,27 @@ interface LocationDevice {            // permissions and settings, Android imple
   same constant with the own member id.
 - Tests: a Compose UI test with two lifecycle collectors on one page sets `Dispatchers.Main` to `Unconfined`; on the
   multi-threaded test "main" their observers were added to the lifecycle concurrently.
+
+### Implementation notes (M4-11, ADR-0029)
+
+- **Map cache:** Compose service `mapcache` (`nginx:1.29.3-alpine`, `mem_limit: 32m`, volume `map_cache`), config
+  `deploy/mapcache/default.conf.template` rendered from `LARES_*` (`NGINX_ENVSUBST_FILTER`). Caddy sends `/map/*` there.
+  Two regex locations: `…\.json` is fetched with `Accept-Encoding: ""` and `sub_filter` replaces the upstream origin
+  with `<public URL>/map` (applied on cache hits too, since the cache keeps the upstream body); everything else is
+  fetched gzip and stored as is. `proxy_cache_path … inactive=7d max_size=$LARES_MAP_CACHE_SIZE`, `proxy_cache_valid
+  200 6h` (the upstream's `max-age` wins), `proxy_cache_revalidate` (ETag → 304), stale on errors and 429, per-IP
+  `limit_req` 50 r/s burst 400, only `/map/…` (else 404), `X-Lares-Map: HIT|MISS|…`. The upstream is resolved per
+  request through Docker's DNS (`resolver 127.0.0.11`).
+- **Server:** `LocationConfigValues.clientUrl(url)` maps `"$mapUpstream/…"` to `"$publicUrl/map/…"` when
+  `LARES_MAP_PROXY=true`; `/location/config` returns both styles through it and `labelFont`.
+- **Client:** `MapViewState.labelFont` (from `LocationConfig.labelFont`, fallback `Noto Sans Bold` for older servers)
+  is the `textFont` of pin initials and place labels; a font name the style's glyph server does not know leaves the
+  pins without letters.
+- Place labels in dark theme use `onSurface` text on a `surface` halo (the place colours were unreadable on
+  `colorful-dark`); light theme keeps the place colour.
+- Checked: through a local `mapcache` a VersaTiles style comes back with every resource URL on `/map/`, a tile is a
+  MISS and then a HIT, other paths 404; `smoke.sh` checks that `/map/` reaches the cache and that the server hands out
+  proxied style URLs.
 
 ### UI (M4-07…M4-10)
 

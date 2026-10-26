@@ -12,7 +12,7 @@ Status values: `proposed` (direction chosen, details or customer confirmation pe
 | [0003](0003-license-agpl.md) | License: AGPL-3.0-or-later | accepted | 2026-10-22 |
 | [0004](0004-kotlin-full-stack.md) | Kotlin full stack: Ktor server, Kotlin/Compose Multiplatform client | accepted | 2026-10-22 |
 | [0005](0005-postgresql-docker-vps.md) | PostgreSQL, Docker Compose, VPS as primary target | accepted | 2026-10-22 |
-| [0006](0006-no-proprietary-dependencies.md) | No proprietary dependencies: maps, location, push | accepted | 2026-10-22 |
+| [0006](0006-no-proprietary-dependencies.md) | No proprietary dependencies: maps, location, push | accepted (§1 default source superseded by 0029) | 2026-10-22 |
 | [0007](0007-distribution.md) | Distribution: APK first, Google Play and F-Droid after MVP | accepted | 2026-10-22 |
 | [0008](0008-offline-first-sync.md) | Offline-first client with server-authoritative sync | accepted | 2026-10-23 |
 | [0009](0009-gps-trackers-via-traccar.md) | GPS trackers via Traccar compatibility | proposed | 2026-10-22 |
@@ -33,8 +33,9 @@ Status values: `proposed` (direction chosen, details or customer confirmation pe
 | [0024](0024-positions-outside-the-sync-log.md) | Positions and sharing state travel outside the sync log | accepted | 2026-10-25 |
 | [0025](0025-location-visibility-rules.md) | Location visibility rules: subject → target, widest level wins | accepted | 2026-10-25 |
 | [0026](0026-addresses-through-a-server-geocoder.md) | Addresses come from a geocoder through the server, on demand | accepted | 2026-10-25 |
-| [0027](0027-map-rendering-maplibre-compose.md) | The map is drawn with maplibre-compose behind an expect composable | accepted | 2026-10-25 |
+| [0027](0027-map-rendering-maplibre-compose.md) | The map is drawn with maplibre-compose behind an expect composable | accepted (§4 amended by 0029) | 2026-10-25 |
 | [0028](0028-battery-aware-tracking-service.md) | Phones track with one foreground service in moving and still modes | accepted | 2026-10-25 |
+| [0029](0029-map-tiles-through-a-server-cache.md) | Map tiles come through a caching proxy on the family server; VersaTiles by default | accepted | 2026-10-26 |
 
 ## When to write an ADR
 

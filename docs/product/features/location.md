@@ -95,6 +95,7 @@ GPS trackers come later. Technical design: [architecture/location.md](../../arch
   follows the light and dark theme. The map needs a network connection; offline it shows the last known positions with
   «Нет связи».
   *UI: the server's light or dark style by the app theme; offline the last positions with «Нет связи. Показаны последние известные места.», without any known style «Карта появится, когда будет связь» (M4-08).*
+  *Server: the phones load style, tiles, fonts and icons only from the family server's map cache, filled on demand from VersaTiles and emptied of what was not viewed for 7 days; pin initials use the style's font (M4-11, ADR-0029, customer 2026-10-26).*
 - **LOC-011** `MVP` `done` — «Обновить» (Q-027): everybody who sees a member can ask their phone for a fresh precise
   position; it arrives within about a minute if the phone is online. Not available while the member is paused. At most
   once a minute per member.
