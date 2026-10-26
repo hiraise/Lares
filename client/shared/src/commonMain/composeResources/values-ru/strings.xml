@@ -1025,4 +1025,36 @@
     <string name="notif_birthday_week">За неделю</string>
     <string name="notif_birthday_two_weeks">За 2 недели</string>
     <string name="event_deleted">Событие удалено</string>
+    <!-- Location status lines (LOC-003, LOC-010, LOC-012…LOC-014) -->
+    <string name="loc_status_not_sharing">Не делится геопозицией</string>
+    <string name="loc_status_paused">На паузе</string>
+    <string name="loc_status_paused_until">На паузе до %1$s</string>
+    <string name="loc_status_off_location_disabled">Геопозиция выключена на телефоне</string>
+    <string name="loc_status_off_permission_revoked">Нет доступа к геопозиции</string>
+    <string name="loc_status_off_stopped">Передача остановлена</string>
+    <string name="loc_status_off_signed_out">Выход из приложения</string>
+    <string name="loc_status_last_place">последнее место %1$s</string>
+    <string name="loc_status_no_data">Нет данных</string>
+    <string name="loc_status_no_data_since">Нет данных %1$s</string>
+    <string name="loc_status_at_home">Дома</string>
+    <string name="loc_status_since">с %1$s</string>
+    <string name="loc_status_since_yesterday">со вчера, %1$s</string>
+    <string name="loc_status_moving">В пути</string>
+    <string name="loc_status_no_address">Без адреса</string>
+    <string name="loc_status_from_home">%1$s от дома</string>
+    <string name="loc_status_from_place">%1$s от места «%2$s»</string>
+    <string name="loc_status_meters">%1$s м</string>
+    <string name="loc_status_kilometers">%1$s км</string>
+    <string name="loc_status_decimal_separator">,</string>
+    <string name="loc_status_now">сейчас</string>
+    <plurals name="loc_status_minutes_ago">
+        <item quantity="one">%1$d мин назад</item>
+        <item quantity="few">%1$d мин назад</item>
+        <item quantity="many">%1$d мин назад</item>
+        <item quantity="other">%1$d мин назад</item>
+    </plurals>
+    <string name="loc_status_at">в %1$s</string>
+    <string name="loc_status_yesterday_at">вчера в %1$s</string>
+    <string name="loc_status_date_at">%1$s в %2$s</string>
+    <string name="loc_sharing_moved">Геопозицией теперь делится другой телефон</string>
 </resources>

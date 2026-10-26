@@ -33,6 +33,18 @@ import app.lares.contract.api.auth.Me
 import app.lares.contract.api.auth.RefreshRequest
 import app.lares.contract.api.auth.SessionInfo
 import app.lares.contract.api.auth.SetupRequest
+import app.lares.contract.api.location.AddressLabel
+import app.lares.contract.api.location.AddressSearch
+import app.lares.contract.api.location.LiveMessage
+import app.lares.contract.api.location.LocationConfig
+import app.lares.contract.api.location.LocationHistory
+import app.lares.contract.api.location.LocationNow
+import app.lares.contract.api.location.LocationRules
+import app.lares.contract.api.location.LocationWatchers
+import app.lares.contract.api.location.PutLocationRulesRequest
+import app.lares.contract.api.location.SetSharingRequest
+import app.lares.contract.api.location.UploadPositionsRequest
+import app.lares.contract.api.location.UploadPositionsResponse
 import app.lares.contract.api.notifications.NotificationSettings
 import app.lares.contract.api.notifications.PushRegistrationRequest
 import app.lares.contract.api.notifications.PushTestResponse
@@ -66,6 +78,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.datetime.LocalDate
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 
@@ -201,6 +214,73 @@ class LaresApi(
             }
         }
 
+    // Location (architecture/location.md § Positions, state, live channel).
+
+    suspend fun setSharing(request: SetSharingRequest) =
+        authed<SetSharingRequest, Unit>(HttpMethod.Put, "/api/v1/location/me/sharing", request)
+
+    suspend fun uploadPositions(request: UploadPositionsRequest): UploadPositionsResponse =
+        authed(HttpMethod.Post, "/api/v1/location/positions", request)
+
+    suspend fun locationNow(): LocationNow = authed(HttpMethod.Get, "/api/v1/location/now", Unit)
+
+    suspend fun history(
+        memberId: String,
+        date: LocalDate,
+    ): LocationHistory =
+        authed(HttpMethod.Get, "/api/v1/location/history", Unit) {
+            parameter("memberId", memberId)
+            parameter("date", date.toString())
+        }
+
+    /** «Обновить» (LOC-011): 202; `CONFLICT` when the member does not share right now. */
+    suspend fun requestLocationRefresh(memberId: String) =
+        authed<Unit, Unit>(HttpMethod.Post, "/api/v1/location/members/${memberId.encoded()}/refresh", Unit)
+
+    suspend fun watchers(): LocationWatchers = authed(HttpMethod.Get, "/api/v1/location/me/watchers", Unit)
+
+    suspend fun locationConfig(): LocationConfig = authed(HttpMethod.Get, "/api/v1/location/config", Unit)
+
+    suspend fun address(
+        latitude: Double,
+        longitude: Double,
+    ): AddressLabel =
+        authed(HttpMethod.Get, "/api/v1/location/address", Unit) {
+            parameter("lat", latitude)
+            parameter("lon", longitude)
+        }
+
+    suspend fun searchAddress(query: String): AddressSearch =
+        authed(HttpMethod.Get, "/api/v1/location/search", Unit) { parameter("q", query) }
+
+    suspend fun locationRules(): LocationRules = authed(HttpMethod.Get, "/api/v1/location/rules", Unit)
+
+    suspend fun putLocationRules(request: PutLocationRulesRequest) =
+        authed<PutLocationRulesRequest, Unit>(HttpMethod.Put, "/api/v1/location/rules", request)
+
+    /**
+     * The live location channel (ADR-0024), with the token handling of [events]. Completes when the server closes the
+     * socket normally; fails on network errors, and with [ApiException] `FORBIDDEN` (no `location.view`) or
+     * `SESSION_REVOKED` (the session ended) when the server closes it for those reasons.
+     */
+    fun locationLive(): Flow<LiveMessage> =
+        channelFlow {
+            val token = freshAccessToken()
+            val url = baseUrl().replaceFirst("http", "ws") + "/api/v1/location/live"
+            client.webSocket(urlString = url, request = {
+                bearerAuth(token)
+                timeout { requestTimeoutMillis = HttpTimeoutConfig.INFINITE_TIMEOUT_MS }
+            }) {
+                for (frame in incoming) {
+                    if (frame is Frame.Text) send(LaresJson.decodeFromString(LiveMessage.serializer(), frame.readText()))
+                }
+                when (closeReason.await()?.code) {
+                    CLOSE_FORBIDDEN -> throw ApiException(ErrorCode.FORBIDDEN, "No access to locations", httpStatus = 403)
+                    CLOSE_SIGNED_OUT -> throw ApiException(ErrorCode.SESSION_REVOKED, "Session ended", httpStatus = 401)
+                }
+            }
+        }
+
     // Plumbing.
 
     private suspend fun baseUrl(override: String? = null): String =
@@ -332,4 +412,10 @@ class LaresApi(
     private fun ApiError.toException(httpStatus: Int) = ApiException(code, message, fields, httpStatus)
 
     private fun String.encoded(): String = encodeURLPathPart()
+
+    private companion object {
+        /** Close codes of the live location channel (server `LocationLiveService`). */
+        const val CLOSE_SIGNED_OUT: Short = 4401
+        const val CLOSE_FORBIDDEN: Short = 4403
+    }
 }

@@ -17,6 +17,19 @@ import app.lares.client.data.calendar.CalendarReminderTexts
 import app.lares.client.data.calendar.CalendarRepository
 import app.lares.client.data.calendar.CalendarWriter
 import app.lares.client.data.calendar.EnglishCalendarReminderTexts
+import app.lares.client.data.location.AllowAllLocationDevice
+import app.lares.client.data.location.EnglishLocationTexts
+import app.lares.client.data.location.LocationDevice
+import app.lares.client.data.location.LocationRepository
+import app.lares.client.data.location.LocationTextResources
+import app.lares.client.data.location.LocationTexts
+import app.lares.client.data.location.LocationTracking
+import app.lares.client.data.location.NoopLocationTracking
+import app.lares.client.data.location.PlacesRepository
+import app.lares.client.data.location.PlacesWriter
+import app.lares.client.data.location.PositionQueue
+import app.lares.client.data.location.PositionUploader
+import app.lares.client.data.location.SharingController
 import app.lares.client.data.shopping.ShoppingRepository
 import app.lares.client.data.shopping.ShoppingWriter
 import app.lares.client.data.tasks.EnglishTaskReminderTexts
@@ -25,6 +38,7 @@ import app.lares.client.data.tasks.TaskReminderTexts
 import app.lares.client.data.tasks.TasksRepository
 import app.lares.client.data.tasks.TasksWriter
 import app.lares.client.db.LocalDb
+import app.lares.client.notifications.NotificationPoster
 import app.lares.client.sync.LocalWriter
 import app.lares.client.sync.Materializer
 import app.lares.client.sync.SyncConfig
@@ -87,6 +101,40 @@ private fun coreModule() =
         // Overridden by the app UI with resource texts (uiModule).
         single<CalendarReminderTexts> { EnglishCalendarReminderTexts() }
         single { CalendarReminderPlanner(get(), get(), get(), get(), get(), clock()) }
+        single { PlacesRepository(get(), get()) }
+        single { PlacesWriter(get(), get(), clock()) }
+        // Overridden by the app UI with resource texts (uiModule).
+        single<LocationTextResources> { EnglishLocationTexts() }
+        single { LocationTexts(get()) }
+        single { PositionQueue(get()) }
+        single {
+            SharingController(
+                get(),
+                get(),
+                getOrNull<LocationTracking>() ?: NoopLocationTracking(),
+                getOrNull<LocationDevice>() ?: AllowAllLocationDevice(),
+                get(),
+                getOrNull<NotificationPoster>() ?: NotificationPoster { _, _, _, _, _ -> },
+                get(),
+                get(),
+                clock(),
+                get(AppScope),
+            )
+        }
+        single { PositionUploader(get(), get(), get(), clock()) }
+        single {
+            LocationRepository(
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                get(AppScope),
+                clock(),
+                sharing = get<SharingController>().observe(),
+            )
+        }
     }
 
 private fun org.koin.core.scope.Scope.clock(): Clock = getOrNull<Clock>() ?: Clock.System

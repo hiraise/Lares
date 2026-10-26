@@ -1,0 +1,26 @@
+-- Family places (LOC-020): named circles, synced to everybody with `location.view`.
+CREATE TABLE place (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    icon TEXT NOT NULL,
+    latitude REAL NOT NULL,
+    longitude REAL NOT NULL,
+    radius_m INTEGER NOT NULL,
+    address TEXT,
+    created_by TEXT NOT NULL
+);
+
+selectAll:
+SELECT * FROM place ORDER BY name COLLATE NOCASE, id;
+
+selectById:
+SELECT * FROM place WHERE id = ?;
+
+upsert:
+INSERT OR REPLACE INTO place (id, name, icon, latitude, longitude, radius_m, address, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+deleteById:
+DELETE FROM place WHERE id = ?;
+
+deleteAll:
+DELETE FROM place;

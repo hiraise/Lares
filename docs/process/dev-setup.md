@@ -52,8 +52,8 @@ to `build/dev/` (ignored by git).
 | --- | --- |
 | `verify.sh [tasks]` | `spotlessApply` + tasks (default: `check :client:android:assembleDebug`); prints errors, failed tests, totals |
 | `server.sh start\|stop\|restart\|reset\|status\|log` | Dev DB + server in background on `LARES_PORT` (8080), own database `lares_e2e`, setup code `DEVSETUP01` |
-| `seed.py family\|token\|invite\|login-code\|call` | Test family Петровы via the API (`olga / olga-password` admin, `dima`, kids Аня and Тимур) |
-| `emu.sh start [--window]\|install\|launch\|fresh\|link URL\|stop` | Emulator lifecycle, `adb reverse`, deep links |
+| `seed.py family\|token\|invite\|login-code\|tasks\|shopping\|calendar\|location\|move\|tick\|call` | Test family Петровы via the API (`olga / olga-password` admin, `dima`, kids Аня and Тимур); `location` seeds places and sharing sessions of the other members |
+| `emu.sh start [--window]\|install\|launch\|fresh\|link URL\|geo LAT LON\|route home-school\|stop` | Emulator lifecycle, `adb reverse`, deep links, GPS position and a walking route |
 | `ui.sh dump\|tap\|wait\|has\|field\|type\|shot\|crash …` | Drive the app by visible text; screenshots downscaled to 540×1200 |
 
 The dev DB port is detected from the running container (5432, or 5434 when 5432 is taken by another PostgreSQL).

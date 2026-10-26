@@ -76,13 +76,29 @@ class MigrationTest {
         assertEquals(emptyList(), old.indexes("event%"))
 
         LaresDb.Schema.migrate(old, 4, 5)
-        assertEquals(5L, LaresDb.Schema.version)
         assertEquals(fresh.schemaOf(*CALENDAR_TABLES), old.schemaOf(*CALENDAR_TABLES))
         assertEquals(listOf("event_occurrence_event", "event_reminder_event"), old.indexes("event%"))
+    }
+
+    @Test
+    fun version5DatabaseGetsTheLocationTablesOfAFreshInstall() {
+        val fresh = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY).also { LaresDb.Schema.create(it) }
+
+        // An M3 database (schema version 5): everything except the location tables.
+        val old = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
+        LaresDb.Schema.create(old)
+        LOCATION_TABLES.forEach { old.execute(null, "DROP TABLE $it", 0) }
+        assertEquals(emptyList(), old.indexes("position%"))
+
+        LaresDb.Schema.migrate(old, 5, 6)
+        assertEquals(6L, LaresDb.Schema.version)
+        assertEquals(fresh.schemaOf(*LOCATION_TABLES), old.schemaOf(*LOCATION_TABLES))
+        assertEquals(listOf("position_outbox_recorded"), old.indexes("position%"))
     }
 
     private companion object {
         val SHOPPING_TABLES = arrayOf("shopping_list", "shopping_item")
         val CALENDAR_TABLES = arrayOf("event", "event_occurrence", "event_reminder", "notification_pref")
+        val LOCATION_TABLES = arrayOf("place", "place_alert", "position_outbox", "location_pref", "location_snapshot")
     }
 }

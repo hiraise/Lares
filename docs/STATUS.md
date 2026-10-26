@@ -8,14 +8,14 @@ Updated: 2026-10-26
 M1 Tasks — all plans M1-01…M1-07 done; M1 acceptance with the customer next.
 M2 Shopping lists — all plans M2-01…M2-06 done; M2 acceptance with the customer next.
 M3 Calendar — all plans M3-01…M3-08 done, released as v0.4.0; M3 acceptance with the customer next.
-M4 Location — M4-01…M4-05 done (server side complete and load-tested with location); next M4-06 (client core).**
+M4 Location — M4-01…M4-06 done (server side complete and load-tested; client core done); next M4-07 (Android sharing service).**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
 
 [M4 Location](product/roadmap.md#m4-location): planned — [location spec](product/features/location.md) (approved,
 Q-025…Q-029 answered), [location design](architecture/location.md), [M4 plans](plans/README.md#m4-plans). Done: M4-01…
-M4-05. Next: M4-06 (client core).
+M4-06. Next: M4-07 (Android sharing service).
 Acceptance of M0–M3 is still pending.
 
 **Active release branch: `release/0.5.0`** (M4). `release/0.4.1` was not needed: the customer found no bugs in v0.4.0. Commit approved work here; `main` is protected
@@ -24,6 +24,11 @@ Acceptance of M0–M3 is still pending.
 
 ## Last completed
 
+- 2026-10-26 M4-06 Location in the client core: places and own alerts work offline; the map data comes live (socket,
+  then polling, offline the last snapshot); status lines «Дома · с 15:10», «Нет данных с 18:05», «В пути · сейчас»
+  (en, ru); this phone's sharing — enable, pause, resume, report off, another phone takes over — remembered and sent
+  when online; positions queued up to 24 h and uploaded in batches; tracking policy (moving / still). Dev tools
+  `seed.py location|move`, `emu.sh geo|route`. 53 unit and 4 multi-device tests.
 - 2026-10-26 M4-05 Load test with location: 20 phones, 10 of them sending a position every 30 s, 3 open maps, places
   with arrivals and departures — server memory max 254 of 256 MiB, p95 95 ms (uploads 37 ms), start 2–3.4 s, no errors;
   with 10 phones close to M0. Targets met without tuning, little memory margin
@@ -153,7 +158,8 @@ Acceptance of M0–M3 is still pending.
 1. M0 and M1 acceptance with the customer (APK v0.2.0, walkthrough on real phones, Russian changelog; checklist in the M1-07
    handoff).
 2. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
-3. M4-06 (location client core) and the rest of M4 on `release/0.5.0`, in order.
+3. M4-07 (Android sharing service; first confirm the emulator's `geo fix` reaches `fused`) and the rest of M4 on
+   `release/0.5.0`, in order.
 4. After the M1 acceptance: set the tasks spec to `implemented`.
 5. M2 acceptance with the customer (checklist in the M2-06 handoff); after it set the shopping spec to `implemented`.
 6. M3 acceptance with the customer on v0.4.0 (checklist in the M3-08 handoff); fixes go to `release/0.5.0`; after the

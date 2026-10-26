@@ -371,3 +371,14 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   254 of 256 MiB, p95 95 ms (uploads 37 ms), cold start 2.0–3.4 s, 0 errors, 20 arrivals and departures; 10 devices —
   RSS max 247, p95 46 ms (M0: 237, 52); 1 CPU, 5 min — p95 73 ms. Targets met without tuning, memory margin small
   ([perf/M4-location.md](architecture/perf/M4-location.md)). 4 new loadsim tests (9 in the module).
+
+- 2026-10-26 **M4-06** Location in the client core: local tables (schema 6, data schema 5) for places, own arrive /
+  leave alerts, the position queue, this phone's sharing state and the last map snapshot; place adapters with the
+  server's rules, `PlacesRepository` / `PlacesWriter` (offline, changed fields, derived alert rows); all location API
+  calls incl. the live socket; `LocationRepository` (live → polling → cached snapshot, stale and moving on minute
+  ticks, privacy rules for the cache, history with stops, cached addresses and config); `LocationTexts` status lines
+  and ages (en / ru resources); `SharingController` (enable online only, pause «На 1 час» / «До утра» / «Пока не
+  включу», pending requests, expiry, report off once, another phone takes over), `PositionQueue`, `PositionUploader`,
+  `TrackingPolicy`; `location_refresh` push; dev tools `seed.py location|move`, stored seed sessions for `call --as`,
+  `emu.sh geo|route home-school`. 53 new unit tests, 4 multi-device tests. Open for M4-07: confirm that the emulator's
+  `geo fix` reaches the `fused` provider.

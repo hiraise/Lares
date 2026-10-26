@@ -600,6 +600,41 @@ interface LocationDevice {            // permissions and settings, Android imple
 - Pure API: `TrackingPolicy(clock)` with `onFix(fix): Decision(record: Boolean, newMode: Mode?)`, `onSignificantMotion()`,
   `onPause/onResume`, `request(mode, sdk, hasMotionSensor): TrackingRequest`, `shouldUpload(queueOldest, queueSize, mode)`.
 
+### Implementation notes (M4-06)
+
+- `position_outbox.recorded_at` is epoch milliseconds (INTEGER): ISO texts with and without fractions of a second do
+  not sort.
+- `LaresApi.requestLocationRefresh(memberId)` («Обновить»): `refresh` already names the token refresh. `locationLive()`
+  shares the `events()` token path; a close with 4403 throws `ApiException(FORBIDDEN)`, 4401 `SESSION_REVOKED`.
+- `LocationRepository(api, localDb, members, places, permissions, syncEngine, scope, clock, sharing, ticks, live,
+  timings)`: names and colors come from `MembersRepository` (already joined with persons), the household is not needed;
+  `scope` is the app scope for `shareIn`, `sharing` is `SharingController.observe()` for `MapState.me`. Connection:
+  LIVE while the socket delivers, POLLING while it connects or is down, OFFLINE when `SyncStatus` is offline or both
+  the socket and the poll failed with an I/O error. The poll starts only after a socket failure. Members are sorted by
+  name. `LocationTimings.cacheInterval` (30 s); the cache is also written when the last collector leaves.
+- `config(reload)` returns `LocationConfig?` (memory, then `location_pref` `config` offline); `address()` returns null
+  without caching on network errors.
+- `LocationTexts.status(member, address, now, zone, places)`: the place comes from `member.place`; `places` give the
+  nearest place when there is no address («2 км от дома», others «350 м от места «Школа №12»» — place names have no
+  genitive). A sharing member without any fix shows «Нет данных». Since texts: «с 15:10», «со вчера, 15:10»,
+  «с 12 окт.»; a pause end more than a day ahead shows the date. `formatDistance` rounds to 10 m below 1 km, one
+  decimal below 10 km. `BatteryLevel` LOW ≤ 15, MEDIUM ≤ 50, HIGH.
+- `SharingController(…, scope, ticks)`: `enable()`, `pause()`, `resume()` return `Result`; offline enable fails with
+  `NeedsNetworkException`. A pause the server refuses (no `location.pause_own`) is undone on the phone. `checkPause()`
+  is the minute check of the service. `onFixRecorded(at)` stores `last_fix_at`. `sendPending()` drops a request the
+  server refuses (it cannot succeed later). `MySharing.StaleUploads` needs a stored `last_upload_ok` (never-uploaded
+  phones show Sharing).
+- `PositionUploader.flush(force = false)`: `force` skips the backoff (network back, «Обновить» fix). Batches answered
+  `sharingHere = false` or `paused` are removed from the queue (the server dropped them for good).
+- `TrackingPolicy`: STILL needs 3 minutes in MOVING (since the last mode change) besides ≥ 3 fixes within 75 m; the
+  accuracy limit of 200 m applies in STILL too; `request(…, hasFused = true)`; `onFreshFix(fix)` marks the «Обновить»
+  fix as the last recorded. Platform interfaces: `NoopLocationTracking`, `AllowAllLocationDevice` (JVM, tests);
+  `DeviceLocationStatus.canShare` = fine + background + location on.
+- Dev tools: `seed.py location` keeps `sessions` (access + refresh token per seeded member), `olga_id` and `location`
+  (place ids) in `seed.json`; `emu.sh route` sends `geo fix LON LAT 150 8 5` (5 knots ≈ walking fast). `geo fix`
+  reaches the `gps` provider; that the AOSP `fused` provider passes it on is to be confirmed in M4-07 (nothing
+  requested locations before; if not, the service uses `gps` on the emulator).
+
 ### Android (`client/android/…/location/`)
 
 - Manifest: `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION`, `ACCESS_BACKGROUND_LOCATION`,

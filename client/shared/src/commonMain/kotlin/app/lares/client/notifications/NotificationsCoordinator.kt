@@ -3,6 +3,7 @@ package app.lares.client.notifications
 import app.lares.client.auth.SessionManager
 import app.lares.client.auth.SessionState
 import app.lares.client.data.calendar.CalendarReminderPlanner
+import app.lares.client.data.location.SharingController
 import app.lares.client.data.tasks.TaskReminderPlanner
 import app.lares.client.platform.PreferencesStore
 import kotlinx.coroutines.CancellationException
@@ -29,7 +30,7 @@ class PreferredLanguage(
  * Ties notifications to the session (plan M0-09): after login (and at every app start while logged in) it schedules
  * periodic background sync, registers with UnifiedPush, uploads the push endpoint, loads mute settings and
  * re-registers reminders, and keeps task and calendar reminders in step with their data (M1-04, M3-04); on logout it
- * cancels background work, stops the reminder planners and unregisters.
+ * cancels background work, stops the reminder planners and location sharing on this phone, and unregisters.
  */
 class NotificationsCoordinator(
     private val sessionManager: SessionManager,
@@ -42,6 +43,7 @@ class NotificationsCoordinator(
     private val taskReminders: TaskReminderPlanner,
     private val calendarReminders: CalendarReminderPlanner,
     private val scope: CoroutineScope,
+    private val sharingController: SharingController? = null,
 ) {
     private var taskRemindersJob: Job? = null
     private var calendarRemindersJob: Job? = null
@@ -91,5 +93,7 @@ class NotificationsCoordinator(
         calendarRemindersJob = null
         backgroundSync.cancelAll()
         distributors.unregister()
+        // Stops the tracking service; the server marks the member SIGNED_OUT with the session end (LOC-012).
+        sharingController?.let { scope.launch { it.disable() } }
     }
 }

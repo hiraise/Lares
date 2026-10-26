@@ -1,5 +1,7 @@
 package app.lares.client.sync
 
+import app.lares.client.data.location.PlaceAdapter
+import app.lares.client.data.location.PlaceAlertAdapter
 import app.lares.client.db.LaresDb
 import app.lares.contract.Ids
 import app.lares.contract.api.ErrorCode
@@ -59,7 +61,7 @@ import app.lares.client.db.Task_completion as TaskCompletionRow
 
 // Typed-table adapters of all entity types and the row ↔ data class mapping shared with the repositories.
 
-private val stringList = ListSerializer(String.serializer())
+internal val stringList = ListSerializer(String.serializer())
 private val contactList = ListSerializer(ContactData.serializer())
 
 internal fun Boolean.toDb(): Long = if (this) 1L else 0L
@@ -335,7 +337,7 @@ private fun <T : Any> EntityAdapter<T>.changedFields(
     return (a.keys + b.keys).filterTo(mutableSetOf()) { a[it] != b[it] }
 }
 
-private fun forbidden(
+internal fun forbidden(
     op: MutationOp,
     what: String,
 ): Nothing = throw LocalForbiddenException("Not allowed to ${op.name.lowercase()} this $what")
@@ -756,10 +758,10 @@ private fun requireParentEvent(
         .executeAsOneOrNull()
         ?.toData() ?: throw LocalWriteException(ErrorCode.ENTITY_NOT_FOUND, message = "Event not found")
 
-private fun invalid(field: String): Nothing = throw LocalValidationException(mapOf(field to FieldErrorCode.INVALID_FORMAT))
+internal fun invalid(field: String): Nothing = throw LocalValidationException(mapOf(field to FieldErrorCode.INVALID_FORMAT))
 
 /** A child row's id must be the one derived from its parent (ADR-0022, ADR-0023), else `id: INVALID_FORMAT`. */
-private fun requireDerivedId(
+internal fun requireDerivedId(
     id: String,
     expected: () -> String,
 ) {
@@ -1007,5 +1009,7 @@ fun defaultEntityAdapters(clock: Clock) =
             EventAdapter(),
             EventOccurrenceAdapter(),
             EventReminderAdapter(),
+            PlaceAdapter(),
+            PlaceAlertAdapter(),
         ),
     )

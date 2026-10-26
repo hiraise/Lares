@@ -8,15 +8,17 @@
   tools/dev/seed.py tasks                  # sample tasks and routines (after family; skips if already seeded)
   tools/dev/seed.py shopping               # sample shopping lists (after family; skips if already seeded)
   tools/dev/seed.py calendar               # relatives with birthdays, sample events, memorable date (after family)
+  tools/dev/seed.py location               # places Дом, Школа №12; sharing and positions of Дмитрий, Аня, Тимур (after family)
+  tools/dev/seed.py move NAME LAT LON      # one position now for a seeded member (Аня, Тимур, Дмитрий)
   tools/dev/seed.py tick NAME [--as LOGIN] # mark the first item named NAME bought by that member (default olga)
-  tools/dev/seed.py call METHOD PATH [JSON] [--as LOGIN]
+  tools/dev/seed.py call METHOD PATH [JSON] [--as NAME]  # NAME: olga, or a seeded member (stored session after location)
 
 Test family "Петровы" (setup code DEVSETUP01):
   Ольга Петрова  olga / olga-password  administrator (built-in group)
   Дмитрий Петров dima / dima-password  Взрослые
   Аня, Тимур     no login              Дети
 A payload is a deep link; open it on the emulator with: tools/dev/emu.sh link '<payload>'.
-State (member ids) is kept in build/dev/seed.json. Env: LARES_PORT (default 8080).
+State (member ids, Ольга's id, the seeded sessions) is kept in build/dev/seed.json. Env: LARES_PORT (default 8080).
 """
 import datetime
 import json
@@ -32,6 +34,24 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 STATE = os.path.join(ROOT, "build", "dev", "seed.json")
 BASE = f"http://localhost:{os.environ.get('LARES_PORT', '8080')}/api/v1"
 DEVICE = {"name": "seed script", "platform": "cli"}
+
+
+def raw_call(method, path, body=None, token=None):
+    """(status, decoded body) without exiting on HTTP errors."""
+    data = json.dumps(body).encode() if body is not None else None
+    req = urllib.request.Request(BASE + path, method=method, data=data)
+    req.add_header("Content-Type", "application/json")
+    req.add_header("X-Lares-Protocol", "1")
+    if token:
+        req.add_header("Authorization", "Bearer " + token)
+    try:
+        with urllib.request.urlopen(req) as r:
+            text = r.read().decode()
+            return r.status, (json.loads(text) if text else None)
+    except urllib.error.HTTPError as e:
+        return e.code, e.read().decode()[:500]
+    except urllib.error.URLError as e:
+        sys.exit(f"server not reachable at {BASE} ({e.reason}); run tools/dev/server.sh start")
 
 
 def call(method, path, body=None, token=None):
@@ -454,6 +474,136 @@ def calendar():
     print(f"Танцы: {next_wednesday} cancelled, {moved_monday} moved to 18:00–19:15")
 
 
+# Location (plan M4-06). Seeded members share from "seed script" sessions kept in seed.json, so uploads and
+# OFF_ON_PHONE come from the session that set SHARING. Access tokens live 1 h; session() refreshes them on 401.
+
+HOME = (55.7963, 37.5378)
+SCHOOL = (55.8001, 37.5329)
+LOGINS = {"dima": "Дмитрий Петров", "olga": "Ольга Петрова"}
+
+
+def seeded_name(name):
+    """The full name of a seeded member for NAME (full name, first name or login), else None."""
+    name = LOGINS.get(name, name)
+    for full in load_state().get("members", {}):
+        if full == name or full.split()[0] == name:
+            return full
+    return None
+
+
+def store_session(name, auth):
+    state = load_state()
+    state.setdefault("sessions", {})[name] = {"accessToken": auth["accessToken"], "refreshToken": auth["refreshToken"]}
+    save_state(state)
+
+
+def session_call(name, method, path, body=None):
+    """A call as the stored session of seeded member NAME; refreshes the token pair once on 401."""
+    stored = load_state().get("sessions", {}).get(name)
+    if not stored:
+        sys.exit(f"no stored session for {name}; run: seed.py location")
+    status, resp = raw_call(method, path, body, stored["accessToken"])
+    if status == 401:
+        st, auth = raw_call("POST", "/auth/refresh", {"refreshToken": stored["refreshToken"]})
+        if st != 200:
+            sys.exit(f"session of {name} ended (HTTP {st}); run: tools/dev/server.sh reset && seed.py family && seed.py location")
+        store_session(name, auth)
+        status, resp = raw_call(method, path, body, auth["accessToken"])
+    if status >= 400:
+        sys.exit(f"HTTP {status} {method} {path} as {name}: {resp}")
+    return resp
+
+
+def fix(at, lat, lon, accuracy=15.0, speed=None, battery=None):
+    f = {"recordedAt": instant(at), "latitude": round(lat, 6), "longitude": round(lon, 6), "accuracyM": accuracy}
+    if speed is not None:
+        f["speedMps"] = speed
+    if battery is not None:
+        f.update(battery=battery, charging=False)
+    return f
+
+
+def stay(start, end, where, battery, step_min=10):
+    """Fixes every STEP_MIN minutes at WHERE (with a few metres of jitter) from START to END."""
+    out, t, i = [], start, 0
+    while t <= end:
+        jitter = ((i * 7) % 5 - 2) * 0.00003
+        out.append(fix(t, where[0] + jitter, where[1] - jitter, battery=battery))
+        t += datetime.timedelta(minutes=step_min)
+        i += 1
+    return out
+
+
+def walk(start, end, a, b, battery):
+    """One fix a minute along the straight line from A to B."""
+    minutes = int((end - start).total_seconds() // 60)
+    return [
+        fix(start + datetime.timedelta(minutes=i), a[0] + (b[0] - a[0]) * i / minutes, a[1] + (b[1] - a[1]) * i / minutes, 10.0, 1.4, battery)
+        for i in range(1, minutes)
+    ]
+
+
+def location():
+    state = load_state()
+    if not state.get("members"):
+        sys.exit("no test family; run: seed.py family")
+    if state.get("location"):
+        print("location already seeded; move a member with: seed.py move Аня 55.79 37.53")
+        return
+    token = login()
+    olga = call("GET", "/me", token=token)["memberId"]
+    places = {c["data"]["name"]: c["id"] for c in all_changes(token) if c["type"] == "place"}
+    mutations = []
+    for name, (lat, lon), radius, icon in [("Дом", HOME, 120, "home"), ("Школа №12", SCHOOL, 150, "school")]:
+        if name not in places:
+            places[name] = uuid7()
+            mutations.append(("place", places[name], {"name": name, "icon": icon, "latitude": lat, "longitude": lon, "radiusM": radius, "createdBy": olga}))
+    if mutations:
+        push(token, mutations)
+
+    # Sessions: Дмитрий by password, the kids by a one-time login code (device "seed script").
+    store_session("Дмитрий Петров", call("POST", "/auth/login", {"login": "dima", "password": "dima-password", "device": DEVICE}))
+    for kid in ("Аня", "Тимур"):
+        code = call("POST", "/login-codes", {"memberId": state["members"][kid]}, token)["code"]
+        store_session(kid, call("POST", "/auth/login-code", {"code": code, "device": DEVICE}))
+
+    now = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0)
+
+    def ago(hours=0, minutes=0):
+        return now - datetime.timedelta(hours=hours, minutes=minutes)
+
+    anya = (
+        stay(ago(9), ago(7, 50), HOME, 82)
+        + walk(ago(7, 50), ago(7, 35), HOME, SCHOOL, 80)
+        + stay(ago(7, 35), ago(1, 20), SCHOOL, 68)
+        + walk(ago(1, 20), ago(1), SCHOOL, HOME, 57)
+        + stay(ago(1), ago(0, 2), HOME, 55)
+        + [fix(ago(0, 1), HOME[0], HOME[1], battery=55)]
+    )
+    timur = stay(ago(0, 40), ago(0, 10), HOME, 12) + [fix(ago(0, 1), HOME[0] + 0.00002, HOME[1], battery=12)]
+    dima = [fix(ago(0, 1), HOME[0] + 0.018, HOME[1], accuracy=20.0, battery=64)]
+    for name, fixes in [("Аня", anya), ("Тимур", timur), ("Дмитрий Петров", dima)]:
+        session_call(name, "PUT", "/location/me/sharing", {"status": "sharing"})
+        accepted = 0
+        for i in range(0, len(fixes), 200):
+            accepted += session_call(name, "POST", "/location/positions", {"positions": fixes[i : i + 200]})["accepted"]
+        print(f"{name}: sharing, {accepted} positions")
+    state = load_state()
+    state["olga_id"] = olga
+    state["location"] = places
+    save_state(state)
+    print("places:", ", ".join(places), f"; Ольга ({olga}) shares from the emulator")
+
+
+def move(name, lat, lon):
+    full = seeded_name(name)
+    if full is None or full == "Ольга Петрова":
+        sys.exit("move works for seeded members (Аня, Тимур, Дмитрий); Ольга's position comes from the emulator: emu.sh geo")
+    now = datetime.datetime.now(datetime.timezone.utc)
+    r = session_call(full, "POST", "/location/positions", {"positions": [fix(now, lat, lon, accuracy=10.0)]})
+    print(f"{full}: accepted {r['accepted']}, sharingHere {r['sharingHere']}")
+
+
 def main(argv):
     if not argv or argv[0] in ("-h", "--help"):
         print(__doc__)
@@ -467,6 +617,12 @@ def main(argv):
         shopping()
     elif cmd == "calendar":
         calendar()
+    elif cmd == "location":
+        location()
+    elif cmd == "move":
+        if len(args) != 3:
+            sys.exit("usage: seed.py move NAME LAT LON")
+        move(args[0], float(args[1]), float(args[2]))
     elif cmd == "tick":
         as_login = "olga"
         if "--as" in args:
@@ -494,7 +650,12 @@ def main(argv):
             as_login = args[i + 1]
             args = args[:i] + args[i + 2 :]
         body = json.loads(args[2]) if len(args) > 2 else None
-        print(json.dumps(call(args[0].upper(), args[1], body, login(as_login)), ensure_ascii=False, indent=1))
+        full = seeded_name(as_login)
+        if full and full != "Ольга Петрова" and full in load_state().get("sessions", {}):
+            result = session_call(full, args[0].upper(), args[1], body)
+        else:
+            result = call(args[0].upper(), args[1], body, login(as_login))
+        print(json.dumps(result, ensure_ascii=False, indent=1))
     else:
         sys.exit(f"unknown command {cmd!r}\n{__doc__}")
 

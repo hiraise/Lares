@@ -989,4 +989,34 @@
     <string name="notif_birthday_week">A week before</string>
     <string name="notif_birthday_two_weeks">2 weeks before</string>
     <string name="event_deleted">Event deleted</string>
+    <!-- Location status lines (LOC-003, LOC-010, LOC-012…LOC-014) -->
+    <string name="loc_status_not_sharing">Not sharing location</string>
+    <string name="loc_status_paused">Paused</string>
+    <string name="loc_status_paused_until">Paused until %1$s</string>
+    <string name="loc_status_off_location_disabled">Location is off on the phone</string>
+    <string name="loc_status_off_permission_revoked">No location access</string>
+    <string name="loc_status_off_stopped">Sharing stopped</string>
+    <string name="loc_status_off_signed_out">Signed out of the app</string>
+    <string name="loc_status_last_place">last seen %1$s</string>
+    <string name="loc_status_no_data">No data</string>
+    <string name="loc_status_no_data_since">No data %1$s</string>
+    <string name="loc_status_at_home">At home</string>
+    <string name="loc_status_since">since %1$s</string>
+    <string name="loc_status_since_yesterday">since yesterday %1$s</string>
+    <string name="loc_status_moving">On the way</string>
+    <string name="loc_status_no_address">No address</string>
+    <string name="loc_status_from_home">%1$s from home</string>
+    <string name="loc_status_from_place">%1$s from %2$s</string>
+    <string name="loc_status_meters">%1$s m</string>
+    <string name="loc_status_kilometers">%1$s km</string>
+    <string name="loc_status_decimal_separator">.</string>
+    <string name="loc_status_now">now</string>
+    <plurals name="loc_status_minutes_ago">
+        <item quantity="one">%1$d min ago</item>
+        <item quantity="other">%1$d min ago</item>
+    </plurals>
+    <string name="loc_status_at">at %1$s</string>
+    <string name="loc_status_yesterday_at">yesterday at %1$s</string>
+    <string name="loc_status_date_at">%1$s at %2$s</string>
+    <string name="loc_sharing_moved">Another phone now shares your location</string>
 </resources>

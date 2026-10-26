@@ -1,0 +1,21 @@
+-- This phone's location state (architecture/location.md § Sharing on this phone): `enabled`, `paused_until`,
+-- `paused_forever`, `pending`, `last_upload_ok`, `last_fix_at`, `reported_off`, and the cached `config`.
+CREATE TABLE location_pref (
+    key TEXT NOT NULL PRIMARY KEY,
+    value TEXT NOT NULL
+);
+
+all:
+SELECT * FROM location_pref;
+
+get:
+SELECT value FROM location_pref WHERE key = ?;
+
+put:
+INSERT OR REPLACE INTO location_pref (key, value) VALUES (?, ?);
+
+remove:
+DELETE FROM location_pref WHERE key = ?;
+
+deleteAll:
+DELETE FROM location_pref;

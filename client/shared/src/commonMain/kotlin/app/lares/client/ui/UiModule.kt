@@ -1,6 +1,7 @@
 package app.lares.client.ui
 
 import app.lares.client.data.calendar.CalendarReminderTexts
+import app.lares.client.data.location.LocationTextResources
 import app.lares.client.data.tasks.TaskReminderTexts
 import app.lares.client.di.AppScope
 import app.lares.client.notifications.notificationsModule
@@ -14,6 +15,7 @@ import app.lares.client.ui.calendar.CalendarViewModel
 import app.lares.client.ui.calendar.EventEditorViewModel
 import app.lares.client.ui.calendar.EventViewModel
 import app.lares.client.ui.common.CalendarReminderResourceTexts
+import app.lares.client.ui.common.LocationResourceTexts
 import app.lares.client.ui.common.TaskReminderResourceTexts
 import app.lares.client.ui.common.UiNotices
 import app.lares.client.ui.family.AddMemberViewModel
@@ -65,6 +67,7 @@ fun uiModule(): Module =
         // Replaces the core's English fallback.
         single<TaskReminderTexts> { TaskReminderResourceTexts(getOrNull<Clock>() ?: Clock.System) }
         single<CalendarReminderTexts> { CalendarReminderResourceTexts() }
+        single<LocationTextResources> { LocationResourceTexts() }
         single { AppStartup(get(), get(AppScope)) }
         single { AppearanceSettings(get(), get(), get(AppScope)) }
         viewModel { ServerViewModel(get()) }

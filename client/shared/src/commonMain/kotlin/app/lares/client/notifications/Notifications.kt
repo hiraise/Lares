@@ -4,6 +4,7 @@ import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOneOrNull
 import app.lares.client.api.LaresApi
+import app.lares.client.data.location.SharingController
 import app.lares.client.db.LocalDb
 import app.lares.contract.api.LaresJson
 import app.lares.contract.api.notifications.NotificationSettings
@@ -158,12 +159,14 @@ class PushEndpoints(
 
 /**
  * Handles a decrypted push message (plan M0-09): `sync` → background sync; `notification` → shown on its type's
- * channel unless muted. Unknown kinds and types (from a newer server) are ignored.
+ * channel unless muted; `location_refresh` → «Обновить» for this phone's sharing (M4-06). Unknown kinds and types
+ * (from a newer server) are ignored.
  */
 class PushMessageHandler(
     private val poster: NotificationPoster,
     private val backgroundSync: BackgroundSync,
     private val settings: NotificationSettingsRepository,
+    private val sharing: SharingController? = null,
 ) {
     suspend fun handle(content: ByteArray) {
         val payload =
@@ -186,6 +189,10 @@ class PushMessageHandler(
                 val id = payload.entityId?.let { "${type.key}:$it" } ?: type.key
                 val target = payload.entityType?.let { type -> payload.entityId?.let { NotificationTarget(type, it) } }
                 poster.show(id, type.channel, title, payload.body.orEmpty(), target)
+            }
+
+            PushPayload.KIND_LOCATION_REFRESH -> {
+                sharing?.onRefreshRequest()
             }
         }
     }

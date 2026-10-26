@@ -1,0 +1,33 @@
+-- Fixes recorded on this phone and not yet uploaded (LOC-027): `json` is a `PositionFix`, `recorded_at` its time in epoch
+-- milliseconds (ISO texts with and without fractions do not sort). Kept up to 24 h / 5 000 rows.
+CREATE TABLE position_outbox (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    recorded_at INTEGER NOT NULL,
+    json TEXT NOT NULL
+);
+
+CREATE INDEX position_outbox_recorded ON position_outbox (recorded_at);
+
+insert:
+INSERT INTO position_outbox (recorded_at, json) VALUES (?, ?);
+
+oldest:
+SELECT * FROM position_outbox ORDER BY recorded_at, id LIMIT :limit;
+
+count:
+SELECT count(*) FROM position_outbox;
+
+oldestRecordedAt:
+SELECT min(recorded_at) AS oldest FROM position_outbox;
+
+deleteById:
+DELETE FROM position_outbox WHERE id = ?;
+
+deleteBefore:
+DELETE FROM position_outbox WHERE recorded_at < ?;
+
+deleteOldestBeyond:
+DELETE FROM position_outbox WHERE id IN (SELECT id FROM position_outbox ORDER BY recorded_at DESC, id DESC LIMIT -1 OFFSET :keep);
+
+deleteAll:
+DELETE FROM position_outbox;
