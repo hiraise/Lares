@@ -228,7 +228,14 @@ class TodayViewModelTest {
             assertTrue(
                 CalendarUiFixture.E_ANNIV in events && CalendarUiFixture.E_DENTIST in events && CalendarUiFixture.E_HOLIDAY in events,
             )
-            assertTrue(upcoming.more >= 1, "the moved dance in a week is left out")
+            // Today's dance (17:30–18:45 Moscow) drops out once it is over, so the row count depends on the time of day:
+            // the moved dance in a week is either the last row shown or counted in «Ещё N».
+            val danceInWeek =
+                upcoming.items.any {
+                    it.date == CalendarUiFixture.week &&
+                        (it.item as? CalendarItem.Event)?.occ?.eventId == CalendarUiFixture.E_DANCE
+                }
+            assertTrue(danceInWeek || upcoming.more >= 1, "the moved dance in a week is shown or counted")
             assertTrue("Carol" in upcoming.allNames)
         }
     }
