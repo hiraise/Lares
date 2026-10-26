@@ -8,14 +8,14 @@ Updated: 2026-10-26
 M1 Tasks — all plans M1-01…M1-07 done; M1 acceptance with the customer next.
 M2 Shopping lists — all plans M2-01…M2-06 done; M2 acceptance with the customer next.
 M3 Calendar — all plans M3-01…M3-08 done, released as v0.4.0; M3 acceptance with the customer next.
-M4 Location — M4-01…M4-08 done (server side complete and load-tested; client core; Android sharing service; Map screen); next M4-09 (history and places).**
+M4 Location — M4-01…M4-09 done (server side complete and load-tested; client core; Android sharing service; Map screen; history and places); next M4-10 (alerts, rules, Today, person page, manual).**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
 
 [M4 Location](product/roadmap.md#m4-location): planned — [location spec](product/features/location.md) (approved,
 Q-025…Q-029 answered), [location design](architecture/location.md), [M4 plans](plans/README.md#m4-plans). Done: M4-01…
-M4-08. Next: M4-09 (history and places).
+M4-09. Next: M4-10 (alerts, rules, Today, person page, manual).
 Acceptance of M0–M3 is still pending.
 
 **Active release branch: `release/0.5.0`** (M4). `release/0.4.1` was not needed: the customer found no bugs in v0.4.0. Commit approved work here; `main` is protected
@@ -24,6 +24,11 @@ Acceptance of M0–M3 is still pending.
 
 ## Last completed
 
+- 2026-10-26 M4-09 History and places: «История» on a member's card (day strip of the kept days, the track and stops
+  on the map, «Школа №12 · 8:25–14:40», «Дома · с 15:15», addresses for other stops); «Места» with who is where, the
+  place sheet (address, edit, delete), the place editor (long press on the map, «Я здесь», address search, icon,
+  radius 50–1000 m; offline save); read-only for kids. 24 new tests; emulator walkthrough of all scenarios (one layout
+  fix).
 - 2026-10-26 M4-08 Map screen: More › Карта with the OpenStreetMap map (light / dark), places, pins in personal colors
   (grey when paused, off or stale), the family sheet with the own sharing row and the others (place or address, age,
   battery), the member card with «Обновить», «Места», «Показать всех» / «Моё местоположение», «Нет связи». 18 new
@@ -166,7 +171,7 @@ Acceptance of M0–M3 is still pending.
 1. M0 and M1 acceptance with the customer (APK v0.2.0, walkthrough on real phones, Russian changelog; checklist in the M1-07
    handoff).
 2. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
-3. M4-09 (history and places) and the rest of M4 on `release/0.5.0`, in order; real-phone battery checks (Xiaomi / Samsung)
+3. M4-10 (alerts, rules, Today, person page, manual) and the M4 wrap-up on `release/0.5.0`, in order; real-phone battery checks (Xiaomi / Samsung)
    in the M4 acceptance.
 4. After the M1 acceptance: set the tasks spec to `implemented`.
 5. M2 acceptance with the customer (checklist in the M2-06 handoff); after it set the shopping spec to `implemented`.

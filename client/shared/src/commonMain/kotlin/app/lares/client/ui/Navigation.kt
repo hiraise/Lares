@@ -29,9 +29,13 @@ import app.lares.client.ui.family.GroupEditorRoute
 import app.lares.client.ui.family.MemberDetailRoute
 import app.lares.client.ui.family.PersonRoute
 import app.lares.client.ui.family.TagRoute
+import app.lares.client.ui.location.HistoryArgs
+import app.lares.client.ui.location.HistoryRoute
 import app.lares.client.ui.location.LocationSettingsRoute
 import app.lares.client.ui.location.MapArgs
 import app.lares.client.ui.location.MapRoute
+import app.lares.client.ui.location.PlaceEditorArgs
+import app.lares.client.ui.location.PlaceEditorRoute
 import app.lares.client.ui.main.MainNavigation
 import app.lares.client.ui.main.MainScaffoldRoute
 import app.lares.client.ui.main.SectionPlaceholderPage
@@ -124,6 +128,21 @@ data object LocationSettingsDestination
 data class MapDestination(
     val memberId: String? = null,
     val placeId: String? = null,
+)
+
+/** A member's day on the map (M4-09); [date] is an ISO date, null = today. */
+@Serializable
+data class LocationHistoryDestination(
+    val memberId: String,
+    val date: String? = null,
+)
+
+/** The place editor (M4-09): an existing place, or a new one at [lat], [lon]. */
+@Serializable
+data class PlaceEditorDestination(
+    val id: String? = null,
+    val lat: Double? = null,
+    val lon: Double? = null,
 )
 
 @Serializable
@@ -395,14 +414,32 @@ fun MainNavHost() {
         composable<SectionPageDestination> { entry ->
             val section = entry.toRoute<SectionPageDestination>().section
             if (section == Section.MAP) {
-                MapRoute(MapArgs(), onBack = { navController.popBackStack() })
+                MapRoute(
+                    MapArgs(),
+                    onBack = { navController.popBackStack() },
+                    onHistory = { navController.navigate(LocationHistoryDestination(it)) },
+                    onPlaceEditor = { navController.navigate(PlaceEditorDestination(it.id, it.lat, it.lon)) },
+                )
             } else {
                 SectionPlaceholderPage(section, onBack = { navController.popBackStack() })
             }
         }
         composable<MapDestination> { entry ->
             val route = entry.toRoute<MapDestination>()
-            MapRoute(MapArgs(route.memberId, route.placeId), onBack = { navController.popBackStack() })
+            MapRoute(
+                MapArgs(route.memberId, route.placeId),
+                onBack = { navController.popBackStack() },
+                onHistory = { navController.navigate(LocationHistoryDestination(it)) },
+                onPlaceEditor = { navController.navigate(PlaceEditorDestination(it.id, it.lat, it.lon)) },
+            )
+        }
+        composable<LocationHistoryDestination> { entry ->
+            val route = entry.toRoute<LocationHistoryDestination>()
+            HistoryRoute(HistoryArgs(route.memberId, route.date?.let(LocalDate::parse)), onBack = { navController.popBackStack() })
+        }
+        composable<PlaceEditorDestination> { entry ->
+            val route = entry.toRoute<PlaceEditorDestination>()
+            PlaceEditorRoute(PlaceEditorArgs(route.id, route.lat, route.lon), onBack = { navController.popBackStack() })
         }
         composable<SettingsDestination> {
             SettingsRoute(

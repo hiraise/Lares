@@ -1133,4 +1133,40 @@
     <string name="map_history">История</string>
     <string name="map_nobody">Пока никого нет</string>
     <string name="map_tile_subtitle">Где сейчас семья</string>
+    <!-- History and places (M4-09) -->
+    <string name="loc_history_title">%1$s · История</string>
+    <string name="loc_history_range">%1$s–%2$s</string>
+    <string name="loc_history_empty">Нет данных за этот день</string>
+    <string name="loc_history_offline">История доступна, когда есть связь</string>
+    <string name="loc_history_denied">Нет доступа к истории</string>
+    <string name="place_editor_new">Новое место</string>
+    <string name="place_editor_edit">Изменить место</string>
+    <string name="place_editor_read_only">Места меняют только те, кому это разрешено.</string>
+    <string name="place_field_name">Название</string>
+    <string name="place_field_icon">Значок</string>
+    <string name="place_icon_home">Дом</string>
+    <string name="place_icon_school">Школа</string>
+    <string name="place_icon_work">Работа</string>
+    <string name="place_icon_sport">Спорт</string>
+    <string name="place_icon_shop">Магазин</string>
+    <string name="place_icon_place">Место</string>
+    <string name="place_map_hint">Нажмите на карту, чтобы перенести центр</string>
+    <string name="place_here">Я здесь</string>
+    <string name="place_radius">Радиус</string>
+    <string name="place_address">Адрес</string>
+    <string name="place_search">Найти</string>
+    <string name="place_search_none">Ничего не найдено</string>
+    <string name="place_delete">Удалить место</string>
+    <string name="place_delete_title">Удалить место «%1$s»?</string>
+    <string name="place_delete_text">Подписки на него перестанут работать.</string>
+    <string name="place_discard_text">Изменения в месте не сохранятся.</string>
+    <string name="place_edit">Изменить</string>
+    <string name="places_add">Добавить место</string>
+    <string name="places_nobody">Никого</string>
+    <plurals name="places_here">
+        <item quantity="one">%1$s здесь</item>
+        <item quantity="few">%1$s здесь</item>
+        <item quantity="many">%1$s здесь</item>
+        <item quantity="other">%1$s здесь</item>
+    </plurals>
 </resources>

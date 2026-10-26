@@ -67,6 +67,14 @@ sealed interface CameraKind {
         val lon: Double,
         val zoom: Double,
     ) : CameraKind
+
+    /** Fit a box (a day's track) with 48 dp padding. */
+    data class Bounds(
+        val south: Double,
+        val west: Double,
+        val north: Double,
+        val east: Double,
+    ) : CameraKind
 }
 
 /** A camera move; a new [serial] repeats the same move (the button pressed twice). */
@@ -81,7 +89,7 @@ const val MEMBER_ZOOM = 16.0
 
 /**
  * The family map. [contentPadding] is the part of the map covered by other UI (the sheet, the top row): camera moves
- * keep their targets out of it.
+ * keep their targets out of it. [onCenterChange] reports the camera centre after moves (a new place starts there).
  */
 @Composable
 expect fun FamilyMapView(
@@ -93,4 +101,5 @@ expect fun FamilyMapView(
     onMapLongClick: (Double, Double) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
+    onCenterChange: (Double, Double) -> Unit = { _, _ -> },
 )

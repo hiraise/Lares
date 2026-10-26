@@ -124,14 +124,16 @@ GPS trackers come later. Technical design: [architecture/location.md](../../arch
 
 ### History
 
-- **LOC-004** `MVP` `todo` — Movement history per member and day: the track on the map and the list of stops under it
+- **LOC-004** `MVP` `done` — Movement history per member and day: the track on the map and the list of stops under it
   («Школа №12 08:25–14:40», addresses for stops outside places); a tap on a stop shows it on the map. Days are picked
   from a strip of the retained days. ASSUMPTION: a stop is a stay of at least 10 minutes within about 100 m.
   *Server: `GET /location/history` by household-local day, thinned to 3 000 points (M4-03).*
   *Client core: day history with stops (M4-06).*
+  *UI: «История» on the member card; day strip of the retained days, the track and stops on the map, the stop list with places, addresses or «Без адреса», «с 16:50» while ongoing; a tap centres a stop (M4-09).*
 - **LOC-005** `MVP` `todo` — History is deleted after the retention period: 30 days by default; an administrator chooses
   7, 14, 30, 60 or 90 days (Family › Геопозиция). A shorter period deletes older positions within an hour.
   *Server: setting stored and synced (M4-02); hourly purge, member removal deletes positions (M4-03).*
+  *UI: the history's day strip follows the period from the server (M4-09); the administrator's choice comes with M4-10.*
 
 ### Who sees whom
 
@@ -146,12 +148,13 @@ GPS trackers come later. Technical design: [architecture/location.md](../../arch
 
 ### Places and notifications
 
-- **LOC-020** `MVP` `todo` — Places: a named circle (centre + radius 50–1000 m, 100 m by default) with an icon, e.g.
+- **LOC-020** `MVP` `done` — Places: a named circle (centre + radius 50–1000 m, 100 m by default) with an icon, e.g.
   «Дом», «Школа №12». Created by a tap on the map, «Я здесь» or a search by address (LOC-024); shown on the map as
   labelled circles and in the list behind «Места»; a tap on a place shows it and who is there. Created, changed and deleted by
   members with `location.manage_places`; seen by everybody with `location.view`.
   *Server: storage, sync, validation and permissions done (M4-02).*
   *Client core: places sync and are created, changed and deleted offline with the same rules (M4-06).*
+  *UI: «Места» list with who is there, the place sheet (address, who is here, edit / delete), the editor (name, icon, map tap, long press on the Map, «Я здесь», radius 50–1000 m in steps of 10); read-only without `location.manage_places` (M4-09).*
 - **LOC-021** `MVP` `todo` — Arrive / leave notifications (Q-028): everybody who sees a member turns on for themselves
   «Сообщать: прибытие и уход» for chosen places (on the member's card or on the place). Nothing is on by default.
   Texts: «Аня · Школа №12 — Прибытие в 08:52», «… — Уход в 14:20» (no gendered verbs: the app does not know genders).
@@ -164,9 +167,10 @@ GPS trackers come later. Technical design: [architecture/location.md](../../arch
   larger) does not decide anything; leaving needs a position clearly outside the circle, so a person sitting at the edge does not flicker in and
   out.
   *Server: presence per member and place with the hysteresis above, from uploaded positions (M4-04).*
-- **LOC-024** `MVP` `todo` — Address search in the place editor (Q-029): type an address, press search, pick a result;
+- **LOC-024** `MVP` `done` — Address search in the place editor (Q-029): type an address, press search, pick a result;
   the map moves there.
   *Server: `GET /location/search`, 5 results with the city (M4-04).*
+  *UI: «Адрес» field with «Найти» (or the keyboard's search key) in the place editor, up to 5 results, a pick moves the centre and keeps the address; hidden when the server has no address service (M4-09).*
 - **LOC-023** `later` `todo` — Schedule-aware alerts ("not at school by 8:30 on a weekday").
 
 ### Everywhere

@@ -11,13 +11,17 @@ import app.lares.client.data.location.LocationTexts
 import app.lares.client.data.location.MapState
 import app.lares.client.data.location.MemberOnMap
 import app.lares.client.data.location.Place
+import app.lares.client.data.location.PlacesWriter
 import app.lares.client.data.observeViewer
 import app.lares.client.data.tasks.householdZone
 import app.lares.client.db.LocalDb
 import app.lares.client.ui.common.UiError
+import app.lares.client.ui.common.attempt
 import app.lares.client.ui.common.toUiError
 import app.lares.contract.api.ErrorCode
 import app.lares.contract.api.location.LocationConfig
+import app.lares.contract.api.location.VisibilityLevel
+import app.lares.contract.permissions.PlaceRules
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -66,6 +70,8 @@ data class MemberCard(
     val accuracyM: Int?,
     val canRefresh: Boolean,
     val refresh: RefreshUi?,
+    /** «История»: the viewer sees this member with history (LOC-004). */
+    val canHistory: Boolean = false,
 )
 
 data class MapUiState(
@@ -80,6 +86,10 @@ data class MapUiState(
     val card: MemberCard? = null,
     val camera: MapCameraRequest? = null,
     val placesOpen: Boolean = false,
+    /** The open place sheet. */
+    val place: Place? = null,
+    /** `location.manage_places`: «Добавить место», long press, edit and delete. */
+    val canManagePlaces: Boolean = false,
 ) {
     val offline: Boolean get() = connection == Connection.OFFLINE
 
@@ -92,6 +102,7 @@ private data class Local(
     val camera: MapCameraRequest? = null,
     val initialDone: Boolean = false,
     val placesOpen: Boolean = false,
+    val placeId: String? = null,
     val refresh: RefreshUi? = null,
     val config: LocationConfig? = null,
 )
@@ -107,6 +118,7 @@ class MapViewModel(
     household: HouseholdRepository,
     localDb: LocalDb,
     permissions: PermissionsRepository,
+    private val placesWriter: PlacesWriter,
     private val clock: Clock,
     private val args: MapArgs = MapArgs(),
     private val refreshTimeout: Duration = REFRESH_TIMEOUT,
@@ -126,19 +138,21 @@ class MapViewModel(
             .observe()
             .map { householdZone(it?.data?.timeZone) }
             .distinctUntilChanged()
-    private val me =
-        observeViewer(localDb, permissions)
-            .map { it?.memberId }
-            .distinctUntilChanged()
+    private val viewer = observeViewer(localDb, permissions)
+    private val me = viewer.map { it?.memberId }.distinctUntilChanged()
+    private val canManage = viewer.map { it != null && PlaceRules.canManage(it) }.distinctUntilChanged()
+
+    /** The camera centre the map last reported: «Добавить место» from the list starts there. */
+    private var center: Pair<Double, Double>? = null
 
     val state: StateFlow<MapUiState> =
         combine(
             location.observeNow().onEach(::onMapState),
-            me,
+            combine(me, canManage, ::Pair),
             zone,
             addresses,
             local,
-        ) { map, me, zone, addresses, local ->
+        ) { map, (me, canManage), zone, addresses, local ->
             val now = clock.now()
             val rows =
                 MapLogic.rows(map.members, me).map { member ->
@@ -156,6 +170,7 @@ class MapViewModel(
                         accuracyM = member.last?.accuracyM?.let { kotlin.math.round(it).toInt() },
                         canRefresh = MapLogic.canRefresh(member, me),
                         refresh = local.refresh?.takeIf { it.memberId == member.memberId }?.let { done(it, member) },
+                        canHistory = member.level == VisibilityLevel.HISTORY,
                     )
                 }
             MapUiState(
@@ -169,6 +184,8 @@ class MapViewModel(
                 card = card,
                 camera = local.camera,
                 placesOpen = local.placesOpen,
+                place = local.placeId?.let { id -> map.places.firstOrNull { it.id == id } },
+                canManagePlaces = canManage,
             )
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), MapUiState())
 
@@ -195,7 +212,33 @@ class MapViewModel(
 
     fun closePlaces() = local.update { it.copy(placesOpen = false) }
 
-    fun showPlace(placeId: String) = local.update { it.copy(placesOpen = false, camera = request(CameraKind.Place(placeId))) }
+    /** A place row or a circle on the map: its sheet opens and the camera centres on it. */
+    fun openPlace(placeId: String) =
+        local.update { it.copy(placesOpen = false, placeId = placeId, selected = null, camera = request(CameraKind.Place(placeId))) }
+
+    fun closePlace() = local.update { it.copy(placeId = null) }
+
+    /** Deletes the place (after the confirmation in the sheet); works offline. */
+    fun deletePlace(placeId: String) {
+        local.update { it.copy(placeId = null) }
+        viewModelScope.launch { attempt { placesWriter.delete(placeId) } }
+    }
+
+    fun onCenter(
+        lat: Double,
+        lon: Double,
+    ) {
+        center = lat to lon
+    }
+
+    /** Where a new place from «Добавить место» starts: the map centre, else the viewer, else the first place. */
+    fun newPlaceCenter(): Pair<Double, Double>? {
+        center?.let { return it }
+        val map = latest ?: return null
+        val mine = map.members.firstOrNull { it.memberId == state.value.me }?.last
+        if (mine != null) return mine.latitude to mine.longitude
+        return map.places.firstOrNull()?.let { it.data.latitude to it.data.longitude }
+    }
 
     /** «Обновить»: asks the member's phone for a fresh fix; done when a newer one arrives, else after 90 s no answer. */
     fun refresh(memberId: String) {

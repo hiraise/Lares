@@ -1095,4 +1095,39 @@
     <string name="map_history">History</string>
     <string name="map_nobody">Nobody to show yet</string>
     <string name="map_tile_subtitle">Where the family is now</string>
+    <!-- History and places (M4-09) -->
+    <string name="loc_history_title">%1$s · History</string>
+    <!-- A stop's start and end times: "8:25–14:40" -->
+    <string name="loc_history_range">%1$s–%2$s</string>
+    <string name="loc_history_empty">No data for this day</string>
+    <string name="loc_history_offline">History is available when there is a connection</string>
+    <string name="loc_history_denied">No access to the history</string>
+    <string name="place_editor_new">New place</string>
+    <string name="place_editor_edit">Edit place</string>
+    <string name="place_editor_read_only">Only members who may manage places can change them.</string>
+    <string name="place_field_name">Name</string>
+    <string name="place_field_icon">Icon</string>
+    <string name="place_icon_home">Home</string>
+    <string name="place_icon_school">School</string>
+    <string name="place_icon_work">Work</string>
+    <string name="place_icon_sport">Sport</string>
+    <string name="place_icon_shop">Shop</string>
+    <string name="place_icon_place">Place</string>
+    <string name="place_map_hint">Tap the map to move the centre</string>
+    <string name="place_here">I'm here</string>
+    <string name="place_radius">Radius</string>
+    <string name="place_address">Address</string>
+    <string name="place_search">Find</string>
+    <string name="place_search_none">Nothing found</string>
+    <string name="place_delete">Delete place</string>
+    <string name="place_delete_title">Delete place «%1$s»?</string>
+    <string name="place_delete_text">Alerts for it will stop working.</string>
+    <string name="place_discard_text">Your changes to this place will be lost.</string>
+    <string name="place_edit">Edit</string>
+    <string name="places_add">Add place</string>
+    <string name="places_nobody">Nobody</string>
+    <plurals name="places_here">
+        <item quantity="one">%1$s is here</item>
+        <item quantity="other">%1$s are here</item>
+    </plurals>
 </resources>

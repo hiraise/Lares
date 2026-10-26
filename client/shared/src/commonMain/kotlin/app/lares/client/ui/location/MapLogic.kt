@@ -68,6 +68,12 @@ object MapLogic {
             )
         }
 
+    /** Names of the members whose current place is [placeId] (the place list and sheet), by name. */
+    fun whoIsHere(
+        placeId: String,
+        members: List<MemberOnMap>,
+    ): List<String> = members.filter { it.place?.id == placeId }.map { it.name }
+
     /** The sheet's member rows: everybody but the viewer (the sharing row stands for them), by name as given. */
     fun rows(
         members: List<MemberOnMap>,

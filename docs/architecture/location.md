@@ -755,6 +755,37 @@ interface LocationDevice {            // permissions and settings, Android imple
   armeabi-v7a, x86_64) and is stored uncompressed (about 17 MB compressed). ADR-0027's estimate of 10–15 MB holds per
   ABI only; per-ABI release APKs or compressed native libraries are a release-process decision (handoff).
 
+### Implementation notes (M4-09)
+
+- **Map seam:** `CameraKind.Bounds(south, west, north, east)` (fitted with 48 dp padding; the history's track) and an
+  optional `onCenterChange` on `FamilyMapView` (Android: the camera centre after each move, from
+  `MapState.cameraPosition`); «Добавить место» from the list starts at that centre, else at the viewer's position,
+  else at the first place. The JVM stand-in also lists stops (`map_<stopId>`) and the draft circle (`draft_place`).
+- **History** (`HistoryViewModel(location, members, places, household, clock, HistoryArgs(memberId, date?))`): the day
+  strip comes from `config().historyDays` (30 while unknown); a day outside it opens today. `HistoryLogic` (pure):
+  days, chip labels («Сегодня», «Вчера», «Пн, 19 окт.» — `UiText.Capitalized`, Russian short weekdays are lower
+  case), stop rows (HOME place → «Дома», other place → its name, else the address, else «Без адреса»; «8:25–14:40»
+  or «с 16:50»), camera (one spot → `Point` zoom 16). Addresses are asked once per stop outside places (ADR-0026).
+  `FORBIDDEN` / `NOT_FOUND` close the page with the notice «Нет доступа к истории» (shown by the main screen, like the
+  event page); an I/O failure shows «История доступна, когда есть связь»; tapping the day again retries. History is
+  never stored on the phone.
+- **Places on the Map:** `MapViewModel` takes `PlacesWriter`; a place circle or label, or a row of «Места», opens the
+  place sheet (`openPlace`, camera on the place); the sheet's delete goes through `PlacesWriter` (offline). A long
+  press opens the editor only when the viewer has `location.manage_places` (`MapUiState.canManagePlaces`). The card's
+  «История» shows for HISTORY level (`MemberCard.canHistory`). Who is here = members whose current place is the place
+  (`MapLogic.whoIsHere`), «Тимур, Аня здесь» (plural `places_here`) or «Никого».
+- **Editor** (`PlaceEditorViewModel(location, places, writer, localDb, permissions, PlaceEditorArgs(id?, lat?, lon?))`,
+  `PlaceForm` pure): the map stays fixed on top (no scroll conflict with the form); a tap (or long press) moves the
+  centre without moving the camera; «Я здесь», a search pick and opening move the camera (zoom 16). The address is set
+  only by a search result and cleared when the centre moves another way, so it never names another spot. Saving an
+  existing place applies only the fields this form changed over the stored row (`PlaceForm.applyTo`; the centre and the
+  address move together). «Я здесь» uses the viewer's newest fix from the map data (the cached snapshot offline).
+  Search: «Найти» is a text button in the field, also the keyboard's search key (`FormField` now passes `onSearch` to
+  `onDone`); results are cut to 5. Back with changes asks to discard.
+- Icons `work`, `fitness_center` added (`PlaceIcon.WORK`, `SPORT`).
+- Tests: `TestViewModels` (jvmTest) clears view models and waits for their coroutines before `resetMain()`; without it a
+  late `WhileSubscribed` timeout failed whichever UI test ran next.
+
 ### UI (M4-07…M4-10)
 
 - **Map** (`MapDestination(memberId?, placeId?)`, More › Карта; replaces `SectionPlaceholderPage` for `Section.MAP`):

@@ -57,8 +57,11 @@ class MapViewModelTest {
     @BeforeTest
     fun main() = Dispatchers.setMain(Dispatchers.Default)
 
+    private val vms = TestViewModels()
+
     @AfterTest
     fun close() {
+        vms.clear()
         f.close()
         Dispatchers.resetMain()
     }
@@ -109,15 +112,18 @@ class MapViewModelTest {
                 }
             }
         }
-        return MapViewModel(
-            f.repository(),
-            LocationTexts(EnglishLocationTexts()),
-            HouseholdRepository(f.localDb),
-            f.localDb,
-            f.permissions,
-            f.clock,
-            MapArgs(),
-            timeout,
+        return vms.keep(
+            MapViewModel(
+                f.repository(),
+                LocationTexts(EnglishLocationTexts()),
+                HouseholdRepository(f.localDb),
+                f.localDb,
+                f.permissions,
+                f.placesWriter,
+                f.clock,
+                MapArgs(),
+                timeout,
+            ),
         )
     }
 
@@ -207,5 +213,23 @@ class MapViewModelTest {
         assertEquals(CameraKind.All, awaitState(vm.state) { it.camera?.kind == CameraKind.All }.camera!!.kind)
         vm.locate()
         awaitState(vm.state) { it.camera?.kind == CameraKind.Member(DIMA) }
+    }
+
+    @Test
+    fun `places - a circle opens the sheet, managers delete, the card offers history`() {
+        val vm = setUp()
+        socket.trySend(snapshot(member(ANYA, placeId = HOME_ID)))
+        val loaded = awaitState(vm.state) { it.rows.size == 1 }
+        assertEquals(true, loaded.canManagePlaces)
+        vm.select(ANYA)
+        assertEquals(true, awaitState(vm.state) { it.card != null }.card!!.canHistory)
+        vm.openPlace(HOME_ID)
+        val open = awaitState(vm.state) { it.place != null }
+        assertEquals(HOME_ID, open.place!!.id)
+        assertNull(open.card)
+        assertEquals(CameraKind.Place(HOME_ID), open.camera!!.kind)
+        vm.deletePlace(HOME_ID)
+        awaitState(vm.state) { it.place == null && it.places.none { p -> p.id == HOME_ID } }
+        assertEquals("delete", runBlocking { f.outbox() }.single().op.lowercase())
     }
 }

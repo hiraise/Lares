@@ -402,3 +402,11 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   «На паузе»), «Места» sheet, «Показать всех» / «Моё местоположение», offline banner, no-style placeholder; light /
   dark style by theme. 18 new tests (logic, view model, UI). Debug APK 28 → 69 MB (uncompressed native renderer).
 
+- 2026-10-26 **M4-09 History and places** (client UI): History page from the member card (`LocationHistoryDestination`;
+  day strip from `config().historyDays`, track in the member color and stops on the map, stop rows with place / «Дома» /
+  address / «Без адреса» and «с …» while ongoing, tap centres a stop; denied → closes with a notice, offline text);
+  «Места» sheet with who is here, place sheet with edit / delete, long press on the map and «Добавить место» open the
+  place editor (`PlaceEditorDestination`; name, icon chips, draft circle moved by a tap, «Я здесь», radius slider,
+  address search on «Найти» only, offline save of changed fields only). Map seam: `CameraKind.Bounds`,
+  `onCenterChange`. Icons `work`, `fitness_center`. 24 new tests (logic, view models, UI). Walkthrough found one
+  issue: «Добавить место» under the navigation bar with 4+ places (sheet now opens fully).

@@ -29,9 +29,11 @@ import app.lares.client.ui.family.MemberDetailViewModel
 import app.lares.client.ui.family.PersonArgs
 import app.lares.client.ui.family.PersonViewModel
 import app.lares.client.ui.family.TagViewModel
+import app.lares.client.ui.location.HistoryViewModel
 import app.lares.client.ui.location.LocationSettingsViewModel
 import app.lares.client.ui.location.MapArgs
 import app.lares.client.ui.location.MapViewModel
+import app.lares.client.ui.location.PlaceEditorViewModel
 import app.lares.client.ui.main.MainViewModel
 import app.lares.client.ui.main.TodayViewModel
 import app.lares.client.ui.onboarding.InviteAcceptViewModel
@@ -90,8 +92,19 @@ fun uiModule(): Module =
         viewModel { NotificationPromptViewModel(get(), get()) }
         viewModel { LocationSettingsViewModel(get(), getOrNull<LocationDevice>() ?: AllowAllLocationDevice(), get(), get(), get()) }
         viewModel { params ->
-            MapViewModel(get(), get(), get(), get(), get(), getOrNull<Clock>() ?: Clock.System, params.getOrNull<MapArgs>() ?: MapArgs())
+            MapViewModel(
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                getOrNull<Clock>() ?: Clock.System,
+                params.getOrNull<MapArgs>() ?: MapArgs(),
+            )
         }
+        viewModel { params -> HistoryViewModel(get(), get(), get(), get(), getOrNull<Clock>() ?: Clock.System, params.get()) }
+        viewModel { params -> PlaceEditorViewModel(get(), get(), get(), get(), get(), params.get()) }
         viewModel { AboutViewModel(get(), get(), get()) }
         viewModel { FamilyViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
         viewModel { params -> MemberDetailViewModel(get(), get(), get(), get(), get(), get(), params.get()) }

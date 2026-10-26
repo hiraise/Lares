@@ -92,3 +92,5 @@ battery_full
 location_off
 play_arrow
 refresh
+work
+fitness_center

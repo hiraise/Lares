@@ -27,11 +27,13 @@ import app.lares.client.resources.ic_battery_5_bar
 import app.lares.client.resources.ic_battery_6_bar
 import app.lares.client.resources.ic_battery_charging_full
 import app.lares.client.resources.ic_battery_full
+import app.lares.client.resources.ic_history
 import app.lares.client.resources.ic_refresh
 import app.lares.client.resources.loc_status_kilometers
 import app.lares.client.resources.loc_status_meters
 import app.lares.client.resources.map_accuracy
 import app.lares.client.resources.map_battery
+import app.lares.client.resources.map_history
 import app.lares.client.resources.map_refresh
 import app.lares.client.resources.map_refresh_done
 import app.lares.client.resources.map_refresh_no_answer
@@ -48,7 +50,7 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * The member card (plan M4-08, LOC-011): the sheet's content after a pin or row tap — name, status line, accuracy,
- * battery and «Обновить». «История» comes with M4-09, the alerts with M4-10.
+ * battery, «Обновить» and «История» (M4-09); the alerts come with M4-10.
  */
 @Composable
 fun MemberCardContent(
@@ -57,6 +59,7 @@ fun MemberCardContent(
     onBack: () -> Unit,
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier,
+    onHistory: () -> Unit = {},
 ) {
     val member = card.row.member
     Column(modifier.fillMaxWidth().testTag("member_card"), verticalArrangement = Arrangement.spacedBy(Spacing.m)) {
@@ -94,6 +97,14 @@ fun MemberCardContent(
                 icon = Res.drawable.ic_refresh,
             )
             refresh?.let { RefreshText(it) }
+        }
+        if (card.canHistory) {
+            TonalButton(
+                stringResource(Res.string.map_history),
+                onClick = onHistory,
+                modifier = Modifier.fillMaxWidth().testTag("history"),
+                icon = Res.drawable.ic_history,
+            )
         }
         Spacer(Modifier.size(Spacing.s))
     }

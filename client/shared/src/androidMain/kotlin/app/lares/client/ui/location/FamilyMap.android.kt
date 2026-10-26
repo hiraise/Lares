@@ -7,12 +7,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.lares.contract.location.Geo
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -65,6 +68,7 @@ actual fun FamilyMapView(
     onMapLongClick: (Double, Double) -> Unit,
     modifier: Modifier,
     contentPadding: PaddingValues,
+    onCenterChange: (Double, Double) -> Unit,
 ) {
     val styleUrl = state.styleUrl ?: return
     val scheme = MaterialTheme.colorScheme
@@ -75,6 +79,7 @@ actual fun FamilyMapView(
     val placeClick by rememberUpdatedState(onPlaceClick)
     val mapClick by rememberUpdatedState(onMapClick)
     val mapLongClick by rememberUpdatedState(onMapLongClick)
+    val centerChange by rememberUpdatedState(onCenterChange)
 
     val placeAreas =
         remember(state.places, state.draftPlace, primary, secondary) {
@@ -192,6 +197,13 @@ actual fun FamilyMapView(
         }
     }
 
+    LaunchedEffect(mapState) {
+        snapshotFlow { if (mapState.isCameraMoving) null else mapState.cameraPosition.center }
+            .filterNotNull()
+            .distinctUntilChanged()
+            .collect { centerChange(it.latitude, it.longitude) }
+    }
+
     MaplibreMap(
         modifier = modifier,
         state = mapState,
@@ -267,6 +279,10 @@ private fun target(
 
         is CameraKind.Point -> {
             CameraTarget.Center(kind.lat, kind.lon, kind.zoom)
+        }
+
+        is CameraKind.Bounds -> {
+            CameraTarget.Bounds(west = kind.west, south = kind.south, east = kind.east, north = kind.north)
         }
 
         CameraKind.All -> {

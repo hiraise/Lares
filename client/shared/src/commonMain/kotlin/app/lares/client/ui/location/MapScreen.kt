@@ -105,6 +105,8 @@ import org.koin.core.parameter.parametersOf
 fun MapRoute(
     args: MapArgs,
     onBack: () -> Unit,
+    onHistory: (String) -> Unit = {},
+    onPlaceEditor: (PlaceEditorArgs) -> Unit = {},
     viewModel: MapViewModel = koinViewModel { parametersOf(args) },
     sharing: LocationSettingsViewModel = koinViewModel(),
 ) {
@@ -126,11 +128,25 @@ fun MapRoute(
                 onLocate = viewModel::locate,
                 onPlaces = viewModel::openPlaces,
                 onClosePlaces = viewModel::closePlaces,
-                onPlace = viewModel::showPlace,
+                onPlace = viewModel::openPlace,
                 onSetup = sharing::openSetup,
                 onTurnOnLocation = sharing::openLocationSettings,
                 onPause = sharing::openPause,
                 onResume = sharing::resume,
+                onClosePlace = viewModel::closePlace,
+                onEditPlace = { id ->
+                    viewModel.closePlace()
+                    onPlaceEditor(PlaceEditorArgs(id = id))
+                },
+                onDeletePlace = viewModel::deletePlace,
+                onAddPlace = {
+                    viewModel.closePlaces()
+                    val center = viewModel.newPlaceCenter()
+                    onPlaceEditor(PlaceEditorArgs(lat = center?.first, lon = center?.second))
+                },
+                onLongPress = { lat, lon -> onPlaceEditor(PlaceEditorArgs(lat = lat, lon = lon)) },
+                onHistory = onHistory,
+                onCenter = viewModel::onCenter,
             ),
     )
     if (sharingState.setupOpen) {
@@ -159,6 +175,14 @@ class MapActions(
     val onTurnOnLocation: () -> Unit,
     val onPause: () -> Unit,
     val onResume: () -> Unit,
+    val onClosePlace: () -> Unit = {},
+    val onEditPlace: (String) -> Unit = {},
+    val onDeletePlace: (String) -> Unit = {},
+    val onAddPlace: () -> Unit = {},
+    /** A long press on the map (managers only): a new place there. */
+    val onLongPress: (Double, Double) -> Unit = { _, _ -> },
+    val onHistory: (String) -> Unit = {},
+    val onCenter: (Double, Double) -> Unit = { _, _ -> },
 )
 
 private val SHEET_HANDLE = 20.dp
@@ -207,6 +231,7 @@ fun MapScreen(
                         initials = initialsFor(card.row.member.name, state.members.map { it.name }),
                         onBack = actions.onCloseCard,
                         onRefresh = { actions.onRefresh(card.row.member.memberId) },
+                        onHistory = { actions.onHistory(card.row.member.memberId) },
                         modifier = Modifier.onGloballyPositioned { peekContent = with(density) { it.size.height.toDp() } },
                     )
                 } else {
@@ -241,7 +266,19 @@ fun MapScreen(
             )
         }
     }
-    if (state.placesOpen) PlacesSheet(state, actions)
+    if (state.placesOpen) {
+        PlacesSheet(state.places, state.members, state.canManagePlaces, actions.onPlace, actions.onAddPlace, actions.onClosePlaces)
+    }
+    state.place?.let { place ->
+        PlaceSheet(
+            place,
+            state.members,
+            state.canManagePlaces,
+            onEdit = { actions.onEditPlace(place.id) },
+            onDelete = { actions.onDeletePlace(place.id) },
+            onDismiss = actions.onClosePlace,
+        )
+    }
 }
 
 @Composable
@@ -280,10 +317,12 @@ private fun MapLayer(
             state = view,
             camera = state.camera,
             onMemberClick = actions.onSelect,
-            onPlaceClick = { },
+            onPlaceClick = actions.onPlace,
             onMapClick = { _, _ -> },
+            onMapLongClick = { lat, lon -> if (state.canManagePlaces) actions.onLongPress(lat, lon) },
             modifier = Modifier.fillMaxSize().semantics { contentDescription = description },
             contentPadding = PaddingValues(top = top, bottom = bottom),
+            onCenterChange = actions.onCenter,
         )
     }
 }
@@ -509,45 +548,5 @@ private fun MemberRowView(
             )
         }
         row.battery?.let { BatteryLabel(it) }
-    }
-}
-
-/** «Места» until the places list of M4-09: the names; a tap centres the map. */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun PlacesSheet(
-    state: MapUiState,
-    actions: MapActions,
-) {
-    ModalBottomSheet(
-        onDismissRequest = actions.onClosePlaces,
-        containerColor = MaterialTheme.colorScheme.background,
-        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
-    ) {
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .padding(horizontal = Spacing.screen)
-                .padding(bottom = Spacing.xl)
-                .navigationBarsPadding()
-                .testTag("places_sheet"),
-            verticalArrangement = Arrangement.spacedBy(Spacing.l),
-        ) {
-            Text(stringResource(Res.string.map_places), style = MaterialTheme.typography.headlineSmall)
-            if (state.places.isEmpty()) {
-                Text(stringResource(Res.string.map_no_places), color = MaterialTheme.colorScheme.onSurfaceVariant)
-            } else {
-                ListGroup {
-                    state.places.forEachIndexed { index, place ->
-                        if (index > 0) ListDivider()
-                        ListRow(
-                            place.data.name,
-                            icon = if (place.data.icon == PlaceIcon.HOME) Res.drawable.ic_home else Res.drawable.ic_push_pin,
-                            onClick = { actions.onPlace(place.id) },
-                        )
-                    }
-                }
-            }
-        }
     }
 }

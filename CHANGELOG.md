@@ -18,6 +18,11 @@ Versioning: [SemVer](https://semver.org/) from the first release.
   member's card with «Обновить» to ask their phone for a fresh position. Your own sharing row with «Пауза» /
   «Продолжить» / «Включить передачу геопозиции» is always on the map. Offline the last known positions show with
   «Нет связи». The APK is larger because of the map renderer.
+- History and places (M4-09): «История» on a member's card shows their day — the track on the map and the stops under
+  it («Школа №12 · 8:25–14:40», «Дома · с 16:50», a street address for other stops) for any day the family keeps. «Места»
+  lists the places with who is there now; a place shows its address and who is there. Those allowed to manage places
+  create them by a long press on the map, «Я здесь» or a search by address, choose an icon and the circle size
+  (50–1000 m), change and delete them; this works offline too.
 
 ## [0.4.0] - 2026-10-25
 

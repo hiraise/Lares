@@ -139,7 +139,7 @@ Icon names in use (Material Symbols): `home`, `task_alt`, `shopping_cart`, `cale
 `beach_access`, `swap_horiz`, `event_repeat`, `local_grocery_store`, `battery_3_bar`, `battery_5_bar`, `battery_6_bar`;
 added in M0-07: `visibility`, `visibility_off`, `close`, `logout`, `delete`, `info`, `qr_code_2`, `content_paste`, `person`,
 `palette`, `sync`; added in M0-08: `share`, `lock_reset`, `person_remove`, `expand_less`; added in M1-05: `checklist`, `edit`, `skip_next`,
-`alarm`, `undo`, `notes`; added in M2-04: `category`, `remove_shopping_cart`, `add_shopping_cart`, `remove_done`; added in M3-05: `today`, `filter_list`, `celebration`, `event`, `event_busy`; added in M4-07: `battery_alert`, `battery_charging_full`, `battery_1_bar`, `battery_full`, `location_off`, `play_arrow`, `refresh`.
+`alarm`, `undo`, `notes`; added in M2-04: `category`, `remove_shopping_cart`, `add_shopping_cart`, `remove_done`; added in M3-05: `today`, `filter_list`, `celebration`, `event`, `event_busy`; added in M4-07: `battery_alert`, `battery_charging_full`, `battery_1_bar`, `battery_full`, `location_off`, `play_arrow`, `refresh`; added in M4-09: `work`, `fitness_center`.
 
 ## People
 

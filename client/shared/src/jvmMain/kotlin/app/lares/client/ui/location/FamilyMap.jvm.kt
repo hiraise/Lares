@@ -20,6 +20,7 @@ actual fun FamilyMapView(
     onMapLongClick: (Double, Double) -> Unit,
     modifier: Modifier,
     contentPadding: PaddingValues,
+    onCenterChange: (Double, Double) -> Unit,
 ) {
     Column(modifier.padding(contentPadding)) {
         state.pins.forEach { pin ->
@@ -31,6 +32,8 @@ actual fun FamilyMapView(
         state.places.forEach { place ->
             Text(place.name, Modifier.testTag("place_${place.id}").clickable { onPlaceClick(place.id) })
         }
+        state.stops.forEach { stop -> Text("stop", Modifier.testTag("map_${stop.id}")) }
+        state.draftPlace?.let { Text("${it.name} ${it.radiusM.toInt()}", Modifier.testTag("draft_place")) }
         camera?.let { Text(it.kind.toString(), Modifier.testTag("camera")) }
     }
 }
