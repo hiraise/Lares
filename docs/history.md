@@ -364,3 +364,10 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   second, 5 s wait limit, failures kept 10 min), `GET /location/address` and `/location/search` with permissions,
   per-member limits and validation; `LARES_GEOCODER_URL` / `_EMAIL` in deploy; install manual "Addresses" (en, ru).
   27 new server tests (263 in the module), a fake Nominatim with recorded responses; tests never reach the internet.
+- 2026-10-26 M4-05 Load simulation with location: `tools/loadsim` got sharing phones (one per member, one fix every
+  30 s along a 3 km loop through the family places, walking near places, driving between), map viewers (`/location/live`,
+  `now`, `history`, «Обновить»), places and own `place_alert` rows in the setup, location totals in the report;
+  `loadtest.sh` turns addresses off and takes `LOADTEST_SERVER_CPUS`. Runs: 20 devices / 10 sharing, 30 min — RSS max
+  254 of 256 MiB, p95 95 ms (uploads 37 ms), cold start 2.0–3.4 s, 0 errors, 20 arrivals and departures; 10 devices —
+  RSS max 247, p95 46 ms (M0: 237, 52); 1 CPU, 5 min — p95 73 ms. Targets met without tuning, memory margin small
+  ([perf/M4-location.md](architecture/perf/M4-location.md)). 4 new loadsim tests (9 in the module).

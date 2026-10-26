@@ -12,6 +12,8 @@
 #   LOADTEST_OUT        results directory (default build/loadtest/<date-time>)
 #   LOADTEST_JAVA_OPTS  server JVM options instead of the image default (for tuning runs)
 #   LOADTEST_SERVER_ENV extra server environment, space-separated NAME=value pairs (for tuning runs)
+#   LOADTEST_SERVER_CPUS CPU limit of the server container, e.g. 1 (closer to a 1-vCPU VPS; default no limit)
+# Addresses are off (LARES_GEOCODER_URL empty): the public geocoder must never be load-tested.
 # Results: latency.csv, summary.json, phases.csv (loadsim), memory.csv, server-rss.csv (RSS, threads), server.log,
 # environment.txt, summary.txt.
 set -eu
@@ -47,6 +49,7 @@ LARES_DB_PASSWORD=$password
 LARES_SETUP_CODE=$SETUP_CODE
 LARES_CADDYFILE=Caddyfile.push
 LARES_NTFY_DOMAIN=ntfy.localhost
+LARES_GEOCODER_URL=
 ENV
 
 # Tuning settings go into an extra compose file; production files stay unchanged.
@@ -54,8 +57,12 @@ server_env=$(
     [ -z "${LOADTEST_JAVA_OPTS:-}" ] || echo "      JAVA_OPTS: \"$LOADTEST_JAVA_OPTS\""
     for pair in ${LOADTEST_SERVER_ENV:-}; do echo "      ${pair%%=*}: \"${pair#*=}\""; done
 )
-if [ -n "$server_env" ]; then
-    printf 'services:\n  server:\n    environment:\n%s\n' "$server_env" >"$WORK/override.yml"
+if [ -n "$server_env" ] || [ -n "${LOADTEST_SERVER_CPUS:-}" ]; then
+    {
+        printf 'services:\n  server:\n'
+        [ -z "${LOADTEST_SERVER_CPUS:-}" ] || printf '    cpus: %s\n' "$LOADTEST_SERVER_CPUS"
+        [ -z "$server_env" ] || printf '    environment:\n%s\n' "$server_env"
+    } >"$WORK/override.yml"
 else
     echo "services: {}" >"$WORK/override.yml"
 fi
@@ -123,6 +130,7 @@ sample_memory() {
     echo "docker: $(docker version --format '{{.Server.Version}}'); docker VM: $(docker info --format '{{.NCPU}} CPUs, {{.MemTotal}} bytes')"
     echo "LOADTEST_JAVA_OPTS: ${LOADTEST_JAVA_OPTS:-(image default)}"
     echo "LOADTEST_SERVER_ENV: ${LOADTEST_SERVER_ENV:-}"
+    echo "LOADTEST_SERVER_CPUS: ${LOADTEST_SERVER_CPUS:-(no limit)}"
     echo "loadsim options: $*"
 } >"$OUT/environment.txt"
 

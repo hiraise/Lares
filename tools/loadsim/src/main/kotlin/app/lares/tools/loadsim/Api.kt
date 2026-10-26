@@ -159,13 +159,26 @@ class DeviceApi(
             )
     }
 
+    /** Opens `/sync/events` and runs [block] on it; the upgrade time is recorded as [EVENTS]. */
+    suspend fun events(block: suspend DefaultClientWebSocketSession.() -> Unit) =
+        socket(EVENTS, "/sync/events", { recorder.wsOpened.incrementAndGet() }, block)
+
+    /** Opens the live map channel `/location/live` and runs [block] on it; recorded as [LIVE]. */
+    suspend fun live(block: suspend DefaultClientWebSocketSession.() -> Unit) =
+        socket(LIVE, "/location/live", { recorder.liveOpened.incrementAndGet() }, block)
+
     /**
-     * Opens `/sync/events` and runs [block] on it; the upgrade time is recorded as [EVENTS]. Returns when the socket
-     * closes. A failed upgrade is recorded with status 0 and rethrown.
+     * Opens the WebSocket at [path] and runs [block] on it; the upgrade time is recorded as [label]. Returns when the
+     * socket closes. A failed upgrade is recorded with status 0 and rethrown.
      */
-    suspend fun events(block: suspend DefaultClientWebSocketSession.() -> Unit) {
+    private suspend fun socket(
+        label: String,
+        path: String,
+        onOpen: () -> Unit,
+        block: suspend DefaultClientWebSocketSession.() -> Unit,
+    ) {
         val token = checkNotNull(auth).accessToken
-        val url = base.replaceFirst("http", "ws") + "/api/v1/sync/events"
+        val url = base.replaceFirst("http", "ws") + "/api/v1$path"
         val start = TimeSource.Monotonic.markNow()
         var opened = false
         try {
@@ -174,14 +187,14 @@ class DeviceApi(
                 header(HttpHeaders.Authorization, "Bearer $token")
             }) {
                 opened = true
-                recorder.record(EVENTS, 101, start.millis())
-                recorder.wsOpened.incrementAndGet()
+                recorder.record(label, 101, start.millis())
+                onOpen()
                 block()
             }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            if (!opened) recorder.record(EVENTS, 0, start.millis())
+            if (!opened) recorder.record(label, 0, start.millis())
             throw e
         }
     }
@@ -192,6 +205,7 @@ class DeviceApi(
 
     companion object {
         const val EVENTS = "WS /sync/events"
+        const val LIVE = "WS /location/live"
         val REQUEST_TIMEOUT = 30.seconds
     }
 }

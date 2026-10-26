@@ -1,6 +1,6 @@
 # Project status
 
-Updated: 2026-10-25
+Updated: 2026-10-26
 
 ## Phase
 
@@ -8,14 +8,14 @@ Updated: 2026-10-25
 M1 Tasks — all plans M1-01…M1-07 done; M1 acceptance with the customer next.
 M2 Shopping lists — all plans M2-01…M2-06 done; M2 acceptance with the customer next.
 M3 Calendar — all plans M3-01…M3-08 done, released as v0.4.0; M3 acceptance with the customer next.
-M4 Location — M4-01…M4-04 done (contract; places, alerts and visibility rules; positions, sharing and the live channel; arrive / leave, location notifications and addresses on the server); next M4-05 or M4-06.**
+M4 Location — M4-01…M4-05 done (server side complete and load-tested with location); next M4-06 (client core).**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
 
 [M4 Location](product/roadmap.md#m4-location): planned — [location spec](product/features/location.md) (approved,
 Q-025…Q-029 answered), [location design](architecture/location.md), [M4 plans](plans/README.md#m4-plans). Done: M4-01…
-M4-04. Next: M4-05 (load test) or M4-06 (client core).
+M4-05. Next: M4-06 (client core).
 Acceptance of M0–M3 is still pending.
 
 **Active release branch: `release/0.5.0`** (M4). `release/0.4.1` was not needed: the customer found no bugs in v0.4.0. Commit approved work here; `main` is protected
@@ -24,6 +24,10 @@ Acceptance of M0–M3 is still pending.
 
 ## Last completed
 
+- 2026-10-26 M4-05 Load test with location: 20 phones, 10 of them sending a position every 30 s, 3 open maps, places
+  with arrivals and departures — server memory max 254 of 256 MiB, p95 95 ms (uploads 37 ms), start 2–3.4 s, no errors;
+  with 10 phones close to M0. Targets met without tuning, little memory margin
+  ([perf/M4-location.md](architecture/perf/M4-location.md)).
 - 2026-10-25 M4-04 Geofences, location notifications and addresses on the server: the server decides who arrived at or
   left a place (two agreeing positions, edge zone and inaccurate positions ignored) and shows the place in «где сейчас»;
   subscribers get «Аня · Школа №12 — Прибытие в 08:52»; administrators get «Геопозиция выключена» / «снова передаётся»
@@ -149,7 +153,7 @@ Acceptance of M0–M3 is still pending.
 1. M0 and M1 acceptance with the customer (APK v0.2.0, walkthrough on real phones, Russian changelog; checklist in the M1-07
    handoff).
 2. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
-3. M4-05 (load test with location) and M4-06… on `release/0.5.0`, in order.
+3. M4-06 (location client core) and the rest of M4 on `release/0.5.0`, in order.
 4. After the M1 acceptance: set the tasks spec to `implemented`.
 5. M2 acceptance with the customer (checklist in the M2-06 handoff); after it set the shopping spec to `implemented`.
 6. M3 acceptance with the customer on v0.4.0 (checklist in the M3-08 handoff); fixes go to `release/0.5.0`; after the
@@ -170,7 +174,7 @@ See the table in [plans README](plans/README.md#m0-plans).
 | Google developer verification for sideloaded apps (rolling out from 2026, global 2027) | APK / F-Droid installs may require a verified developer | Re-check before M6; a developer account likely covers it |
 | Loss or leak of the release signing key | No updates for installed apps / fake updates | Lares-only key, backup archive kept off the machine by the customer, fingerprint checked in the release workflow (ADR-0019) |
 | OEM battery optimizations (Xiaomi, Huawei, Samsung) kill background location | Gaps in location tracking | In-app guide to exclude the app from battery optimization; detect and warn about stale positions |
-| JVM server memory above budget | Stack does not fit a 1 GB VPS | M0-11: RSS max 237 of 256 MiB after tuning, stack ~320 MiB; re-measure in M4 with location; next lever GraalVM native image |
+| JVM server memory above budget | Stack does not fit a 1 GB VPS | M4-05 with location (20 devices, 10 sharing): RSS max 254 of 256 MiB, p95 95 ms, stack ~360 MiB — met with little margin; levers in [M4-location](architecture/perf/M4-location.md#conclusion-against-adr-0013), last GraalVM native image |
 | maplibre-compose is pre-1.0 (breaking changes in minor releases) | Map code churn on upgrades | Pinned 0.20.0, all map code behind `FamilyMapView` (ADR-0027); upgrades as their own plan |
 | Public Nominatim usage policy (1 req/s, no bulk, may ask apps to switch) | Addresses stop working | On-demand lookups only, caches, rate limit, configurable URL, off switch (ADR-0026) |
 | Android 17 (targetSdk 37) requires `ACCESS_LOCAL_NETWORK` for servers on a home network | A LAN-only server unreachable | Check in the M4 acceptance; the documented setup uses a public domain |

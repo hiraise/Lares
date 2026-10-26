@@ -692,6 +692,10 @@ interface LocationDevice {            // permissions and settings, Android imple
   point per 5 s: `home-school`).
 - `tools/dev/seed.py location`: places «Дом» and «Школа №12» (Moscow coordinates in the script), sharing on for the
   other members, a day of positions for Аня (home → school → home) and current positions for everybody.
+- `tools/loadsim` (M4-05): the first device of every member shares and uploads one fix every 30 s along a 3 km loop
+  through the family places (walking near places, driving between), three second devices keep `/location/live` open
+  and call `now`, `history` and «Обновить»; `--sharing-devices`, `--position-interval`, `--map-viewers`, `--places`.
+  Results: [perf/M4-location.md](perf/M4-location.md).
 - The emulator's AOSP image has the platform `fused` provider; `geo fix` feeds GPS.
 - Text drawn inside the map is invisible to `ui.sh dump`; pins and places carry content descriptions only in the sheet
   rows, which the tester uses.

@@ -6,7 +6,7 @@ updated: 2026-10-23
 
 Measurement of the [ADR-0013](../../adr/0013-server-resource-budget.md) targets for one household, as amended by
 [ADR-0015](../../adr/0015-load-measurement-amendment.md) (no location uploads in M0). Plan: [M0-11](../../plans/M0/11-load-simulation.md).
-Re-run in M4 with position uploads every 30 s.
+Re-run in M4 with position uploads every 30 s: [M4-location.md](M4-location.md).
 
 **Result: all targets met** after tuning the JVM (smaller heap and code cache). Server RSS levels off at about 235 MiB
 (target ≤ 256), p95 latency is 56 ms (target ≤ 100), cold start is under 3 s (target ≤ 10), and the whole container

@@ -71,7 +71,7 @@ Full documentation map: [docs/README.md](docs/README.md).
 | `tools/dev/` | Agent dev scripts: short-output build/test, local server, test family, emulator driving | exists |
 | `tools/release/` | Release script, release notes, APK signature check ([release process](docs/process/release.md)) | exists |
 | `tools/design-assets/` | Generates bundled fonts and icons (Python + fonttools) | exists (M0-07) |
-| `tools/loadsim/` | Load simulation CLI (simulated family against a running server) | exists (M0-11) |
+| `tools/loadsim/` | Load simulation CLI (simulated family against a running server, with location) | exists (M0-11, M4-05) |
 
 Layout is provisional until M0 scaffolding; see [architecture overview](docs/architecture/overview.md).
 
