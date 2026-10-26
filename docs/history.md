@@ -418,3 +418,6 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   administrators); `"location"` taps open the Map at the member; user manual "Map" (en, ru). All LOC MVP requirements
   done. 19 new tests. Walkthrough: all scenarios pass; the push itself is not testable on the emulator (no ntfy, the
   server detected arrival and departure); fixed: history chips offline looked active, the rule sheet opened half.
+- 2026-10-26 Release **v0.5.0** (M4 Location): pull request #4, signed APK, server image 0.5.0, GitHub release. CI flake
+  in `MapUiTest` fixed (`LocationSettingsViewModelTest` now clears its view models before resetting Main); test
+  failures are logged in full. Next branch `release/0.5.1`.

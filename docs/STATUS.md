@@ -8,7 +8,7 @@ Updated: 2026-10-26
 M1 Tasks — all plans M1-01…M1-07 done; M1 acceptance with the customer next.
 M2 Shopping lists — all plans M2-01…M2-06 done; M2 acceptance with the customer next.
 M3 Calendar — all plans M3-01…M3-08 done, released as v0.4.0; M3 acceptance with the customer next.
-M4 Location — all plans M4-01…M4-10 done; M4 acceptance with the customer next (checklist in the M4-10 handoff).**
+M4 Location — all plans M4-01…M4-10 done, released as v0.5.0; M4 acceptance with the customer next (checklist in the M4-10 handoff).**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
@@ -18,12 +18,15 @@ Q-025…Q-029 answered), [location design](architecture/location.md), [M4 plans]
 M4-10. Next: M4 acceptance.
 Acceptance of M0–M3 is still pending.
 
-**Active release branch: `release/0.5.0`** (M4). `release/0.4.1` was not needed: the customer found no bugs in v0.4.0. Commit approved work here; `main` is protected
-([release process](process/release.md), ADR-0020). Latest release: [v0.4.0](https://github.com/hiraise/Lares/releases/tag/v0.4.0)
+**Active release branch: `release/0.5.1`** (fixes from the M4 acceptance; the next milestone gets `release/0.6.0`). Commit approved work here; `main` is protected
+([release process](process/release.md), ADR-0020). Latest release: [v0.5.0](https://github.com/hiraise/Lares/releases/tag/v0.5.0)
 (M3, 2026-10-25).
 
 ## Last completed
 
+- 2026-10-26 Release **v0.5.0** (M4 Location): release pull request #4 merged, signed APK, server image
+  `ghcr.io/hiraise/lares-server:0.5.0`, GitHub release. Fixed on the way: CI flake in `MapUiTest` (a location settings
+  view model outliving its test). Next branch `release/0.5.1` for the customer's fixes.
 - 2026-10-26 M4-10 Alerts, rules, everywhere, manual: arrive / leave alerts chosen on the member card, the person page
   or a place; «Кто меня видит» / «О вас сообщают»; administrators edit «кто кого видит» and the history period; Today
   «Семья сейчас», person page «Где сейчас»; location notification switches and taps; user manual "Map". All LOC MVP
@@ -176,11 +179,11 @@ Acceptance of M0–M3 is still pending.
    handoff).
 2. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
 3. M4 acceptance with the customer (checklist in the M4-10 handoff): real phones with ntfy for arrive / leave
-   notifications, battery over a day (Xiaomi / Samsung); then release v0.5.0 and set the location spec to
-   `implemented`.
+   notifications, battery over a day (Xiaomi / Samsung); then set the location spec to `implemented`; fixes go to
+   `release/0.5.1`.
 4. After the M1 acceptance: set the tasks spec to `implemented`.
 5. M2 acceptance with the customer (checklist in the M2-06 handoff); after it set the shopping spec to `implemented`.
-6. M3 acceptance with the customer on v0.4.0 (checklist in the M3-08 handoff); fixes go to `release/0.5.0`; after the
+6. M3 acceptance with the customer on v0.4.0 (checklist in the M3-08 handoff); fixes go to `release/0.5.1`; after the
    acceptance set the calendar spec to `implemented`.
 
 ## Plan progress
