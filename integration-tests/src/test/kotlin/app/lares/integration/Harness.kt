@@ -14,6 +14,12 @@ import app.lares.client.data.TagsRepository
 import app.lares.client.data.TagsWriter
 import app.lares.client.data.calendar.CalendarRepository
 import app.lares.client.data.calendar.CalendarWriter
+import app.lares.client.data.location.LocationRepository
+import app.lares.client.data.location.PlacesRepository
+import app.lares.client.data.location.PlacesWriter
+import app.lares.client.data.location.PositionQueue
+import app.lares.client.data.location.PositionUploader
+import app.lares.client.data.location.SharingController
 import app.lares.client.data.shopping.ShoppingRepository
 import app.lares.client.data.shopping.ShoppingWriter
 import app.lares.client.data.tasks.TasksRepository
@@ -39,6 +45,8 @@ import app.lares.contract.entities.GroupData
 import app.lares.contract.entities.HouseholdData
 import app.lares.contract.entities.MemberData
 import app.lares.contract.entities.PersonData
+import app.lares.contract.entities.PlaceAlertData
+import app.lares.contract.entities.PlaceData
 import app.lares.contract.entities.ShoppingItemData
 import app.lares.contract.entities.ShoppingListData
 import app.lares.contract.entities.TagData
@@ -176,6 +184,12 @@ class TestClient(
     val shoppingWriter: ShoppingWriter = koin.get()
     val calendar: CalendarRepository = koin.get()
     val calendarWriter: CalendarWriter = koin.get()
+    val places: PlacesRepository = koin.get()
+    val placesWriter: PlacesWriter = koin.get()
+    val location: LocationRepository = koin.get()
+    val sharing: SharingController = koin.get()
+    val positions: PositionQueue = koin.get()
+    val uploader: PositionUploader = koin.get()
 
     suspend fun connect() = session.connect(serverUrl)
 
@@ -216,6 +230,8 @@ class TestClient(
                     EntityTypes.EVENT_OCCURRENCE,
                 ) { event_occurrenceQueries.selectAll().executeAsList().map { it.id } },
             eventReminders = typedRows(EntityTypes.EVENT_REMINDER) { event_reminderQueries.selectAll().executeAsList().map { it.id } },
+            places = typedRows(EntityTypes.PLACE) { placeQueries.selectAll().executeAsList().map { it.id } },
+            placeAlerts = typedRows(EntityTypes.PLACE_ALERT) { place_alertQueries.selectAll().executeAsList().map { it.id } },
         )
 
     @Suppress("UNCHECKED_CAST")
@@ -258,6 +274,8 @@ class TestClient(
             events = of(EntityTypes.EVENT, EventData.serializer()),
             eventOccurrences = of(EntityTypes.EVENT_OCCURRENCE, EventOccurrenceData.serializer()),
             eventReminders = of(EntityTypes.EVENT_REMINDER, EventReminderData.serializer()),
+            places = of(EntityTypes.PLACE, PlaceData.serializer()),
+            placeAlerts = of(EntityTypes.PLACE_ALERT, PlaceAlertData.serializer()),
         )
     }
 
@@ -285,15 +303,19 @@ data class Snapshot(
     val eventOccurrences: Map<String, EventOccurrenceData>,
     /** Only the member's own rows (ADR-0023). */
     val eventReminders: Map<String, EventReminderData>,
+    val places: Map<String, PlaceData>,
+    /** Only the member's own rows (ADR-0024). */
+    val placeAlerts: Map<String, PlaceAlertData>,
 ) {
     val isEmpty: Boolean
         get() =
             households.isEmpty() && members.isEmpty() && groups.isEmpty() && persons.isEmpty() && tags.isEmpty() &&
                 tasks.isEmpty() && checklistItems.isEmpty() && taskCompletions.isEmpty() && shoppingLists.isEmpty() &&
-                shoppingItems.isEmpty() && events.isEmpty() && eventOccurrences.isEmpty() && eventReminders.isEmpty()
+                shoppingItems.isEmpty() && events.isEmpty() && eventOccurrences.isEmpty() && eventReminders.isEmpty() &&
+                places.isEmpty() && placeAlerts.isEmpty()
 
     /** Without the rows that only their member sees. */
-    val shared: Snapshot get() = copy(eventReminders = emptyMap())
+    val shared: Snapshot get() = copy(eventReminders = emptyMap(), placeAlerts = emptyMap())
 }
 
 /**

@@ -1,0 +1,18 @@
+-- The last map state seen on this phone (key `now`, a `LocationNow`), shown with «Нет связи» (ADR-0024: no histories).
+CREATE TABLE location_snapshot (
+    key TEXT NOT NULL PRIMARY KEY,
+    json TEXT NOT NULL,
+    fetched_at TEXT NOT NULL
+);
+
+get:
+SELECT * FROM location_snapshot WHERE key = ?;
+
+put:
+INSERT OR REPLACE INTO location_snapshot (key, json, fetched_at) VALUES (?, ?, ?);
+
+remove:
+DELETE FROM location_snapshot WHERE key = ?;
+
+deleteAll:
+DELETE FROM location_snapshot;

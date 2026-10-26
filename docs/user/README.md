@@ -10,10 +10,10 @@ Available:
 - Tasks: today's tasks, routines, assignees, reminders and notifications: [en](en/tasks.md), [ru](ru/tasks.md)
 - Shopping lists: adding items, departments, ticking off in a store, suggestions, tags: [en](en/shopping.md), [ru](ru/shopping.md)
 - Calendar: views and filters, events and repeats, reminders, birthdays and memorable dates, notifications: [en](en/calendar.md), [ru](ru/calendar.md)
+- Map: sharing and battery settings on different phone brands, pause, places, arrive and leave notifications, history, who sees whom, privacy: [en](en/map.md), [ru](ru/map.md)
 
 Planned:
 
 - First setup: household, inviting members, child accounts
 - Installing the Android app and connecting to the server
-- Location sharing and battery settings on different phone brands
-- One guide per module: map, budget, tags
+- One guide per module: budget, tags

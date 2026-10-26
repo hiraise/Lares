@@ -10,6 +10,8 @@ import app.lares.contract.api.admin.ResetPasswordRequest
 import app.lares.contract.api.admin.SetGroupsRequest
 import app.lares.contract.api.admin.UpdateGroupRequest
 import app.lares.contract.api.admin.UpdateHouseholdRequest
+import app.lares.contract.api.location.PutLocationRulesRequest
+import app.lares.contract.location.LocationVisibility
 import app.lares.server.testing.ADULTS
 import app.lares.server.testing.KIDS
 import app.lares.server.testing.assertError
@@ -93,6 +95,13 @@ class AdminPermissionMatrixTest {
                     },
                     Endpoint("DELETE invites", HttpStatusCode.NoContent) {
                         client.send(HttpMethod.Delete, "/api/v1/invites/$invite", it)
+                    },
+                    Endpoint("GET location/rules", HttpStatusCode.OK) {
+                        client.send(HttpMethod.Get, "/api/v1/location/rules", it)
+                    },
+                    Endpoint("PUT location/rules", HttpStatusCode.NoContent) {
+                        val rules = LocationVisibility.defaultRules(adults.toString(), kids.toString())
+                        client.send(HttpMethod.Put, "/api/v1/location/rules", it, PutLocationRulesRequest(rules))
                     },
                 )
 

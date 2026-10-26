@@ -190,6 +190,14 @@ class NotificationsTest {
     }
 
     @Test
+    fun pendingNavigationMapsLocationToTheMapAtTheMember() {
+        val pending = PendingNavigation()
+        assertTrue(pending.submit(PendingNavigation.LOCATION, "m2"))
+        assertEquals(NavTarget.MapMember("m2"), pending.target.value)
+        assertEquals("location", PendingNavigation.LOCATION, "the server's entityType of location notifications")
+    }
+
+    @Test
     fun pendingNavigationMapsEventsAndPersons() {
         val pending = PendingNavigation()
         val id = "01928c4e-0000-7000-8000-00000000e001"

@@ -33,6 +33,24 @@ class Recorder {
     val eventsReceived = AtomicLong()
     val pullResets = AtomicLong()
 
+    // Location (plan M4-05).
+    val positionsSent = AtomicLong()
+    val positionsAccepted = AtomicLong()
+    val uploadsNotSharingHere = AtomicLong()
+    val refreshesRequested = AtomicLong()
+    val refreshesAnswered = AtomicLong()
+    val liveOpened = AtomicLong()
+    val liveClosed = AtomicLong()
+    val arrivalsSeen = AtomicLong()
+    val departuresSeen = AtomicLong()
+    val liveMessagesByType = ConcurrentHashMap<String, AtomicLong>()
+
+    fun liveMessage(type: String) {
+        liveMessagesByType.computeIfAbsent(type) { AtomicLong() }.incrementAndGet()
+    }
+
+    val liveMessages: Long get() = liveMessagesByType.values.sumOf { it.get() }
+
     fun record(
         endpoint: String,
         status: Int,

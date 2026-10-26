@@ -117,6 +117,10 @@ class Report(
                 config.effectiveBurstAt?.let { put("burstAt", it.toString()) }
                 put("pushInterval", config.pushInterval.toString())
                 put("burstInterval", config.burstInterval.toString())
+                put("sharingDevices", config.sharing)
+                put("positionInterval", config.positionInterval.toString())
+                put("mapViewers", config.mapViewers)
+                put("places", config.places)
             }
             putJsonArray("phases") {
                 for (span in spans) {
@@ -147,6 +151,21 @@ class Report(
                 put("eventsReceived", recorder.eventsReceived.get())
                 put("pullResets", recorder.pullResets.get())
             }
+            putJsonObject("location") {
+                put("positionsSent", recorder.positionsSent.get())
+                put("positionsAccepted", recorder.positionsAccepted.get())
+                put("uploadsNotSharingHere", recorder.uploadsNotSharingHere.get())
+                put("refreshesRequested", recorder.refreshesRequested.get())
+                put("refreshesAnswered", recorder.refreshesAnswered.get())
+                put("liveSocketsOpened", recorder.liveOpened.get())
+                put("liveSocketsClosed", recorder.liveClosed.get())
+                put("liveMessages", recorder.liveMessages)
+                put("arrivalsSeenLive", recorder.arrivalsSeen.get())
+                put("departuresSeenLive", recorder.departuresSeen.get())
+                putJsonObject("liveMessagesByType") {
+                    recorder.liveMessagesByType.toSortedMap().forEach { (type, count) -> put(type, count.get()) }
+                }
+            }
             put("requestErrorRate", requestErrorRate)
             put("rejectionRate", rejectionRate)
             put("maxErrorRate", config.maxErrorRate)
@@ -160,7 +179,7 @@ class Report(
             appendLine(
                 String.format(
                     Locale.ROOT,
-                    "%-28s %-7s %7s %6s %8s %8s %8s %8s",
+                    "%-36s %-7s %7s %6s %8s %8s %8s %8s",
                     "endpoint",
                     "phase",
                     "count",
@@ -177,7 +196,7 @@ class Report(
                     appendLine(
                         String.format(
                             Locale.ROOT,
-                            "%-28s %-7s %7d %6d %8.1f %8.1f %8.1f %8.1f",
+                            "%-36s %-7s %7d %6d %8.1f %8.1f %8.1f %8.1f",
                             row.endpoint,
                             label,
                             row.count,
@@ -197,6 +216,14 @@ class Report(
             appendLine(
                 "WebSockets: ${recorder.wsOpened.get()} opened, ${recorder.wsClosed.get()} closed; " +
                     "${recorder.eventsReceived.get()} events; ${recorder.pullResets.get()} pull resets",
+            )
+            appendLine(
+                "Location: ${recorder.positionsSent.get()} positions sent, ${recorder.positionsAccepted.get()} accepted, " +
+                    "${recorder.uploadsNotSharingHere.get()} not sharing here; ${recorder.refreshesRequested.get()} refreshes " +
+                    "requested, ${recorder.refreshesAnswered.get()} answered by an extra fix; live: ${recorder.liveOpened.get()} " +
+                    "opened, ${recorder.liveClosed.get()} closed, ${recorder.liveMessages} messages " +
+                    "${recorder.liveMessagesByType.toSortedMap().mapValues { it.value.get() }}; seen live: " +
+                    "${recorder.arrivalsSeen.get()} arrivals, ${recorder.departuresSeen.get()} departures",
             )
             appendLine(
                 "Error rate: requests ${percent(requestErrorRate)}, rejected mutations ${percent(rejectionRate)} " +

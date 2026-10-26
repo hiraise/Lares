@@ -11,7 +11,7 @@ One file per module. A spec says **what** the product does; architecture and ADR
 | TSK | [tasks.md](tasks.md) | M1 | approved |
 | SHP | [shopping.md](shopping.md) | M2 | approved |
 | CAL | [calendar.md](calendar.md) | M3 | approved |
-| LOC, TRK | [location.md](location.md) | M4; trackers later | outline |
+| LOC, TRK | [location.md](location.md) | M4; trackers later | approved |
 | BUD | [budget.md](budget.md) | M5 | outline |
 
 ## Spec status

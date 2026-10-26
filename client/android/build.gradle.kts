@@ -70,4 +70,6 @@ dependencies {
     implementation(libs.androidx.work.runtime)
     // UnifiedPush connector only; never `embedded-fcm-distributor` (Google Play Services, ADR-0006).
     implementation(libs.unifiedpush.connector)
+    // MapLibre native renderer for the map (ADR-0027); Vulkan is the one-line alternative.
+    runtimeOnly(libs.maplibre.compose.runtime.opengl.android)
 }

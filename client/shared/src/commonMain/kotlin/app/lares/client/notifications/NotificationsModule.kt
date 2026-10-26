@@ -16,6 +16,6 @@ fun notificationsModule(): Module =
         single { NotificationSettingsRepository(get(), get()) }
         single { PushEndpoints(get(), get(), get()) }
         single { Reminders(get(), get(), get(), getOrNull<Clock>() ?: Clock.System) } bind ReminderScheduler::class
-        single { PushMessageHandler(get(), get(), get()) }
-        single { NotificationsCoordinator(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(AppScope)) }
+        single { PushMessageHandler(get(), get(), get(), getOrNull()) }
+        single { NotificationsCoordinator(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(AppScope), getOrNull()) }
     }

@@ -97,7 +97,7 @@ Authenticated, requires `household.manage`:
 
 | Method | Path | Purpose | Spec |
 | --- | --- | --- | --- |
-| PATCH | `/api/v1/household` | Name, time zone, currency, default language | FND-003 |
+| PATCH | `/api/v1/household` | Name, time zone, currency, default language, location history days | FND-003, LOC-005 |
 | POST | `/api/v1/members` | Create member directly (no password → QR login) | FND-022 |
 | DELETE | `/api/v1/members/{id}` | Remove member | FND-025 |
 | POST | `/api/v1/members/{id}/password` | Reset member password | FND-012 |
@@ -108,6 +108,18 @@ Authenticated, requires `household.manage`:
 | POST | `/api/v1/invites` | Create invite | FND-024 |
 | GET | `/api/v1/invites` | List active invites | FND-024 |
 | DELETE | `/api/v1/invites/{id}` | Revoke invite | FND-024 |
+| GET | `/api/v1/location/rules` | Location visibility rules | LOC-006 |
+| PUT | `/api/v1/location/rules` | Replace all location visibility rules | LOC-006 |
+| PUT | `/api/v1/location/me/sharing` | Share, pause or report sharing off on this phone | LOC-010, LOC-012, LOC-019 |
+| POST | `/api/v1/location/positions` | Upload positions of the sharing phone | LOC-001, LOC-022 |
+| GET | `/api/v1/location/now` | Where the visible members are now | LOC-003 |
+| GET | `/api/v1/location/history` | A member's day track | LOC-004 |
+| POST | `/api/v1/location/members/{id}/refresh` | «Обновить»: ask the member's phone for a position | LOC-011 |
+| GET | `/api/v1/location/me/watchers` | Who sees me, who gets my arrive / leave alerts | LOC-015 |
+| GET | `/api/v1/location/config` | Map styles, addresses on/off, history days | LOC-005, LOC-014 |
+| GET | `/api/v1/location/address` | Street address of a shown position | LOC-014 |
+| GET | `/api/v1/location/search` | Address search for the place editor | LOC-024 |
+| WS | `/api/v1/location/live` | Live positions of visible members | LOC-003 |
 
 Persons and tags have no REST endpoints: they are written through sync mutations only.
 
@@ -127,6 +139,73 @@ DTOs live in `contract/…/api/admin/AdminDtos.kt`; QR/link payloads are built a
 - Taken logins answer `LOGIN_TAKEN` with `fields.login = TAKEN`.
 - `POST /login-codes` with another member's id checks `household.manage` first (403 without it, even for unknown ids),
   then the id (404).
+
+### Location endpoint details (M4)
+
+DTOs live in `contract/…/api/location/LocationDtos.kt` (architecture/location.md, ADR-0025).
+
+- `PATCH /household` accepts `locationHistoryDays` (LOC-005, M4-02): one of 7, 14, 30, 60, 90 (default 30), else
+  `VALIDATION_FAILED` with `locationHistoryDays: OUT_OF_RANGE`. The value is part of the synced `household` row.
+- `GET /location/rules` → **200** `LocationRules {rules: [LocationRule {id, subject, target, level}]}` in the saved
+  order. A party is `{kind: "everyone"|"group"|"member", id?}`; levels are `current` and `history`.
+- `PUT /location/rules` body `PutLocationRulesRequest {rules: [LocationRuleInput]}` replaces all rules (at most 100) and
+  answers **204**; every PUT gives the rules new ids. Shape errors (`Validators.locationRules`) and group or member ids
+  that are not live in the household answer `VALIDATION_FAILED` with `rules.N.subject` / `rules.N.target` (and
+  `rules.N.level` for `none`) `INVALID_FORMAT`; nothing is stored then. Rule changes record no sync change.
+- New households get the default rules (Adults see everybody with history, Kids see Adults now). Deleting a group or
+  removing a member deletes the rules naming it.
+
+Positions, sharing state and the live channel (M4-03, ADR-0024; behaviour in
+[location.md § Positions, state, live channel](location.md#positions-state-live-channel-m4-03)). All need a session.
+
+- `PUT /location/me/sharing` body `SetSharingRequest {status, pausedUntil?, reason?}` → **204**. `sharing` makes the
+  calling session the sharing one (another phone of the member learns it on its next upload); `paused` needs
+  `location.pause_own` (`FORBIDDEN`), `pausedUntil` in the future and at most 7 days ahead; `off_on_phone` needs a
+  `reason` and changes something only when sent by the sharing session. `never`, a misplaced `pausedUntil` or
+  `reason` → `VALIDATION_FAILED` (`Validators.setSharing`).
+- `POST /location/positions` body `UploadPositionsRequest {positions: [PositionFix]}` (1…200, any order, else
+  `VALIDATION_FAILED` `positions: OUT_OF_RANGE`) → **200** `UploadPositionsResponse {accepted, sharingHere, paused,
+  pausedUntil?, refreshRequested}`. `accepted` counts fixes stored by this request; invalid fixes, fixes older than
+  24 h or more than 5 min in the future and fixes already stored (same member and `recordedAt`) are skipped silently.
+  `sharingHere = false`: this session does not share (stop). `paused`: nothing was stored. `refreshRequested`:
+  somebody pressed «Обновить» and this request stored no fix.
+- `GET /location/now` (`location.view`) → **200** `LocationNow {members: [MemberLocation], serverTime}`: every live member
+  the caller sees (level `current` or `history`), the caller included; members who never shared have status `never`.
+  `placeId`, `placeSince` (M4-04): the live place the member is in (the smallest radius when nested) and since when, as
+  decided by the server's arrive / leave detection (LOC-022); missing outside every place.
+- `GET /location/history?memberId=…&date=YYYY-MM-DD` (`location.view`) → **200** `LocationHistory {memberId, date,
+  points: [TrackPoint]}`: that household-local day, oldest first, accuracy ≤ 200 m, at most 3 000 points (first and
+  last kept), empty outside the retention period. Member not visible, unknown or of another household → `NOT_FOUND`;
+  visible only now → `FORBIDDEN`; bad date → `VALIDATION_FAILED`.
+- `POST /location/members/{id}/refresh` (`location.view`) → **202**, no body. Not visible → `NOT_FOUND`; not sharing
+  (paused, off, never) → `CONFLICT`. Sends a data-only push `{"kind":"location_refresh"}` to the sharing session at most
+  once per 60 s; the request also rides on that phone's next upload response.
+- `GET /location/me/watchers` → **200** `LocationWatchers {viewers: [Watcher {memberId, level}], alerts: [AlertWatcher
+  {memberId, placeIds}]}`: who sees the caller (the caller left out) and whose arrive / leave alerts about the caller
+  name live places, only for subscribers who still see the caller.
+- `GET /location/config` → **200** `LocationConfig {mapStyleUrl, mapDarkStyleUrl, addresses, historyDays}`
+  (`addresses`: the server has an address service, `LARES_GEOCODER_URL` not empty).
+- WebSocket `GET /location/live` (bearer token on the upgrade request; `location.view`, else the socket closes with code
+  4403). Server → client JSON `LiveMessage`: `{"type":"snapshot","now":LocationNow}` on connect and after visibility or
+  place changes; `{"type":"member","member":MemberLocation}` when a visible member's position or state changes;
+  `{"type":"gone","memberId":…}` when a member is no longer visible (a snapshot follows). Clients send nothing; ping
+  every 30 s. Code 4401 closes it when the session ends or the member is removed.
+
+Addresses (M4-04, ADR-0026; [location.md § Geofences, notifications, addresses](location.md#geofences-notifications-addresses-m4-04)).
+The server asks its configured Nominatim-compatible service; phones never do. Both endpoints answer from server caches
+when they can; the server sends at most one request per second and gives up after waiting 5 s (then the answer is empty).
+
+- `GET /location/address?lat=…&lon=…` (`location.view`) → **200** `AddressLabel {label?}`, e.g. `{"label":"Тверская
+  улица, 7"}`; `{}` when unknown, when the service fails or when addresses are off. Coordinates are rounded to 4 decimals
+  (≈ 11 m) before they are sent. Missing, unparsable or out-of-range `lat` / `lon` → `VALIDATION_FAILED` with
+  `lat` / `lon`: `REQUIRED`, `INVALID_FORMAT` or `OUT_OF_RANGE`. More than 60 requests per member per minute →
+  `RATE_LIMITED`.
+- `GET /location/search?q=…` (`location.manage_places`) → **200** `AddressSearch {results: [AddressResult {label,
+  latitude, longitude}]}`, at most 5, labels with the city («Тверская улица, 7, Москва»); `{"results":[]}` when nothing is
+  found, on failure or when addresses are off. Results near the household's first place (±0.5°) come first. `q` is
+  trimmed; shorter than 3 or longer than 200 characters → `VALIDATION_FAILED` `q: TOO_SHORT|TOO_LONG`. More than 10
+  requests per member per minute → `RATE_LIMITED`.
+- The language of the labels is the caller's push registration language, else the household's default language.
 
 ### Notification endpoint details (M0-09)
 
@@ -158,3 +237,10 @@ DTOs live in `contract/…/api/notifications/NotificationDtos.kt` (FND-051, FND-
   `task.completed` — the first non-skipped completion of an occurrence by someone else, if the creator opted in;
   `task.overdue` — the server's overdue job (to the creator). Recipients need `tasks.view`. `task.reminder` is local
   only (never pushed).
+- Location notifications (M4-04), `entityType = "location"`, `entityId` = the member the notice is about; texts in
+  [location design § Geofences, notifications, addresses](location.md#geofences-notifications-addresses-m4-04):
+  `location.place` — the member arrived at or left a place (LOC-021), to subscribers whose own alert row about the
+  member names the place and who may still see the member; changes found from positions older than 15 minutes send
+  nothing. `location.sharing` — a member without `location.pause_own` turned sharing off on the phone or signed out,
+  and when sharing is back (LOC-012), to administrators other than the member. Both are muted per member like other
+  types. `location_refresh` (`kind`, data-only, to one session) asks the sharing phone for a position (M4-03).

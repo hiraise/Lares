@@ -32,6 +32,11 @@ sealed interface NavTarget {
     data class Person(
         val id: String,
     ) : NavTarget
+
+    /** The Map centred on a member (location notifications, the sharing notification; plan M4-10). */
+    data class MapMember(
+        val memberId: String,
+    ) : NavTarget
 }
 
 /**
@@ -57,6 +62,8 @@ class PendingNavigation {
 
                 EntityTypes.PERSON -> NavTarget.Person(entityId)
 
+                LOCATION -> NavTarget.MapMember(entityId)
+
                 else -> return false
             }
         pending.value = target
@@ -72,6 +79,11 @@ class PendingNavigation {
 
     /** Takes [target] if it is still pending, so it is handled once. */
     fun consume(target: NavTarget): Boolean = pending.compareAndSet(target, null)
+
+    companion object {
+        /** `entityType` of location notifications; the id is the member (server `LocationNotifier.ENTITY_TYPE`). */
+        const val LOCATION = "location"
+    }
 }
 
 /** Whether a tapped task can be opened; a task that was just assigned may still be on its way, so it syncs once. */

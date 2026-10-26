@@ -40,6 +40,7 @@ object HouseholdRepository {
             it[timeZone] = data.timeZone
             it[currency] = data.currency
             it[defaultLanguage] = data.defaultLanguage
+            it[locationHistoryDays] = data.locationHistoryDays
             it[seq] = 0
             it[createdAt] = now
             it[updatedAt] = now
@@ -73,6 +74,7 @@ object HouseholdRepository {
             it[timeZone] = data.timeZone
             it[currency] = data.currency
             it[defaultLanguage] = data.defaultLanguage
+            it[locationHistoryDays] = data.locationHistoryDays
             it[HouseholdTable.seq] = seq
             it[updatedAt] = now
         }
@@ -92,6 +94,7 @@ object HouseholdRepository {
                             timeZone = it[HouseholdTable.timeZone],
                             currency = it[HouseholdTable.currency],
                             defaultLanguage = it[HouseholdTable.defaultLanguage],
+                            locationHistoryDays = it[HouseholdTable.locationHistoryDays],
                         ),
                 )
             }

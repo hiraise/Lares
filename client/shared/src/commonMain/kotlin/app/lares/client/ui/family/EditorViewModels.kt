@@ -19,11 +19,17 @@ import app.lares.client.ui.common.FieldError
 import app.lares.client.ui.common.UiError
 import app.lares.client.ui.common.fieldErrors
 import app.lares.client.ui.common.toUiError
+import app.lares.client.ui.location.AlertsLogic
+import app.lares.client.ui.location.AlertsSheetUi
+import app.lares.client.ui.location.AlertsTarget
+import app.lares.client.ui.location.LiveLocations
+import app.lares.client.ui.location.LiveLocationsState
 import app.lares.contract.api.ErrorCode
 import app.lares.contract.api.FieldErrorCode
 import app.lares.contract.api.admin.CreateGroupRequest
 import app.lares.contract.api.admin.UpdateGroupRequest
 import app.lares.contract.api.admin.UpdateHouseholdRequest
+import app.lares.contract.api.location.VisibilityLevel
 import app.lares.contract.entities.ContactData
 import app.lares.contract.entities.ContactKind
 import app.lares.contract.entities.PaletteColor
@@ -208,6 +214,18 @@ data class PersonUiState(
     val color: PaletteColor get() = form.color ?: fallbackColor
 }
 
+/** «Где сейчас» on a member's page (LOC-017, LOC-021): the status line, «История», the viewer's alerts about them. */
+data class PersonLocationUi(
+    val memberId: String,
+    val status: String,
+    /** The viewer sees this member with history (LOC-004). */
+    val canHistory: Boolean,
+    /** Places the viewer gets arrive / leave alerts on about this member. */
+    val alertPlaces: List<String>,
+    /** The open alerts sheet. */
+    val alerts: AlertsSheetUi? = null,
+)
+
 /**
  * A person's form (FND-031, FND-034): relatives, members' profiles and the own profile. Written through sync, so it
  * works offline. Everyone edits their own profile; other persons need `persons.manage`.
@@ -221,6 +239,7 @@ class PersonViewModel(
     private val clock: Clock,
     private val personId: String?,
     calendar: CalendarRepository? = null,
+    private val live: LiveLocations? = null,
 ) : ViewModel() {
     private val me = sessionManager.me()
     private val form = MutableStateFlow(PersonUiState(loaded = personId == null, isNew = personId == null))
@@ -242,6 +261,49 @@ class PersonViewModel(
                 canAddMemorable = seesCalendar && dates != null && permissions.has(Permission.CALENDAR_CREATE),
             )
         }.stateIn(viewModelScope, SharingStarted.Eagerly, form.value)
+
+    private val alertsOpen = MutableStateFlow(false)
+    private var latestLocation: LiveLocationsState? = null
+
+    /**
+     * «Где сейчас» for a member the viewer sees (not for relatives, oneself or members out of sight). Apart from the
+     * eager [state] and shared `WhileSubscribed`, so the live location socket closes with the page.
+     */
+    val whereNow: StateFlow<PersonLocationUi?> =
+        if (personId == null || live == null) {
+            MutableStateFlow(null)
+        } else {
+            combine(live.observe(), alertsOpen) { location, open ->
+                latestLocation = location
+                val located = location.members.firstOrNull { it.member.personId == personId && it.member.memberId != location.me }
+                located?.let {
+                    val member = it.member
+                    val rows = AlertsLogic.memberRows(member, location.places, location.alerts)
+                    PersonLocationUi(
+                        memberId = member.memberId,
+                        status = it.status,
+                        canHistory = member.level == VisibilityLevel.HISTORY,
+                        alertPlaces = rows.filter { row -> row.checked }.map { row -> row.title },
+                        alerts = if (open) AlertsSheetUi(AlertsTarget.Member(member.memberId), member.name, rows) else null,
+                    )
+                }
+            }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+        }
+
+    fun openAlerts() = alertsOpen.update { true }
+
+    fun closeAlerts() = alertsOpen.update { false }
+
+    /** Writes the viewer's alert row about this member (works offline). */
+    fun saveAlerts(selected: Set<String>) {
+        val sheet = whereNow.value?.alerts ?: return
+        alertsOpen.update { false }
+        val changes = AlertsLogic.changes(sheet.target, sheet.rows, selected, latestLocation?.alerts.orEmpty())
+        viewModelScope.launch {
+            app.lares.client.ui.common
+                .attempt { live?.saveAlerts(changes) }
+        }
+    }
 
     init {
         viewModelScope.launch {

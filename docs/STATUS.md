@@ -1,27 +1,77 @@
 # Project status
 
-Updated: 2026-10-25
+Updated: 2026-10-26
 
 ## Phase
 
 **M0 Foundation — all plans M0-01…M0-11 done; M0 acceptance with the customer pending.
 M1 Tasks — all plans M1-01…M1-07 done; M1 acceptance with the customer next.
 M2 Shopping lists — all plans M2-01…M2-06 done; M2 acceptance with the customer next.
-M3 Calendar — all plans M3-01…M3-08 done; M3 acceptance with the customer next, then release v0.4.0.**
+M3 Calendar — all plans M3-01…M3-08 done, released as v0.4.0; M3 acceptance with the customer next.
+M4 Location — all plans M4-01…M4-10 done; M4 acceptance with the customer next (checklist in the M4-10 handoff).**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
 
-[M1 Tasks](product/roadmap.md#m1-tasks): implemented, customer acceptance pending (together with M0). Specs
-`foundation`, `tags` and `tasks` approved. Next: [M2 Shopping lists](product/roadmap.md#m2-shopping-lists) — plans ready
-([M2 plans](plans/README.md#m2-plans)), shopping spec approved.
+[M4 Location](product/roadmap.md#m4-location): planned — [location spec](product/features/location.md) (approved,
+Q-025…Q-029 answered), [location design](architecture/location.md), [M4 plans](plans/README.md#m4-plans). Done: M4-01…
+M4-10. Next: M4 acceptance.
+Acceptance of M0–M3 is still pending.
 
-**Active release branch: `release/0.4.0`** (next: M3). Commit approved work here; `main` is protected
-([release process](process/release.md), ADR-0020). Latest release: [v0.3.0](https://github.com/hiraise/lares/releases/tag/v0.3.0)
-(M2, 2026-10-24).
+**Active release branch: `release/0.5.0`** (M4). `release/0.4.1` was not needed: the customer found no bugs in v0.4.0. Commit approved work here; `main` is protected
+([release process](process/release.md), ADR-0020). Latest release: [v0.4.0](https://github.com/hiraise/Lares/releases/tag/v0.4.0)
+(M3, 2026-10-25).
 
 ## Last completed
 
+- 2026-10-26 M4-10 Alerts, rules, everywhere, manual: arrive / leave alerts chosen on the member card, the person page
+  or a place; «Кто меня видит» / «О вас сообщают»; administrators edit «кто кого видит» and the history period; Today
+  «Семья сейчас», person page «Где сейчас»; location notification switches and taps; user manual "Map". All LOC MVP
+  requirements done. 19 new tests; emulator walkthrough (push not testable there: no ntfy).
+- 2026-10-26 M4-09 History and places: «История» on a member's card (day strip of the kept days, the track and stops
+  on the map, «Школа №12 · 8:25–14:40», «Дома · с 15:15», addresses for other stops); «Места» with who is where, the
+  place sheet (address, edit, delete), the place editor (long press on the map, «Я здесь», address search, icon,
+  radius 50–1000 m; offline save); read-only for kids. 24 new tests; emulator walkthrough of all scenarios (one layout
+  fix).
+- 2026-10-26 M4-08 Map screen: More › Карта with the OpenStreetMap map (light / dark), places, pins in personal colors
+  (grey when paused, off or stale), the family sheet with the own sharing row and the others (place or address, age,
+  battery), the member card with «Обновить», «Места», «Показать всех» / «Моё местоположение», «Нет связи». 18 new
+  tests; emulator walkthrough. Debug APK 28 → 69 MB (map renderer).
+- 2026-10-26 M4-07 Android location sharing: Settings › Геопозиция with the setup (precise location, «Разрешить в
+  любом режиме», notifications, battery with vendor hints), the foreground service with «Вы делитесь геопозицией»,
+  pause and «Продолжить» (not for kids), restart after reboot, «Обновить», location off / permission revoked reported.
+  20 new tests; emulator walkthrough of all scenarios (the emulator uses `gps`: its `fused` passes no `geo fix`).
+- 2026-10-26 M4-06 Location in the client core: places and own alerts work offline; the map data comes live (socket,
+  then polling, offline the last snapshot); status lines «Дома · с 15:10», «Нет данных с 18:05», «В пути · сейчас»
+  (en, ru); this phone's sharing — enable, pause, resume, report off, another phone takes over — remembered and sent
+  when online; positions queued up to 24 h and uploaded in batches; tracking policy (moving / still). Dev tools
+  `seed.py location|move`, `emu.sh geo|route`. 53 unit and 4 multi-device tests.
+- 2026-10-26 M4-05 Load test with location: 20 phones, 10 of them sending a position every 30 s, 3 open maps, places
+  with arrivals and departures — server memory max 254 of 256 MiB, p95 95 ms (uploads 37 ms), start 2–3.4 s, no errors;
+  with 10 phones close to M0. Targets met without tuning, little memory margin
+  ([perf/M4-location.md](architecture/perf/M4-location.md)).
+- 2026-10-25 M4-04 Geofences, location notifications and addresses on the server: the server decides who arrived at or
+  left a place (two agreeing positions, edge zone and inaccurate positions ignored) and shows the place in «где сейчас»;
+  subscribers get «Аня · Школа №12 — Прибытие в 08:52»; administrators get «Геопозиция выключена» / «снова передаётся»
+  about kids; street addresses and address search through the configured OpenStreetMap service (cached, 1 request/s,
+  can be turned off). 27 new server tests.
+- 2026-10-25 M4-03 Positions, sharing and the live channel on the server: phones upload positions (batches, offline up
+  to 24 h, re-sends ignored) and set sharing on, pause or off; one phone per member shares; «где сейчас» and day
+  histories only for those allowed to see, live changes over a separate socket, «Обновить» by push and in the upload
+  answer, signing out stops sharing, old history deleted hourly; map style settings for the server. 28 new server tests.
+- 2026-10-25 M4-02 Places, alerts and visibility rules on the server: places and arrive / leave alert rows sync (alerts
+  only to their subscriber), administrators read and replace the «кто кого видит» rules (`GET/PUT /location/rules`),
+  default rules for new families and (migration V9) for existing ones, rules and alerts go with deleted groups and
+  members, history retention days in the household settings; 10 new server tests.
+- 2026-10-25 M4-01 Location contract: places and arrive / leave alerts as sync data, position and live DTOs, who sees
+  whom (`LocationVisibility`, default rules), distances and circles, geofence hysteresis, stops in a day's history,
+  place write rules, validators, new notification types; 32 new contract tests.
+- 2026-10-25 M4 planning: location spec detailed (draft), customer answered Q-025…Q-029 (pause with durations and the
+  last position, a mark and an admin notification when a kid's phone stops sharing, «Обновить» for everybody who sees the
+  member, own arrive / leave alerts with transparency, street addresses via OpenStreetMap through the server). Design
+  [architecture/location.md](architecture/location.md), ADR-0024…ADR-0028, plans M4-01…M4-10.
+- 2026-10-25 Release **v0.4.0** (M3 Calendar): release pull request #3 merged, signed APK, server image
+  `ghcr.io/hiraise/lares-server:0.4.0`, GitHub release. Next branch `release/0.4.1` for the customer's fixes.
 - 2026-10-25 M3-08 Calendar everywhere: «Скоро» on Today (date tiles, «Бабушка Валя, 78 лет · Понедельник · через 3
   дня», «Ещё N» opens «Список»), «События» on the tag page, «Исполнится 78 · через 3 дня» and «Даты» with «Добавить
   памятную дату» on the person page, Settings switches for calendar notifications and event reminders and the
@@ -125,11 +175,13 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 1. M0 and M1 acceptance with the customer (APK v0.2.0, walkthrough on real phones, Russian changelog; checklist in the M1-07
    handoff).
 2. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
-3. M4 plan: re-run the load test with location uploads every 30 s (ADR-0015).
+3. M4 acceptance with the customer (checklist in the M4-10 handoff): real phones with ntfy for arrive / leave
+   notifications, battery over a day (Xiaomi / Samsung); then release v0.5.0 and set the location spec to
+   `implemented`.
 4. After the M1 acceptance: set the tasks spec to `implemented`.
 5. M2 acceptance with the customer (checklist in the M2-06 handoff); after it set the shopping spec to `implemented`.
-6. M3 acceptance with the customer (checklist in the M3-08 handoff), then release v0.4.0; after it set the calendar
-   spec to `implemented`.
+6. M3 acceptance with the customer on v0.4.0 (checklist in the M3-08 handoff); fixes go to `release/0.5.0`; after the
+   acceptance set the calendar spec to `implemented`.
 
 ## Plan progress
 
@@ -146,7 +198,11 @@ See the table in [plans README](plans/README.md#m0-plans).
 | Google developer verification for sideloaded apps (rolling out from 2026, global 2027) | APK / F-Droid installs may require a verified developer | Re-check before M6; a developer account likely covers it |
 | Loss or leak of the release signing key | No updates for installed apps / fake updates | Lares-only key, backup archive kept off the machine by the customer, fingerprint checked in the release workflow (ADR-0019) |
 | OEM battery optimizations (Xiaomi, Huawei, Samsung) kill background location | Gaps in location tracking | In-app guide to exclude the app from battery optimization; detect and warn about stale positions |
-| JVM server memory above budget | Stack does not fit a 1 GB VPS | M0-11: RSS max 237 of 256 MiB after tuning, stack ~320 MiB; re-measure in M4 with location; next lever GraalVM native image |
+| JVM server memory above budget | Stack does not fit a 1 GB VPS | M4-05 with location (20 devices, 10 sharing): RSS max 254 of 256 MiB, p95 95 ms, stack ~360 MiB — met with little margin; levers in [M4-location](architecture/perf/M4-location.md#conclusion-against-adr-0013), last GraalVM native image |
+| maplibre-compose is pre-1.0 (breaking changes in minor releases) | Map code churn on upgrades | Pinned 0.20.0, all map code behind `FamilyMapView` (ADR-0027); upgrades as their own plan |
+| APK size with the map renderer (debug 69 MB; native libs ~13 MB per ABI, stored uncompressed) | Slow APK downloads | Decide in the release process: per-ABI APKs or compressed native libraries |
+| Public Nominatim usage policy (1 req/s, no bulk, may ask apps to switch) | Addresses stop working | On-demand lookups only, caches, rate limit, configurable URL, off switch (ADR-0026) |
+| Android 17 (targetSdk 37) requires `ACCESS_LOCAL_NETWORK` for servers on a home network | A LAN-only server unreachable | Check in the M4 acceptance; the documented setup uses a public domain |
 | Compose Multiplatform web target is Beta | Web client (M7) may need workarounds | Re-evaluate at M7; fallback is a separate web UI |
 | Sync engine complexity | Data loss or conflicts | Protocol accepted (sync.md, ADR-0008); server invariants (M0-05) and multi-device convergence tests (M0-06) run in `check` |
 | Flexible permissions make UI and testing harder | Confusing group editor, permission bugs | Templates "Adults"/"Kids", plain wording, permission matrix tests (ADR-0014) |

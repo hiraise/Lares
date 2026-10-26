@@ -91,8 +91,9 @@ suspend fun HttpClient.memberSession(
     adminToken: String,
     login: String,
     groupIds: Set<UUID>,
+    displayName: String = login,
 ): AuthResult {
-    createMember(adminToken, CreateMemberRequest(login, login, MEMBER_PASSWORD, groupIds.mapTo(mutableSetOf(), UUID::toString)))
+    createMember(adminToken, CreateMemberRequest(displayName, login, MEMBER_PASSWORD, groupIds.mapTo(mutableSetOf(), UUID::toString)))
     val response = login(login, MEMBER_PASSWORD)
     assertEquals(HttpStatusCode.OK, response.status, "login $login")
     return response.body()

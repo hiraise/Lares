@@ -1,0 +1,38 @@
+-- Schema 5 → 6 (M4-06): places, own arrive / leave alerts, the position queue, this phone's location state and the
+-- last map snapshot (DATA_SCHEMA_VERSION 5 makes the next sync a full resync).
+
+CREATE TABLE place (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    icon TEXT NOT NULL,
+    latitude REAL NOT NULL,
+    longitude REAL NOT NULL,
+    radius_m INTEGER NOT NULL,
+    address TEXT,
+    created_by TEXT NOT NULL
+);
+
+CREATE TABLE place_alert (
+    id TEXT NOT NULL PRIMARY KEY,
+    member_id TEXT NOT NULL,
+    subscriber_id TEXT NOT NULL,
+    place_ids TEXT NOT NULL
+);
+
+CREATE TABLE position_outbox (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    recorded_at INTEGER NOT NULL,
+    json TEXT NOT NULL
+);
+CREATE INDEX position_outbox_recorded ON position_outbox (recorded_at);
+
+CREATE TABLE location_pref (
+    key TEXT NOT NULL PRIMARY KEY,
+    value TEXT NOT NULL
+);
+
+CREATE TABLE location_snapshot (
+    key TEXT NOT NULL PRIMARY KEY,
+    json TEXT NOT NULL,
+    fetched_at TEXT NOT NULL
+);

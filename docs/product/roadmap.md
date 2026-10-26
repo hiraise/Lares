@@ -59,6 +59,11 @@ Today, the tag page section, notification settings and taps (M3-01…M3-08).
 
 Location sharing from phones, live map, history (30 days by default), places and geofence notifications,
 visibility rules by groups.
+Implemented: Android sharing with the setup, pause and the persistent notification, battery-aware tracking, offline
+queue, «Обновить», the Map with places, status lines and street addresses, day history with stops, the place editor
+with address search, arrive / leave notifications chosen by each member, «Кто меня видит» / «О вас сообщают», the rules
+editor and history period for administrators, «Семья сейчас» on Today, «Где сейчас» on the person page, notification
+switches and taps, the user manual "Map" (M4-01…M4-10).
 
 ## M5 Budget
 

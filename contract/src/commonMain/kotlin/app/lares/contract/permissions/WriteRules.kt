@@ -21,7 +21,8 @@ object WriteRules {
      * coarse `tasks.view` gate; the entity-level decision is [TaskRules]. `shopping_list` needs `shopping.manage_lists` and
      * `shopping_item` `shopping.edit`; the entity-level checks are [ShoppingRules]. `event` needs `calendar.view`;
      * `event_occurrence` and `event_reminder` too, but are never deleted by clients (ADR-0022, ADR-0023); the
-     * entity-level checks are [EventRules]. Types not listed here (including read-only
+     * entity-level checks are [EventRules]. `place` needs `location.manage_places`; `place_alert` `location.view`, upsert
+     * only; the entity-level checks are [PlaceRules]. Types not listed here (including read-only
      * `household`, `member`, `group`) cannot be changed through sync.
      */
     fun canMutate(
@@ -61,6 +62,14 @@ object WriteRules {
 
             EntityTypes.EVENT_OCCURRENCE, EntityTypes.EVENT_REMINDER -> {
                 op == MutationOp.UPSERT && permissions.has(Permission.CALENDAR_VIEW)
+            }
+
+            EntityTypes.PLACE -> {
+                permissions.has(Permission.LOCATION_MANAGE_PLACES)
+            }
+
+            EntityTypes.PLACE_ALERT -> {
+                op == MutationOp.UPSERT && permissions.has(Permission.LOCATION_VIEW)
             }
 
             else -> {

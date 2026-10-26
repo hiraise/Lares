@@ -1,0 +1,24 @@
+-- The member's own arrive / leave alerts (LOC-021, ADR-0023 pattern): the server sends only the logged-in member's rows.
+-- The id is derived from the watched member and the subscriber; `place_ids` is a JSON array, empty = off.
+-- Clients never delete these rows.
+CREATE TABLE place_alert (
+    id TEXT NOT NULL PRIMARY KEY,
+    member_id TEXT NOT NULL,
+    subscriber_id TEXT NOT NULL,
+    place_ids TEXT NOT NULL
+);
+
+selectAll:
+SELECT * FROM place_alert ORDER BY member_id, subscriber_id;
+
+selectById:
+SELECT * FROM place_alert WHERE id = ?;
+
+upsert:
+INSERT OR REPLACE INTO place_alert (id, member_id, subscriber_id, place_ids) VALUES (?, ?, ?, ?);
+
+deleteById:
+DELETE FROM place_alert WHERE id = ?;
+
+deleteAll:
+DELETE FROM place_alert;

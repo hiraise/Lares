@@ -40,3 +40,8 @@ Q-001…Q-012 answered by the customer on 2026-10-22 during kickoff; later answe
 | Q-022 | Birthday reminders (2026-10-24) | Configurable per member; by default at 09:00 every day starting 3 days before the birthday, through the day itself (CAL-016). |
 | Q-023 | Tasks in the calendar (2026-10-24) | All tasks with a date show in the calendar list and the day list (current occurrence only), with a switch, on by default (CAL-009). |
 | Q-024 | Week view (2026-10-24) | A grid by hours: seven columns, all-day events on top (CAL-008). |
+| Q-025 | Pausing location sharing (2026-10-25) | «На 1 час», «До утра», «Пока не включу»; others see «на паузе» with the last position (LOC-010). |
+| Q-026 | Sharing turned off on a kid's phone (2026-10-25) | A mark on the map and a notification to administrators; no data for a while (battery, network) — a mark only (LOC-012, LOC-013). |
+| Q-027 | «Обновить» a member's position (2026-10-25) | Yes, for everybody who sees the member (LOC-011). |
+| Q-028 | Arrive / leave notifications (2026-10-25) | Everybody who sees a member sets their own; nothing by default; the member sees who gets them (LOC-021, LOC-015). |
+| Q-029 | Addresses (2026-10-25) | Street addresses and address search through an OpenStreetMap service via the server; the administrator can turn it off (LOC-014, LOC-024). |

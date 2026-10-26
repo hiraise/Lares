@@ -35,6 +35,7 @@ import app.lares.client.resources.ic_location_on
 import app.lares.client.resources.ic_notifications
 import app.lares.client.resources.ic_sell
 import app.lares.client.resources.ic_settings
+import app.lares.client.resources.map_tile_subtitle
 import app.lares.client.resources.more_devices
 import app.lares.client.resources.more_family_groups
 import app.lares.client.resources.more_family_members
@@ -91,7 +92,13 @@ fun MoreScreen(
                 buildList {
                     if (Section.MAP in state.sections) {
                         add(
-                            Tile(Res.drawable.ic_location_on, stringResource(Res.string.section_map), null, true, PaletteColor.TEAL) {
+                            Tile(
+                                Res.drawable.ic_location_on,
+                                stringResource(Res.string.section_map),
+                                stringResource(Res.string.map_tile_subtitle),
+                                true,
+                                PaletteColor.TEAL,
+                            ) {
                                 navigation.onSection(Section.MAP)
                             },
                         )

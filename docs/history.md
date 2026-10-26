@@ -316,3 +316,105 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   and deleted events (`EventLinks`), user manual "Calendar" (en, ru), CHANGELOG, roadmap and spec statuses (all CAL MVP
   requirements `done`, TSK-022 `done`). 10 new tests (client 333, multi-device 35); emulator walkthrough found no bugs
   (the «Дни рождения» row moved before the test switch).
+- 2026-10-25 Release **v0.4.0** (M3 Calendar): release pull request #3 merged, signed APK, server image
+  `ghcr.io/hiraise/lares-server:0.4.0`, GitHub release; branch `release/0.4.1` started for fixes.
+- 2026-10-25 M4 planning: location spec detailed (LOC-001…LOC-027, draft), customer answered Q-025 (pause with durations,
+  others see «на паузе» and the last position), Q-026 (sharing turned off on a kid's phone: mark + notification to
+  administrators), Q-027 («Обновить» for everybody who sees the member), Q-028 (everybody sets their own arrive / leave
+  alerts; the member sees who gets them), Q-029 (street addresses and address search through OpenStreetMap via the
+  server). Design in [architecture/location.md](architecture/location.md), ADR-0024 (positions outside the sync log,
+  live channel), ADR-0025 (visibility rules), ADR-0026 (addresses through a server geocoder, on demand), ADR-0027
+  (maplibre-compose behind an expect composable), ADR-0028 (foreground service with moving / still modes), plans
+  M4-01…M4-10.
+- 2026-10-25 M4 plans reviewed by two fresh agents from the executor's point of view (server half, client half); 42
+  findings fixed — among them: live sockets closed on sign-out and checked per message, retention also clears the last
+  position, «Обновить» compares server times only and never fires during a pause, all session-ending paths covered,
+  geocoder off-switch that survives `value()` and compose defaults, seed sessions with refresh tokens, Android 8–10
+  background-permission paths, a client compile break from new notification types.
+- 2026-10-25 Customer approved the location spec; no bugs found in v0.4.0, so `release/0.4.1` is dropped and M4 work goes
+  to `release/0.5.0` (started from `main`, the 0.4.1 status commit carried over).
+- 2026-10-25 M4-01 Location contract: sync types `place` and `place_alert` (derived id `Ids.placeAlertRowId`, `derive`
+  now takes a byte marker, existing ids unchanged), REST and live DTOs with lenient enums, `HouseholdData.locationHistoryDays`,
+  notification types `location.place` / `location.sharing` and the `location_refresh` push, `Geo` (haversine, circle),
+  `LocationVisibility` with default rules, `Geofence` hysteresis, `Stops.detect`, `PlaceRules` and `WriteRules`,
+  validators and `normalizePlace`; `seed.py place_alert_row_id`; client notification labels (en, ru). 32 new contract
+  tests (208 in the module).
+- 2026-10-25 M4-02 Places, alerts and visibility rules on the server: V9 (`place`, `place_alert`, `location_rule`,
+  `household.location_history_days`, default rules for existing households by group name), sync handlers for places
+  (`PlaceRules`, `location.view`) and alert rows (derived id, only the subscriber writes and pulls), `LocationHub`,
+  `LocationVisibilityService` with `GET/PUT /location/rules` and per-viewer levels, defaults at setup, rules removed with
+  their group or member, alert rows tombstoned with either member, housekeeping purge, `LocationFixtures`. 10 new server
+  tests (208 in the module), rules endpoints added to the admin permission matrix. Fixed on the way: untyped NULLs in the
+  V9 default-rule insert.
+- 2026-10-25 M4-03 Positions, sharing state and the live channel on the server: V10 (`position`, `location_state`),
+  `PUT /location/me/sharing`, `POST /location/positions` (idempotent on member + time, per-member row lock),
+  `GET /location/now`, `/history` (household-local day, accuracy ≤ 200 m, thinned to 3 000 evenly spaced points),
+  `POST /location/members/{id}/refresh` (`NotificationService.sendToSession`, once per 60 s), `/me/watchers`, `/config`,
+  WS `/location/live` (snapshot / member / gone, per-viewer levels, close 4401 / 4403), `LocationSessions` hooks in
+  logout, session revoke, refresh-token revoke and password reset, member removal deletes location rows,
+  `LocationRetentionJob`, `AppConfig.location` and the map style variables in deploy, `LocationFixtures` upload and
+  sharing helpers. 28 new server tests (236 in the module). Deviation: history thinning by even spacing, because the
+  plan's "every k-th" formula could not give the 3 000 points its test expects.
+- 2026-10-25 **M4-04** Geofences, location notifications and addresses on the server: `V11` `place_presence`,
+  `LocationGeofencing` (contract hysteresis per member and place, lazy rows, reset on a moved / resized place, deleted
+  with the place and the member), `MemberLocation.placeId/placeSince` in `GET /now` and the live channel;
+  `LocationNotifier` (`location.place` to subscribers who still see the member, nothing for transitions older than
+  15 min; `location.sharing` off / back about members without `location.pause_own` to other administrators, also on
+  signing out) with en/ru texts; `NominatimLookup`, `AddressService` (LRU caches, rounding to 4 decimals, one request per
+  second, 5 s wait limit, failures kept 10 min), `GET /location/address` and `/location/search` with permissions,
+  per-member limits and validation; `LARES_GEOCODER_URL` / `_EMAIL` in deploy; install manual "Addresses" (en, ru).
+  27 new server tests (263 in the module), a fake Nominatim with recorded responses; tests never reach the internet.
+- 2026-10-26 M4-05 Load simulation with location: `tools/loadsim` got sharing phones (one per member, one fix every
+  30 s along a 3 km loop through the family places, walking near places, driving between), map viewers (`/location/live`,
+  `now`, `history`, «Обновить»), places and own `place_alert` rows in the setup, location totals in the report;
+  `loadtest.sh` turns addresses off and takes `LOADTEST_SERVER_CPUS`. Runs: 20 devices / 10 sharing, 30 min — RSS max
+  254 of 256 MiB, p95 95 ms (uploads 37 ms), cold start 2.0–3.4 s, 0 errors, 20 arrivals and departures; 10 devices —
+  RSS max 247, p95 46 ms (M0: 237, 52); 1 CPU, 5 min — p95 73 ms. Targets met without tuning, memory margin small
+  ([perf/M4-location.md](architecture/perf/M4-location.md)). 4 new loadsim tests (9 in the module).
+
+- 2026-10-26 **M4-06** Location in the client core: local tables (schema 6, data schema 5) for places, own arrive /
+  leave alerts, the position queue, this phone's sharing state and the last map snapshot; place adapters with the
+  server's rules, `PlacesRepository` / `PlacesWriter` (offline, changed fields, derived alert rows); all location API
+  calls incl. the live socket; `LocationRepository` (live → polling → cached snapshot, stale and moving on minute
+  ticks, privacy rules for the cache, history with stops, cached addresses and config); `LocationTexts` status lines
+  and ages (en / ru resources); `SharingController` (enable online only, pause «На 1 час» / «До утра» / «Пока не
+  включу», pending requests, expiry, report off once, another phone takes over), `PositionQueue`, `PositionUploader`,
+  `TrackingPolicy`; `location_refresh` push; dev tools `seed.py location|move`, stored seed sessions for `call --as`,
+  `emu.sh geo|route home-school`. 53 new unit tests, 4 multi-device tests. Open for M4-07: confirm that the emulator's
+  `geo fix` reaches the `fused` provider.
+- 2026-10-26 **M4-07** Android location sharing: `LocationService` (a `location` foreground service with the persistent
+  notification «Вы делитесь геопозицией» / «Пауза до 15:30», «Пауза на 1 час» only with `location.pause_own`,
+  «Продолжить»), platform providers through `LocationManagerCompat` (`fused` on API 31+, `gps` below and on the
+  emulator, `passive` in STILL), significant-motion trigger, battery on every fix, its own queue uploads, network-back
+  and location-switch receivers, minute tick for pause expiry and the stale-uploads notice; `LocationResume` after boot,
+  update, process death, app start and from `SyncWorker` (reports PERMISSION_REVOKED / LOCATION_DISABLED / STOPPED once
+  with «Передача геопозиции остановлена — откройте Lares»). Shared UI: sharing setup sheet (pure `SharingSetupLogic`:
+  explanation with who sees you, precise, background, notifications, battery with vendor hints), pause sheet,
+  Settings › Геопозиция with status, actions and the «Экономия заряда» guide. 7 new icons. 20 new tests (setup logic,
+  battery vendors, view model, UI). Emulator walkthrough: the AOSP `fused` provider passes no `geo fix` positions, so
+  the emulator uses `gps`; three small bugs (location-off status, stale «stopped» notice, slow recovery after location
+  on) found and fixed, all seven scenarios pass.
+- 2026-10-26 **M4-08 Map screen**: More › Карта shows the real map — maplibre-compose 0.20.0 (OpenGL runtime, BSD;
+  no Google artifacts) behind `FamilyMapView` (Android actual with GeoJSON layers for places, labels, accuracy
+  circles, pins with initials, track and stops; JVM stand-in for tests). Family sheet with the own sharing row
+  (pause / resume / turn on, reusing the M4-07 sheets) and the other members (status line, address once per rounded
+  position, battery), member card with accuracy and «Обновить» (done on a newer fix, «Телефон не ответил» after 90 s,
+  «На паузе»), «Места» sheet, «Показать всех» / «Моё местоположение», offline banner, no-style placeholder; light /
+  dark style by theme. 18 new tests (logic, view model, UI). Debug APK 28 → 69 MB (uncompressed native renderer).
+
+- 2026-10-26 **M4-09 History and places** (client UI): History page from the member card (`LocationHistoryDestination`;
+  day strip from `config().historyDays`, track in the member color and stops on the map, stop rows with place / «Дома» /
+  address / «Без адреса» and «с …» while ongoing, tap centres a stop; denied → closes with a notice, offline text);
+  «Места» sheet with who is here, place sheet with edit / delete, long press on the map and «Добавить место» open the
+  place editor (`PlaceEditorDestination`; name, icon chips, draft circle moved by a tap, «Я здесь», radius slider,
+  address search on «Найти» only, offline save of changed fields only). Map seam: `CameraKind.Bounds`,
+  `onCenterChange`. Icons `work`, `fitness_center`. 24 new tests (logic, view models, UI). Walkthrough found one
+  issue: «Добавить место» under the navigation bar with 4+ places (sheet now opens fully).
+- 2026-10-26 M4-10 Alerts, rules, everywhere, manual (M4 wrap-up): «Сообщать: прибытие и уход» on the member card,
+  the person page and the place sheet («Сообщать мне»), `AlertsLogic` writes one full set per member; Settings ›
+  Геопозиция «Кто меня видит» / «О вас сообщают»; Family settings › «Геопозиция: кто кого видит» (rules as sentences,
+  edit sheet, one `PUT`, row errors, history period 7–90 days); Today «Семья сейчас» and the person page «Где сейчас»
+  through the new `LiveLocations` (socket only while visible); location notification switches (sharing-off for
+  administrators); `"location"` taps open the Map at the member; user manual "Map" (en, ru). All LOC MVP requirements
+  done. 19 new tests. Walkthrough: all scenarios pass; the push itself is not testable on the emulator (no ntfy, the
+  server detected arrival and departure); fixed: history chips offline looked active, the rule sheet opened half.

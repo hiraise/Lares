@@ -5,10 +5,14 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import app.lares.android.location.LocationResume
 import app.lares.client.App
+import app.lares.client.di.AppScope
 import app.lares.client.platform.DeepLinkHandler
 import app.lares.client.platform.PendingNavigation
 import app.lares.client.sync.SyncEngine
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 /** AppCompat activity so per-app language switching works on every Android version (FND-061). */
 class MainActivity : AppCompatActivity() {
@@ -31,6 +35,8 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
         // The realtime connection is kept only while the app is visible (sync.md).
         koin.get<SyncEngine>().setForeground(true)
+        // The visible app may always start the location service; a revoked permission is reported here (M4-07).
+        koin.get<CoroutineScope>(AppScope).launch { koin.get<LocationResume>().check() }
     }
 
     override fun onStop() {

@@ -43,8 +43,23 @@ class IdsTest {
     }
 
     @Test
+    fun `LOC-021 place alert row ids are stable and differ from reminder ids`() {
+        // memberId = event, subscriberId = member: same inputs as the reminder vector, different marker.
+        assertEquals("0192f3a4-5b6c-8db2-9f01-234567896b13", Ids.placeAlertRowId(event, member))
+        assertEquals(Ids.placeAlertRowId(event, member), Ids.placeAlertRowId(event, member))
+        assertNotEquals(Ids.reminderRowId(event, member), Ids.placeAlertRowId(event, member))
+        assertNotEquals(Ids.placeAlertRowId(event, member), Ids.placeAlertRowId(member, event))
+        assertFailsWith<IllegalArgumentException> { Ids.placeAlertRowId(event, "m1") }
+    }
+
+    @Test
     fun `derived ids are version 8, RFC variant, canonical lowercase`() {
-        val ids = listOf(Ids.occurrenceRowId(event, LocalDate(2026, 10, 28)), Ids.reminderRowId(event, member))
+        val ids =
+            listOf(
+                Ids.occurrenceRowId(event, LocalDate(2026, 10, 28)),
+                Ids.reminderRowId(event, member),
+                Ids.placeAlertRowId(event, member),
+            )
         for (id in ids) {
             val uuid = UUID.fromString(id)
             assertEquals(id, uuid.toString())

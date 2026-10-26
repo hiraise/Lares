@@ -30,6 +30,11 @@ Status values: `proposed` (direction chosen, details or customer confirmation pe
 | [0021](0021-shopping-items-kept-as-list-memory.md) | A shopping item is "this product in this list" and is kept after it is bought | accepted | 2026-10-24 |
 | [0022](0022-event-series-with-occurrence-rows.md) | A repeating event is one row; changed occurrences are rows with derived ids | accepted | 2026-10-24 |
 | [0023](0023-owner-only-sync-rows.md) | Personal reminder rows sync only to their member | accepted | 2026-10-24 |
+| [0024](0024-positions-outside-the-sync-log.md) | Positions and sharing state travel outside the sync log | accepted | 2026-10-25 |
+| [0025](0025-location-visibility-rules.md) | Location visibility rules: subject → target, widest level wins | accepted | 2026-10-25 |
+| [0026](0026-addresses-through-a-server-geocoder.md) | Addresses come from a geocoder through the server, on demand | accepted | 2026-10-25 |
+| [0027](0027-map-rendering-maplibre-compose.md) | The map is drawn with maplibre-compose behind an expect composable | accepted | 2026-10-25 |
+| [0028](0028-battery-aware-tracking-service.md) | Phones track with one foreground service in moving and still modes | accepted | 2026-10-25 |
 
 ## When to write an ADR
 

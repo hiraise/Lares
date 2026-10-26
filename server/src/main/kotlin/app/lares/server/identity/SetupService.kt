@@ -5,6 +5,7 @@ import app.lares.contract.api.auth.AuthResult
 import app.lares.contract.api.auth.SetupRequest
 import app.lares.contract.entities.HouseholdData
 import app.lares.contract.entities.PersonData
+import app.lares.contract.location.LocationVisibility
 import app.lares.contract.permissions.BuiltInGroup
 import app.lares.contract.permissions.PermissionCatalogue
 import app.lares.contract.validation.Validators
@@ -13,6 +14,7 @@ import app.lares.server.household.HouseholdRepository
 import app.lares.server.household.MemberRepository
 import app.lares.server.household.PersonRepository
 import app.lares.server.identity.crypto.PasswordHasher
+import app.lares.server.location.LocationRuleRepository
 import app.lares.server.platform.db.AppDatabase
 import app.lares.server.platform.http.ApiException
 import app.lares.server.platform.http.validate
@@ -108,10 +110,13 @@ class SetupService(
             recordChange(householdId),
             now,
         )
+        val adultsId = UUID.randomUUID()
         val adultsTemplate = PermissionCatalogue.adultsTemplate
-        GroupRepository.create(householdId, UUID.randomUUID(), names.adults, null, adultsTemplate, recordChange(householdId), now)
+        GroupRepository.create(householdId, adultsId, names.adults, null, adultsTemplate, recordChange(householdId), now)
+        val kidsId = UUID.randomUUID()
         val kidsTemplate = PermissionCatalogue.kidsTemplate
-        GroupRepository.create(householdId, UUID.randomUUID(), names.kids, null, kidsTemplate, recordChange(householdId), now)
+        GroupRepository.create(householdId, kidsId, names.kids, null, kidsTemplate, recordChange(householdId), now)
+        LocationRuleRepository.replace(householdId, LocationVisibility.defaultRules(adultsId.toString(), kidsId.toString()), now)
 
         val userId = UUID.randomUUID()
         UserRepository.create(userId, Validators.normalizeLogin(request.login), passwordHash, now)

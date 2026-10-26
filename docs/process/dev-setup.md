@@ -52,8 +52,8 @@ to `build/dev/` (ignored by git).
 | --- | --- |
 | `verify.sh [tasks]` | `spotlessApply` + tasks (default: `check :client:android:assembleDebug`); prints errors, failed tests, totals |
 | `server.sh start\|stop\|restart\|reset\|status\|log` | Dev DB + server in background on `LARES_PORT` (8080), own database `lares_e2e`, setup code `DEVSETUP01` |
-| `seed.py family\|token\|invite\|login-code\|call` | Test family Петровы via the API (`olga / olga-password` admin, `dima`, kids Аня and Тимур) |
-| `emu.sh start [--window]\|install\|launch\|fresh\|link URL\|stop` | Emulator lifecycle, `adb reverse`, deep links |
+| `seed.py family\|token\|invite\|login-code\|tasks\|shopping\|calendar\|location\|move\|tick\|call` | Test family Петровы via the API (`olga / olga-password` admin, `dima`, kids Аня and Тимур); `location` seeds places and sharing sessions of the other members |
+| `emu.sh start [--window]\|install\|launch\|fresh\|link URL\|geo LAT LON\|route home-school\|stop` | Emulator lifecycle, `adb reverse`, deep links, GPS position and a walking route |
 | `ui.sh dump\|tap\|wait\|has\|field\|type\|shot\|crash …` | Drive the app by visible text; screenshots downscaled to 540×1200 |
 
 The dev DB port is detected from the running container (5432, or 5434 when 5432 is taken by another PostgreSQL).
@@ -84,6 +84,19 @@ adb reverse tcp:8080 tcp:8080
 Debug builds allow plain HTTP to `10.0.2.2`, `localhost` and `127.0.0.1` only (`client/android/src/debug/res/xml/
 network_security_config.xml`); release builds are HTTPS-only. Typing in the app: `adb shell input text "…"` (ASCII only),
 then `adb shell input keyevent 66` (Enter). A typed address without a scheme gets `https://`.
+
+### Location on the emulator (M4-07)
+
+- `tools/dev/emu.sh geo LAT LON` / `emu.sh route home-school` send `geo fix`, which reaches only the `gps` provider; the
+  platform `fused` provider of the AOSP image passes nothing on. The app therefore requests `gps` on the emulator
+  (`AndroidLocationSource.isEmulator`); check with `adb shell dumpsys location` (the app's request and its `locations`
+  count).
+- Location switch: `adb shell cmd location set-location-enabled false|true`. Permission revoke (kills the process):
+  `adb shell pm revoke app.lares.android.debug android.permission.ACCESS_FINE_LOCATION`.
+- The sharing service: `adb shell dumpsys activity services app.lares.android.debug`; its notification:
+  `adb shell dumpsys notification --noredact | grep -A3 lares`. After `adb reboot` run `tools/dev/emu.sh start` again
+  (restores `adb reverse`).
+- No push distributor on the emulator: «Обновить» reaches the phone with its next upload (`refreshRequested`).
 
 ## Troubleshooting (seen in M0-01 and M0-07)
 

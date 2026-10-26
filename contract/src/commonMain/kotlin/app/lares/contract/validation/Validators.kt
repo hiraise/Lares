@@ -1,6 +1,13 @@
 package app.lares.contract.validation
 
 import app.lares.contract.api.FieldErrorCode
+import app.lares.contract.api.location.PartyKind
+import app.lares.contract.api.location.PositionFix
+import app.lares.contract.api.location.PutLocationRulesRequest
+import app.lares.contract.api.location.RuleParty
+import app.lares.contract.api.location.SetSharingRequest
+import app.lares.contract.api.location.SharingStatus
+import app.lares.contract.api.location.VisibilityLevel
 import app.lares.contract.calendar.EventSchedule
 import app.lares.contract.entities.ChecklistItemData
 import app.lares.contract.entities.EventData
@@ -8,6 +15,8 @@ import app.lares.contract.entities.EventKind
 import app.lares.contract.entities.EventOccurrenceData
 import app.lares.contract.entities.EventReminderData
 import app.lares.contract.entities.PersonData
+import app.lares.contract.entities.PlaceAlertData
+import app.lares.contract.entities.PlaceData
 import app.lares.contract.entities.Recurrence
 import app.lares.contract.entities.RecurrenceMode
 import app.lares.contract.entities.RecurrenceUnit
@@ -17,12 +26,15 @@ import app.lares.contract.entities.ShoppingListData
 import app.lares.contract.entities.TagData
 import app.lares.contract.entities.TaskCompletionData
 import app.lares.contract.entities.TaskData
+import app.lares.contract.location.LocationLimits
 import app.lares.contract.shopping.ShoppingNames
 import kotlinx.datetime.IllegalTimeZoneException
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Instant
 
 /**
  * Input rules shared by client and server. Each validator returns `null` when the value is valid,
@@ -62,6 +74,9 @@ object Validators {
     const val EVENT_PLACE_MAX = 200
     const val EVENT_MAX_PARTICIPANTS = 30
     const val EVENT_MAX_TAGS = 20
+    private const val PERCENT_MAX = 100
+    private val LATITUDE = -90.0..90.0
+    private val LONGITUDE = -180.0..180.0
 
     /** The only rule of a memorable date (CAL-005). */
     val MEMORABLE_RECURRENCE = Recurrence(RecurrenceMode.FIXED, RecurrenceUnit.YEAR, 1)
@@ -359,6 +374,91 @@ object Validators {
 
     private fun reminderMinutes(value: Int?): FieldErrorCode? =
         if (value != null && value !in 0..REMINDER_MINUTES_MAX) FieldErrorCode.OUT_OF_RANGE else null
+
+    /** Trims name and address; a blank address becomes null. */
+    fun normalizePlace(data: PlaceData): PlaceData = data.copy(name = data.name.trim(), address = data.address?.trim()?.ifEmpty { null })
+
+    /** Field rules of a place (architecture/location.md § Validation); the creator is checked by the server. */
+    fun place(data: PlaceData): Map<String, FieldErrorCode> {
+        val errors =
+            ValidationErrors()
+                .add("name", requiredText(data.name, LocationLimits.PLACE_NAME_MAX))
+                .add("address", optionalText(data.address, LocationLimits.PLACE_ADDRESS_MAX))
+        if (data.latitude !in LATITUDE) errors.add("latitude", FieldErrorCode.OUT_OF_RANGE)
+        if (data.longitude !in LONGITUDE) errors.add("longitude", FieldErrorCode.OUT_OF_RANGE)
+        if (data.radiusM !in LocationLimits.MIN_RADIUS_M..LocationLimits.MAX_RADIUS_M) errors.add("radiusM", FieldErrorCode.OUT_OF_RANGE)
+        return errors.fields
+    }
+
+    /** Field rules of an alert row; the member, the subscriber and the places are checked by the server. */
+    fun placeAlert(data: PlaceAlertData): Map<String, FieldErrorCode> {
+        val errors = ValidationErrors()
+        if (data.memberId == data.subscriberId) errors.add("memberId", FieldErrorCode.INVALID_FORMAT)
+        if (data.placeIds.size > LocationLimits.MAX_ALERT_PLACES) errors.add("placeIds", FieldErrorCode.OUT_OF_RANGE)
+        return errors.fields
+    }
+
+    /** Value ranges of one fix; its age is checked by the server ([LocationLimits.MAX_FIX_AGE_HOURS]). */
+    fun positionFix(fix: PositionFix): Map<String, FieldErrorCode> {
+        val errors = ValidationErrors()
+        if (fix.latitude !in LATITUDE) errors.add("latitude", FieldErrorCode.OUT_OF_RANGE)
+        if (fix.longitude !in LONGITUDE) errors.add("longitude", FieldErrorCode.OUT_OF_RANGE)
+        if (fix.accuracyM !in 0f..LocationLimits.MAX_ACCURACY_M) errors.add("accuracyM", FieldErrorCode.OUT_OF_RANGE)
+        fix.speedMps?.let { if (it !in 0f..LocationLimits.MAX_SPEED_MPS) errors.add("speedMps", FieldErrorCode.OUT_OF_RANGE) }
+        fix.bearingDeg?.let { if (it !in 0f..LocationLimits.MAX_BEARING_DEG) errors.add("bearingDeg", FieldErrorCode.OUT_OF_RANGE) }
+        fix.battery?.let { if (it !in 0..PERCENT_MAX) errors.add("battery", FieldErrorCode.OUT_OF_RANGE) }
+        return errors.fields
+    }
+
+    /** `PUT /location/sharing`: a pause ends in the future within [LocationLimits.MAX_PAUSE_DAYS]; "off" needs a reason. */
+    fun setSharing(
+        request: SetSharingRequest,
+        now: Instant,
+    ): Map<String, FieldErrorCode> {
+        val errors = ValidationErrors()
+        if (request.status == SharingStatus.NEVER) errors.add("status", FieldErrorCode.INVALID_FORMAT)
+        val until = request.pausedUntil
+        if (until != null) {
+            when {
+                request.status != SharingStatus.PAUSED -> errors.add("pausedUntil", FieldErrorCode.INVALID_FORMAT)
+                until <= now || until > now + LocationLimits.MAX_PAUSE_DAYS.days -> errors.add("pausedUntil", FieldErrorCode.OUT_OF_RANGE)
+            }
+        }
+        when {
+            request.status == SharingStatus.OFF_ON_PHONE && request.reason == null -> errors.add("reason", FieldErrorCode.REQUIRED)
+            request.status != SharingStatus.OFF_ON_PHONE && request.reason != null -> errors.add("reason", FieldErrorCode.INVALID_FORMAT)
+        }
+        return errors.fields
+    }
+
+    /** Shape of the visibility rules (ADR-0025); whether the ids exist is the server's check. */
+    fun locationRules(request: PutLocationRulesRequest): Map<String, FieldErrorCode> {
+        val errors = ValidationErrors()
+        if (request.rules.size > LocationLimits.MAX_RULES) errors.add("rules", FieldErrorCode.OUT_OF_RANGE)
+        request.rules.forEachIndexed { i, rule ->
+            if (!rule.subject.wellFormed()) errors.add("rules.$i.subject", FieldErrorCode.INVALID_FORMAT)
+            if (!rule.target.wellFormed()) errors.add("rules.$i.target", FieldErrorCode.INVALID_FORMAT)
+            if (rule.level == VisibilityLevel.NONE) errors.add("rules.$i.level", FieldErrorCode.INVALID_FORMAT)
+        }
+        return errors.fields
+    }
+
+    /** One of [LocationLimits.HISTORY_DAYS_CHOICES] (LOC-005). */
+    fun locationHistoryDays(value: Int): FieldErrorCode? =
+        if (value in
+            LocationLimits.HISTORY_DAYS_CHOICES
+        ) {
+            null
+        } else {
+            FieldErrorCode.OUT_OF_RANGE
+        }
+
+    private fun RuleParty.wellFormed(): Boolean =
+        when (kind) {
+            PartyKind.EVERYONE -> id == null
+            PartyKind.GROUP, PartyKind.MEMBER -> !id.isNullOrBlank()
+            PartyKind.UNKNOWN -> false
+        }
 
     fun deviceName(value: String): FieldErrorCode? = requiredText(value, DEVICE_NAME_MAX)
 

@@ -25,6 +25,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.time.LocalTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlin.random.Random
 import kotlin.system.exitProcess
@@ -51,7 +52,10 @@ suspend fun run(config: Config): Int =
         val recorder = Recorder()
         var phaseStart = System.currentTimeMillis()
         val runId = (1..4).map { "abcdefghjkmnpqrstuvwxyz23456789".random() }.joinToString("")
-        log("run $runId: ${config.devices} devices (${config.members} members) against ${config.server}")
+        log(
+            "run $runId: ${config.devices} devices (${config.members} members, ${config.sharing} sharing location, " +
+                "${config.mapViewers} map viewers) against ${config.server}",
+        )
         val family =
             try {
                 setUp(config, recorder, runId)
@@ -73,6 +77,8 @@ suspend fun run(config: Config): Int =
         val load =
             launch {
                 family.devices.forEach { it.launchIn(this) }
+                family.location.phones.forEach { it.launchIn(this) }
+                family.location.viewers.forEach { it.launchIn(this) }
                 launch { family.admin.run() }
                 launch { refreshLoop(family.admin.api, config.refreshInterval, Random(runId.hashCode()), recorder) }
                 launch { progress(recorder) }
@@ -107,11 +113,15 @@ suspend fun run(config: Config): Int =
 private class Family(
     val admin: AdminDevice,
     val devices: List<Device>,
+    val location: LocationFamily,
 )
+
+/** Time zone of the household created by first-run setup (history days are household-local). */
+private const val HOUSEHOLD_ZONE = "Europe/Berlin"
 
 /**
  * Creates (or logs into) the household through the public API, adds members to the group that may manage tags and
- * persons ("Adults"), and signs in two devices per member with login codes.
+ * persons ("Adults"), and signs in two devices per member with login codes; then sets up places and alerts.
  */
 private suspend fun setUp(
     config: Config,
@@ -129,7 +139,7 @@ private suspend fun setUp(
                 "POST /setup",
                 HttpMethod.Post,
                 "/setup",
-                SetupRequest(code, "Load test", "Europe/Berlin", "EUR", "en", "Admin", "loadadmin", "loadsim-$runId-password", device),
+                SetupRequest(code, "Load test", HOUSEHOLD_ZONE, "EUR", "en", "Admin", "loadadmin", "loadsim-$runId-password", device),
                 authenticated = false,
             )
         } else {
@@ -185,7 +195,10 @@ private suspend fun setUp(
                 )
             Device(index, api, config, recorder, runId).also { it.pull() }
         }
-    return Family(AdminDevice(admin, config, recorder, adults.key, renamed.key, renamed.value.name), devices)
+    val location =
+        setUpLocation(config, recorder, runId, admin, adminMember, { members[it / 2] }, devices.map { it.api }, ZoneId.of(HOUSEHOLD_ZONE))
+    log("location: ${config.places} places, ${config.sharing} sharing phones, ${config.mapViewers} map viewers")
+    return Family(AdminDevice(admin, config, recorder, adults.key, renamed.key, renamed.value.name), devices, location)
 }
 
 /** All live groups of the household, read with a full pull. */
@@ -256,7 +269,8 @@ private suspend fun progress(recorder: Recorder) {
         val samples = recorder.samples().filter { it.phase != Phase.SETUP }
         log(
             "${recorder.phase.name.lowercase()}: ${samples.size} requests, ${samples.count { it.failed }} failed, " +
-                "${recorder.mutationsSent.get()} mutations, ${recorder.eventsReceived.get()} events",
+                "${recorder.mutationsSent.get()} mutations, ${recorder.eventsReceived.get()} events, " +
+                "${recorder.positionsSent.get()} positions, ${recorder.liveMessages} live messages",
         )
     }
 }

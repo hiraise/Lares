@@ -59,6 +59,14 @@ enum class NotificationType(
     /** Local birthday and memorable-date reminders (CAL-016); the server never sends it. */
     @SerialName("birthday.reminder")
     BIRTHDAY_REMINDER(NotificationChannel.REMINDERS),
+
+    /** A watched member arrived at or left a place (LOC-021). */
+    @SerialName("location.place")
+    LOCATION_PLACE(NotificationChannel.FAMILY_ACTIVITY),
+
+    /** A member's phone stopped or resumed sharing its location; to administrators (LOC-012). */
+    @SerialName("location.sharing")
+    LOCATION_SHARING(NotificationChannel.FAMILY_ACTIVITY),
     ;
 
     /** The stable wire name, e.g. `system.test`. */
@@ -111,6 +119,9 @@ data class PushPayload(
     companion object {
         const val KIND_SYNC = "sync"
         const val KIND_NOTIFICATION = "notification"
+
+        /** Data-only, to one session: somebody pressed «Обновить», send a fresh position (LOC-010). */
+        const val KIND_LOCATION_REFRESH = "location_refresh"
 
         /** Upper bound for the encoded payload; UnifiedPush allows at most 3993 bytes of cleartext. */
         const val MAX_BYTES = 2048

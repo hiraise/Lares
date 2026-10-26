@@ -12,12 +12,14 @@ data class AppConfig(
     val setupCode: String?,
     /** Push endpoint hosts allowed despite resolving to non-global addresses, e.g. an internal ntfy (M0-09). */
     val pushAllowedHosts: Set<String> = emptySet(),
+    /** Map styles and the address lookup (architecture/location.md § Configuration). */
+    val location: LocationConfigValues = LocationConfigValues(),
 ) {
     enum class LogFormat { PLAIN, JSON }
 
     // Keeps secrets out of logs and exception messages.
     override fun toString(): String =
-        "AppConfig(port=$port, db=$db, publicUrl=$publicUrl, logFormat=$logFormat, pushAllowedHosts=$pushAllowedHosts, setupCode=${if (setupCode == null) "unset" else "***"})"
+        "AppConfig(port=$port, db=$db, publicUrl=$publicUrl, logFormat=$logFormat, pushAllowedHosts=$pushAllowedHosts, location=$location, setupCode=${if (setupCode == null) "unset" else "***"})"
 
     companion object {
         fun fromEnv(env: Map<String, String> = System.getenv()): AppConfig {
@@ -41,6 +43,17 @@ data class AppConfig(
                 LogFormat.entries.firstOrNull { it.name.equals(logFormatText, ignoreCase = true) }
                     ?: throw IllegalArgumentException("LARES_LOG_FORMAT must be 'plain' or 'json', got '$logFormatText'")
 
+            val mapStyleUrl = value("LARES_MAP_STYLE_URL", LocationConfigValues.DEFAULT_MAP_STYLE_URL).trim()
+            require(isLocationUrl(mapStyleUrl)) { "LARES_MAP_STYLE_URL must be an https URL, got '$mapStyleUrl'" }
+            val mapDarkStyleUrl = value("LARES_MAP_STYLE_DARK_URL", LocationConfigValues.DEFAULT_MAP_DARK_STYLE_URL).trim()
+            require(isLocationUrl(mapDarkStyleUrl)) { "LARES_MAP_STYLE_DARK_URL must be an https URL, got '$mapDarkStyleUrl'" }
+            // Not read with value(): set but empty switches addresses off.
+            val geocoderUrl =
+                (env["LARES_GEOCODER_URL"] ?: LocationConfigValues.DEFAULT_GEOCODER_URL).trim().trimEnd('/').takeIf { it.isNotEmpty() }
+            require(
+                geocoderUrl == null || isLocationUrl(geocoderUrl),
+            ) { "LARES_GEOCODER_URL must be an https URL or empty, got '$geocoderUrl'" }
+
             return AppConfig(
                 port = port,
                 db =
@@ -59,8 +72,24 @@ data class AppConfig(
                         .map { it.trim().lowercase() }
                         .filter { it.isNotEmpty() }
                         .toSet(),
+                location =
+                    LocationConfigValues(
+                        mapStyleUrl = mapStyleUrl,
+                        mapDarkStyleUrl = mapDarkStyleUrl,
+                        geocoderUrl = geocoderUrl,
+                        geocoderEmail = env["LARES_GEOCODER_EMAIL"]?.trim()?.takeIf { it.isNotEmpty() },
+                    ),
             )
         }
+
+        /** https, or http for a local test server. */
+        private fun isLocationUrl(text: String): Boolean =
+            runCatching {
+                val uri = URI(text)
+                val host = uri.host.orEmpty()
+                host.isNotEmpty() &&
+                    (uri.scheme == "https" || (uri.scheme == "http" && host in setOf("localhost", "127.0.0.1")))
+            }.getOrDefault(false)
 
         private fun isHttpUrl(text: String): Boolean =
             runCatching {
@@ -76,4 +105,23 @@ data class DbConfig(
     val password: String,
 ) {
     override fun toString(): String = "DbConfig(url=$url, user=$user, password=***)"
+}
+
+/** Map styles for the clients and the Nominatim-compatible address lookup (null = addresses off). */
+data class LocationConfigValues(
+    val mapStyleUrl: String = DEFAULT_MAP_STYLE_URL,
+    val mapDarkStyleUrl: String = DEFAULT_MAP_DARK_STYLE_URL,
+    val geocoderUrl: String? = DEFAULT_GEOCODER_URL,
+    val geocoderEmail: String? = null,
+) {
+    // The contact address stays out of logs.
+    override fun toString(): String =
+        "LocationConfigValues(mapStyleUrl=$mapStyleUrl, mapDarkStyleUrl=$mapDarkStyleUrl, geocoderUrl=$geocoderUrl, " +
+            "geocoderEmail=${if (geocoderEmail == null) "unset" else "***"})"
+
+    companion object {
+        const val DEFAULT_MAP_STYLE_URL = "https://tiles.openfreemap.org/styles/liberty"
+        const val DEFAULT_MAP_DARK_STYLE_URL = "https://tiles.openfreemap.org/styles/dark"
+        const val DEFAULT_GEOCODER_URL = "https://nominatim.openstreetmap.org"
+    }
 }

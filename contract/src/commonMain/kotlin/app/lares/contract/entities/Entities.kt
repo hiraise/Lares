@@ -1,5 +1,6 @@
 package app.lares.contract.entities
 
+import app.lares.contract.location.LocationLimits
 import app.lares.contract.permissions.BuiltInGroup
 import app.lares.contract.permissions.Permission
 import app.lares.contract.permissions.PermissionSetSerializer
@@ -19,6 +20,8 @@ data class HouseholdData(
     val currency: String,
     /** `en` or `ru`. */
     val defaultLanguage: String,
+    /** Days positions are kept (LOC-005); one of `LocationLimits.HISTORY_DAYS_CHOICES`. */
+    val locationHistoryDays: Int = LocationLimits.DEFAULT_HISTORY_DAYS,
 )
 
 /**

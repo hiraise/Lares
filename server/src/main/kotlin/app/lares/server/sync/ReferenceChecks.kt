@@ -11,13 +11,22 @@ import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.jdbc.select
 import java.util.UUID
 
-// Server-only checks shared by the sync handlers of several modules (tasks, shopping, calendar). Run inside `dbQuery`.
+// Server-only checks shared by the sync handlers of several modules (tasks, shopping, calendar, location). Run inside `dbQuery`.
 
 /** `VALIDATION_FAILED` with one field error. */
 internal fun invalidField(
     field: String,
     code: FieldErrorCode = FieldErrorCode.INVALID_FORMAT,
 ) = ApiException(ErrorCode.VALIDATION_FAILED, "Invalid fields: $field", mapOf(field to code))
+
+/** A child row's id must be the one derived from its parent ([expected]; ADR-0022, ADR-0023), else `id: INVALID_FORMAT`. */
+internal fun requireDerivedId(
+    id: UUID,
+    expected: () -> String,
+) {
+    val derived = runCatching(expected).getOrNull()
+    if (derived == null || id.toString().lowercase() != derived.lowercase()) throw invalidField("id")
+}
 
 /** Ids not yet stored must be non-deleted tags of the household (archived tags count). */
 internal fun requireAddedTags(

@@ -27,6 +27,20 @@ import app.lares.server.identity.crypto.PasswordHasher
 import app.lares.server.identity.crypto.TokenGenerator
 import app.lares.server.identity.identityRoutes
 import app.lares.server.identity.memberAdminRoutes
+import app.lares.server.location.AddressEndpoints
+import app.lares.server.location.AddressService
+import app.lares.server.location.LocationHub
+import app.lares.server.location.LocationLiveService
+import app.lares.server.location.LocationNotifier
+import app.lares.server.location.LocationRetentionJob
+import app.lares.server.location.LocationService
+import app.lares.server.location.LocationSessions
+import app.lares.server.location.LocationVisibilityService
+import app.lares.server.location.NominatimLookup
+import app.lares.server.location.PlaceAlertSyncHandler
+import app.lares.server.location.PlaceSyncHandler
+import app.lares.server.location.locationAdminRoutes
+import app.lares.server.location.locationRoutes
 import app.lares.server.notifications.NotificationService
 import app.lares.server.notifications.PushEndpointGuard
 import app.lares.server.notifications.SyncTicklePublisher
@@ -77,7 +91,7 @@ class AppDeps(
     val buildInfo: BuildInfo,
     val clock: Clock = Clock.System,
     val passwordHasher: PasswordHasher = PasswordHasher(),
-    /** Sync housekeeping and the overdue job; tests switch them off and call the job functions directly. */
+    /** Sync housekeeping, the overdue and the location retention jobs; tests switch them off and call the job functions directly. */
     val backgroundJobs: Boolean = true,
 ) {
     val tokenGenerator = TokenGenerator()
@@ -87,23 +101,54 @@ class AppDeps(
     val setupCode = SetupCodeProvider(config.setupCode, codeGenerator)
     val permissionService = PermissionService(db)
     val meQuery = MeQuery(permissionService)
-    val authService = AuthService(db, clock, passwordHasher, tokenGenerator, loginLimiter, meQuery)
+    val locationHub = LocationHub()
+    val pushEndpointGuard = PushEndpointGuard(config.pushAllowedHosts)
+    val webPushSender = WebPushSender(db, pushEndpointGuard, WebPushSender.subjectFor(config.publicUrl))
+    val notificationService = NotificationService(db, clock, pushEndpointGuard, webPushSender)
+    val locationVisibility = LocationVisibilityService(db, clock, locationHub)
+    val locationNotifier = LocationNotifier(db, locationVisibility, notificationService)
+    val locationSessions = LocationSessions(clock, locationHub, locationNotifier)
+    val authService = AuthService(db, clock, passwordHasher, tokenGenerator, loginLimiter, meQuery, locationSessions)
     val setupService = SetupService(db, clock, passwordHasher, setupLimiter, setupCode, authService)
-    val accountService = AccountService(db, clock, passwordHasher, loginLimiter, meQuery)
+    val accountService = AccountService(db, clock, passwordHasher, loginLimiter, meQuery, locationSessions)
     val householdAdminService = HouseholdAdminService(db, clock)
     val groupAdminService = GroupAdminService(db, clock)
-    val memberAdminService = MemberAdminService(db, clock, passwordHasher)
+    val memberAdminService = MemberAdminService(db, clock, passwordHasher, locationSessions)
 
     /** Wrong invite and login codes count per IP like failed logins (10 per 15 minutes); keys have their own prefixes. */
     val inviteService = InviteService(db, clock, passwordHasher, codeGenerator, authService, loginLimiter, config.publicUrl)
     val loginCodeService = LoginCodeService(db, clock, codeGenerator, authService, permissionService, loginLimiter, config.publicUrl)
 
-    val pushEndpointGuard = PushEndpointGuard(config.pushAllowedHosts)
-    val webPushSender = WebPushSender(db, pushEndpointGuard, WebPushSender.subjectFor(config.publicUrl))
-    val notificationService = NotificationService(db, clock, pushEndpointGuard, webPushSender)
     val taskNotifier = TaskNotifier(db, permissionService, notificationService)
     val taskOverdueJob = TaskOverdueJob(db, clock, taskNotifier)
     val eventNotifier = EventNotifier(db, permissionService, notificationService)
+    val locationService =
+        LocationService(
+            db,
+            clock,
+            config.location,
+            locationVisibility,
+            locationHub,
+            notificationService,
+            permissionService,
+            locationNotifier,
+        )
+    val locationLiveService = LocationLiveService(db, locationService, permissionService, locationHub, changeBus)
+    val locationRetentionJob = LocationRetentionJob(db, clock)
+
+    /** Addresses through the configured geocoder (ADR-0026); off when `LARES_GEOCODER_URL` is set but empty. */
+    val addressService =
+        AddressService(
+            config.location.geocoderUrl?.let {
+                NominatimLookup(
+                    it,
+                    config.location.geocoderEmail,
+                    NominatimLookup.userAgent(buildInfo.version),
+                )
+            },
+            clock,
+        )
+    val addressEndpoints = AddressEndpoints(db, clock, addressService)
 
     val syncHandlers =
         SyncHandlers(
@@ -121,6 +166,8 @@ class AppDeps(
                 EventSyncHandler(eventNotifier),
                 EventOccurrenceSyncHandler(eventNotifier),
                 EventReminderSyncHandler(),
+                PlaceSyncHandler(locationHub),
+                PlaceAlertSyncHandler(),
             ),
         )
     val syncPullService = SyncPullService(db, syncHandlers, permissionService)
@@ -175,6 +222,8 @@ fun Application.module(deps: AppDeps) {
                 householdRoutes(deps.authService, deps.householdAdminService, deps.groupAdminService)
                 syncRoutes(deps.authService, deps.syncPullService, deps.syncPushService, deps.syncEventsService)
                 notificationRoutes(deps.authService, deps.notificationService)
+                locationAdminRoutes(deps.authService, deps.locationVisibility)
+                locationRoutes(deps.authService, deps.locationService, deps.locationLiveService, deps.addressEndpoints)
             }
         }
     }
@@ -183,8 +232,10 @@ fun Application.module(deps: AppDeps) {
     // Task events come from requests and jobs alike; tests await them with `taskNotifier.awaitIdle()`.
     deps.taskNotifier.start(this)
     deps.eventNotifier.start(this)
+    deps.locationNotifier.start(this)
     if (deps.backgroundJobs) {
         deps.syncHousekeeping.start(this)
         deps.taskOverdueJob.start(this)
+        deps.locationRetentionJob.start(this)
     }
 }

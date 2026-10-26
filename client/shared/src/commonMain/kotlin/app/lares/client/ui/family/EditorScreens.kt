@@ -51,11 +51,15 @@ import app.lares.client.resources.group_rights
 import app.lares.client.resources.group_title
 import app.lares.client.resources.ic_close
 import app.lares.client.resources.ic_delete
+import app.lares.client.resources.ic_history
+import app.lares.client.resources.ic_location_on
 import app.lares.client.resources.ic_lock
 import app.lares.client.resources.language_en
 import app.lares.client.resources.language_ru
+import app.lares.client.resources.map_history
 import app.lares.client.resources.person_add_memorable
 import app.lares.client.resources.person_dates
+import app.lares.client.resources.person_where_now
 import app.lares.client.resources.relation_suggestions
 import app.lares.client.resources.relative_birthday
 import app.lares.client.resources.relative_birthday_clear
@@ -71,6 +75,7 @@ import app.lares.client.resources.relative_read_only
 import app.lares.client.resources.relative_relation
 import app.lares.client.resources.relative_title
 import app.lares.client.resources.relative_title_new
+import app.lares.client.resources.rules_entry
 import app.lares.client.resources.section_family
 import app.lares.client.resources.setup_currency
 import app.lares.client.resources.setup_currency_hint
@@ -98,10 +103,13 @@ import app.lares.client.ui.components.FormField
 import app.lares.client.ui.components.LinkButton
 import app.lares.client.ui.components.ListDivider
 import app.lares.client.ui.components.ListGroup
+import app.lares.client.ui.components.ListRow
 import app.lares.client.ui.components.NoticeBanner
 import app.lares.client.ui.components.PrimaryButton
 import app.lares.client.ui.components.SectionHeader
 import app.lares.client.ui.components.initialsFor
+import app.lares.client.ui.location.AlertsRow
+import app.lares.client.ui.location.AlertsSheet
 import app.lares.client.ui.main.title
 import app.lares.client.ui.onboarding.CURRENCY_SUGGESTIONS
 import app.lares.client.ui.onboarding.TimeZoneDialog
@@ -276,9 +284,14 @@ fun PersonRoute(
     onEvent: (String) -> Unit = {},
     /** «Добавить памятную дату»: the editor with the person as participant. */
     onAddMemorable: (String) -> Unit = {},
+    /** «Где сейчас»: the Map centred on the member. */
+    onMap: (String) -> Unit = {},
+    /** «История»: the member's day on the map. */
+    onHistory: (String) -> Unit = {},
     viewModel: PersonViewModel = koinViewModel(key = "person-$personId") { parametersOf(PersonArgs(personId)) },
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val whereNow by viewModel.whereNow.collectAsStateWithLifecycle()
     var pickBirthday by rememberSaveable { mutableStateOf(false) }
     var confirmDelete by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(state.done) { if (state.done) onBack() }
@@ -317,6 +330,7 @@ fun PersonRoute(
                 capitalization = KeyboardCapitalization.Words,
             )
         }
+        whereNow?.let { PersonLocationRows(it, onMap, onHistory, viewModel::openAlerts) }
         Box(Modifier.clickable(enabled = editable) { pickBirthday = true }.testTag("birthday_field")) {
             FormField(
                 birthdayText(form.birthDay, form.birthMonth, form.birthYear) ?: stringResource(Res.string.relative_birthday_none),
@@ -448,6 +462,7 @@ fun PersonRoute(
             destructive = true,
         )
     }
+    whereNow?.alerts?.let { AlertsSheet(it, onSave = viewModel::saveAlerts, onDismiss = viewModel::closeAlerts) }
 }
 
 @Composable
@@ -455,11 +470,44 @@ private fun ErrorLine(text: String) {
     Text(text, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
 }
 
+/** «Где сейчас», «История» and «Сообщать: прибытие и уход» for a member the viewer sees (plan M4-10, LOC-017). */
+@Composable
+private fun PersonLocationRows(
+    location: PersonLocationUi,
+    onMap: (String) -> Unit,
+    onHistory: (String) -> Unit,
+    onAlerts: () -> Unit,
+) {
+    ListGroup(Modifier.testTag("person_location")) {
+        ListRow(
+            stringResource(Res.string.person_where_now),
+            Modifier.testTag("person_where_now"),
+            icon = Res.drawable.ic_location_on,
+            supporting = location.status,
+            showChevron = true,
+            onClick = { onMap(location.memberId) },
+        )
+        if (location.canHistory) {
+            ListDivider()
+            ListRow(
+                stringResource(Res.string.map_history),
+                Modifier.testTag("person_history"),
+                icon = Res.drawable.ic_history,
+                showChevron = true,
+                onClick = { onHistory(location.memberId) },
+            )
+        }
+        ListDivider()
+        AlertsRow(location.alertPlaces, onAlerts)
+    }
+}
+
 /** Family settings (FND-003). */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun FamilySettingsRoute(
     onBack: () -> Unit,
+    onLocationRules: () -> Unit = {},
     viewModel: FamilySettingsViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -519,6 +567,16 @@ fun FamilySettingsRoute(
                 enabled = state.online,
                 loading = state.action.busy,
             )
+            // Administrators: «кто кого видит» and the history period (M4-10, LOC-005, LOC-006).
+            ListGroup {
+                ListRow(
+                    stringResource(Res.string.rules_entry),
+                    Modifier.testTag("family_location_rules"),
+                    icon = Res.drawable.ic_location_on,
+                    showChevron = true,
+                    onClick = onLocationRules,
+                )
+            }
         }
     }
     if (pickZone) {

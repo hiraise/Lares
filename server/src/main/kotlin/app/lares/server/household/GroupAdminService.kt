@@ -5,6 +5,7 @@ import app.lares.contract.api.admin.CreateGroupRequest
 import app.lares.contract.api.admin.GroupCreated
 import app.lares.contract.api.admin.UpdateGroupRequest
 import app.lares.contract.validation.Validators
+import app.lares.server.location.LocationRuleRepository
 import app.lares.server.platform.db.AppDatabase
 import app.lares.server.platform.http.ApiException
 import app.lares.server.platform.http.validate
@@ -91,6 +92,8 @@ class GroupAdminService(
             val members = GroupRepository.memberIdsOf(group.id)
             GroupRepository.removeMembers(group.id, members)
             GroupRepository.tombstone(householdId, group.id, recordChange(householdId), clock.nowForDb())
+            // The recorded change already tells the location live channel to recompute (ADR-0025).
+            LocationRuleRepository.deleteNamingGroup(group.id)
             AccessVersionService.bump(householdId, members)
         }
     }

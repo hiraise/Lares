@@ -42,6 +42,11 @@ services:
       LARES_SETUP_CODE: ${LARES_SETUP_CODE:-}
       LARES_LOG_FORMAT: ${LARES_LOG_FORMAT:-json}
       LARES_PUSH_ALLOWED_HOSTS: ${LARES_PUSH_ALLOWED_HOSTS:-}
+      LARES_MAP_STYLE_URL: ${LARES_MAP_STYLE_URL:-https://tiles.openfreemap.org/styles/liberty}
+      LARES_MAP_STYLE_DARK_URL: ${LARES_MAP_STYLE_DARK_URL:-https://tiles.openfreemap.org/styles/dark}
+      # No colon: LARES_GEOCODER_URL set but empty stays empty and turns addresses off.
+      LARES_GEOCODER_URL: ${LARES_GEOCODER_URL-https://nominatim.openstreetmap.org}
+      LARES_GEOCODER_EMAIL: ${LARES_GEOCODER_EMAIL:-}
     mem_limit: 300m # measured max RSS 237 MiB + ~25 %, docs/architecture/perf/M0-baseline.md
     logging: *logging
 

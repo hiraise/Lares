@@ -5,14 +5,19 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
+import app.lares.android.location.LocationResume
+import app.lares.android.location.androidLocationModule
 import app.lares.android.notifications.androidNotificationsModule
 import app.lares.android.notifications.createNotificationChannels
+import app.lares.client.di.AppScope
 import app.lares.client.di.androidPlatformModule
 import app.lares.client.di.sharedModule
 import app.lares.client.notifications.NotificationsCoordinator
 import app.lares.client.platform.AppStartup
 import app.lares.client.sync.SyncEngine
 import app.lares.client.ui.uiModule
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
 
@@ -24,6 +29,7 @@ class LaresApplication : Application() {
                 modules(
                     sharedModule(androidPlatformModule(this@LaresApplication)),
                     androidNotificationsModule(this@LaresApplication),
+                    androidLocationModule(this@LaresApplication),
                     uiModule(),
                 )
             }.koin
@@ -33,6 +39,8 @@ class LaresApplication : Application() {
         // Restore the saved session right away (offline too); the UI waits for it.
         koin.get<AppStartup>().start()
         watchConnectivity(koin.get())
+        // Sharing enabled here but the service is gone (process death, update): bring it back or report why (M4-07).
+        koin.get<CoroutineScope>(AppScope).launch { koin.get<LocationResume>().check() }
     }
 
     /** sync.md trigger "connectivity regained": sync as soon as a network with internet appears. */

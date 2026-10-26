@@ -81,6 +81,13 @@ Add terms here before using them in code.
 | Track | Трек | Sequence of positions over a period. |
 | Place | Место | Named area on the map (circle). |
 | Geofence alert | Уведомление о геозоне | Notification on arrival at / departure from a place. |
+| Place alert | Подписка на место | A member's choice of places whose arrive / leave alerts they get for one other member (`place_alert`). |
+| Sharing status | Состояние передачи | Never, sharing, paused or off on the phone (`SharingStatus`). |
+| Pause | Пауза | Sharing stopped by the member for a while or until resumed; others see the last position before it. |
+| Sharing phone | Телефон, который передаёт | The one session of a member that uploads positions; another phone of theirs stays quiet. |
+| Visibility rule | Правило видимости геопозиции | "Subject sees target at level" (group, member or everyone), set by administrators (ADR-0025). |
+| Visibility level | Где сейчас / С историей | What a viewer gets of a member: nothing, the current position (`CURRENT`) or also the history (`HISTORY`). |
+| Stop | Остановка | A stay of at least 10 minutes within 100 m in a day's history, with the place if it is in one. |
 | Tracker | GPS-маячок, трекер | Hardware device reporting positions (watch, car tracker). |
 | Trackable | Отслеживаемый объект | What a tracker is attached to: member, car, pet. |
 

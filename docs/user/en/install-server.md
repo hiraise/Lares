@@ -171,6 +171,37 @@ they arrive within seconds, and still without Google services.
 
 The ntfy server only accepts the app's own push topics; it cannot be used by strangers for anything else.
 
+## Map (optional)
+
+The map in the app is drawn from free [OpenFreeMap](https://openfreemap.org) styles: no account, no key, no tracking.
+To use other MapLibre-compatible styles (for example your own tile server), set in `.env`:
+
+```sh
+LARES_MAP_STYLE_URL=https://tiles.example.com/styles/light.json
+LARES_MAP_STYLE_DARK_URL=https://tiles.example.com/styles/dark.json
+```
+
+Both addresses must start with `https://`. Restart with `docker compose up -d`; the app picks up the new styles the next
+time it opens the map.
+
+### Addresses
+
+When a family member is not in one of your places, the app shows the street address of their position («Тверская
+улица, 7»), and the place editor can search for an address. Your server looks the addresses up at an OpenStreetMap
+address service — by default the public [Nominatim](https://nominatim.org) — the phones never contact it themselves.
+
+What is sent: the coordinates of positions shown in the app, rounded to about 10 m, and the address searches people type,
+with the app's language. No names and no account details. The server asks only when somebody looks at a position
+(never for every position it receives), remembers answers for a week and sends at most one request per second.
+
+- Turn addresses off: set `LARES_GEOCODER_URL=` (empty) in `.env`. The app then shows the distance to the nearest place
+  instead and hides the address search.
+- Use your own service: set `LARES_GEOCODER_URL` to a self-hosted Nominatim, or Photon with a Nominatim-compatible API
+  (`https://`, the address the service answers `/reverse` and `/search` on).
+- The public Nominatim asks for a contact: set `LARES_GEOCODER_EMAIL=you@example.com` (optional, sent with each request).
+
+Restart with `docker compose up -d` after a change.
+
 ## Already running a web server?
 
 If nginx or Traefik already uses ports 80 and 443 on this machine, remove the `caddy` service from your setup and proxy

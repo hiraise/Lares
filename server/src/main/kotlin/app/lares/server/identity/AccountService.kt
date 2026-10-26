@@ -9,6 +9,7 @@ import app.lares.contract.api.auth.SessionInfo
 import app.lares.contract.validation.Validators
 import app.lares.server.household.MemberRepository
 import app.lares.server.identity.crypto.PasswordHasher
+import app.lares.server.location.LocationSessions
 import app.lares.server.platform.db.AppDatabase
 import app.lares.server.platform.http.ApiException
 import app.lares.server.platform.http.validate
@@ -29,6 +30,7 @@ class AccountService(
     /** Guards password checks of logged-in users against guessing with a stolen access token. */
     private val limiter: FailedAttemptLimiter,
     private val meQuery: MeQuery,
+    private val locationSessions: LocationSessions,
 ) {
     suspend fun me(principal: MemberPrincipal): Me =
         db.dbQuery { meQuery.load(principal.userId, principal.memberId, principal.householdId) }
@@ -71,6 +73,7 @@ class AccountService(
             val session = SessionRepository.get(id)
             if (session == null || session.userId != principal.userId) throw notFound()
             SessionRepository.revoke(id, clock.nowForDb())
+            locationSessions.onSessionEnded(this, id)
         }
     }
 

@@ -80,6 +80,8 @@ kotlin {
             implementation(libs.androidx.camera.lifecycle)
             implementation(libs.androidx.camera.view)
             implementation(libs.zxing.core)
+            // The map (ADR-0027); never the location-runtime-gms / -hms artifacts.
+            implementation(libs.maplibre.compose)
         }
         jvmMain.dependencies {
             implementation(libs.sqldelight.sqlite.driver)
@@ -115,4 +117,11 @@ compose.resources {
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+    // CI keeps no test reports: print the whole failure, causes included.
+    testLogging {
+        events("failed")
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        showCauses = true
+        showStackTraces = true
+    }
 }

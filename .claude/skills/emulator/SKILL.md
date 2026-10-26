@@ -24,6 +24,9 @@ tools/dev/seed.py tasks            # sample tasks: routines, checklist, overdue,
 tools/dev/seed.py shopping         # lists «Аптека», «Дача» (tag «Дача»), «Продукты» (active; dima ticked 2) (after family)
 tools/dev/seed.py calendar         # relatives Бабушка Валя (+3 d), Дядя Коля; «Танцы» weekly (one cancelled, one moved), «Стоматолог», «Отпуск», memorable date (after family)
 tools/dev/seed.py tick Хлеб --as dima   # another member ticks an item now: «who is shopping» for 15 min
+tools/dev/seed.py location         # places «Дом», «Школа №12»; Аня (a day home → school → home), Тимур (home 40 min), Дмитрий (2 km away) share; Ольга (the emulator) does not
+tools/dev/seed.py move Аня 55.7990 37.5340   # one position now for a seeded member (Аня, Тимур, Дмитрий)
+tools/dev/seed.py call GET /location/now --as Аня   # seeded members use their stored sharing session
 tools/dev/emu.sh start             # headless; run in background, boot takes about a minute
 tools/dev/emu.sh install           # build + install debug APK + launch (after every code change)
 ```
@@ -45,7 +48,12 @@ tools/dev/ui.sh crash               # crash buffer + ANRs since the last launch
 tools/dev/emu.sh fresh              # clear app data (back to the Server screen)
 tools/dev/emu.sh link "$(tools/dev/seed.py invite | sed -n 's/^payload //p')"   # open an invite deep link
 tools/dev/seed.py login-code Аня    # login QR payload for a member; open it with emu.sh link
+tools/dev/emu.sh geo 55.7963 37.5378   # the emulator's GPS position (Ольга's phone): «Дом»
+tools/dev/emu.sh route home-school  # walk «Дом» → «Школа №12»: 40 fixes, one per 5 s, ~5 knots (run in background)
 ```
+
+`geo fix` feeds the emulator's `gps` provider (velocity in knots works); whether the platform `fused` provider
+passes it on is checked in M4-07 with the sharing service (no app requested locations before).
 
 Chain several actions in one Bash call and end with `dump` (cheap text) to see where you are. Take a screenshot only
 to check visual details (layout, colors, dark theme) or for the handoff, and do not Read the same screen twice.

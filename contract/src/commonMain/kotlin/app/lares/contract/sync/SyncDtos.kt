@@ -24,6 +24,8 @@ object EntityTypes {
     const val EVENT = "event"
     const val EVENT_OCCURRENCE = "event_occurrence"
     const val EVENT_REMINDER = "event_reminder"
+    const val PLACE = "place"
+    const val PLACE_ALERT = "place_alert"
 }
 
 /** Limits of pull and push. */

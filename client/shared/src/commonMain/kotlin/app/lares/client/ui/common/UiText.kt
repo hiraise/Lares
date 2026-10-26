@@ -43,6 +43,11 @@ sealed interface UiText {
         val parts: List<UiText>,
         val separator: String,
     ) : UiText
+
+    /** [text] with its first letter in upper case (a chip starting with «пн»). */
+    data class Capitalized(
+        val text: UiText,
+    ) : UiText
 }
 
 fun uiText(
@@ -60,6 +65,7 @@ fun UiText.text(): String =
         is UiText.Plural -> pluralStringResource(res, quantity, *args.map { it.text() }.toTypedArray())
         is UiText.Item -> stringArrayResource(res)[index]
         is UiText.Concat -> parts.map { it.text() }.joinToString(separator)
+        is UiText.Capitalized -> text.text().replaceFirstChar { it.uppercaseChar() }
     }
 
 suspend fun UiText.load(): String =
@@ -69,4 +75,5 @@ suspend fun UiText.load(): String =
         is UiText.Plural -> getPluralString(res, quantity, *args.map { it.load() }.toTypedArray())
         is UiText.Item -> getStringArray(res)[index]
         is UiText.Concat -> parts.map { it.load() }.joinToString(separator)
+        is UiText.Capitalized -> text.load().replaceFirstChar { it.uppercaseChar() }
     }

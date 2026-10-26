@@ -31,9 +31,29 @@ data class Config(
     val insecure: Boolean = false,
     /** The run fails above this share of failed requests or rejected mutations. */
     val maxErrorRate: Double = 0.01,
+    /** Phones sharing location (plan M4-05): the first device of the first N members; null = every member. */
+    val sharingDevices: Int? = null,
+    /** Pause between position uploads of a sharing phone (one fix per upload). */
+    val positionInterval: Duration = 30.seconds,
+    /** Devices holding the live map channel, taken from the second devices of the members; null = up to 3. */
+    val mapViewersOption: Int? = null,
+    /** Family places on the simulated route. */
+    val places: Int = 2,
 ) {
     /** Members of the simulated family: two devices each. */
     val members: Int get() = (devices + 1) / 2
+
+    /** Number of sharing phones: one per member at most (two sharing phones of one member would take turns, LOC-019). */
+    val sharing: Int get() = sharingDevices ?: members
+
+    /** Indexes of the sharing devices: the first device of each of the first [sharing] members. */
+    val sharingIndexes: List<Int> get() = (0 until sharing).map { it * 2 }
+
+    /** Number of map viewers: 3 by default, fewer when the family has fewer second devices. */
+    val mapViewers: Int get() = mapViewersOption ?: minOf(DEFAULT_MAP_VIEWERS, devices / 2)
+
+    /** Indexes of the map viewers: the second devices of the first [mapViewers] members. */
+    val viewerIndexes: List<Int> get() = (0 until mapViewers).map { it * 2 + 1 }
 
     /** Offset of the burst from the end of the warm-up, or null without a burst. */
     val effectiveBurstAt: Duration?
@@ -45,6 +65,9 @@ data class Config(
             }
 
     companion object {
+        const val MAX_PLACES = 8
+        const val DEFAULT_MAP_VIEWERS = 3
+
         val USAGE =
             """
             Usage: loadsim [options]
@@ -64,6 +87,10 @@ data class Config(
               --out DIR               output directory (default build/loadsim)
               --insecure              trust any TLS certificate (local Caddy CA)
               --max-error-rate R      fail above this share of errors (default 0.01)
+              --sharing-devices N     phones sharing location, one per member (default: every member)
+              --position-interval D   pause between position uploads of a sharing phone (default 30s)
+              --map-viewers N         devices holding the live map channel, second devices (default 3)
+              --places N              family places on the route, 0..$MAX_PLACES (default 2)
             Durations: 90s, 5m, 1h, 1h30m, 0.
             """.trimIndent()
 
@@ -147,6 +174,22 @@ data class Config(
                             )
                         }
 
+                        "--sharing-devices" -> {
+                            config.copy(sharingDevices = nonNegativeInt(flag, value()))
+                        }
+
+                        "--position-interval" -> {
+                            config.copy(positionInterval = duration(flag, value()))
+                        }
+
+                        "--map-viewers" -> {
+                            config.copy(mapViewersOption = nonNegativeInt(flag, value()))
+                        }
+
+                        "--places" -> {
+                            config.copy(places = nonNegativeInt(flag, value()))
+                        }
+
                         else -> {
                             throw IllegalArgumentException("Unknown option $flag")
                         }
@@ -160,6 +203,7 @@ data class Config(
                 "--burst-interval" to config.burstInterval,
                 "--refresh-interval" to config.refreshInterval,
                 "--admin-interval" to config.adminInterval,
+                "--position-interval" to config.positionInterval,
             )
             ) {
                 require(interval > Duration.ZERO) { "$name must be positive" }
@@ -167,6 +211,11 @@ data class Config(
             require((config.adminLogin == null) == (config.adminPassword == null)) {
                 "--admin-login and --admin-password go together"
             }
+            require(config.sharing <= config.members) { "--sharing-devices must be at most ${config.members} (one per member)" }
+            require(config.mapViewers <= config.devices / 2) {
+                "--map-viewers must be at most ${config.devices / 2} (second devices of the members)"
+            }
+            require(config.places <= MAX_PLACES) { "--places must be at most $MAX_PLACES" }
             return config
         }
 
@@ -181,6 +230,11 @@ data class Config(
                 Duration.parseOrNull(text.trim())?.takeIf { !it.isNegative() }
                     ?: throw IllegalArgumentException("$flag: '$text' is not a duration like 90s, 5m or 1h")
             }
+
+        private fun nonNegativeInt(
+            flag: String,
+            text: String,
+        ): Int = text.toIntOrNull()?.takeIf { it >= 0 } ?: throw IllegalArgumentException("$flag must be a number >= 0")
 
         private fun positiveInt(
             flag: String,

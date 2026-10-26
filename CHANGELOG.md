@@ -5,6 +5,34 @@ Versioning: [SemVer](https://semver.org/) from the first release.
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-26
+
+### Added
+
+- Location sharing on Android (M4-07): Settings › «Геопозиция» turns on sharing with a short setup — precise location,
+  «Allow all the time», notifications and battery saving with hints for Xiaomi, Huawei/Honor, Samsung, OnePlus/Oppo/
+  Realme. While sharing, the notification «Вы делитесь геопозицией» is always shown; pause «На 1 час», «До утра» or
+  «Пока не включу» for those allowed to pause, «Продолжить». Sharing continues after a restart of the phone, answers
+  «Обновить», and tells the family when location is turned off or the permission is taken away. The map follows.
+- The map (M4-08): More › «Карта» shows the family on an OpenStreetMap map (light and dark style from the server) —
+  places as circles, each member as a pin in their color (grey when paused, off or without fresh data), and a list
+  under the map: where each one is (place, street address or «В пути»), how long ago and the battery. A tap opens the
+  member's card with «Обновить» to ask their phone for a fresh position. Your own sharing row with «Пауза» /
+  «Продолжить» / «Включить передачу геопозиции» is always on the map. Offline the last known positions show with
+  «Нет связи». The APK is larger because of the map renderer.
+- History and places (M4-09): «История» on a member's card shows their day — the track on the map and the stops under
+  it («Школа №12 · 8:25–14:40», «Дома · с 16:50», a street address for other stops) for any day the family keeps. «Места»
+  lists the places with who is there now; a place shows its address and who is there. Those allowed to manage places
+  create them by a long press on the map, «Я здесь» or a search by address, choose an icon and the circle size
+  (50–1000 m), change and delete them; this works offline too.
+- Arrive and leave notifications, who sees whom (M4-10): on a member's card, their page or a place, «Сообщать: прибытие
+  и уход» turns on «Аня · Школа №12 — Прибытие в 08:52» / «Уход в 14:20» for chosen places, for yourself only; a tap
+  opens the map at the member. Settings › «Геопозиция» shows «Кто меня видит» and «О вас сообщают». Administrators set
+  «кто кого видит» as rules («Дети видят: Взрослые · где сейчас») and how long history is kept (7–90 days) in Family
+  settings › «Геопозиция: кто кого видит». Today shows «Семья сейчас»; a member's page shows «Где сейчас» and «История».
+  Settings › Notifications has «Места: прибытие и уход» and, for administrators, «Передача геопозиции выключена».
+  New manual "Map" (en, ru).
+
 ## [0.4.0] - 2026-10-25
 
 ### Added

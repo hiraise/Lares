@@ -73,6 +73,7 @@ import app.lares.client.ui.tasks.TasksRoute
 import app.lares.client.ui.tasks.TasksViewModel
 import app.lares.client.ui.theme.LaresTheme
 import app.lares.contract.permissions.Section
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
@@ -116,6 +117,8 @@ class MainNavigation(
     val onEvent: (String, LocalDate?) -> Unit = { _, _ -> },
     val onEventEditor: (EventEditorArgs) -> Unit = {},
     val onPerson: (String) -> Unit = {},
+    /** The Map, centred on a member when given (Today «Семья сейчас»). */
+    val onMap: (String?) -> Unit = {},
 )
 
 @Composable
@@ -198,7 +201,9 @@ fun MainScaffoldRoute(
                         tab.value = MainTab.CALENDAR
                     }
                 },
+                onMap = navigation.onMap,
             ),
+        familyNow = todayViewModel.familyNow,
     )
     if (sheetOpen) {
         SyncSheet(
@@ -221,6 +226,7 @@ fun MainScaffold(
     tab: MutableState<MainTab> = rememberSaveable { mutableStateOf(MainTab.TODAY) },
     today: TodayUiState = TodayUiState(),
     todayActions: TodayActions = TodayActions(),
+    familyNow: StateFlow<TodayFamilyNowUi?>? = null,
 ) {
     var selected by tab
     val tabs = MainTab.visible(state.sections)
@@ -235,7 +241,9 @@ fun MainScaffold(
         Box(Modifier.fillMaxSize().padding(padding)) {
             when (current) {
                 MainTab.TODAY -> {
-                    TodayScreen(state, onOpenSync = onOpenSync, onOpenMore = { selected = MainTab.MORE }, today, todayActions)
+                    // Collected here only, so the live location socket closes on the other tabs.
+                    val now = familyNow?.collectAsStateWithLifecycle()?.value
+                    TodayScreen(state, onOpenSync = onOpenSync, onOpenMore = { selected = MainTab.MORE }, today, todayActions, now)
                 }
 
                 MainTab.TASKS -> {

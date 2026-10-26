@@ -29,6 +29,14 @@ import app.lares.client.ui.family.GroupEditorRoute
 import app.lares.client.ui.family.MemberDetailRoute
 import app.lares.client.ui.family.PersonRoute
 import app.lares.client.ui.family.TagRoute
+import app.lares.client.ui.location.HistoryArgs
+import app.lares.client.ui.location.HistoryRoute
+import app.lares.client.ui.location.LocationRulesRoute
+import app.lares.client.ui.location.LocationSettingsRoute
+import app.lares.client.ui.location.MapArgs
+import app.lares.client.ui.location.MapRoute
+import app.lares.client.ui.location.PlaceEditorArgs
+import app.lares.client.ui.location.PlaceEditorRoute
 import app.lares.client.ui.main.MainNavigation
 import app.lares.client.ui.main.MainScaffoldRoute
 import app.lares.client.ui.main.SectionPlaceholderPage
@@ -112,6 +120,35 @@ data object DevicesDestination
 
 @Serializable
 data object NotificationSettingsDestination
+
+@Serializable
+data object LocationSettingsDestination
+
+/** Family › «Геопозиция: кто кого видит» (M4-10, administrators). */
+@Serializable
+data object LocationRulesDestination
+
+/** The Map (M4-08), centred on a member or a place when given. */
+@Serializable
+data class MapDestination(
+    val memberId: String? = null,
+    val placeId: String? = null,
+)
+
+/** A member's day on the map (M4-09); [date] is an ISO date, null = today. */
+@Serializable
+data class LocationHistoryDestination(
+    val memberId: String,
+    val date: String? = null,
+)
+
+/** The place editor (M4-09): an existing place, or a new one at [lat], [lon]. */
+@Serializable
+data class PlaceEditorDestination(
+    val id: String? = null,
+    val lat: Double? = null,
+    val lon: Double? = null,
+)
 
 @Serializable
 data object AboutDestination
@@ -313,7 +350,15 @@ fun MainNavHost() {
                     onSettings = { navController.navigate(SettingsDestination) },
                     onProfile = { navController.navigate(ProfileDestination) },
                     onDevices = { navController.navigate(DevicesDestination) },
-                    onSection = { navController.navigate(SectionPageDestination(it)) },
+                    onSection = {
+                        if (it ==
+                            Section.MAP
+                        ) {
+                            navController.navigate(MapDestination())
+                        } else {
+                            navController.navigate(SectionPageDestination(it))
+                        }
+                    },
                     onFamily = { navController.navigate(FamilyDestination(it)) },
                     onTask = { navController.navigate(TaskDetailDestination(it)) },
                     onTaskEditor = { navController.navigate(TaskEditorDestination.of(it)) },
@@ -321,6 +366,7 @@ fun MainNavHost() {
                     onEvent = { id, occurrence -> navController.navigate(EventDestination(id, occurrence?.toString())) },
                     onEventEditor = { navController.navigate(EventEditorDestination.of(it)) },
                     onPerson = { navController.navigate(PersonDestination(it)) },
+                    onMap = { navController.navigate(MapDestination(memberId = it)) },
                 ),
             )
         }
@@ -372,7 +418,34 @@ fun MainNavHost() {
             )
         }
         composable<SectionPageDestination> { entry ->
-            SectionPlaceholderPage(entry.toRoute<SectionPageDestination>().section, onBack = { navController.popBackStack() })
+            val section = entry.toRoute<SectionPageDestination>().section
+            if (section == Section.MAP) {
+                MapRoute(
+                    MapArgs(),
+                    onBack = { navController.popBackStack() },
+                    onHistory = { navController.navigate(LocationHistoryDestination(it)) },
+                    onPlaceEditor = { navController.navigate(PlaceEditorDestination(it.id, it.lat, it.lon)) },
+                )
+            } else {
+                SectionPlaceholderPage(section, onBack = { navController.popBackStack() })
+            }
+        }
+        composable<MapDestination> { entry ->
+            val route = entry.toRoute<MapDestination>()
+            MapRoute(
+                MapArgs(route.memberId, route.placeId),
+                onBack = { navController.popBackStack() },
+                onHistory = { navController.navigate(LocationHistoryDestination(it)) },
+                onPlaceEditor = { navController.navigate(PlaceEditorDestination(it.id, it.lat, it.lon)) },
+            )
+        }
+        composable<LocationHistoryDestination> { entry ->
+            val route = entry.toRoute<LocationHistoryDestination>()
+            HistoryRoute(HistoryArgs(route.memberId, route.date?.let(LocalDate::parse)), onBack = { navController.popBackStack() })
+        }
+        composable<PlaceEditorDestination> { entry ->
+            val route = entry.toRoute<PlaceEditorDestination>()
+            PlaceEditorRoute(PlaceEditorArgs(route.id, route.lat, route.lon), onBack = { navController.popBackStack() })
         }
         composable<SettingsDestination> {
             SettingsRoute(
@@ -381,6 +454,7 @@ fun MainNavHost() {
                     onProfile = { navController.navigate(ProfileDestination) },
                     onDevices = { navController.navigate(DevicesDestination) },
                     onNotifications = { navController.navigate(NotificationSettingsDestination) },
+                    onLocation = { navController.navigate(LocationSettingsDestination) },
                     onAbout = { navController.navigate(AboutDestination) },
                 ),
             )
@@ -396,6 +470,7 @@ fun MainNavHost() {
         composable<LoginQrDestination> { LoginQrRoute(onBack = { navController.popBackStack() }) }
         composable<DevicesDestination> { DevicesRoute(onBack = { navController.popBackStack() }) }
         composable<NotificationSettingsDestination> { NotificationSettingsRoute(onBack = { navController.popBackStack() }) }
+        composable<LocationSettingsDestination> { LocationSettingsRoute(onBack = { navController.popBackStack() }) }
         composable<AboutDestination> {
             AboutRoute(onBack = { navController.popBackStack() }, onLicenses = { navController.navigate(LicensesDestination) })
         }
@@ -407,7 +482,8 @@ fun MainNavHost() {
 /**
  * A tapped task notification or reminder opens the task over the main screen; a task that is gone opens the Tasks tab
  * with a notice instead (plan M1-07). Events open their page (the reminded occurrence, else the next one), a gone
- * event opens the Calendar tab with a notice; birthday reminders open the person (plan M3-08).
+ * event opens the Calendar tab with a notice; birthday reminders open the person (plan M3-08); location notifications
+ * open the Map at the member (plan M4-10).
  */
 @Composable
 private fun NotificationTaps(
@@ -444,6 +520,11 @@ private fun NotificationTaps(
                 is NavTarget.Person -> {
                     if (!pending.consume(target)) return@collect
                     navController.navigate(PersonDestination(target.id)) { popUpTo<SectionsDestination>() }
+                }
+
+                is NavTarget.MapMember -> {
+                    if (!pending.consume(target)) return@collect
+                    navController.navigate(MapDestination(memberId = target.memberId)) { popUpTo<SectionsDestination>() }
                 }
 
                 else -> {}
@@ -508,7 +589,12 @@ private fun NavGraphBuilder.familyGraph(navController: NavHostController) {
             onBack = back,
             onEvent = { navController.navigate(EventDestination(it)) },
             onAddMemorable = { navController.navigate(EventEditorDestination.of(EventEditorArgs(memorable = true, personId = it))) },
+            onMap = { navController.navigate(MapDestination(memberId = it)) },
+            onHistory = { navController.navigate(LocationHistoryDestination(it)) },
         )
     }
-    composable<FamilySettingsDestination> { FamilySettingsRoute(onBack = back) }
+    composable<FamilySettingsDestination> {
+        FamilySettingsRoute(onBack = back, onLocationRules = { navController.navigate(LocationRulesDestination) })
+    }
+    composable<LocationRulesDestination> { LocationRulesRoute(onBack = back) }
 }

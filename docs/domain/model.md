@@ -68,11 +68,16 @@ erDiagram
     DEVICE ||--o{ POSITION : "reports"
     TRACKABLE ||--o{ DEVICE : "carries"
     HOUSEHOLD ||--o{ PLACE : "defines"
-    PLACE ||--o{ GEOFENCE_SUBSCRIPTION : "watched by"
+    MEMBER ||--o{ PLACE_ALERT : "subscribes (per watched member)"
+    PLACE_ALERT }o--o{ PLACE : "lists"
+    MEMBER ||--o| LOCATION_STATE : "sharing status, latest fix"
     HOUSEHOLD ||--o{ LOCATION_VISIBILITY_RULE : "defines"
 ```
 
-- `POSITION` is append-only, not synced through the general mechanism, deleted after retention.
+- `POSITION` is append-only, not synced through the general mechanism, deleted after retention (ADR-0024).
+- `PLACE` and `PLACE_ALERT` are sync data; a `PLACE_ALERT` row is seen only by its subscriber, its id is derived from
+  the watched member and the subscriber (`Ids.placeAlertRowId`).
+- `LOCATION_STATE` (server only) holds the member's sharing status, pause, the sharing session and the newest fix.
 
 ## Budget (M5)
 
