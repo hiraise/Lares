@@ -215,12 +215,13 @@ Server-only checks:
 
 ## Server
 
-### Tables (`V10__budget.sql`)
+### Tables (`V12__budget.sql`)
 
 ```sql
 budget_plan    (id uuid PK, household_id uuid NOT NULL → household, effective_from text NOT NULL,   -- "2026-12"
                 plan_table text NOT NULL,                                                         -- JSON BudgetTable
-                updated_by uuid NOT NULL → member, seq, created_at, updated_at, deleted)
+                updated_by uuid NOT NULL → member, saved_at timestamptz NOT NULL,                 -- data.updatedAt
+                seq, created_at, updated_at, deleted)
 budget_month   (id uuid PK, household_id, month text NOT NULL, month_table text NULL, updated_by uuid NOT NULL → member,
                 seq, created_at, updated_at, deleted)
 budget_receipt (id uuid PK, household_id, month text NOT NULL, income_id uuid NULL, label text NULL, amount bigint NULL,
@@ -230,7 +231,8 @@ budget_funding (id uuid PK, household_id, month text NOT NULL, income_id uuid NO
                 seq, created_at, updated_at, deleted)
 ```
 
-Indexes: `(household_id, seq)` on all four. (`table` is reserved in SQL, hence `plan_table` / `month_table`.)
+Indexes: `(household_id, seq)` on all four. (`table` is reserved in SQL, hence `plan_table` / `month_table`; the plan's
+`updatedAt` is `saved_at`, since `updated_at` is the server's sync column.)
 
 ### Handlers (package `app.lares.server.budget`)
 

@@ -61,6 +61,7 @@ the 20th, 12 000 on the 25th; about twenty categories.
   versions with their date and author. ASSUMPTION: applying to the current month replaces its plan cells but keeps
   what was already entered or ticked.
   *Contract: plan versions with derived ids, `BudgetMath.planFor` / `firstMonth` (M5-01).*
+  *Server: versions stored and synced; versions of past months read-only, with a day of grace after midnight (M5-02).*
 
 ### Month
 
@@ -70,19 +71,23 @@ the 20th, 12 000 on the 25th; about twenty categories.
   date may be earlier or later than planned. ASSUMPTION: an extra income not in the plan (a bonus) can be added to a
   month; it has no cells and counts as free money.
   *Contract: receipts of planned and extra incomes, validation (M5-01).*
+  *Server: receipts stored and synced; only extra incomes can be deleted (M5-02).*
 - **BUD-012** `MVP` `doing` — Funding: in each income's column the member ticks the categories transferred from it.
   The transferred amount is the planned one and can be changed (less or more). The category row shows funded of its
   monthly amount.
   *Contract: ticks with derived ids, `fundedBy` written only as oneself (M5-01).*
+  *Server: ticks stored and synced; two members ticking the same cell write one row, the later amount wins (M5-02).*
 - **BUD-013** `MVP` `doing` — Changing a month without changing the plan: a cell's planned amount, a category added
   or left out for this month only. Every difference from the plan is marked in the month (customer: «должно быть
   отражено»).
   *Contract: month copy of the table, `BudgetMath.tableFor` / `differences` (M5-01).*
+  *Server: month copies stored and synced (M5-02).*
 - **BUD-014** `MVP` `doing` — Totals of the month and of each income: expected, actual, transferred; shortfall
   (actual below expected) and free money (actual minus transferred). Free money is only shown; it is not carried to
   the next month or assigned anywhere (customer, 2026-11-07).
   *Contract: `BudgetMath.summary` — expected, actual, transferred, shortfall, free money (M5-01).*
-- **BUD-015** `MVP` `todo` — Works offline and syncs like the other modules (FND-040).
+- **BUD-015** `MVP` `doing` — Works offline and syncs like the other modules (FND-040).
+  *Server: four sync types, `budget.view` reads and `budget.manage` writes (M5-02).*
 
 ### Overview
 

@@ -5,13 +5,13 @@ Updated: 2026-11-07
 ## Phase
 
 **M0–M4 implemented and accepted by the customer (2026-11-07): foundation, tasks, shopping lists, calendar, location.
-M5 Budget in progress: M5-01 (contract) done; next M5-02.**
+M5 Budget in progress: M5-01 (contract), M5-02 (server) done; next M5-03.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
 
 [M5 Budget](product/roadmap.md#m5-budget): [spec](product/features/budget.md) approved 2026-11-07,
-[design](architecture/budget.md), ADR-0032, [M5 plans](plans/README.md#m5-plans). Done: M5-01. Next: M5-02.
+[design](architecture/budget.md), ADR-0032, [M5 plans](plans/README.md#m5-plans). Done: M5-01, M5-02. Next: M5-03.
 M0–M4 accepted 2026-11-07.
 
 **Active release branch: `release/0.6.0`** (M5 Budget). Commit approved work here; `main` is protected
@@ -20,6 +20,9 @@ M0–M4 accepted 2026-11-07.
 
 ## Last completed
 
+- 2026-11-07 M5-02 Budget on the server: plan versions, month copies, incomes and ticks stored and synced; only
+  `budget.view` reads and `budget.manage` writes, past plan versions read-only, only extra incomes deletable;
+  `seed.py budget`; 8 new server tests.
 - 2026-11-07 M5-01 Budget contract: plan versions, month copies, receipts and ticks as sync data with derived ids
   (also in `seed.py`), write rules, validators, `BudgetMath` (plan in force, table checks, differences from the plan,
   month totals with shortfall and free money) tested on the customer's notebook; 33 new contract tests.
@@ -202,7 +205,7 @@ M0–M4 accepted 2026-11-07.
 
 1. Release v0.5.2 (battery saving, ADR-0030) when the customer approves; check a day of battery and home tracks on a
    real phone.
-2. M5 Budget: execute plans [M5-02…M5-06](plans/README.md#m5-plans) in order (`/plan-run M5-02`).
+2. M5 Budget: execute plans [M5-03…M5-06](plans/README.md#m5-plans) in order (`/plan-run M5-03`).
 3. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
 
 ## Plan progress

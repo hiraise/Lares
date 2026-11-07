@@ -24,7 +24,7 @@ no jobs.
 
 ## Scope
 
-- `V10__budget.sql` as in the design.
+- `V12__budget.sql` as in the design (V10 and V11 are taken by location).
 - Package `app.lares.server.budget`: `BudgetTables.kt`, `BudgetRepository.kt` (row ↔ data; tables as JSON text with the
   contract `Json`), `BudgetChecks.kt` (derived-id check, current-month check using the household zone),
   `BudgetPlanSyncHandler.kt`, `BudgetMonthSyncHandler.kt`, `BudgetReceiptSyncHandler.kt`, `BudgetFundingSyncHandler.kt`.

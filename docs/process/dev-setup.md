@@ -52,7 +52,7 @@ to `build/dev/` (ignored by git).
 | --- | --- |
 | `verify.sh [tasks]` | `spotlessApply` + tasks (default: `check :client:android:assembleDebug`); prints errors, failed tests, totals |
 | `server.sh start\|stop\|restart\|reset\|status\|log` | Dev DB + server in background on `LARES_PORT` (8080), own database `lares_e2e`, setup code `DEVSETUP01` |
-| `seed.py family\|token\|invite\|login-code\|tasks\|shopping\|calendar\|location\|move\|tick\|call` | Test family Петровы via the API (`olga / olga-password` admin, `dima`, kids Аня and Тимур); `location` seeds places and sharing sessions of the other members |
+| `seed.py family\|token\|invite\|login-code\|tasks\|shopping\|calendar\|location\|budget\|move\|tick\|call` | Test family Петровы via the API (`olga / olga-password` admin, `dima`, kids Аня and Тимур); `location` seeds places and sharing sessions of the other members; `budget` the notebook plan from this month with the 5th's income recorded and half of it ticked |
 | `emu.sh start [--window]\|install\|launch\|fresh\|link URL\|geo LAT LON\|route home-school\|stop` | Emulator lifecycle, `adb reverse`, deep links, GPS position and a walking route |
 | `ui.sh dump\|tap\|wait\|has\|field\|type\|shot\|crash …` | Drive the app by visible text; screenshots downscaled to 540×1200 |
 

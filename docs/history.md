@@ -460,3 +460,10 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   and normalizers, `BudgetMath` (`planFor`, `tableFor`, `incomeDate`, `check`, `differences`, `summary`). Design
   detail changed: `summary` takes receipts keyed by row id (extra incomes need their id). 33 new contract tests on the
   customer's notebook (contract 242 total).
+- 2026-11-07 M5-02 Budget on the server: migration `V12__budget.sql` (V10/V11 were taken by location; the plan's
+  `updatedAt` stored as `saved_at`), package `app.lares.server.budget` with four `WritableSyncHandler`s registered after
+  location: derived-id and immutable-field checks (extra receipts need a UUIDv7), `budget.view` reads, `budget.manage`
+  writes, `updatedBy` / new `fundedBy` only the writer, planned receipts not deletable, past plan versions read-only
+  (checked in `validate`, so an unchanged upsert of one is rejected too; a day of grace in the household zone),
+  `fundedAt` / plan `updatedAt` at most a day ahead; housekeeping purges receipt tombstones. Fixtures
+  `BudgetFixtures.kt`, `seed.py budget` (the notebook plan from this month). 8 new server tests.
