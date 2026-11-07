@@ -445,3 +445,7 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
 - 2026-11-07 ADR-0031 tags apart from people: `PaletteColor` + rose, olive, cyan, indigo, magenta, slate (HCT tones
   48/92/75/28, tags only; person validation rejects them); `TagChip` outlined with a dot, the tag picker selected like
   a filter chip; `ColorSwatches(colors = …)`. 3 new tests.
+- 2026-11-07 Budget spec rewritten from the customer's notebook (Q-031): income distribution only — versioned plan of
+  categories × incomes by day of the month, months with actual incomes (by hand, may come early) and ticked funding,
+  one-month changes marked, shortfall and free money shown; accounts, transactions, rules, deficits, loans, debts
+  dropped. Glossary, permissions, roadmap, tags (TAG-002 done, TAG-005 later) follow.

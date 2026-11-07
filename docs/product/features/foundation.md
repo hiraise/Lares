@@ -169,7 +169,7 @@ Example:
 | Member | Groups | Result |
 | --- | --- | --- |
 | Dad, Mom | Administrators | Everything, including household management |
-| Son, 14 | Kids | Tasks, lists, calendar; sees parents on the map; sees his "Pocket money" account if granted `budget.view` and access to it |
+| Son, 14 | Kids | Tasks, lists, calendar; sees parents on the map; no Budget section |
 | Grandma | "Grandparents" (custom) | Calendar and shopping lists only |
 
 ## Permission catalogue
@@ -194,8 +194,8 @@ Draft; each module spec extends it. Template defaults are chosen by agents and e
 | `location.view` | section | Open the Map (who is visible follows visibility rules) | ✓ | ✓ |
 | `location.pause_own` | action | Pause own location sharing | ✓ | — |
 | `location.manage_places` | action | Create and edit places (Home, School) | ✓ | — |
-| `budget.view` | section | Open Budget (which accounts follows account access) | ✓ | — |
-| `budget.manage` | action | Categories, allocation rules, debts, account access | ✓ | — |
+| `budget.view` | section | Open Budget: the plan, months and their history | ✓ | — |
+| `budget.manage` | action | Change the plan, record incomes, tick funding, change a month | ✓ | — |
 
 Data visibility rules created with the templates:
 

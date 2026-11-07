@@ -7,7 +7,7 @@ Never claim a change is done without running the relevant tests.
 
 | Level | Scope | Tooling (finalized in M0) |
 | --- | --- | --- |
-| Unit | Domain logic: recurrence, allocation rules, deficits, geofence math, permissions | kotlin.test, runs on JVM |
+| Unit | Domain logic: recurrence, budget plan and month totals, geofence math, permissions | kotlin.test, runs on JVM |
 | Server integration | HTTP API + real PostgreSQL, permissions, household isolation | Ktor test host, Testcontainers |
 | Sync | Several simulated clients editing offline and syncing: convergence, no data loss, rejections | Shared client code against a test server |
 | Client | View models, repositories, local DB | KMP common tests |

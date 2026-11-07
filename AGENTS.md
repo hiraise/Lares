@@ -6,8 +6,8 @@ Entry point for AI agents working on this repository. Read this file first, then
 
 **Lares** (named after the Roman guardian spirits of the home; see Q-001) is a self-hosted, open-source (AGPL-3.0-or-later) family organizer.
 Modules: shared tasks and recurring chores, shopping lists, family calendar (events, birthdays of relatives),
-location of family members on a map (phones; geofences), family budget (envelope-style income allocation,
-category deficits and loans, real debts), and tags that cut across all modules. Access is controlled by
+location of family members on a map (phones; geofences), family budget (monthly distribution of income
+into categories by a versioned plan; no spending tracking), and tags that cut across all modules. Access is controlled by
 admin-defined groups and permissions; there is no hardcoded "child" role.
 Server: Kotlin/Ktor + PostgreSQL, deployed with Docker Compose on a VPS. Client: Kotlin Multiplatform +
 Compose Multiplatform, Android first; web, iOS, desktop later. No ads, no telemetry, no paid tiers,

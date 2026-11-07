@@ -10,7 +10,8 @@ Answered questions stay in the "Answered" section for history.
 
 | Q | Topic | Question | Default |
 | --- | --- | --- | --- |
-| Q-031 | Budget concept (2026-11-07) | The customer will rework the budget (M5): which of the confirmed concepts (allocation rules, category deficits, inter-category loans, real debts) change, and how? | M5 is not planned until the customer describes the new concept. |
+| Q-032 | Budget reminders (2026-11-07) | Should the app remind on an income's day to record it and fund the categories, and whom? | No reminders in M5 (BUD-030 later). |
+| Q-033 | Budget analytics (2026-11-07) | Which analytics over months: plan vs. actual, totals per category over a year, months with a shortfall, something else? | M5 shows the list of months with expected, actual and free money only (BUD-020); analytics later (BUD-022). |
 | Q-030 | Battery vs. freshness while moving (2026-10-27) | Should a moving phone upload less often (every 2–3 min instead of 30 s), go «live» only while someone looks at the map or taps «Обновить», or send less at night? Each saves battery but makes a moving member's pin lag. | No change: positions every minute on foot (30 s in a vehicle), uploaded within 30 s; less only on low battery (ADR-0030). |
 
 ## Answered
@@ -22,7 +23,7 @@ Q-001…Q-012 answered by the customer on 2026-10-22 during kickoff; later answe
 | Q-001 | Project name | 2026-10-23: the project is named **Lares**. Package and application id `app.lares`; repository `github.com/hiraise/lares`. (Earlier working name: FamilyHub.) |
 | Q-002 | Milestone order after Tasks | Shopping → Calendar → Location → Budget. |
 | Q-003 | Google Play | App complies with Play policies from day one; APKs until MVP; whether to publish on Play is decided at M6. |
-| Q-004 | Income allocation | Ordered rules: fixed amounts and percents of the remainder; remainder manual or to a chosen category; rule set per income source. |
+| Q-004 | Income allocation | Ordered rules: fixed amounts and percents of the remainder; remainder manual or to a chosen category; rule set per income source. Superseded by Q-031. |
 | Q-005 | Who sees money | Per-account access for members and groups (ADR-0014). |
 | Q-006 | Currencies | One household currency; data model keeps currency per account for later. |
 | Q-007 | Trackers | Phones only for now; GPS trackers moved to "Later". |
@@ -48,3 +49,4 @@ Q-001…Q-012 answered by the customer on 2026-10-22 during kickoff; later answe
 | Q-027 | «Обновить» a member's position (2026-10-25) | Yes, for everybody who sees the member (LOC-011). |
 | Q-028 | Arrive / leave notifications (2026-10-25) | Everybody who sees a member sets their own; nothing by default; the member sees who gets them (LOC-021, LOC-015). |
 | Q-029 | Addresses (2026-10-25) | Street addresses and address search through an OpenStreetMap service via the server; the administrator can turn it off (LOC-014, LOC-024). |
+| Q-031 | Budget concept | 2026-11-07: the budget distributes income, it does not track spending. A versioned plan of categories × incomes by day of the month; each month the actual income per payment (may come early) is entered by hand and categories are ticked as funded, by hand when money is short; shortfall and free money are only shown; one-month changes allowed but marked; the date is enough for an income; access by permission; whole roubles; analytics later. Accounts, deficits, loans, debts, rules dropped. [budget](features/budget.md). |

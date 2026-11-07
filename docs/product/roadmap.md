@@ -14,7 +14,7 @@ Each milestone ends with a build the family can install (APK) and a short change
 | M2 | Shopping lists | [shopping](features/shopping.md) | implemented (M2-01…M2-06); accepted 2026-11-07 |
 | M3 | Calendar | [calendar](features/calendar.md) | implemented (M3-01…M3-08); accepted 2026-11-07 |
 | M4 | Location | [location](features/location.md) | implemented (M4-01…M4-11); accepted 2026-11-07 |
-| M5 | Budget | [budget](features/budget.md) | not started; the customer reworks the concept (Q-031) |
+| M5 | Budget | [budget](features/budget.md) | spec approved 2026-11-07; technical design and plans next |
 | M5b | Files and photos | [files](features/files.md) | not started |
 | M6 | Public release | — | not started |
 | M7 | Web client | — | not started |
@@ -67,8 +67,9 @@ switches and taps, the user manual "Map" (M4-01…M4-10).
 
 ## M5 Budget
 
-Accounts, categories, transactions, allocation rules, category deficits, inter-category loans, debts with schedules,
-reports, tags. One currency.
+Monthly distribution of income into categories: a versioned plan (categories × incomes by day of the month), each
+month's actual incomes and funded categories, shortfall and free money. No spending tracking (customer, 2026-11-07).
+Whole roubles.
 
 ## M5b Files and photos
 

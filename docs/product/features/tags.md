@@ -1,6 +1,6 @@
 ---
-status: approved  # core accepted by the customer, 2026-11-07; TAG-005 waits for the budget
-milestone: M0 (core), integrations in M1–M5
+status: implemented  # accepted by the customer, 2026-11-07; the budget has no tags (BUD, 2026-11-07)
+milestone: M0 (core), integrations in M1–M3
 updated: 2026-10-24
 ---
 # Tags (TAG)
@@ -8,8 +8,8 @@ updated: 2026-10-24
 ## Summary
 
 A tag is a household-wide label such as "Car", "Dacha", "School". It can be attached to items in every module.
-A tag page shows everything linked to it: open tasks, upcoming events, shopping items, spending.
-Tags complement budget categories: car spending spread over "Fuel", "Insurance", "Repairs" is summed under the tag "Car".
+A tag page shows everything linked to it: open tasks, upcoming events, shopping items. The budget distributes income
+and records no spending (2026-11-07), so it has no tags.
 
 ## Scenarios
 
@@ -25,8 +25,8 @@ Tags complement budget categories: car spending spread over "Fuel", "Insurance",
   *Server: tags through sync, `tags.manage` (M0-05); client core `TagsWriter`/`TagsRepository` (M0-06); Family › Tags:
   list, create/edit sheet with the palette, archive section, delete (M0-08). Icons are not offered in the UI yet.
   16 tag colors and outlined chips with a dot (ADR-0031).*
-- **TAG-002** `MVP` `doing` — A tag can be attached to tasks, shopping lists and items, events, transactions and debts (as each module ships).
-  *Tasks: done (M1-02, M1-06). Other modules add theirs.*
+- **TAG-002** `MVP` `done` — A tag can be attached to tasks, shopping lists and items, and events.
+  *Tasks (M1-02, M1-06), shopping (M2), events (M3).*
   *Tasks done: tags in the task editor, «+ Новая метка» for `tags.manage` (M1-06).*
   *Shopping done: tags on lists («Метки списка») and items (item sheet), «+ Новая метка» for `tags.manage` (M2-05).*
   *Calendar client core: event tags stored and shown on items (M3-04); editor in M3-06. Budget adds theirs in M5.*
@@ -45,7 +45,7 @@ Tags complement budget categories: car spending spread over "Fuel", "Insurance",
   *Calendar client core: `forTag` (next occurrence of each tagged event within 365 days) (M3-04); section in M3-08.*
   *Calendar done: «События · N» after shopping — the next occurrence of each tagged event within a year with a date
   tile and «Вторник, 28 октября · 16:00»; the tasks empty state is hidden when the page has events (M3-08).*
-- **TAG-005** `MVP` `todo` — Tag page shows spending for the tag over a chosen period (after M5).
+- **TAG-005** `later` `todo` — Tag page shows spending for the tag over a chosen period (when the budget records spending, BUD-031).
 - **TAG-006** `MVP` `done` — Tag names are unique within a household, case-insensitive.
   *Server: `TAG_NAME_TAKEN`, archived tags keep their name, deleted ones free it (M0-05); client checks local tags first (M0-06); inline "already exists" error in the tag sheet, sync rejections in
   the snackbar (M0-08).*
