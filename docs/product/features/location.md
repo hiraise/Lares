@@ -54,11 +54,16 @@ GPS trackers come later. Technical design: [architecture/location.md](../../arch
   (with «Пауза» for those who may pause). Inside the app Map shows «Вы делитесь местоположением · Пауза».
   *Android: persistent notification «Вы делитесь геопозицией» (paused «Пауза до 15:30» with «Продолжить»), «Пауза на 1 час» only with `location.pause_own` (M4-07).*
   *UI: the map's sharing row «Вы делитесь местоположением · Пауза» (M4-08).*
-- **LOC-007** `MVP` `done` — Battery-aware tracking: while moving, a position about every 30 seconds (or every 50 m);
+- **LOC-007** `MVP` `done` — Battery-aware tracking: while moving, a position about every minute on foot and every 30
+  seconds in a vehicle (customer, 2026-11-07);
   while staying in one place, one position every 15 minutes with the battery level. Accuracy, speed and battery are sent
-  with each position.
+  with each position. With the battery at 20 % or lower (not charging) or the phone's battery saver on, a moving phone
+  takes a position half as often (every 2 minutes on foot, every minute in a vehicle), uploaded every 2 minutes
+  (customer, 2026-10-27). A single position far from where the member stays is ignored until the next one confirms it
+  (indoor scatter, 2026-11-07). Otherwise a moving phone uploads
+  about every 30 seconds, at any time of day — ASSUMPTION (Q-030).
   *Client core: tracking policy (moving / still, what to record and when to upload) (M4-06).*
-  *Android: the service drives the policy with the platform `fused` (API 31+) or `gps` provider, `passive` and the significant-motion sensor, with battery on every fix (M4-07).*
+  *Android: the service drives the policy with the platform `fused` (API 31+) or `gps` provider, `passive` and the significant-motion sensor, with battery on every fix (M4-07). GNSS every minute on foot, every 30 s at vehicle speed, twice as long on low power (ADR-0030).*
 - **LOC-008** `MVP` `done` — The app guides the member to turn off battery optimization (with brand-specific hints for
   Xiaomi, Huawei, Samsung and others) and shows a warning on the phone when it could not send positions for a long time.
   *Android: battery step in the setup and the «Экономия заряда» row with vendor hints (Xiaomi, Huawei/Honor, Samsung, OnePlus/Oppo/Realme, others); «Не удаётся передать геопозицию» after an hour without uploads (M4-07). Real-phone checks of Xiaomi / Samsung battery behaviour pending for the M4 acceptance.*

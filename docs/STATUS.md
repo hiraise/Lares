@@ -1,6 +1,6 @@
 # Project status
 
-Updated: 2026-10-26
+Updated: 2026-11-07
 
 ## Phase
 
@@ -24,6 +24,12 @@ Acceptance of M0–M3 is still pending.
 
 ## Last completed
 
+- 2026-11-07 Tracking slower and calmer indoors (ADR-0030 revised, customer's request): on foot GPS every minute, at
+  vehicle speed every 30 s, doubled on low power (battery ≤ 20 % or battery saver; uploads every 2 min); the still
+  radius widens by the fixes' accuracy, leaving STILL by position needs two far fixes. Not checked on a real phone.
+- 2026-10-27 Battery saving while sharing location (ADR-0030, customer's request): on foot the phone asks for GPS every
+  30 s instead of 10 s, at vehicle speed every 10 s as before; at battery ≤ 20 % or with battery saver every minute and
+  uploads every 2 min. Q-030 opened (less frequent uploads or «live only while someone looks»). On `release/0.5.2`.
 - 2026-10-26 Release **v0.5.1**: map through the family server (M4-11), pin initials, minute-by-minute ages, readable
   dark-theme place labels, stored snapshot removed before an emptied map on FORBIDDEN. Pull request #5. Next branch
   `release/0.5.2`. Servers with an edited `docker-compose.yml` need the `mapcache` service, its template and the Caddy
@@ -199,6 +205,7 @@ See the table in [plans README](plans/README.md#m0-plans).
 
 ## Waiting for the customer
 
+- Q-030: battery vs. how fresh a moving member's pin is (less frequent uploads, live only on demand, night schedule).
 - For a real installation: a VPS (1 vCPU / 2 GB / 20 GB) and a domain with DNS access.
 
 ## Risks

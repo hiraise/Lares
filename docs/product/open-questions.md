@@ -8,7 +8,9 @@ Answered questions stay in the "Answered" section for history.
 
 ## Open
 
-_(none)_
+| Q | Topic | Question | Default |
+| --- | --- | --- | --- |
+| Q-030 | Battery vs. freshness while moving (2026-10-27) | Should a moving phone upload less often (every 2–3 min instead of 30 s), go «live» only while someone looks at the map or taps «Обновить», or send less at night? Each saves battery but makes a moving member's pin lag. | No change: positions every minute on foot (30 s in a vehicle), uploaded within 30 s; less only on low battery (ADR-0030). |
 
 ## Answered
 

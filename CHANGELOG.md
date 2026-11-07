@@ -5,6 +5,14 @@ Versioning: [SemVer](https://semver.org/) from the first release.
 
 ## [Unreleased]
 
+### Changed
+
+- Location sharing uses less battery: on foot the phone checks its position every minute instead of every 10 seconds,
+  in a car every 30 seconds. With the battery at 20 % or lower (not charging) or battery saver on, it checks half as
+  often (the map can lag up to about 4 minutes).
+- Fewer stray track lines at home: a single far-off position indoors no longer counts as leaving, and the scatter of
+  indoor positions no longer keeps the phone in frequent tracking.
+
 ## [0.5.1] - 2026-10-26
 
 ### Changed

@@ -34,8 +34,9 @@ Status values: `proposed` (direction chosen, details or customer confirmation pe
 | [0025](0025-location-visibility-rules.md) | Location visibility rules: subject → target, widest level wins | accepted | 2026-10-25 |
 | [0026](0026-addresses-through-a-server-geocoder.md) | Addresses come from a geocoder through the server, on demand | accepted | 2026-10-25 |
 | [0027](0027-map-rendering-maplibre-compose.md) | The map is drawn with maplibre-compose behind an expect composable | accepted (§4 amended by 0029) | 2026-10-25 |
-| [0028](0028-battery-aware-tracking-service.md) | Phones track with one foreground service in moving and still modes | accepted | 2026-10-25 |
+| [0028](0028-battery-aware-tracking-service.md) | Phones track with one foreground service in moving and still modes | accepted (§2, §3 amended by 0030) | 2026-10-25 |
 | [0029](0029-map-tiles-through-a-server-cache.md) | Map tiles come through a caching proxy on the family server; VersaTiles by default | accepted | 2026-10-26 |
+| [0030](0030-pace-and-power-adaptive-moving-requests.md) | While moving, the platform request follows the pace and the phone's power (amends 0028) | accepted | 2026-11-07 |
 
 ## When to write an ADR
 

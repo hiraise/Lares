@@ -432,3 +432,11 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   first real map on this Mac, initials on pins, MISS then HIT. 3 new server tests.
 - 2026-10-26 Release **v0.5.1** (map through the family server, CI fixes): pull request #5, signed APK, server image
   0.5.1, GitHub release. Next branch `release/0.5.2`.
+- 2026-10-27 Battery saving while sharing location (ADR-0030, amends ADR-0028 §2–3): MOVING asks for GNSS every 30 s
+  on foot, every 10 s for a minute after a fix at ≥ 5 m/s, every minute on low power (battery ≤ 20 % not charging, or
+  battery saver; uploads every 2 min); balanced quality rejected (no fixes without a network provider). Q-030 opened
+  for the product side. 4 new policy tests; emulator walkthrough of pace, low power, saver and pause.
+- 2026-11-07 ADR-0030 revised after the customer saw a tangle of track lines at home: MOVING every 1 min on foot, 30 s
+  at ≥ 5 m/s, low power doubles both (still window 5 min then); MOVING → STILL allows up to 50 m of a fix's accuracy
+  beyond the 75 m radius; STILL → MOVING by position needs two accurate fixes ≥ 150 m away, the first not recorded.
+  3 new policy tests.
