@@ -101,7 +101,8 @@ class PlanViewModelTest {
         onCategoryAmount(amount.toString())
         cells.forEach { (income, value) -> onCell(income, value.toString()) }
         saveCategory()
-        awaitState(state) { it.categoryForm == null }
+        // Not just "the sheet is closed": it was closed before it opened too, and the state may lag behind.
+        awaitState(state) { s -> s.categoryForm == null && s.table.categories.any { it.name == name } }
     }
 
     @Test
@@ -198,7 +199,7 @@ class PlanViewModelTest {
 
             val income = vm.addIncome(15, 5_000)
             vm.addCategory("Кино", 5_000, mapOf(income to 5_000L))
-            var state = vm.state.value
+            var state = awaitState(vm.state) { s -> s.table.categories.any { it.name == "Кино" } && s.table.incomes.size == 5 }
             assertEquals(5, state.table.incomes.size)
             assertEquals(
                 BudgetCategory(
