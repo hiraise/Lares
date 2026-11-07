@@ -15,6 +15,8 @@ Versioning: [SemVer](https://semver.org/) from the first release.
 - Fewer stray track lines at home: a single far-off position indoors no longer counts as leaving, and the scatter of
   indoor positions no longer keeps the phone in frequent tracking.
 
+Update the server together with the app: a server older than 0.5.2 does not accept the new tag colors.
+
 ## [0.5.1] - 2026-10-26
 
 ### Changed
