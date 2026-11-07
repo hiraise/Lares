@@ -5,13 +5,14 @@ Updated: 2026-11-07
 ## Phase
 
 **M0–M4 implemented and accepted by the customer (2026-11-07): foundation, tasks, shopping lists, calendar, location.
-M5 Budget: spec approved by the customer (2026-11-07); technical design and plans next.**
+M5 Budget: spec approved (2026-11-07); design and plans M5-01…M5-06 ready; next M5-01.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
 
 None in progress. [M5 Budget](product/roadmap.md#m5-budget): the [spec](product/features/budget.md) was reworked with
-the customer (Q-031) and approved on 2026-11-07; next the technical design and the M5 plans. M0–M4 accepted 2026-11-07.
+the customer (Q-031) and approved on 2026-11-07; [design](architecture/budget.md), ADR-0032 and
+[M5 plans](plans/README.md#m5-plans) M5-01…M5-06 are ready. Next: M5-01. M0–M4 accepted 2026-11-07.
 
 **Active release branch: `release/0.5.2`** (battery saving, ADR-0030; the next milestone gets `release/0.6.0`). Commit approved work here; `main` is protected
 ([release process](process/release.md), ADR-0020). Latest release: [v0.5.1](https://github.com/hiraise/Lares/releases/tag/v0.5.1)
@@ -19,6 +20,9 @@ the customer (Q-031) and approved on 2026-11-07; next the technical design and t
 
 ## Last completed
 
+- 2026-11-07 Budget design and plans: four sync types (`budget_plan` versions by month, `budget_month` month-only
+  copy, `budget_receipt`, `budget_funding`), derived ids, `BudgetMath` on the phone (ADR-0032); plans M5-01…M5-06.
+  ADR-0031 corrected: an older server rejects the new tag colors.
 - 2026-11-07 Budget spec reworked with the customer (Q-031, draft): a versioned plan of categories × incomes by day,
   months with actual incomes and ticked funding, shortfall and free money; no spending, accounts, deficits, loans or
   debts. Approved by the customer. Tags `implemented` (TAG-005 later). Q-032 reminders, Q-033 analytics opened.
@@ -192,8 +196,7 @@ the customer (Q-031) and approved on 2026-11-07; next the technical design and t
 
 1. Release v0.5.2 (battery saving, ADR-0030) when the customer approves; check a day of battery and home tracks on a
    real phone.
-2. Budget technical design (architecture/budget.md, ADRs) and the M5 plans from the approved
-   [budget spec](product/features/budget.md).
+2. M5 Budget: execute plans [M5-01…M5-06](plans/README.md#m5-plans) in order (`/plan-run M5-01`).
 3. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
 
 ## Plan progress

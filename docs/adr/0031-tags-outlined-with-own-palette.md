@@ -23,13 +23,15 @@ Amends ADR-0016 (palette and tag chips in visual-style.md).
    HCT at the tones of the existing ten (base 48, light container 92, dark text 75, dark container 28). Tags pick from
    all 16 (`PaletteColors.tagColors`, around the color wheel); persons from the first ten
    (`PaletteColors.personColors`), and person validation rejects the others.
-3. The wire names are appended; older clients decode the new names to gray (the lenient enum), older servers store a
-   new name they do not know as gray. No migration.
+3. The wire names are appended; older clients decode the new names to gray (the lenient enum). An older server
+   rejects a new name (strict decoding, `VALIDATION_FAILED`), so a new color needs the server of 0.5.2 or later. No
+   migration.
 
 ## Consequences
 
 - A tag and a person of the same color no longer look alike; tags are calmer on screens with many people.
-- A tag of a new color shows gray on phones still on 0.5.1 or older until they update.
+- A tag of a new color shows gray on phones still on 0.5.1 or older until they update; on a server older than 0.5.2
+  choosing a new color fails to sync and the phone reports the rejected change.
 
 ## Alternatives considered
 

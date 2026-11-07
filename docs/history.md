@@ -449,3 +449,6 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   categories × incomes by day of the month, months with actual incomes (by hand, may come early) and ticked funding,
   one-month changes marked, shortfall and free money shown; accounts, transactions, rules, deficits, loans, debts
   dropped. Glossary, permissions, roadmap, tags (TAG-002 done, TAG-005 later) follow.
+- 2026-11-07 M5 budget design ([architecture/budget.md](architecture/budget.md), ADR-0032): plan versions keyed by
+  `effectiveFrom` month, month-only edits as a full table copy, receipts and fundings as upsert-only rows with derived
+  ids (markers 0x21–0x24), sums and checks in shared `BudgetMath`; plans M5-01…M5-06 written.

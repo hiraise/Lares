@@ -38,6 +38,7 @@ Status values: `proposed` (direction chosen, details or customer confirmation pe
 | [0029](0029-map-tiles-through-a-server-cache.md) | Map tiles come through a caching proxy on the family server; VersaTiles by default | accepted | 2026-10-26 |
 | [0030](0030-pace-and-power-adaptive-moving-requests.md) | While moving, the platform request follows the pace and the phone's power (amends 0028) | accepted | 2026-11-07 |
 | [0031](0031-tags-outlined-with-own-palette.md) | Tags are outlined chips with a color dot and have a palette of 16 colors (amends 0016) | accepted | 2026-11-07 |
+| [0032](0032-budget-plan-versions-and-month-rows.md) | The budget plan is versioned by month; months, receipts and ticks are rows with derived ids | accepted | 2026-11-07 |
 
 ## When to write an ADR
 
