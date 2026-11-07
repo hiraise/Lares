@@ -22,7 +22,7 @@ Status values: `proposed` (direction chosen, details or customer confirmation pe
 | [0013](0013-server-resource-budget.md) | Server resource budget | accepted (§2 amended by 0015) | 2026-10-22 |
 | [0014](0014-group-based-permissions.md) | Group-based permissions | accepted | 2026-10-22 |
 | [0015](0015-load-measurement-amendment.md) | Load measurement in M0 without location uploads (amends 0013) | accepted | 2026-10-22 |
-| [0016](0016-visual-design-system.md) | Visual design system: neutral Material 3 with a lake-gradient accent | accepted | 2026-10-23 |
+| [0016](0016-visual-design-system.md) | Visual design system: neutral Material 3 with a lake-gradient accent | accepted (palette and tag chips amended by 0031) | 2026-10-23 |
 | [0017](0017-task-occurrences-derived-from-completions.md) | Routine occurrences are derived from completions, not stored | accepted | 2026-10-23 |
 | [0018](0018-tags-embedded-in-entities.md) | Tags are stored as id sets inside taggable entities | accepted | 2026-10-23 |
 | [0019](0019-release-signing-and-flow.md) | Releases are signed with one permanent Lares key and cut per milestone | accepted (§4, §7 superseded by 0020) | 2026-10-23 |
@@ -37,6 +37,7 @@ Status values: `proposed` (direction chosen, details or customer confirmation pe
 | [0028](0028-battery-aware-tracking-service.md) | Phones track with one foreground service in moving and still modes | accepted (§2, §3 amended by 0030) | 2026-10-25 |
 | [0029](0029-map-tiles-through-a-server-cache.md) | Map tiles come through a caching proxy on the family server; VersaTiles by default | accepted | 2026-10-26 |
 | [0030](0030-pace-and-power-adaptive-moving-requests.md) | While moving, the platform request follows the pace and the phone's power (amends 0028) | accepted | 2026-11-07 |
+| [0031](0031-tags-outlined-with-own-palette.md) | Tags are outlined chips with a color dot and have a palette of 16 colors (amends 0016) | accepted | 2026-11-07 |
 
 ## When to write an ADR
 

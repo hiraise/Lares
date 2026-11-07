@@ -6,12 +6,18 @@ import app.lares.client.platform.ThemeMode
 import app.lares.client.resources.Res
 import app.lares.client.resources.color_blue
 import app.lares.client.resources.color_brown
+import app.lares.client.resources.color_cyan
 import app.lares.client.resources.color_gray
 import app.lares.client.resources.color_green
+import app.lares.client.resources.color_indigo
+import app.lares.client.resources.color_magenta
+import app.lares.client.resources.color_olive
 import app.lares.client.resources.color_orange
 import app.lares.client.resources.color_pink
 import app.lares.client.resources.color_purple
 import app.lares.client.resources.color_red
+import app.lares.client.resources.color_rose
+import app.lares.client.resources.color_slate
 import app.lares.client.resources.color_teal
 import app.lares.client.resources.color_yellow
 import app.lares.client.resources.contact_address
@@ -81,6 +87,12 @@ fun PaletteColor.label(): String =
             PaletteColor.PINK -> Res.string.color_pink
             PaletteColor.BROWN -> Res.string.color_brown
             PaletteColor.GRAY -> Res.string.color_gray
+            PaletteColor.ROSE -> Res.string.color_rose
+            PaletteColor.OLIVE -> Res.string.color_olive
+            PaletteColor.CYAN -> Res.string.color_cyan
+            PaletteColor.INDIGO -> Res.string.color_indigo
+            PaletteColor.MAGENTA -> Res.string.color_magenta
+            PaletteColor.SLATE -> Res.string.color_slate
         },
     )
 

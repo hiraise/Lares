@@ -1,5 +1,5 @@
 ---
-status: approved
+status: implemented  # accepted by the customer, 2026-11-07
 milestone: M0
 updated: 2026-10-24
 ---
@@ -83,7 +83,7 @@ localization and deployment — everything feature modules depend on.
   suggestions, contacts, notes (M0-08).*
 - **FND-033** `later` `todo` — Person photo, in milestone M5b ([files](files.md)). Until then avatars show initials on
   the personal color.
-- **FND-034** `MVP` `done` — Every person has a personal color from the shared palette, assigned automatically
+- **FND-034** `MVP` `done` — Every person has a personal color from the 10 personal colors of the palette, assigned automatically
   (least-used in the household) and changeable; it marks the person's avatar, events, map pin and assignments
   ([visual style](../../design/visual-style.md#people)).
   *Server: `PersonData.color`, least-used color on setup, member creation and invite acceptance (M0-05); client core picks the least-used color for new relatives (`PersonsWriter`, M0-06); avatars in personal colors and

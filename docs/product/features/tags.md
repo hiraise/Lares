@@ -1,5 +1,5 @@
 ---
-status: approved
+status: approved  # core accepted by the customer, 2026-11-07; TAG-005 waits for the budget
 milestone: M0 (core), integrations in M1–M5
 updated: 2026-10-24
 ---
@@ -19,9 +19,12 @@ Tags complement budget categories: car spending spread over "Fuel", "Insurance",
 
 ## Requirements
 
-- **TAG-001** `MVP` `done` — Members create, rename, recolor and archive tags (name, color, optional icon).
+- **TAG-001** `MVP` `done` — Members create, rename, recolor and archive tags (name, color, optional icon). Tags have
+  16 colors, persons 10; a tag shows its color as a dot on an outlined chip, so it never looks like a person
+  (customer, 2026-11-07, ADR-0031).
   *Server: tags through sync, `tags.manage` (M0-05); client core `TagsWriter`/`TagsRepository` (M0-06); Family › Tags:
-  list, create/edit sheet with the palette, archive section, delete (M0-08). Icons are not offered in the UI yet.*
+  list, create/edit sheet with the palette, archive section, delete (M0-08). Icons are not offered in the UI yet.
+  16 tag colors and outlined chips with a dot (ADR-0031).*
 - **TAG-002** `MVP` `doing` — A tag can be attached to tasks, shopping lists and items, events, transactions and debts (as each module ships).
   *Tasks: done (M1-02, M1-06). Other modules add theirs.*
   *Tasks done: tags in the task editor, «+ Новая метка» for `tags.manage` (M1-06).*

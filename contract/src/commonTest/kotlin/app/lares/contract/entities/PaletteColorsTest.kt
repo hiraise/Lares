@@ -53,4 +53,12 @@ class PaletteColorsTest {
         assertEquals(PURPLE, PaletteColor.fromKey("purple"))
         assertEquals(null, PaletteColor.fromKey("BLUE"))
     }
+
+    @Test
+    fun tagsHaveSixteenColorsPersonsTheFirstTen() {
+        assertEquals(PaletteColor.entries.take(10), PaletteColors.personColors)
+        assertEquals(PaletteColor.entries.toSet(), PaletteColors.tagColors.toSet())
+        assertEquals(16, PaletteColors.tagColors.size)
+        assertEquals(PaletteColor.INDIGO, PaletteColor.fromKey("indigo"))
+    }
 }

@@ -422,6 +422,12 @@
     <string name="color_pink">Розовый</string>
     <string name="color_brown">Коричневый</string>
     <string name="color_gray">Серый</string>
+    <string name="color_rose">Малиновый</string>
+    <string name="color_olive">Оливковый</string>
+    <string name="color_cyan">Голубой</string>
+    <string name="color_indigo">Индиго</string>
+    <string name="color_magenta">Пурпурный</string>
+    <string name="color_slate">Сизый</string>
 
     <!-- Notifications (M0-09) -->
     <string name="settings_notifications">Уведомления</string>

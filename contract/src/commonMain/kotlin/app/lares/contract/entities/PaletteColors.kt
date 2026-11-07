@@ -7,7 +7,8 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
- * The fixed color palette shared by tags and persons (ADR-0016). Hex values live in the client theme.
+ * The fixed color palette of tags and persons (ADR-0016, ADR-0031): persons use the first ten
+ * ([PaletteColors.personColors]), tags all of them. Hex values live in the client theme.
  * Unknown colors from a newer version decode to [GRAY].
  */
 @OptIn(ExperimentalSerializationApi::class)
@@ -43,6 +44,25 @@ enum class PaletteColor {
 
     @SerialName("gray")
     GRAY,
+
+    // Tags only (ADR-0031).
+    @SerialName("rose")
+    ROSE,
+
+    @SerialName("olive")
+    OLIVE,
+
+    @SerialName("cyan")
+    CYAN,
+
+    @SerialName("indigo")
+    INDIGO,
+
+    @SerialName("magenta")
+    MAGENTA,
+
+    @SerialName("slate")
+    SLATE,
     ;
 
     /** The wire name, e.g. `blue`; also stored in the database. */
@@ -60,7 +80,31 @@ internal object PaletteColorSerializer :
 
 /** Personal color rules (FND-034), shared by server and client. */
 object PaletteColors {
-    private val nonGray: List<PaletteColor> = PaletteColor.entries - PaletteColor.GRAY
+    /** The ten colors a person can have, in palette order. */
+    val personColors: List<PaletteColor> = PaletteColor.entries.take(10)
+
+    /** The colors a tag can have, around the color wheel, then the muted ones. */
+    val tagColors: List<PaletteColor> =
+        listOf(
+            PaletteColor.RED,
+            PaletteColor.ORANGE,
+            PaletteColor.YELLOW,
+            PaletteColor.OLIVE,
+            PaletteColor.GREEN,
+            PaletteColor.TEAL,
+            PaletteColor.CYAN,
+            PaletteColor.BLUE,
+            PaletteColor.INDIGO,
+            PaletteColor.PURPLE,
+            PaletteColor.MAGENTA,
+            PaletteColor.PINK,
+            PaletteColor.ROSE,
+            PaletteColor.BROWN,
+            PaletteColor.SLATE,
+            PaletteColor.GRAY,
+        )
+
+    private val nonGray: List<PaletteColor> = personColors - PaletteColor.GRAY
 
     /**
      * The color for a new person: the one used least among [used], ties by palette order.

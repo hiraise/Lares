@@ -14,6 +14,7 @@ import app.lares.contract.entities.EventData
 import app.lares.contract.entities.EventKind
 import app.lares.contract.entities.EventOccurrenceData
 import app.lares.contract.entities.EventReminderData
+import app.lares.contract.entities.PaletteColors
 import app.lares.contract.entities.PersonData
 import app.lares.contract.entities.PlaceAlertData
 import app.lares.contract.entities.PlaceData
@@ -132,6 +133,7 @@ object Validators {
         currentYear: Int,
     ): Map<String, FieldErrorCode> {
         val errors = ValidationErrors().add("name", personName(data.name))
+        errors.add("color", data.color?.takeIf { it !in PaletteColors.personColors }?.let { FieldErrorCode.INVALID_FORMAT })
         errors.addAll(birthDate(data.birthYear, data.birthMonth, data.birthDay, currentYear))
         errors.add("relation", optionalText(data.relation, RELATION_MAX))
         errors.add("notes", optionalText(data.notes, NOTES_MAX))

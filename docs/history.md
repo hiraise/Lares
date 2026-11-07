@@ -440,3 +440,8 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   at ≥ 5 m/s, low power doubles both (still window 5 min then); MOVING → STILL allows up to 50 m of a fix's accuracy
   beyond the 75 m radius; STILL → MOVING by position needs two accurate fixes ≥ 150 m away, the first not recorded.
   3 new policy tests.
+- 2026-11-07 Customer accepted M0–M4 without a walkthrough checklist; specs set to `implemented` (tags `approved`
+  until TAG-005). Budget concept to be reworked by the customer (Q-031).
+- 2026-11-07 ADR-0031 tags apart from people: `PaletteColor` + rose, olive, cyan, indigo, magenta, slate (HCT tones
+  48/92/75/28, tags only; person validation rejects them); `TagChip` outlined with a dot, the tag picker selected like
+  a filter chip; `ColorSwatches(colors = …)`. 3 new tests.
