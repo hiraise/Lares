@@ -1,5 +1,5 @@
 ---
-status: approved
+status: implemented  # accepted by the customer, 2026-11-07
 milestone: M0
 updated: 2026-10-24
 ---
@@ -83,7 +83,7 @@ localization and deployment — everything feature modules depend on.
   suggestions, contacts, notes (M0-08).*
 - **FND-033** `later` `todo` — Person photo, in milestone M5b ([files](files.md)). Until then avatars show initials on
   the personal color.
-- **FND-034** `MVP` `done` — Every person has a personal color from the shared palette, assigned automatically
+- **FND-034** `MVP` `done` — Every person has a personal color from the 10 personal colors of the palette, assigned automatically
   (least-used in the household) and changeable; it marks the person's avatar, events, map pin and assignments
   ([visual style](../../design/visual-style.md#people)).
   *Server: `PersonData.color`, least-used color on setup, member creation and invite acceptance (M0-05); client core picks the least-used color for new relatives (`PersonsWriter`, M0-06); avatars in personal colors and
@@ -169,7 +169,7 @@ Example:
 | Member | Groups | Result |
 | --- | --- | --- |
 | Dad, Mom | Administrators | Everything, including household management |
-| Son, 14 | Kids | Tasks, lists, calendar; sees parents on the map; sees his "Pocket money" account if granted `budget.view` and access to it |
+| Son, 14 | Kids | Tasks, lists, calendar; sees parents on the map; no Budget section |
 | Grandma | "Grandparents" (custom) | Calendar and shopping lists only |
 
 ## Permission catalogue
@@ -194,8 +194,8 @@ Draft; each module spec extends it. Template defaults are chosen by agents and e
 | `location.view` | section | Open the Map (who is visible follows visibility rules) | ✓ | ✓ |
 | `location.pause_own` | action | Pause own location sharing | ✓ | — |
 | `location.manage_places` | action | Create and edit places (Home, School) | ✓ | — |
-| `budget.view` | section | Open Budget (which accounts follows account access) | ✓ | — |
-| `budget.manage` | action | Categories, allocation rules, debts, account access | ✓ | — |
+| `budget.view` | section | Open Budget: the plan, months and their history | ✓ | — |
+| `budget.manage` | action | Change the plan, record incomes, tick funding, change a month | ✓ | — |
 
 Data visibility rules created with the templates:
 

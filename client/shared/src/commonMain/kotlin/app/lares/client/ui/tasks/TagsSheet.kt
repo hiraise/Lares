@@ -3,12 +3,15 @@ package app.lares.client.ui.tasks
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -63,20 +66,20 @@ fun TagsSheet(
     }
 }
 
-/** A tag chip that can be picked: selected = palette container with a check, otherwise an outline. */
+/** A tag chip that can be picked, with a dot in the tag's color: selected = filled like a selected filter chip with a check. */
 @Composable
 private fun SelectableTag(
     tag: Tag,
     selected: Boolean,
     onToggle: () -> Unit,
 ) {
-    val tones = tag.data.color.tones()
+    val colors = MaterialTheme.colorScheme
     val shape = RoundedCornerShape(12.dp)
     val look =
         if (selected) {
-            Modifier.background(tones.container, shape)
+            Modifier.background(colors.inverseSurface, shape)
         } else {
-            Modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant, shape)
+            Modifier.border(1.dp, colors.outlineVariant, shape)
         }
     Row(
         Modifier
@@ -89,11 +92,19 @@ private fun SelectableTag(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        if (selected) AppIcon(Res.drawable.ic_check, null, size = 16.dp, tint = tones.onContainer)
+        if (selected) AppIcon(Res.drawable.ic_check, null, size = 16.dp, tint = colors.inverseOnSurface)
+        Box(
+            Modifier.size(10.dp).background(
+                tag.data.color
+                    .tones()
+                    .base,
+                CircleShape,
+            ),
+        )
         Text(
             tag.data.name,
             style = MaterialTheme.typography.labelLarge,
-            color = if (selected) tones.onContainer else MaterialTheme.colorScheme.onSurface,
+            color = if (selected) colors.inverseOnSurface else colors.onSurface,
         )
     }
 }

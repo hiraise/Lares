@@ -430,3 +430,25 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   deleted, 2 GB cap, stale on upstream errors); the server hands out proxied style URLs and `labelFont`; the app uses
   it for pin initials and place labels; dark-theme place labels readable. Smoke test checks the route; emulator: the
   first real map on this Mac, initials on pins, MISS then HIT. 3 new server tests.
+- 2026-10-26 Release **v0.5.1** (map through the family server, CI fixes): pull request #5, signed APK, server image
+  0.5.1, GitHub release. Next branch `release/0.5.2`.
+- 2026-10-27 Battery saving while sharing location (ADR-0030, amends ADR-0028 §2–3): MOVING asks for GNSS every 30 s
+  on foot, every 10 s for a minute after a fix at ≥ 5 m/s, every minute on low power (battery ≤ 20 % not charging, or
+  battery saver; uploads every 2 min); balanced quality rejected (no fixes without a network provider). Q-030 opened
+  for the product side. 4 new policy tests; emulator walkthrough of pace, low power, saver and pause.
+- 2026-11-07 ADR-0030 revised after the customer saw a tangle of track lines at home: MOVING every 1 min on foot, 30 s
+  at ≥ 5 m/s, low power doubles both (still window 5 min then); MOVING → STILL allows up to 50 m of a fix's accuracy
+  beyond the 75 m radius; STILL → MOVING by position needs two accurate fixes ≥ 150 m away, the first not recorded.
+  3 new policy tests.
+- 2026-11-07 Customer accepted M0–M4 without a walkthrough checklist; specs set to `implemented` (tags `approved`
+  until TAG-005). Budget concept to be reworked by the customer (Q-031).
+- 2026-11-07 ADR-0031 tags apart from people: `PaletteColor` + rose, olive, cyan, indigo, magenta, slate (HCT tones
+  48/92/75/28, tags only; person validation rejects them); `TagChip` outlined with a dot, the tag picker selected like
+  a filter chip; `ColorSwatches(colors = …)`. 3 new tests.
+- 2026-11-07 Budget spec rewritten from the customer's notebook (Q-031): income distribution only — versioned plan of
+  categories × incomes by day of the month, months with actual incomes (by hand, may come early) and ticked funding,
+  one-month changes marked, shortfall and free money shown; accounts, transactions, rules, deficits, loans, debts
+  dropped. Glossary, permissions, roadmap, tags (TAG-002 done, TAG-005 later) follow.
+- 2026-11-07 M5 budget design ([architecture/budget.md](architecture/budget.md), ADR-0032): plan versions keyed by
+  `effectiveFrom` month, month-only edits as a full table copy, receipts and fundings as upsert-only rows with derived
+  ids (markers 0x21–0x24), sums and checks in shared `BudgetMath`; plans M5-01…M5-06 written.

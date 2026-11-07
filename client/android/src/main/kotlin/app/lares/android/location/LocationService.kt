@@ -15,6 +15,7 @@ import android.net.Network
 import android.os.Build
 import android.os.HandlerThread
 import android.os.IBinder
+import android.os.PowerManager
 import android.text.format.DateFormat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -283,12 +284,12 @@ class LocationService : Service() {
     private suspend fun onLocation(location: Location) {
         val fix = location.toFix(battery.level(), battery.charging())
         lock.withLock {
-            val decision = policy.onFix(fix)
+            val decision = policy.onFix(fix, powerSave = getSystemService(PowerManager::class.java)?.isPowerSaveMode == true)
             if (decision.record) {
                 queue.add(fix)
                 controller.onFixRecorded(fix.recordedAt)
             }
-            if (decision.newMode != null) requestUpdates()
+            if (decision.newMode != null || decision.requestChanged) requestUpdates()
         }
         maybeUpload()
     }

@@ -423,6 +423,12 @@
     <string name="color_pink">Pink</string>
     <string name="color_brown">Brown</string>
     <string name="color_gray">Gray</string>
+    <string name="color_rose">Raspberry</string>
+    <string name="color_olive">Olive</string>
+    <string name="color_cyan">Cyan</string>
+    <string name="color_indigo">Indigo</string>
+    <string name="color_magenta">Magenta</string>
+    <string name="color_slate">Slate</string>
 
     <!-- Notifications (M0-09) -->
     <string name="settings_notifications">Notifications</string>

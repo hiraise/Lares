@@ -13,7 +13,7 @@ with relatives' birthdays, a map showing where everyone is, and a family budget 
 - **Shopping lists** — shared, and usable in the store without network.
 - **Calendar** — events and birthdays, with who each event concerns, and reminders.
 - **Map** — where family members are, places like "Home" and "School" with arrival alerts; GPS trackers and kids' watches later.
-- **Budget** — split income into categories by your own rules, track overspending, loans between categories, and debts.
+- **Budget** — plan how each paycheck is split into categories, tick what you have transferred, see shortfalls and free money.
 - **Tags** — tag "Car" and see its tasks, events and spending in one place.
 
 ## Principles

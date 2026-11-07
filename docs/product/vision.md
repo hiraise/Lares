@@ -18,7 +18,8 @@ One shared, private space for the family, hosted on the family's own server:
 - **Shopping lists** — shared, usable in a store without network.
 - **Calendar** — events and birthdays of relatives, with who it concerns and reminders.
 - **Map** — where family members are (phones; GPS trackers possibly later), places and geofence alerts.
-- **Budget** — income allocated to categories by rules, category deficits and inter-category loans, real debts.
+- **Budget** — a monthly plan distributing each expected income into categories; actual incomes and funded categories
+  are recorded each month (no spending tracking).
 - **Tags** — one tag (e.g. "Car") links tasks, events, purchases and spending, with a page showing all of it.
 
 ## Users

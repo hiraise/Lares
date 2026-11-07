@@ -40,6 +40,7 @@ import app.lares.client.ui.theme.LaresTheme
 import app.lares.client.ui.theme.Spacing
 import app.lares.client.ui.theme.tones
 import app.lares.contract.entities.PaletteColor
+import app.lares.contract.entities.PaletteColors
 import org.jetbrains.compose.resources.DrawableResource
 
 /** Extended FAB of list screens: 56 dp, radius 20, lake gradient, white icon and label (visual-style.md). */
@@ -70,7 +71,7 @@ fun ExtendedGradientFab(
     }
 }
 
-/** The 10 palette swatches (FND-034, tags); the selected one carries a check. */
+/** Palette swatches: the 10 personal colors (FND-034) or the 16 tag colors; the selected one carries a check. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ColorSwatches(
@@ -78,13 +79,14 @@ fun ColorSwatches(
     onSelect: (PaletteColor) -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    colors: List<PaletteColor> = PaletteColors.personColors,
 ) {
     FlowRow(
         modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(Spacing.s),
         verticalArrangement = Arrangement.spacedBy(Spacing.s),
     ) {
-        PaletteColor.entries.forEach { color ->
+        colors.forEach { color ->
             val isSelected = color == selected
             val name = color.label()
             Box(

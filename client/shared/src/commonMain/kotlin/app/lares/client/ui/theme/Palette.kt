@@ -34,6 +34,12 @@ private val entries: Map<PaletteColor, PaletteEntry> =
         PaletteColor.PINK to PaletteEntry(0xFFAE5385, 0xFFFFE0EC, 0xFFFF98CE, 0xFF61334C),
         PaletteColor.BROWN to PaletteEntry(0xFF92694D, 0xFFFFE3D1, 0xFFDFAF8E, 0xFF5C3B21),
         PaletteColor.GRAY to PaletteEntry(0xFF6F7277, 0xFFE6E8EE, 0xFFB6B9BE, 0xFF3F4247),
+        PaletteColor.ROSE to PaletteEntry(0xFFBB4D66, 0xFFFFE1E4, 0xFFFF9DAE, 0xFF66323D),
+        PaletteColor.OLIVE to PaletteEntry(0xFF757600, 0xFFECECA9, 0xFFBDBF46, 0xFF44450D),
+        PaletteColor.CYAN to PaletteEntry(0xFF037D95, 0xFFC4EFFE, 0xFF6BC5DF, 0xFF004958),
+        PaletteColor.INDIGO to PaletteEntry(0xFF5E6BC3, 0xFFE6E6FF, 0xFFAAB4FF, 0xFF393F69),
+        PaletteColor.MAGENTA to PaletteEntry(0xFFA154AA, 0xFFFAE1F7, 0xFFF09AF6, 0xFF58365B),
+        PaletteColor.SLATE to PaletteEntry(0xFF607585, 0xFFE0E9F2, 0xFFA6BBCD, 0xFF304553),
     )
 
 fun PaletteColor.tones(dark: Boolean): PaletteTones {

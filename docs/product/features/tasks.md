@@ -1,5 +1,5 @@
 ---
-status: approved  # customer, 2026-10-23 (Q-014…Q-017 answered the same day)
+status: implemented  # accepted by the customer, 2026-11-07 (scope approved 2026-10-23)
 milestone: M1
 updated: 2026-10-24
 ---

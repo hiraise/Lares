@@ -20,6 +20,7 @@ User-facing manuals live in [user/](user/).
 | Sync protocol | [architecture/sync.md](architecture/sync.md) |
 | Authentication and onboarding | [architecture/auth.md](architecture/auth.md) |
 | HTTP API conventions and endpoints | [architecture/api.md](architecture/api.md) |
+| Budget module design (M5) | [architecture/budget.md](architecture/budget.md) |
 | Measured performance and memory, load test | [architecture/perf/M0-baseline.md](architecture/perf/M0-baseline.md), with location [M4-location.md](architecture/perf/M4-location.md) |
 | Implementation plans for sessions | [plans/](plans/README.md) |
 | Why something is the way it is | [adr/](adr/README.md) |

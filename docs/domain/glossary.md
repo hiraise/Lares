@@ -95,18 +95,14 @@ Add terms here before using them in code.
 
 | Code term | RU | Definition |
 | --- | --- | --- |
-| Money account | Счёт | Cash, card or savings account. Named `MoneyAccount` in code to avoid clashing with User. |
-| Transaction | Операция | Expense, income or transfer. |
-| Transfer | Перевод | Movement between money accounts. |
-| Category | Категория (конверт) | Envelope holding allocated money. |
-| Allocation | Распределение | Assigning money to a category. |
-| Allocation rule | Правило распределения | Ordered rule: fixed amount or percent of income to a category. |
-| Income source | Источник дохода | E.g. a member's salary; has its own rule set. |
-| Unallocated | Нераспределённое | Income not yet assigned to categories. |
-| Category deficit | Перерасход категории | Negative category balance, repaid from future allocations. |
-| Category loan | Займ между категориями | Money one category borrowed from another, tracked until repaid. |
-| Debt | Долг, кредит | Real liability or receivable with a counterparty and schedule. |
-| Payment schedule | График платежей | Planned debt payments. |
+| Distribution plan | План распределения | Table of budget categories × incomes: how much of each expected income goes to each category. Versioned. |
+| Plan version | Версия плана | The plan as saved, in force from a given month on. |
+| Budget category | Категория | A purpose money is set aside for each month (Food, Car); has a monthly amount. Can be unused. |
+| Income | Поступление | Money expected on a day of the month with an amount; in a month also its actual amount and date. |
+| Budget month | Месяц | One calendar month opened from a plan version: actual incomes, funding, changes from the plan. |
+| Funding | Перевод в категорию | Ticking that a category got its money from an income (transferred in the bank), with the amount. |
+| Shortfall | Недобор | Actual income below expected. |
+| Free money | Свободная сумма | Actual income not transferred to any category; only shown. |
 
 ## Sync
 

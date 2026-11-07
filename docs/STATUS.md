@@ -1,29 +1,45 @@
 # Project status
 
-Updated: 2026-10-26
+Updated: 2026-11-07
 
 ## Phase
 
-**M0 Foundation — all plans M0-01…M0-11 done; M0 acceptance with the customer pending.
-M1 Tasks — all plans M1-01…M1-07 done; M1 acceptance with the customer next.
-M2 Shopping lists — all plans M2-01…M2-06 done; M2 acceptance with the customer next.
-M3 Calendar — all plans M3-01…M3-08 done, released as v0.4.0; M3 acceptance with the customer next.
-M4 Location — all plans M4-01…M4-10 done, released as v0.5.0; M4 acceptance with the customer next (checklist in the M4-10 handoff).**
+**M0–M4 implemented and accepted by the customer (2026-11-07): foundation, tasks, shopping lists, calendar, location.
+M5 Budget: spec approved (2026-11-07); design and plans M5-01…M5-06 ready; next M5-01.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
 
-[M4 Location](product/roadmap.md#m4-location): planned — [location spec](product/features/location.md) (approved,
-Q-025…Q-029 answered), [location design](architecture/location.md), [M4 plans](plans/README.md#m4-plans). Done: M4-01…
-M4-10. Next: M4 acceptance.
-Acceptance of M0–M3 is still pending.
+None in progress. [M5 Budget](product/roadmap.md#m5-budget): the [spec](product/features/budget.md) was reworked with
+the customer (Q-031) and approved on 2026-11-07; [design](architecture/budget.md), ADR-0032 and
+[M5 plans](plans/README.md#m5-plans) M5-01…M5-06 are ready. Next: M5-01. M0–M4 accepted 2026-11-07.
 
-**Active release branch: `release/0.5.1`** (fixes from the M4 acceptance; the next milestone gets `release/0.6.0`). Commit approved work here; `main` is protected
-([release process](process/release.md), ADR-0020). Latest release: [v0.5.0](https://github.com/hiraise/Lares/releases/tag/v0.5.0)
+**Active release branch: `release/0.5.2`** (battery saving, ADR-0030; the next milestone gets `release/0.6.0`). Commit approved work here; `main` is protected
+([release process](process/release.md), ADR-0020). Latest release: [v0.5.1](https://github.com/hiraise/Lares/releases/tag/v0.5.1)
 (M3, 2026-10-25).
 
 ## Last completed
 
+- 2026-11-07 Budget design and plans: four sync types (`budget_plan` versions by month, `budget_month` month-only
+  copy, `budget_receipt`, `budget_funding`), derived ids, `BudgetMath` on the phone (ADR-0032); plans M5-01…M5-06.
+  ADR-0031 corrected: an older server rejects the new tag colors.
+- 2026-11-07 Budget spec reworked with the customer (Q-031, draft): a versioned plan of categories × incomes by day,
+  months with actual incomes and ticked funding, shortfall and free money; no spending, accounts, deficits, loans or
+  debts. Approved by the customer. Tags `implemented` (TAG-005 later). Q-032 reminders, Q-033 analytics opened.
+- 2026-11-07 Tags apart from people (ADR-0031, customer's request): outlined tag chips with a color dot, 16 tag colors
+  (6 new, tags only), persons keep 10. On `release/0.5.2`.
+- 2026-11-07 Customer accepted M0–M4; specs foundation, tasks, shopping, calendar, location set to `implemented`
+  (tags stay `approved`: TAG-005 waits for the budget). The customer will rework the budget concept (Q-031).
+- 2026-11-07 Tracking slower and calmer indoors (ADR-0030 revised, customer's request): on foot GPS every minute, at
+  vehicle speed every 30 s, doubled on low power (battery ≤ 20 % or battery saver; uploads every 2 min); the still
+  radius widens by the fixes' accuracy, leaving STILL by position needs two far fixes. Not checked on a real phone.
+- 2026-10-27 Battery saving while sharing location (ADR-0030, customer's request): on foot the phone asks for GPS every
+  30 s instead of 10 s, at vehicle speed every 10 s as before; at battery ≤ 20 % or with battery saver every minute and
+  uploads every 2 min. Q-030 opened (less frequent uploads or «live only while someone looks»). On `release/0.5.2`.
+- 2026-10-26 Release **v0.5.1**: map through the family server (M4-11), pin initials, minute-by-minute ages, readable
+  dark-theme place labels, stored snapshot removed before an emptied map on FORBIDDEN. Pull request #5. Next branch
+  `release/0.5.2`. Servers with an edited `docker-compose.yml` need the `mapcache` service, its template and the Caddy
+  `/map/*` route merged by hand.
 - 2026-10-26 M4-11 Map through the family server: phones load the map only from the server, which fetches it from
   VersaTiles on demand and drops what was not viewed for 7 days (ADR-0029); pins show initials again. On
   `release/0.5.1`.
@@ -178,16 +194,10 @@ Acceptance of M0–M3 is still pending.
 
 ## Next steps
 
-1. M0 and M1 acceptance with the customer (APK v0.2.0, walkthrough on real phones, Russian changelog; checklist in the M1-07
-   handoff).
-2. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
-3. M4 acceptance with the customer (checklist in the M4-10 handoff): real phones with ntfy for arrive / leave
-   notifications, battery over a day (Xiaomi / Samsung); then set the location spec to `implemented`; fixes go to
-   `release/0.5.1`.
-4. After the M1 acceptance: set the tasks spec to `implemented`.
-5. M2 acceptance with the customer (checklist in the M2-06 handoff); after it set the shopping spec to `implemented`.
-6. M3 acceptance with the customer on v0.4.0 (checklist in the M3-08 handoff); fixes go to `release/0.5.1`; after the
-   acceptance set the calendar spec to `implemented`.
+1. Release v0.5.2 (battery saving, ADR-0030) when the customer approves; check a day of battery and home tracks on a
+   real phone.
+2. M5 Budget: execute plans [M5-01…M5-06](plans/README.md#m5-plans) in order (`/plan-run M5-01`).
+3. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
 
 ## Plan progress
 
@@ -195,6 +205,8 @@ See the table in [plans README](plans/README.md#m0-plans).
 
 ## Waiting for the customer
 
+- Q-032 (budget reminders), Q-033 (budget analytics).
+- Q-030: battery vs. how fresh a moving member's pin is (less frequent uploads, live only on demand, night schedule).
 - For a real installation: a VPS (1 vCPU / 2 GB / 20 GB) and a domain with DNS access.
 
 ## Risks

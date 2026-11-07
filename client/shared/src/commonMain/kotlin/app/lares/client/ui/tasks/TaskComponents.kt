@@ -92,21 +92,37 @@ fun TaskCheckbox(
     }
 }
 
-/** A tag chip: 12 sp bold, radius 8, palette container and on-container. */
+/**
+ * A tag chip: outlined, radius 8, a dot in the tag's color and 12 sp bold text (ADR-0031). Solid color fills are for
+ * persons, so a tag never looks like someone.
+ */
 @Composable
 fun TagChip(
     tag: Tag,
     modifier: Modifier = Modifier,
 ) {
-    val tones = tag.data.color.tones()
-    Text(
-        tag.data.name,
-        style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp, fontWeight = FontWeight.Bold),
-        color = tones.onContainer,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
-        modifier = modifier.background(tones.container, RoundedCornerShape(8.dp)).padding(horizontal = 8.dp, vertical = 1.dp),
-    )
+    val shape = RoundedCornerShape(8.dp)
+    Row(
+        modifier.border(1.dp, MaterialTheme.colorScheme.outlineVariant, shape).padding(start = 6.dp, end = 8.dp, top = 1.dp, bottom = 1.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            Modifier.size(8.dp).background(
+                tag.data.color
+                    .tones()
+                    .base,
+                CircleShape,
+            ),
+        )
+        Text(
+            tag.data.name,
+            style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp, fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
 }
 
 /** Up to [max] tag chips and "+N" for the rest. */

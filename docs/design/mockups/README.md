@@ -17,6 +17,6 @@ They need the canvas runtime to render, so open the canvas link from the custome
 | `Shopping.dc.html` | Shopping list in a store | Offline banner, quick add, suggestions, bought items collapsed |
 | `Calendar.dc.html` | Calendar month | Event dots in personal colors, day agenda |
 | `Map.dc.html` | Map | Places, avatar pins, family sheet, "sharing" notice with pause |
-| `Budget.dc.html` | Budget | Unallocated hero, categories with deficit and loan, debt payment |
+| `Budget.dc.html` | Budget | Superseded (envelope concept dropped 2026-11-07); see [budget design § UI](../../architecture/budget.md#ui-m5-04m5-06) |
 
 Names, places and amounts are examples. Real content comes from module specs.

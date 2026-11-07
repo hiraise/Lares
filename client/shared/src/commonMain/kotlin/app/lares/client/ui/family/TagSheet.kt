@@ -206,7 +206,7 @@ fun TagSheetDialog(
                 focusRequester = nameFocus,
             )
             Text(stringResource(Res.string.tag_color), style = MaterialTheme.typography.labelLarge)
-            ColorSwatches(sheet.color, editor::onColor)
+            ColorSwatches(sheet.color, editor::onColor, colors = PaletteColors.tagColors)
             ErrorText(sheet.error)
             PrimaryButton(stringResource(Res.string.action_save), editor::save)
             if (sheet.id != null) {

@@ -72,8 +72,9 @@ Never on text, whole screens, regular buttons or several cards in a row.
 
 ### Palette (tags and personal colors)
 
-One fixed palette of 10 colors serves tags and people (`PaletteColor` in `contract/`). Avatars and pins use the base
-color with white initials in both themes (contrast ≥ 4.8:1). Chips use container + on-container.
+One fixed palette (`PaletteColor` in `contract/`, ADR-0031): people use the first 10 colors, tags all 16 (the last six
+are for tags only). Avatars and pins use the base color with white initials in both themes (contrast ≥ 4.8:1). A solid
+fill in a palette color always means a person; a tag shows its color only as a dot (see Tag chips).
 
 | `PaletteColor` | Base (avatar, dot, pin; light chip text) | Light chip container | Dark chip text | Dark chip container |
 | --- | --- | --- | --- | --- |
@@ -87,8 +88,16 @@ color with white initials in both themes (contrast ≥ 4.8:1). Chips use contain
 | `PINK` | `#AE5385` | `#FFE0EC` | `#FF98CE` | `#61334C` |
 | `BROWN` | `#92694D` | `#FFE3D1` | `#DFAF8E` | `#5C3B21` |
 | `GRAY` | `#6F7277` | `#E6E8EE` | `#B6B9BE` | `#3F4247` |
+| `ROSE` (tags) | `#BB4D66` | `#FFE1E4` | `#FF9DAE` | `#66323D` |
+| `OLIVE` (tags) | `#757600` | `#ECECA9` | `#BDBF46` | `#44450D` |
+| `CYAN` (tags) | `#037D95` | `#C4EFFE` | `#6BC5DF` | `#004958` |
+| `INDIGO` (tags) | `#5E6BC3` | `#E6E6FF` | `#AAB4FF` | `#393F69` |
+| `MAGENTA` (tags) | `#A154AA` | `#FAE1F7` | `#F09AF6` | `#58365B` |
+| `SLATE` (tags) | `#607585` | `#E0E9F2` | `#A6BBCD` | `#304553` |
 
-Values were generated in the HCT color space (equal tone per role), so all colors look equally strong.
+Values were generated in the HCT color space (tones 48 / 92 / 75 / 28 per column), so all colors look equally strong.
+The tag picker lists the 16 around the color wheel: red, orange, yellow, olive, green, teal, cyan, blue, indigo,
+purple, magenta, pink, rose, then brown, slate, gray.
 
 ## Typography
 
@@ -170,6 +179,9 @@ M3 `NavigationBar`: container `surfaceContainer` with a 1 dp `divider` top borde
 - **Task checkbox:** circle 24 dp, 1.5 dp border `onSurfaceVariant` (overdue: `error`); done = filled `primary` with a check.
 - **Shopping checkbox:** rounded square 26 dp, radius 8 — different from tasks on purpose ("buy" vs "do").
 - **Filter chips:** pill 36 dp; selected = `inverseSurface` fill; unselected = `outlineVariant` border.
+- **Tag chips (ADR-0031):** radius 8, `outlineVariant` border, 8 dp dot in the tag color, `labelMedium` 12 sp bold in
+  `onSurface`; never filled with the tag color. In the tag picker: selected = `inverseSurface` fill with a check and the
+  dot, unselected = outlined with the dot. Tag lists show a 12 dp dot before the name.
 - **Segmented control:** track `surfaceContainerHigh`, selected segment white with a hairline shadow.
 - **Buttons:** primary = filled `primary`, pill, 52 dp in forms; tonal = `primaryContainer`; text buttons in
   `onPrimaryContainer`. The gradient is not a button style.

@@ -93,7 +93,24 @@ class TrackingPolicyTest {
     }
 
     @Test
-    fun `LOC-007 still to moving by the motion sensor and by a fix 150 m away`() {
+    fun `LOC-007 indoor scatter within the fixes' accuracy is still`() {
+        listOf(0.0, 110.0, -40.0, 100.0, -50.0, 90.0).forEachIndexed { i, north ->
+            policy.onFix(fix(i.minutes, north, accuracy = 60f))
+        }
+        assertEquals(Mode.STILL, policy.mode, "up to 50 m of the accuracy widens the 75 m radius")
+    }
+
+    @Test
+    fun `LOC-007 a single jump while still is not recorded and does not leave`() {
+        standStill(0.seconds, 3.minutes)
+        assertEquals(TrackingPolicy.Decision(record = false), policy.onFix(fix(20.minutes, north = 300.0, accuracy = 40f)))
+        assertEquals(TrackingPolicy.Decision(record = true), policy.onFix(fix(25.minutes, north = 10.0)))
+        assertEquals(TrackingPolicy.Decision(record = false), policy.onFix(fix(40.minutes, north = 300.0, accuracy = 40f)))
+        assertEquals(Mode.STILL, policy.mode)
+    }
+
+    @Test
+    fun `LOC-007 still to moving by the motion sensor and by two fixes 150 m away`() {
         standStill(0.seconds, 3.minutes)
         assertEquals(Mode.MOVING, policy.onSignificantMotion())
         assertNull(policy.onSignificantMotion(), "already moving")
@@ -101,7 +118,8 @@ class TrackingPolicyTest {
         standStill(4.minutes, 8.minutes)
         assertEquals(Mode.STILL, policy.mode)
         assertNull(policy.onFix(fix(20.minutes, north = 160.0, accuracy = 150f)).newMode, "too inaccurate to leave")
-        val away = policy.onFix(fix(21.minutes, north = 170.0, accuracy = 30f))
+        assertEquals(TrackingPolicy.Decision(record = false), policy.onFix(fix(21.minutes, north = 170.0, accuracy = 30f)))
+        val away = policy.onFix(fix(22.minutes, north = 180.0, accuracy = 30f))
         assertEquals(TrackingPolicy.Decision(record = true, newMode = Mode.MOVING), away)
     }
 
@@ -118,7 +136,7 @@ class TrackingPolicyTest {
     @Test
     fun `LOC-007 platform requests per mode, SDK level and sensor`() {
         val moving = policy.request(Mode.MOVING, sdk = 34, hasMotionSensor = true)!!
-        assertEquals(TrackingRequest(LocationProvider.FUSED, 10.seconds, 5.seconds, RequestQuality.HIGH_ACCURACY, passive = false), moving)
+        assertEquals(TrackingRequest(LocationProvider.FUSED, 1.minutes, 30.seconds, RequestQuality.HIGH_ACCURACY, passive = false), moving)
         assertEquals(LocationProvider.GPS, policy.request(Mode.MOVING, sdk = 30, hasMotionSensor = true)!!.provider)
         assertEquals(LocationProvider.GPS, policy.request(Mode.MOVING, sdk = 34, hasMotionSensor = true, hasFused = false)!!.provider)
 
@@ -139,5 +157,67 @@ class TrackingPolicyTest {
         assertTrue(policy.shouldUpload(now, 1, Mode.STILL))
         assertFalse(policy.shouldUpload(null, 0, Mode.STILL))
         assertFalse(policy.shouldUpload(now - 1.minutes, 50, Mode.PAUSED))
+    }
+
+    @Test
+    fun `LOC-007 moving fast asks for a fix every 30 s until a minute without vehicle speed`() {
+        assertFalse(policy.onFix(fix(0.seconds, speed = 1.5f)).requestChanged, "walking")
+        assertEquals(1.minutes, policy.request(Mode.MOVING, sdk = 34, hasMotionSensor = true)!!.interval)
+
+        assertTrue(policy.onFix(fix(30.seconds, north = 40.0, speed = 12f)).requestChanged, "driving")
+        assertEquals(30.seconds, policy.request(Mode.MOVING, sdk = 34, hasMotionSensor = true)!!.interval)
+        assertFalse(policy.onFix(fix(40.seconds, north = 160.0, speed = 0f)).requestChanged, "a red light")
+        assertFalse(policy.onFix(fix(80.seconds, north = 160.0, speed = 0f)).requestChanged)
+        assertTrue(policy.onFix(fix(90.seconds, north = 160.0, speed = 0f)).requestChanged, "a minute without speed")
+        assertEquals(1.minutes, policy.request(Mode.MOVING, sdk = 34, hasMotionSensor = true)!!.interval)
+    }
+
+    @Test
+    fun `LOC-007 fast without a reported speed, from the distance between fixes`() {
+        policy.onFix(fix(0.seconds))
+        assertTrue(policy.onFix(fix(30.seconds, north = 300.0)).requestChanged, "10 m/s")
+        assertEquals(30.seconds, policy.request(Mode.MOVING, sdk = 34, hasMotionSensor = true)!!.interval)
+    }
+
+    @Test
+    fun `LOC-007 low battery or battery saver doubles the interval and uploads every 2 minutes`() {
+        val low = fix(0.seconds, speed = 12f).copy(battery = 20, charging = false)
+        assertTrue(policy.onFix(low).requestChanged, "fast and low battery")
+        assertEquals(1.minutes, policy.request(Mode.MOVING, sdk = 34, hasMotionSensor = true)!!.interval)
+        val now = clock.now()
+        assertFalse(policy.shouldUpload(now - 1.minutes, 3, Mode.MOVING))
+        assertTrue(policy.shouldUpload(now - 2.minutes, 3, Mode.MOVING))
+
+        val charging = fix(60.seconds, north = 700.0, speed = 12f).copy(battery = 20, charging = true)
+        assertTrue(policy.onFix(charging).requestChanged, "charging again")
+        assertEquals(30.seconds, policy.request(Mode.MOVING, sdk = 34, hasMotionSensor = true)!!.interval)
+
+        assertTrue(policy.onFix(fix(70.seconds, north = 800.0, speed = 12f), powerSave = true).requestChanged)
+        assertEquals(1.minutes, policy.request(Mode.MOVING, sdk = 34, hasMotionSensor = true)!!.interval)
+        assertTrue(
+            policy.onFix(fix(80.seconds, north = 900.0, accuracy = 500f).copy(battery = 80)).requestChanged,
+            "also from an inaccurate fix",
+        )
+    }
+
+    @Test
+    fun `LOC-007 low power walking asks every 2 minutes and still comes within 5 minutes`() {
+        var t = 0.minutes
+        while (t <= 4.minutes) {
+            policy.onFix(fix(t, north = (t.inWholeMinutes % 2) * 5.0, speed = 0f).copy(battery = 15, charging = false))
+            if (t == 0.minutes) assertEquals(2.minutes, policy.request(Mode.MOVING, sdk = 34, hasMotionSensor = true)!!.interval)
+            t += 2.minutes
+        }
+        assertEquals(Mode.MOVING, policy.mode, "not before 5 minutes")
+        policy.onFix(fix(6.minutes, speed = 0f).copy(battery = 15, charging = false))
+        assertEquals(Mode.STILL, policy.mode)
+    }
+
+    @Test
+    fun `LOC-007 a new mode starts at walking pace`() {
+        policy.onFix(fix(0.seconds, speed = 12f))
+        policy.onPause()
+        policy.onResume()
+        assertEquals(1.minutes, policy.request(Mode.MOVING, sdk = 34, hasMotionSensor = true)!!.interval)
     }
 }

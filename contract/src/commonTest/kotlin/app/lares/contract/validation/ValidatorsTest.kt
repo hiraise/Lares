@@ -146,5 +146,11 @@ class ValidatorsTest {
         )
         val tooMany = List(21) { ContactData(ContactKind.EMAIL, "a@b.c") }
         assertEquals(mapOf("contacts" to FieldErrorCode.OUT_OF_RANGE), Validators.person(PersonData("A", contacts = tooMany), 2026))
+        assertTrue(Validators.person(PersonData("A", color = PaletteColor.GRAY), 2026).isEmpty())
+        assertEquals(
+            mapOf("color" to FieldErrorCode.INVALID_FORMAT),
+            Validators.person(PersonData("A", color = PaletteColor.INDIGO), 2026),
+            "tag-only colors are not for persons",
+        )
     }
 }

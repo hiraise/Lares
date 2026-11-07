@@ -585,18 +585,23 @@ interface LocationDevice {            // permissions and settings, Android imple
 }
 ```
 
-### Tracking policy (`TrackingPolicy`, ADR-0028)
+### Tracking policy (`TrackingPolicy`, ADR-0028, ADR-0030)
 
 | Mode | Platform request | Recording | Upload |
 | --- | --- | --- | --- |
-| MOVING (start mode; also after a resume) | `fused` (API 31+ when present) else `gps`; high accuracy, interval 10 s, min interval 5 s | a fix with accuracy ≤ 200 m when ≥ 30 s since the last recorded or ≥ 50 m from it | when the oldest queued fix is ≥ 30 s old or 20 are queued |
+| MOVING (start mode; also after a resume) | `fused` (API 31+ when present) else `gps`; high accuracy, interval 1 min, min 30 s; fast pace 30 s, min 15 s; low power doubles both | a fix with accuracy ≤ 200 m when ≥ 30 s since the last recorded or ≥ 50 m from it | when the oldest queued fix is ≥ 30 s old (2 min on low power) or 20 are queued |
 | STILL | same provider, interval 15 min (5 min without a significant-motion sensor), min interval 5 min; high accuracy on API 36+, balanced below; plus `passive` | every fix (heartbeat with battery) | right after each recorded fix |
 | PAUSED | none | none | pending state only |
 
-- MOVING → STILL: at least 3 fixes in the last 3 minutes, all within 75 m of their mean and with speed < 1 m/s (when
-  reported).
-- STILL → MOVING: the significant-motion trigger fires; or a fix (passive or heartbeat) ≥ 150 m from the still anchor
-  with accuracy ≤ 100 m; or sharing resumes.
+- Fast pace (MOVING): a fix at ≥ 5 m/s (reported speed, else the distance from the previous accurate fix) switches to
+  the fast request until a minute passes without one; every mode change starts at the normal pace.
+- Low power: the last fix reports battery ≤ 20 % and not charging, or the phone's battery saver is on; it doubles the
+  interval of either pace (2 min on foot, 1 min fast). The policy flags `Decision.requestChanged` when pace or power change the MOVING request, and the service
+  re-requests updates.
+- MOVING → STILL: at least 3 fixes in the last 3 minutes (5 minutes on low power), all within 75 m of their mean plus
+  their accuracy up to 50 m (indoor scatter), and with speed < 1 m/s (when reported).
+- STILL → MOVING: the significant-motion trigger fires; or two fixes in a row (passive or heartbeat) ≥ 150 m from the
+  still anchor with accuracy ≤ 100 m — the first is not recorded, a single jump is indoor noise; or sharing resumes.
 - «Обновить»: a one-shot high-accuracy `getCurrentLocation` (timeout 45 s), recorded regardless of the thresholds and
   uploaded at once; the mode does not change.
 - Every recorded fix carries battery level and charging (`BatteryManager`).

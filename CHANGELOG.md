@@ -5,6 +5,20 @@ Versioning: [SemVer](https://semver.org/) from the first release.
 
 ## [Unreleased]
 
+## [0.5.2] - 2026-11-07
+
+### Changed
+
+- Location sharing uses less battery: on foot the phone checks its position every minute instead of every 10 seconds,
+  in a car every 30 seconds. With the battery at 20 % or lower (not charging) or battery saver on, it checks half as
+  often (the map can lag up to about 4 minutes).
+- Tags no longer look like people: a tag is an outlined label with a colored dot, and tags have 16 colors to choose
+  from (6 new ones only for tags). People keep their 10 colors.
+- Fewer stray track lines at home: a single far-off position indoors no longer counts as leaving, and the scatter of
+  indoor positions no longer keeps the phone in frequent tracking.
+
+Update the server together with the app: a server older than 0.5.2 does not accept the new tag colors.
+
 ## [0.5.1] - 2026-10-26
 
 ### Changed

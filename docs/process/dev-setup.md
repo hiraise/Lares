@@ -91,6 +91,9 @@ then `adb shell input keyevent 66` (Enter). A typed address without a scheme get
   platform `fused` provider of the AOSP image passes nothing on. The app therefore requests `gps` on the emulator
   (`AndroidLocationSource.isEmulator`); check with `adb shell dumpsys location` (the app's request and its `locations`
   count).
+- Battery for the tracking policy (ADR-0030): the app reads `BATTERY_PROPERTY_CAPACITY`, which `dumpsys battery set
+  level` does not change; use `adb emu power capacity 15`, `adb emu power ac off`, `adb emu power status discharging`
+  (and `ac on` after). Battery saver: `adb shell settings put global low_power 1|0`.
 - Location switch: `adb shell cmd location set-location-enabled false|true`. Permission revoke (kills the process):
   `adb shell pm revoke app.lares.android.debug android.permission.ACCESS_FINE_LOCATION`.
 - The sharing service: `adb shell dumpsys activity services app.lares.android.debug`; its notification:
