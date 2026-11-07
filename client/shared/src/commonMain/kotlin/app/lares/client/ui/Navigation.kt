@@ -15,6 +15,10 @@ import app.lares.client.platform.EventLinks
 import app.lares.client.platform.NavTarget
 import app.lares.client.platform.PendingNavigation
 import app.lares.client.platform.TaskLinks
+import app.lares.client.ui.budget.BudgetRoute
+import app.lares.client.ui.budget.IncomeArgs
+import app.lares.client.ui.budget.IncomeRoute
+import app.lares.client.ui.budget.MonthsRoute
 import app.lares.client.ui.calendar.EventEditorArgs
 import app.lares.client.ui.calendar.EventEditorRoute
 import app.lares.client.ui.calendar.EventRoute
@@ -64,6 +68,7 @@ import app.lares.contract.DeepLink
 import app.lares.contract.permissions.Section
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.YearMonth
 import kotlinx.serialization.Serializable
 import org.koin.compose.koinInject
 
@@ -149,6 +154,23 @@ data class PlaceEditorDestination(
     val lat: Double? = null,
     val lon: Double? = null,
 )
+
+/** «Ещё › Бюджет» (M5-04); [month] is an ISO year-month picked in «Все месяцы», null = the current month. */
+@Serializable
+data class BudgetDestination(
+    val month: String? = null,
+)
+
+/** The income page of a planned income (M5-04); [month] is an ISO year-month. */
+@Serializable
+data class BudgetIncomeDestination(
+    val month: String,
+    val incomeId: String,
+)
+
+/** «Все месяцы» of the budget (M5-04). */
+@Serializable
+data object BudgetMonthsDestination
 
 @Serializable
 data object AboutDestination
@@ -351,12 +373,10 @@ fun MainNavHost() {
                     onProfile = { navController.navigate(ProfileDestination) },
                     onDevices = { navController.navigate(DevicesDestination) },
                     onSection = {
-                        if (it ==
-                            Section.MAP
-                        ) {
-                            navController.navigate(MapDestination())
-                        } else {
-                            navController.navigate(SectionPageDestination(it))
+                        when (it) {
+                            Section.MAP -> navController.navigate(MapDestination())
+                            Section.BUDGET -> navController.navigate(BudgetDestination())
+                            else -> navController.navigate(SectionPageDestination(it))
                         }
                     },
                     onFamily = { navController.navigate(FamilyDestination(it)) },
@@ -429,6 +449,26 @@ fun MainNavHost() {
             } else {
                 SectionPlaceholderPage(section, onBack = { navController.popBackStack() })
             }
+        }
+        composable<BudgetDestination> { entry ->
+            BudgetRoute(
+                entry.toRoute<BudgetDestination>().month?.let(YearMonth::parse),
+                onBack = { navController.popBackStack() },
+                onIncome = { month, id -> navController.navigate(BudgetIncomeDestination(month.toString(), id)) },
+                onMonths = { navController.navigate(BudgetMonthsDestination) },
+            )
+        }
+        composable<BudgetIncomeDestination> { entry ->
+            val route = entry.toRoute<BudgetIncomeDestination>()
+            IncomeRoute(IncomeArgs(YearMonth.parse(route.month), route.incomeId), onBack = { navController.popBackStack() })
+        }
+        composable<BudgetMonthsDestination> {
+            MonthsRoute(
+                onBack = { navController.popBackStack() },
+                onPick = { month ->
+                    navController.navigate(BudgetDestination(month.toString())) { popUpTo<BudgetDestination> { inclusive = true } }
+                },
+            )
         }
         composable<MapDestination> { entry ->
             val route = entry.toRoute<MapDestination>()

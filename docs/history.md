@@ -475,3 +475,12 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   Times truncated to milliseconds so local rows match the shadow. 23 unit tests (adapters, views on the notebook,
   writer, migration) and 6 multi-device tests (`BudgetSyncTest`: different / same tick offline, same income, plan from next month
   while ticking, plan from this month resets the copy, no rows for Kids).
+
+- 2026-11-07 M5-04 Budget month UI: «Ещё › Бюджет» opens the current month (gradient hero «Свободно / Недобор /
+  Ожидается», incomes with their state and «Переведено N из M», categories funded of planned with bars and the
+  «изменено» dot), ‹ › and «Все месяцы»; the income page records «Пришло» and «Дата» (prefilled on first edit),
+  «Очистить», ticks categories (square checkboxes, «Перевести» / «Переведено»), the «Перевели» sheet for another amount,
+  «Отметить все», free money of the income; read-only without checkboxes; empty state without a plan (create button
+  waits for M5-05). One amount formatter (U+202F groups, «₽»). 15 new tests (format, hero precedence, screens,
+  view models); emulator walkthrough of spec scenarios 2, 3, 6 in light and dark without bugs (category amount
+  alignment and the «Все месяцы» line fixed after it).

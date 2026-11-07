@@ -5,6 +5,13 @@ Versioning: [SemVer](https://semver.org/) from the first release.
 
 ## [Unreleased]
 
+### Added
+
+- Budget: «Ещё › Бюджет» shows the current month — free money or shortfall, each income expected and received, how
+  much of each category is transferred. Record what came in and tick the categories you transferred (another amount
+  through the amount), «Отметить все»; past months from «Все месяцы». Members who may only view see it without
+  checkboxes. The plan editor comes next.
+
 ## [0.5.2] - 2026-11-07
 
 ### Changed

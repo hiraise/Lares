@@ -349,6 +349,25 @@ a thin space and «₽» (`1 234 ₽`), no kopecks. Look per [visual style](../d
 - **Today card** (BUD-021): «Бюджет» with the next expected income «20 декабря · 160 000 ₽» and «Не переведено: 5
   категорий»; tap opens the Budget screen. Placed after «Семья сейчас».
 
+### Implementation notes (M5-04)
+
+- `ui/budget/`: `BudgetFormat` (the one amount format: digits grouped by U+202F, «−» for negatives, then a no-break
+  space and «₽»; input keeps up to 10 digits), `BudgetLogic` (hero precedence and all row texts as `UiText`),
+  `BudgetViewModel` (screen and «Все месяцы»), `IncomeViewModel`, `BudgetScreen`, `IncomePage`, `BudgetComponents`.
+- Routes `BudgetDestination(month?)`, `BudgetIncomeDestination(month, incomeId)`, `BudgetMonthsDestination`. The month
+  shown lives in the route's `rememberSaveable` (survives process death) and is passed to the view model; a month
+  outside first month…current month falls back to the current one. Picking in «Все месяцы» replaces the Budget entry.
+- The hero is the lake-gradient card (the one per screen); when free money takes the hero and the month also has a
+  shortfall, a second line «Недобор N ₽» shows it. «Пришло … из … · переведено …» and «45 000 из 60 000» use digits
+  without «₽»; titles and totals with «₽».
+- Income page: the receipt fields are written on keyboard «Готово», when the amount field loses focus and when a date
+  is picked; an emptied amount clears the receipt. Categories are split into «Перевести» (unticked, table order) and
+  «Переведено» (ticked, with «Отметка: имя»). A category whose transfer differs from the planned cell shows
+  «20 000 из 27 000». Extra incomes are listed on the month but have no page until M5-06.
+- «Создать план», «План» and the month menu are hidden until M5-05 / M5-06 (`onCreatePlan` is null); the empty state
+  shows a hint instead.
+- The «изменено» dot uses the `warning` color; category bars past 100 % use `error` on `errorContainer`.
+
 ## Invariants to test
 
 - Two phones tick different categories of one income offline → both ticks survive; the same category → one row, last

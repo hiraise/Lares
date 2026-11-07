@@ -70,6 +70,8 @@ the 20th, 12 000 on the 25th; about twenty categories.
 - **BUD-010** `MVP` `doing` — A month is opened from the plan version in force (automatically on its first day, or
   when someone opens it earlier). Past months stay viewable; a month is never deleted.
   *Client core: months listed from the first version to the current one, nothing written to open a month (M5-03).*
+  *UI: «Ещё › Бюджет» opens the current month, ‹ › and «Все месяцы» open past months; without a plan the empty state
+  «Составьте план распределения» (M5-04).*
 - **BUD-011** `MVP` `doing` — Actual income: for each income of the month, the amount and date it actually came; the
   date may be earlier or later than planned. ASSUMPTION: an extra income not in the plan (a bonus) can be added to a
   month; it has no cells and counts as free money.
@@ -77,6 +79,8 @@ the 20th, 12 000 on the 25th; about twenty categories.
   *Server: receipts stored and synced; only extra incomes can be deleted (M5-02).*
   *Client core: record / clear an income, add, change and delete extra incomes offline; two phones recording one
   income write one row (M5-03).*
+  *UI: the income page records «Пришло» and «Дата» (prefilled with the expected amount and today), «Очистить»; extra
+  incomes in UI with M5-06 (M5-04).*
 - **BUD-012** `MVP` `doing` — Funding: in each income's column the member ticks the categories transferred from it.
   The transferred amount is the planned one and can be changed (less or more). The category row shows funded of its
   monthly amount.
@@ -84,6 +88,8 @@ the 20th, 12 000 on the 25th; about twenty categories.
   *Server: ticks stored and synced; two members ticking the same cell write one row, the later amount wins (M5-02).*
   *Client core: tick, untick, «Отметить все»; the income view with who ticked and changed cells; ticks of different
   categories on two phones offline both survive (M5-03).*
+  *UI: square checkboxes per category of the income, «Перевели» sheet for another amount («20 000 из 27 000»),
+  «Отметить все»; read-only without checkboxes (M5-04).*
 - **BUD-013** `MVP` `doing` — Changing a month without changing the plan: a cell's planned amount, a category added
   or left out for this month only. Every difference from the plan is marked in the month (customer: «должно быть
   отражено»).
@@ -95,6 +101,8 @@ the 20th, 12 000 on the 25th; about twenty categories.
   the next month or assigned anywhere (customer, 2026-11-07).
   *Contract: `BudgetMath.summary` — expected, actual, transferred, shortfall, free money (M5-01).*
   *Client core: totals of every month and income on the phone (M5-03).*
+  *UI: hero «Свободно / Недобор / Ожидается», per income «Недобор» and «Не распределено», categories funded of
+  planned (M5-04).*
 - **BUD-015** `MVP` `doing` — Works offline and syncs like the other modules (FND-040).
   *Server: four sync types, `budget.view` reads and `budget.manage` writes (M5-02).*
   *Client core: four local tables and adapters with the server's checks; members without `budget.view` hold no
@@ -105,6 +113,7 @@ the 20th, 12 000 on the 25th; about twenty categories.
 - **BUD-020** `MVP` `doing` — Budget opens on the current month: the next expected income, what is not yet funded,
   the month's shortfall or free money. The list of months shows for each its expected, actual and free money.
   *Client core: views of the current month and of all months (M5-03).*
+  *UI: the Budget screen and «Все месяцы» with expected, actual and free money or shortfall (M5-04).*
 - **BUD-021** `MVP` `doing` — «Today» shows a budget card to members with `budget.view` (FND-063). ASSUMPTION: the next
   expected income and how many categories of the month are not funded yet.
   *Client core: the next unrecorded income and the categories of recorded incomes not ticked yet (M5-03).*

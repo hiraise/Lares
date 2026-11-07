@@ -13,6 +13,8 @@ import app.lares.client.platform.DeepLinkHandler
 import app.lares.client.platform.EventLinks
 import app.lares.client.platform.PendingNavigation
 import app.lares.client.platform.TaskLinks
+import app.lares.client.ui.budget.BudgetViewModel
+import app.lares.client.ui.budget.IncomeViewModel
 import app.lares.client.ui.calendar.CalendarViewModel
 import app.lares.client.ui.calendar.EventEditorViewModel
 import app.lares.client.ui.calendar.EventViewModel
@@ -111,6 +113,8 @@ fun uiModule(): Module =
         viewModel { LocationRulesViewModel(get(), get(), get(), get(), get(), get()) }
         viewModel { params -> HistoryViewModel(get(), get(), get(), get(), getOrNull<Clock>() ?: Clock.System, params.get()) }
         viewModel { params -> PlaceEditorViewModel(get(), get(), get(), get(), get(), params.get()) }
+        viewModel { BudgetViewModel(get()) }
+        viewModel { params -> IncomeViewModel(get(), get(), params.get()) }
         viewModel { AboutViewModel(get(), get(), get()) }
         viewModel { FamilyViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
         viewModel { params -> MemberDetailViewModel(get(), get(), get(), get(), get(), get(), params.get()) }
