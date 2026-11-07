@@ -5,14 +5,14 @@ Updated: 2026-11-07
 ## Phase
 
 **M0–M4 implemented and accepted by the customer (2026-11-07): foundation, tasks, shopping lists, calendar, location.
-M5 Budget: spec approved (2026-11-07); design and plans M5-01…M5-06 ready; next M5-01.**
+M5 Budget in progress: M5-01 (contract) done; next M5-02.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
 
-None in progress. [M5 Budget](product/roadmap.md#m5-budget): the [spec](product/features/budget.md) was reworked with
-the customer (Q-031) and approved on 2026-11-07; [design](architecture/budget.md), ADR-0032 and
-[M5 plans](plans/README.md#m5-plans) M5-01…M5-06 are ready. Next: M5-01. M0–M4 accepted 2026-11-07.
+[M5 Budget](product/roadmap.md#m5-budget): [spec](product/features/budget.md) approved 2026-11-07,
+[design](architecture/budget.md), ADR-0032, [M5 plans](plans/README.md#m5-plans). Done: M5-01. Next: M5-02.
+M0–M4 accepted 2026-11-07.
 
 **Active release branch: `release/0.6.0`** (M5 Budget). Commit approved work here; `main` is protected
 ([release process](process/release.md), ADR-0020). Latest release: [v0.5.2](https://github.com/hiraise/Lares/releases/tag/v0.5.2)
@@ -20,6 +20,9 @@ the customer (Q-031) and approved on 2026-11-07; [design](architecture/budget.md
 
 ## Last completed
 
+- 2026-11-07 M5-01 Budget contract: plan versions, month copies, receipts and ticks as sync data with derived ids
+  (also in `seed.py`), write rules, validators, `BudgetMath` (plan in force, table checks, differences from the plan,
+  month totals with shortfall and free money) tested on the customer's notebook; 33 new contract tests.
 - 2026-11-07 Release **v0.5.2**: battery saving while sharing location (ADR-0030), calmer tracking indoors, tags apart
   from people (ADR-0031). Pull request #6. Next branch `release/0.6.0` for M5. Servers must be updated with the app
   (an older server rejects the new tag colors).
@@ -199,7 +202,7 @@ the customer (Q-031) and approved on 2026-11-07; [design](architecture/budget.md
 
 1. Release v0.5.2 (battery saving, ADR-0030) when the customer approves; check a day of battery and home tracks on a
    real phone.
-2. M5 Budget: execute plans [M5-01…M5-06](plans/README.md#m5-plans) in order (`/plan-run M5-01`).
+2. M5 Budget: execute plans [M5-02…M5-06](plans/README.md#m5-plans) in order (`/plan-run M5-02`).
 3. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
 
 ## Plan progress

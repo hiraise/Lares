@@ -91,6 +91,7 @@ Algorithm (also implemented in `tools/dev/seed.py`): `b = Uuid.parse(eventId).to
 salt's 8 big-endian bytes; for reminder rows additionally `b[7] = b[7] xor 0x5A`; set the version nibble
 `b[6] = (b[6] and 0x0F) or 0x80` (version 8) and the variant `b[8] = (b[8] and 0x3F) or 0x80`; return the canonical
 lowercase string. Byte 7 keeps occurrence and reminder ids of one event apart; version 8 keeps them apart from v7 ids.
+Other markers: place alerts `0x3C` (location), budget rows `0x21`–`0x24` ([budget](budget.md#derived-ids-contractidskt)).
 
 ## Schedule logic (`contract/…/calendar/`)
 

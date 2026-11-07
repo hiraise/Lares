@@ -370,12 +370,45 @@ def place_alert_row_id(member_id, subscriber_id):
     return derive_row_id(member_id, int.from_bytes(uuid.UUID(subscriber_id).bytes[8:], "big"), marker=0x3C)
 
 
+def month_index(month):
+    """index(m) of architecture/budget.md § Derived ids for a "2026-12" month."""
+    year, number = (int(part) for part in month.split("-"))
+    return year * 12 + number - 1
+
+
+def budget_plan_row_id(household_id, effective_from):
+    """The id of the budget_plan version in force from `effective_from` ("2026-12") (ADR-0032)."""
+    return derive_row_id(household_id, month_index(effective_from), marker=0x21)
+
+
+def budget_month_row_id(household_id, month):
+    """The id of the budget_month row (month-only edits) of `month` ("2026-12")."""
+    return derive_row_id(household_id, month_index(month), marker=0x22)
+
+
+def budget_receipt_row_id(income_id, month):
+    """The id of the budget_receipt row of a planned income in `month` ("2026-12")."""
+    return derive_row_id(income_id, month_index(month), marker=0x23)
+
+
+def budget_funding_row_id(income_id, category_id, month):
+    """The id of the budget_funding row (one tick) of a category from an income in `month` ("2026-12")."""
+    salt = int.from_bytes(uuid.UUID(category_id).bytes[8:], "big")
+    return derive_row_id(budget_receipt_row_id(income_id, month), salt, marker=0x24)
+
+
 # Golden values of contract IdsTest (M3-01).
 _GOLDEN_EVENT = "0192f3a4-5b6c-7d8e-9f01-23456789abcd"
 assert occurrence_row_id(_GOLDEN_EVENT, datetime.date(2026, 10, 28)) == "0192f3a4-5b6c-8d8e-9f01-23456789fadf"
 assert occurrence_row_id(_GOLDEN_EVENT, datetime.date(1969, 12, 31)) == "0192f3a4-5b6c-8d8e-a0fe-dcba98765432"
 assert reminder_row_id(_GOLDEN_EVENT, "0192f3a4-0000-7000-8000-00000000c0de") == "0192f3a4-5b6c-8dd4-9f01-234567896b13"
 assert place_alert_row_id(_GOLDEN_EVENT, "0192f3a4-0000-7000-8000-00000000c0de") == "0192f3a4-5b6c-8db2-9f01-234567896b13"
+# Budget (M5-01): the same id as household and income, so only the markers tell the rows apart.
+assert budget_plan_row_id(_GOLDEN_EVENT, "2026-12") == "0192f3a4-5b6c-8daf-9f01-23456789f4ce"
+assert budget_month_row_id(_GOLDEN_EVENT, "2026-12") == "0192f3a4-5b6c-8dac-9f01-23456789f4ce"
+assert budget_receipt_row_id(_GOLDEN_EVENT, "2026-12") == "0192f3a4-5b6c-8dad-9f01-23456789f4ce"
+assert budget_receipt_row_id(_GOLDEN_EVENT, "1999-01") == "0192f3a4-5b6c-8dad-9f01-23456789f679"
+assert budget_funding_row_id(_GOLDEN_EVENT, "0192f3a4-0000-7000-8000-00000000c0de", "2026-12") == "0192f3a4-5b6c-8d89-9f01-234567893410"
 
 
 def calendar():

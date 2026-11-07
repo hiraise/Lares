@@ -45,35 +45,43 @@ the 20th, 12 000 on the 25th; about twenty categories.
 
 ### Plan
 
-- **BUD-001** `MVP` `todo` — Categories: name, monthly amount, order in the table. A category can be unused (kept for
+- **BUD-001** `MVP` `doing` — Categories: name, monthly amount, order in the table. A category can be unused (kept for
   history and to use again, not in new months) or deleted when no month uses it. Categories can be reordered.
-- **BUD-002** `MVP` `todo` — Incomes of the plan: day of the month (1–31; on shorter months the last day) and
+  *Contract: categories with `unused`, name and amount rules, normalizer (M5-01).*
+- **BUD-002** `MVP` `doing` — Incomes of the plan: day of the month (1–31; on shorter months the last day) and
   expected amount. No source or person is recorded (customer: the date is enough). Two incomes may share a day.
-- **BUD-003** `MVP` `todo` — Plan cells: for each category and income, the amount of that income that goes to the
+  *Contract: incomes by day, `BudgetMath.incomeDate` clamps to the month's last day (M5-01).*
+- **BUD-003** `MVP` `doing` — Plan cells: for each category and income, the amount of that income that goes to the
   category; empty means nothing. The table shows row sums against the category's monthly amount, column sums against
   the income's expected amount, the total expected income and the total of the categories; a row or column that does
   not add up is highlighted, saving is still allowed (customer: «давай посмотрим как получится»).
-- **BUD-004** `MVP` `todo` — The plan is versioned. Saving a change asks from which month it applies: the next month
+  *Contract: cells, table validation, `BudgetMath.check` (row and column sums, bad rows and columns) (M5-01).*
+- **BUD-004** `MVP` `doing` — The plan is versioned. Saving a change asks from which month it applies: the next month
   (default) or the current one. Earlier months keep the version they were made from; the plan's history lists the
   versions with their date and author. ASSUMPTION: applying to the current month replaces its plan cells but keeps
   what was already entered or ticked.
+  *Contract: plan versions with derived ids, `BudgetMath.planFor` / `firstMonth` (M5-01).*
 
 ### Month
 
 - **BUD-010** `MVP` `todo` — A month is opened from the plan version in force (automatically on its first day, or
   when someone opens it earlier). Past months stay viewable; a month is never deleted.
-- **BUD-011** `MVP` `todo` — Actual income: for each income of the month, the amount and date it actually came; the
+- **BUD-011** `MVP` `doing` — Actual income: for each income of the month, the amount and date it actually came; the
   date may be earlier or later than planned. ASSUMPTION: an extra income not in the plan (a bonus) can be added to a
   month; it has no cells and counts as free money.
-- **BUD-012** `MVP` `todo` — Funding: in each income's column the member ticks the categories transferred from it.
+  *Contract: receipts of planned and extra incomes, validation (M5-01).*
+- **BUD-012** `MVP` `doing` — Funding: in each income's column the member ticks the categories transferred from it.
   The transferred amount is the planned one and can be changed (less or more). The category row shows funded of its
   monthly amount.
-- **BUD-013** `MVP` `todo` — Changing a month without changing the plan: a cell's planned amount, a category added
+  *Contract: ticks with derived ids, `fundedBy` written only as oneself (M5-01).*
+- **BUD-013** `MVP` `doing` — Changing a month without changing the plan: a cell's planned amount, a category added
   or left out for this month only. Every difference from the plan is marked in the month (customer: «должно быть
   отражено»).
-- **BUD-014** `MVP` `todo` — Totals of the month and of each income: expected, actual, transferred; shortfall
+  *Contract: month copy of the table, `BudgetMath.tableFor` / `differences` (M5-01).*
+- **BUD-014** `MVP` `doing` — Totals of the month and of each income: expected, actual, transferred; shortfall
   (actual below expected) and free money (actual minus transferred). Free money is only shown; it is not carried to
   the next month or assigned anywhere (customer, 2026-11-07).
+  *Contract: `BudgetMath.summary` — expected, actual, transferred, shortfall, free money (M5-01).*
 - **BUD-015** `MVP` `todo` — Works offline and syncs like the other modules (FND-040).
 
 ### Overview

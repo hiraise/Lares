@@ -26,6 +26,10 @@ object EntityTypes {
     const val EVENT_REMINDER = "event_reminder"
     const val PLACE = "place"
     const val PLACE_ALERT = "place_alert"
+    const val BUDGET_PLAN = "budget_plan"
+    const val BUDGET_MONTH = "budget_month"
+    const val BUDGET_RECEIPT = "budget_receipt"
+    const val BUDGET_FUNDING = "budget_funding"
 }
 
 /** Limits of pull and push. */

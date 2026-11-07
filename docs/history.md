@@ -454,3 +454,9 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   ids (markers 0x21–0x24), sums and checks in shared `BudgetMath`; plans M5-01…M5-06 written.
 - 2026-11-07 Release **v0.5.2** (battery saving, indoor tracking, tag look and colors): pull request #6. Next branch
   `release/0.6.0`.
+- 2026-11-07 M5-01 Budget contract: `BudgetEntities` (plan version, month copy, receipt, funding; `YearMonth` as
+  `"2026-12"` with the library's default serializer), four entity types, derived ids `Ids.budget*RowId` with markers
+  0x21–0x24 (same vectors in `seed.py`), `BudgetRules` and `WriteRules` gates (delete only receipts), budget validators
+  and normalizers, `BudgetMath` (`planFor`, `tableFor`, `incomeDate`, `check`, `differences`, `summary`). Design
+  detail changed: `summary` takes receipts keyed by row id (extra incomes need their id). 33 new contract tests on the
+  customer's notebook (contract 242 total).

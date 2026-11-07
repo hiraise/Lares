@@ -22,8 +22,9 @@ object WriteRules {
      * `shopping_item` `shopping.edit`; the entity-level checks are [ShoppingRules]. `event` needs `calendar.view`;
      * `event_occurrence` and `event_reminder` too, but are never deleted by clients (ADR-0022, ADR-0023); the
      * entity-level checks are [EventRules]. `place` needs `location.manage_places`; `place_alert` `location.view`, upsert
-     * only; the entity-level checks are [PlaceRules]. Types not listed here (including read-only
-     * `household`, `member`, `group`) cannot be changed through sync.
+     * only; the entity-level checks are [PlaceRules]. The four budget types need `budget.manage` and are upsert only,
+     * except `budget_receipt` (extra incomes are deleted); the entity-level checks are [BudgetRules]. Types not listed
+     * here (including read-only `household`, `member`, `group`) cannot be changed through sync.
      */
     fun canMutate(
         type: String,
@@ -70,6 +71,14 @@ object WriteRules {
 
             EntityTypes.PLACE_ALERT -> {
                 op == MutationOp.UPSERT && permissions.has(Permission.LOCATION_VIEW)
+            }
+
+            EntityTypes.BUDGET_PLAN, EntityTypes.BUDGET_MONTH, EntityTypes.BUDGET_FUNDING -> {
+                op == MutationOp.UPSERT && permissions.has(Permission.BUDGET_MANAGE)
+            }
+
+            EntityTypes.BUDGET_RECEIPT -> {
+                permissions.has(Permission.BUDGET_MANAGE)
             }
 
             else -> {

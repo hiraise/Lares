@@ -120,8 +120,8 @@ object BudgetMath {
     fun incomeDate(month: YearMonth, day: Int): LocalDate                               // day clamped to the month's length
     fun check(table: BudgetTable): TableCheck
     fun differences(monthTable: BudgetTable, planTable: BudgetTable): TableDifferences
-    fun summary(month: YearMonth, table: BudgetTable, receipts: List<BudgetReceiptData>,
-                fundings: List<BudgetFundingData>): MonthSummary
+    fun summary(month: YearMonth, table: BudgetTable, receipts: Map<String, BudgetReceiptData>,  // keyed by row id
+                fundings: Collection<BudgetFundingData>): MonthSummary
 }
 
 data class TableCheck(
@@ -151,8 +151,12 @@ data class IncomeSummary(val incomeId: String?, val receiptId: String?, val labe
                          val expected: Long, val actual: Long?, val actualDate: LocalDate?, val transferred: Long,
                          val fundedCount: Int, val plannedCount: Int)   // plannedCount = cells of used categories
 data class CategorySummary(val categoryId: String, val name: String, val amount: Long, val planned: Long,
-                           val funded: Long, val complete: Boolean)    // complete = every planned cell ticked
+                           val funded: Long, val complete: Boolean)    // complete = every planned cell ticked; false without cells
 ```
+
+Receipts are passed with their row ids (M5-01): an extra income's `receiptId` and its order "by date, then id" need
+the id, which the receipt data does not hold. `fundedCount` counts the ticked planned cells of an income;
+`transferred` also counts ticks of a used category without a cell.
 
 Rules: a funding counts only if its income and category are in the month's table and the category is used;
 `transferred` sums funding amounts (not planned amounts). Extra incomes have `expected = 0` and no cells. An income

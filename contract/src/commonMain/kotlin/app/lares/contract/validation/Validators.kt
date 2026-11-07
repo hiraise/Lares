@@ -9,6 +9,11 @@ import app.lares.contract.api.location.SetSharingRequest
 import app.lares.contract.api.location.SharingStatus
 import app.lares.contract.api.location.VisibilityLevel
 import app.lares.contract.calendar.EventSchedule
+import app.lares.contract.entities.BudgetFundingData
+import app.lares.contract.entities.BudgetMonthData
+import app.lares.contract.entities.BudgetPlanData
+import app.lares.contract.entities.BudgetReceiptData
+import app.lares.contract.entities.BudgetTable
 import app.lares.contract.entities.ChecklistItemData
 import app.lares.contract.entities.EventData
 import app.lares.contract.entities.EventKind
@@ -34,6 +39,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.YearMonth
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Instant
 
@@ -75,6 +81,14 @@ object Validators {
     const val EVENT_PLACE_MAX = 200
     const val EVENT_MAX_PARTICIPANTS = 30
     const val EVENT_MAX_TAGS = 20
+    const val BUDGET_NAME_MAX = 60
+    const val BUDGET_MAX_CATEGORIES = 100
+    const val BUDGET_MAX_INCOMES = 20
+    const val BUDGET_AMOUNT_MAX = 1_000_000_000L
+    const val BUDGET_LABEL_MAX = 60
+    const val BUDGET_MIN_YEAR = 2000
+    const val BUDGET_MAX_YEAR = 2100
+    private const val BUDGET_DAY_MAX = 31
     private const val PERCENT_MAX = 100
     private val LATITUDE = -90.0..90.0
     private val LONGITUDE = -180.0..180.0
@@ -86,6 +100,8 @@ object Validators {
 
     private val loginPattern = Regex("[a-z0-9._-]+")
     private val currencyPattern = Regex("[A-Z]{3}")
+    private val uuidPattern = Regex("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
+    private val whitespace = Regex("\\s+")
 
     /** Logins are case-insensitive: validate (and store) the lowercase form. */
     fun normalizeLogin(login: String): String = login.trim().lowercase()
@@ -461,6 +477,110 @@ object Validators {
             PartyKind.GROUP, PartyKind.MEMBER -> !id.isNullOrBlank()
             PartyKind.UNKNOWN -> false
         }
+
+    /**
+     * Category names trimmed with inner whitespace collapsed; zero cells dropped. Server and client normalize before
+     * validating and storing.
+     */
+    fun normalizeBudgetTable(table: BudgetTable): BudgetTable =
+        table.copy(
+            categories = table.categories.map { it.copy(name = collapse(it.name)) },
+            cells = table.cells.filter { it.amount != 0L },
+        )
+
+    fun normalizeBudgetPlan(data: BudgetPlanData): BudgetPlanData = data.copy(table = normalizeBudgetTable(data.table))
+
+    fun normalizeBudgetMonth(data: BudgetMonthData): BudgetMonthData = data.copy(table = data.table?.let(::normalizeBudgetTable))
+
+    /** Trims the label; a blank one becomes null. */
+    fun normalizeBudgetReceipt(data: BudgetReceiptData): BudgetReceiptData = data.copy(label = data.label?.trim()?.ifEmpty { null })
+
+    /**
+     * The first problem of a plan or month table (architecture/budget.md § Validation), reported as one code for the
+     * `table` field: too many categories or incomes; a bad name, a duplicate name (case-insensitive) or id, an id that is
+     * not a lowercase UUID; a day or an amount out of range; a cell of an unknown category or income, or a second cell
+     * for the same pair.
+     */
+    fun budgetTable(table: BudgetTable): FieldErrorCode? {
+        val categories = table.categories
+        val incomes = table.incomes
+        val cells = table.cells
+        val categoryIds = categories.mapTo(HashSet()) { it.id }
+        val incomeIds = incomes.mapTo(HashSet()) { it.id }
+        val names = categories.mapTo(HashSet()) { collapse(it.name).lowercase() }
+        val badNames = categories.any { collapse(it.name).length !in 1..BUDGET_NAME_MAX } || names.size < categories.size
+        val badIds =
+            categoryIds.size < categories.size ||
+                incomeIds.size < incomes.size ||
+                (categoryIds + incomeIds).any { !uuidPattern.matches(it) }
+        val badAmounts =
+            categories.any { it.amount !in 0..BUDGET_AMOUNT_MAX } ||
+                incomes.any { it.day !in 1..BUDGET_DAY_MAX || it.amount !in 0..BUDGET_AMOUNT_MAX } ||
+                cells.any { it.amount !in 1..BUDGET_AMOUNT_MAX }
+        val badCells =
+            cells.any { it.categoryId !in categoryIds || it.incomeId !in incomeIds } ||
+                cells.mapTo(HashSet()) { it.categoryId to it.incomeId }.size < cells.size
+        return when {
+            categories.size > BUDGET_MAX_CATEGORIES || incomes.size > BUDGET_MAX_INCOMES -> FieldErrorCode.OUT_OF_RANGE
+            badNames || badIds -> FieldErrorCode.INVALID_FORMAT
+            badAmounts -> FieldErrorCode.OUT_OF_RANGE
+            badCells -> FieldErrorCode.INVALID_FORMAT
+            else -> null
+        }
+    }
+
+    /** Field rules of a plan version; the derived id, a past `effectiveFrom` and `updatedAt` are checked by the server. */
+    fun budgetPlan(data: BudgetPlanData): Map<String, FieldErrorCode> =
+        ValidationErrors()
+            .add("effectiveFrom", budgetYearMonth(data.effectiveFrom))
+            .add("table", budgetTable(data.table))
+            .fields
+
+    /** Field rules of a month row; null `table` (the month follows its plan) is valid. */
+    fun budgetMonth(data: BudgetMonthData): Map<String, FieldErrorCode> =
+        ValidationErrors()
+            .add("month", budgetYearMonth(data.month))
+            .add("table", data.table?.let(::budgetTable))
+            .fields
+
+    /** Field rules of a receipt: a label only for extra incomes, a date whenever the amount is recorded. */
+    fun budgetReceipt(data: BudgetReceiptData): Map<String, FieldErrorCode> {
+        val errors = ValidationErrors().add("month", budgetYearMonth(data.month))
+        val label = data.label
+        errors.add(
+            "label",
+            if (label != null &&
+                data.incomeId != null
+            ) {
+                FieldErrorCode.INVALID_FORMAT
+            } else {
+                optionalText(label, BUDGET_LABEL_MAX)
+            },
+        )
+        val amount = data.amount
+        if (amount != null) {
+            if (amount !in 0..BUDGET_AMOUNT_MAX) errors.add("amount", FieldErrorCode.OUT_OF_RANGE)
+            if (data.date == null) errors.add("date", FieldErrorCode.REQUIRED)
+        }
+        return errors.fields
+    }
+
+    /** Field rules of a tick: a set amount needs `fundedBy` and `fundedAt`; the server checks `fundedAt` against now. */
+    fun budgetFunding(data: BudgetFundingData): Map<String, FieldErrorCode> {
+        val errors = ValidationErrors().add("month", budgetYearMonth(data.month))
+        val amount = data.amount
+        if (amount != null) {
+            if (amount !in 0..BUDGET_AMOUNT_MAX) errors.add("amount", FieldErrorCode.OUT_OF_RANGE)
+            if (data.fundedBy == null) errors.add("fundedBy", FieldErrorCode.REQUIRED)
+            if (data.fundedAt == null) errors.add("fundedAt", FieldErrorCode.REQUIRED)
+        }
+        return errors.fields
+    }
+
+    private fun budgetYearMonth(value: YearMonth): FieldErrorCode? =
+        if (value.year in BUDGET_MIN_YEAR..BUDGET_MAX_YEAR) null else FieldErrorCode.OUT_OF_RANGE
+
+    private fun collapse(text: String): String = text.trim().replace(whitespace, " ")
 
     fun deviceName(value: String): FieldErrorCode? = requiredText(value, DEVICE_NAME_MAX)
 
