@@ -36,6 +36,7 @@ import app.lares.client.resources.bud_empty_title
 import app.lares.client.resources.bud_incomes
 import app.lares.client.resources.bud_months_all
 import app.lares.client.resources.bud_next_month
+import app.lares.client.resources.bud_plan
 import app.lares.client.resources.bud_prev_month
 import app.lares.client.resources.ic_account_balance_wallet
 import app.lares.client.resources.ic_arrow_back
@@ -48,6 +49,7 @@ import app.lares.client.ui.components.AppPage
 import app.lares.client.ui.components.DetailTopBar
 import app.lares.client.ui.components.EmptyState
 import app.lares.client.ui.components.FullScreenLoading
+import app.lares.client.ui.components.LinkButton
 import app.lares.client.ui.components.ListDivider
 import app.lares.client.ui.components.ListGroup
 import app.lares.client.ui.components.PrimaryButton
@@ -60,7 +62,7 @@ import org.koin.compose.viewmodel.koinViewModel
 
 /**
  * «Ещё › Бюджет» (plan M5-04). The month shown is kept in saved state, so it survives process death; [initialMonth]
- * comes from «Все месяцы». [onCreatePlan] is null until the plan editor exists (M5-05).
+ * comes from «Все месяцы». «План» and «Создать план» open the plan editor (M5-05).
  */
 @Composable
 fun BudgetRoute(
@@ -68,7 +70,7 @@ fun BudgetRoute(
     onBack: () -> Unit,
     onIncome: (YearMonth, String) -> Unit,
     onMonths: () -> Unit,
-    onCreatePlan: (() -> Unit)? = null,
+    onPlan: () -> Unit,
     viewModel: BudgetViewModel = koinViewModel(),
 ) {
     var saved by rememberSaveable { mutableStateOf(initialMonth?.toString()) }
@@ -82,7 +84,7 @@ fun BudgetRoute(
             onNext = { state.next?.let { saved = it.toString() } },
             onMonths = onMonths,
             onIncome = { id -> state.month?.let { onIncome(it, id) } },
-            onCreatePlan = onCreatePlan,
+            onPlan = onPlan,
         ),
     )
 }
@@ -93,7 +95,7 @@ data class BudgetActions(
     val onNext: () -> Unit = {},
     val onMonths: () -> Unit = {},
     val onIncome: (String) -> Unit = {},
-    val onCreatePlan: (() -> Unit)? = null,
+    val onPlan: () -> Unit = {},
 )
 
 /** The month: hero, «Поступления», «Категории»; the empty state without a plan. */
@@ -117,8 +119,9 @@ fun BudgetScreen(
                 title = stringResource(Res.string.bud_empty_title),
                 modifier = Modifier.testTag("budget_empty"),
             )
-            val create = actions.onCreatePlan
-            if (state.canManage && create != null) PrimaryButton(stringResource(Res.string.bud_create_plan), create)
+            if (state.canManage) {
+                PrimaryButton(stringResource(Res.string.bud_create_plan), actions.onPlan, modifier = Modifier.testTag("budget_create_plan"))
+            }
         }
         return
     }
@@ -178,6 +181,7 @@ private fun MonthTopBar(
         IconButton(onClick = actions.onNext, enabled = state.next != null) {
             AppIcon(Res.drawable.ic_chevron_right, stringResource(Res.string.bud_next_month))
         }
+        LinkButton(stringResource(Res.string.bud_plan), actions.onPlan, modifier = Modifier.testTag("budget_plan"))
     }
 }
 

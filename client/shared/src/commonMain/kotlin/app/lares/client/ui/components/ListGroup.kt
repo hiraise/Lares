@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.lares.client.resources.Res
@@ -69,6 +70,8 @@ fun ListRow(
     onClick: (() -> Unit)? = null,
     leading: @Composable (() -> Unit)? = null,
     trailing: @Composable (() -> Unit)? = null,
+    /** Long titles end with «…» after this many lines (user-typed names). */
+    titleMaxLines: Int = Int.MAX_VALUE,
 ) {
     val clickable = if (onClick != null) Modifier.clickable(enabled = enabled, onClick = onClick) else Modifier
     Row(
@@ -83,7 +86,13 @@ fun ListRow(
     ) {
         if (icon != null) AppIcon(icon, contentDescription = null, tint = iconTint) else leading?.invoke()
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
-            Text(title, style = MaterialTheme.typography.bodyMedium, color = titleColor)
+            Text(
+                title,
+                style = MaterialTheme.typography.bodyMedium,
+                color = titleColor,
+                maxLines = titleMaxLines,
+                overflow = TextOverflow.Ellipsis,
+            )
             if (supporting != null) {
                 Text(supporting, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }

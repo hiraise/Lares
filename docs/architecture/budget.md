@@ -364,9 +364,34 @@ a thin space and «₽» (`1 234 ₽`), no kopecks. Look per [visual style](../d
   is picked; an emptied amount clears the receipt. Categories are split into «Перевести» (unticked, table order) and
   «Переведено» (ticked, with «Отметка: имя»). A category whose transfer differs from the planned cell shows
   «20 000 из 27 000». Extra incomes are listed on the month but have no page until M5-06.
-- «Создать план», «План» and the month menu are hidden until M5-05 / M5-06 (`onCreatePlan` is null); the empty state
-  shows a hint instead.
+- «Создать план», «План» and the month menu were hidden until M5-05 / M5-06; M5-05 added «План» and «Создать план».
 - The «изменено» dot uses the `warning` color; category bars past 100 % use `error` on `errorContainer`.
+
+### Implementation notes (M5-05)
+
+- `ui/budget/plan/`: `PlanViewModel` (draft table, `TableCheck` on every change, sheets, save), `PlanLogic` (incomes by
+  day, reorder, texts), `PlanScreen` (summary bar, segmented tabs, rows, save dialog), `PlanSheets` (category and
+  income sheets), `PlanTable` (grid), `PlanHistoryPage` with `PlanHistoryViewModel`. Routes `BudgetPlanDestination
+  (version?)` and `BudgetPlanHistoryDestination`; «План» is a text action in the month top bar for everyone with
+  `budget.view` (read-only without `budget.manage`), «Создать план» in the empty state.
+- The draft is the whole `BudgetTable` held by the view model; nothing is written until «Сохранить», which is enabled
+  only when the draft differs from where it started. `PlanArgs.month` (month mode) loads the month's table and writes
+  it with `editMonth` without the dialog; it is not routed until M5-06.
+- Sheets edit a form and apply it to the draft on «Готово»; dismissing a sheet drops the form (a new income is already
+  in the draft with day 1 and amount 0). Names are collapsed like the normalizer; an empty or duplicate name
+  (case-insensitive) is refused in the sheet. An emptied amount field is 0; empty or 0 cells are no cells.
+- «Удалить» is shown once `isCategoryUsed` / `isIncomeUsed` answer false for the default save month (the first save
+  option): next month, or the current month for the very first plan. The draft's new rows are never used.
+- Reorder: no list in the app has drag-to-reorder, so each category row has a menu with «Выше» / «Ниже», moving within
+  its group (used or unused). Unused categories sit in a collapsed «Не используются» group.
+- Summary bar: «Доход 346 000 · Категории 346 000» with a check when every row, column and the totals add up; else
+  «не сходится на N» (|income − categories|, when they differ) and «Есть строки или столбцы, которые не сходятся».
+- Category names in the list end with «…» after two lines (`ListRow(titleMaxLines)`); the table keeps one line.
+- Table: sticky name column (128 dp), then «Сумма», the incomes by day («5-е» over the expected amount) and «Итого»;
+  a totals row; bad row and column totals in `warning`; the numbers scroll sideways.
+- Known limit: when a version from next month exists and the user saves the draft from the current month, the next
+  month's version stays as it was (the draft started from it, so usually nothing is lost; the edits made now apply
+  only to the current month).
 
 ## Invariants to test
 

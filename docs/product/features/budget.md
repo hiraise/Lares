@@ -45,18 +45,23 @@ the 20th, 12 000 on the 25th; about twenty categories.
 
 ### Plan
 
-- **BUD-001** `MVP` `doing` — Categories: name, monthly amount, order in the table. A category can be unused (kept for
+- **BUD-001** `MVP` `done` — Categories: name, monthly amount, order in the table. A category can be unused (kept for
   history and to use again, not in new months) or deleted when no month uses it. Categories can be reordered.
   *Contract: categories with `unused`, name and amount rules, normalizer (M5-01).*
-- **BUD-002** `MVP` `doing` — Incomes of the plan: day of the month (1–31; on shorter months the last day) and
+  *UI: «План › Категории» with the category sheet, «Не использовать», «Удалить» only when nothing uses it, «Выше» /
+  «Ниже» in the row menu (no drag) (M5-05).*
+- **BUD-002** `MVP` `done` — Incomes of the plan: day of the month (1–31; on shorter months the last day) and
   expected amount. No source or person is recorded (customer: the date is enough). Two incomes may share a day.
   *Contract: incomes by day, `BudgetMath.incomeDate` clamps to the month's last day (M5-01).*
-- **BUD-003** `MVP` `doing` — Plan cells: for each category and income, the amount of that income that goes to the
+  *UI: «План › Поступления» by day with the income sheet (day, expected amount) (M5-05).*
+- **BUD-003** `MVP` `done` — Plan cells: for each category and income, the amount of that income that goes to the
   category; empty means nothing. The table shows row sums against the category's monthly amount, column sums against
   the income's expected amount, the total expected income and the total of the categories; a row or column that does
   not add up is highlighted, saving is still allowed (customer: «давай посмотрим как получится»).
   *Contract: cells, table validation, `BudgetMath.check` (row and column sums, bad rows and columns) (M5-01).*
-- **BUD-004** `MVP` `doing` — The plan is versioned. Saving a change asks from which month it applies: the next month
+  *UI: per-income fields with «Распределено X из Y», the summary bar «Доход · Категории» with «не сходится на N»,
+  warning icons, the read-only «Таблица» like the notebook (M5-05).*
+- **BUD-004** `MVP` `done` — The plan is versioned. Saving a change asks from which month it applies: the next month
   (default) or the current one. Earlier months keep the version they were made from; the plan's history lists the
   versions with their date and author. ASSUMPTION: applying to the current month replaces its plan cells but keeps
   what was already entered or ticked.
@@ -64,6 +69,8 @@ the 20th, 12 000 on the 25th; about twenty categories.
   *Server: versions stored and synced; versions of past months read-only, with a day of grace after midnight (M5-02).*
   *Client core: versions kept offline; saving from the current month returns its month copy to the plan, keeping
   amounts and ticks; past versions refused on the phone too; history newest first (M5-03).*
+  *UI: the plan is edited as a local draft; «Сохранить» asks «С января» / «С декабря (текущий месяц)» with the warning
+  about month changes; «История плана» opens each version read-only (M5-05).*
 
 ### Month
 

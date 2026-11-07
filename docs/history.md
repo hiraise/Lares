@@ -484,3 +484,11 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   waits for M5-05). One amount formatter (U+202F groups, «₽»). 15 new tests (format, hero precedence, screens,
   view models); emulator walkthrough of spec scenarios 2, 3, 6 in light and dark without bugs (category amount
   alignment and the «Все месяцы» line fixed after it).
+- 2026-11-07 M5-05 Budget plan editor: `ui/budget/plan/` — the plan as a local draft with live `TableCheck`,
+  «Категории | Поступления | Таблица», category sheet (name, monthly amount, per-income fields, «Распределено X из Y»,
+  «Не использовать», «Удалить» only when `isCategoryUsed` is false), «Выше» / «Ниже» row menu (no drag-to-reorder in
+  the app), income sheet (day, expected amount), the read-only grid with a sticky name column, the summary bar with
+  «не сходится на N», the save dialog (next month by default, the current month for the first plan, warning about
+  month-only changes), «История плана» and read-only versions; «План» and «Создать план» on the Budget screen.
+  13 new tests (6 view model, 7 screen including building through the sheets); emulator walkthrough of scenarios 1
+  and 5, the table with 12 categories, light and dark, without bugs (long category names now end with «…»).

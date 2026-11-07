@@ -5,13 +5,14 @@ Updated: 2026-11-07
 ## Phase
 
 **M0–M4 implemented and accepted by the customer (2026-11-07): foundation, tasks, shopping lists, calendar, location.
-M5 Budget in progress: M5-01 (contract), M5-02 (server), M5-03 (client core), M5-04 (month UI) done; next M5-05.**
+M5 Budget in progress: M5-01 (contract), M5-02 (server), M5-03 (client core), M5-04 (month UI), M5-05 (plan editor)
+done; next M5-06.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
 
 [M5 Budget](product/roadmap.md#m5-budget): [spec](product/features/budget.md) approved 2026-11-07,
-[design](architecture/budget.md), ADR-0032, [M5 plans](plans/README.md#m5-plans). Done: M5-01…M5-04. Next: M5-05.
+[design](architecture/budget.md), ADR-0032, [M5 plans](plans/README.md#m5-plans). Done: M5-01…M5-05. Next: M5-06.
 M0–M4 accepted 2026-11-07.
 
 **Active release branch: `release/0.6.0`** (M5 Budget). Commit approved work here; `main` is protected
@@ -20,6 +21,10 @@ M0–M4 accepted 2026-11-07.
 
 ## Last completed
 
+- 2026-11-07 M5-05 Budget plan editor: «Бюджет › План» with categories (sheet with per-income amounts, «Не
+  использовать», «Удалить» only when unused anywhere, «Выше» / «Ниже»), incomes by day, the read-only table like the
+  notebook, summary «Доход · Категории» with «не сходится на N»; saving asks «С января» / «С декабря (текущий месяц)»;
+  «История плана» opens versions read-only. 13 new tests; emulator walkthrough without bugs.
 - 2026-11-07 M5-04 Budget month UI: «Ещё › Бюджет» shows the current month (free money or shortfall, incomes,
   categories), «Все месяцы», the income page to record what came in and tick transfers («Перевели» for another
   amount, «Отметить все»); read-only without checkboxes; empty state without a plan. 15 new tests, emulator walkthrough
@@ -212,7 +217,7 @@ M0–M4 accepted 2026-11-07.
 
 1. Release v0.5.2 (battery saving, ADR-0030) when the customer approves; check a day of battery and home tracks on a
    real phone.
-2. M5 Budget: execute plans [M5-05…M5-06](plans/README.md#m5-plans) in order (`/plan-run M5-05`).
+2. M5 Budget: execute plan [M5-06](plans/README.md#m5-plans) (`/plan-run M5-06`).
 3. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
 
 ## Plan progress

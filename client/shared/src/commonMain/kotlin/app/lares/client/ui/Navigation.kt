@@ -19,6 +19,9 @@ import app.lares.client.ui.budget.BudgetRoute
 import app.lares.client.ui.budget.IncomeArgs
 import app.lares.client.ui.budget.IncomeRoute
 import app.lares.client.ui.budget.MonthsRoute
+import app.lares.client.ui.budget.plan.PlanArgs
+import app.lares.client.ui.budget.plan.PlanHistoryRoute
+import app.lares.client.ui.budget.plan.PlanRoute
 import app.lares.client.ui.calendar.EventEditorArgs
 import app.lares.client.ui.calendar.EventEditorRoute
 import app.lares.client.ui.calendar.EventRoute
@@ -171,6 +174,16 @@ data class BudgetIncomeDestination(
 /** «Все месяцы» of the budget (M5-04). */
 @Serializable
 data object BudgetMonthsDestination
+
+/** The budget plan (M5-05); [version] is an ISO year-month of a version shown read-only, null = edit the plan. */
+@Serializable
+data class BudgetPlanDestination(
+    val version: String? = null,
+)
+
+/** «История плана» (M5-05). */
+@Serializable
+data object BudgetPlanHistoryDestination
 
 @Serializable
 data object AboutDestination
@@ -456,6 +469,20 @@ fun MainNavHost() {
                 onBack = { navController.popBackStack() },
                 onIncome = { month, id -> navController.navigate(BudgetIncomeDestination(month.toString(), id)) },
                 onMonths = { navController.navigate(BudgetMonthsDestination) },
+                onPlan = { navController.navigate(BudgetPlanDestination()) },
+            )
+        }
+        composable<BudgetPlanDestination> { entry ->
+            PlanRoute(
+                PlanArgs(version = entry.toRoute<BudgetPlanDestination>().version?.let(YearMonth::parse)),
+                onBack = { navController.popBackStack() },
+                onHistory = { navController.navigate(BudgetPlanHistoryDestination) },
+            )
+        }
+        composable<BudgetPlanHistoryDestination> {
+            PlanHistoryRoute(
+                onBack = { navController.popBackStack() },
+                onVersion = { navController.navigate(BudgetPlanDestination(it.toString())) },
             )
         }
         composable<BudgetIncomeDestination> { entry ->
