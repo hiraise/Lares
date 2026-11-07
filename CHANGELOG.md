@@ -5,6 +5,8 @@ Versioning: [SemVer](https://semver.org/) from the first release.
 
 ## [Unreleased]
 
+## [0.5.2] - 2026-11-07
+
 ### Changed
 
 - Location sharing uses less battery: on foot the phone checks its position every minute instead of every 10 seconds,
