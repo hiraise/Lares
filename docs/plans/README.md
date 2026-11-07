@@ -161,7 +161,7 @@ customer and approved on 2026-11-07 (Q-031).
 | --- | --- | --- | --- |
 | [M5-01](M5/01-budget-contract.md) | Budget contract: data, derived ids, rules, validators, BudgetMath | M4 | done |
 | [M5-02](M5/02-budget-server-sync.md) | Budget on the server: tables, sync handlers, permissions | M5-01 | done |
-| [M5-03](M5/03-budget-client-data.md) | Budget in the client core: tables, adapters, views, repository, writer | M5-02 | ready |
+| [M5-03](M5/03-budget-client-data.md) | Budget in the client core: tables, adapters, views, repository, writer | M5-02 | done |
 | [M5-04](M5/04-budget-month-ui.md) | Budget UI: the month screen, the income page, all months | M5-03 | ready |
 | [M5-05](M5/05-budget-plan-editor-ui.md) | Budget UI: the plan editor, the table, versions and history | M5-04 | ready |
 | [M5-06](M5/06-budget-month-edits-today-manual.md) | Month-only changes, extra incomes, Today card, manual, M5 wrap-up | M5-05 | ready |

@@ -12,6 +12,8 @@ import app.lares.client.data.PersonsRepository
 import app.lares.client.data.PersonsWriter
 import app.lares.client.data.TagsRepository
 import app.lares.client.data.TagsWriter
+import app.lares.client.data.budget.BudgetRepository
+import app.lares.client.data.budget.BudgetWriter
 import app.lares.client.data.calendar.CalendarReminderPlanner
 import app.lares.client.data.calendar.CalendarReminderTexts
 import app.lares.client.data.calendar.CalendarRepository
@@ -103,6 +105,8 @@ private fun coreModule() =
         single { CalendarReminderPlanner(get(), get(), get(), get(), get(), clock()) }
         single { PlacesRepository(get(), get()) }
         single { PlacesWriter(get(), get(), clock()) }
+        single { BudgetRepository(get(), get(), get(), get(), clock()) }
+        single { BudgetWriter(get(), get(), clock()) }
         // Overridden by the app UI with resource texts (uiModule).
         single<LocationTextResources> { EnglishLocationTexts() }
         single { LocationTexts(get()) }

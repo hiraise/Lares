@@ -292,6 +292,23 @@ the household zone, so the user sees the error before sync.
 | `fund(month, incomeId, categoryId, amount)` / `unfund(month, incomeId, categoryId)` | the derived funding row; unfund = amount null |
 | `fundAll(month, incomeId)` | `fund` with the planned amount for every unticked row of the income (one mutation each) |
 
+### Implementation notes (M5-03)
+
+- `budget_plan` also stores `updated_at` (epoch ms; the version's `updatedAt`, needed by the history); `funded_at` is
+  epoch ms too. The writer truncates its times to milliseconds so the local row and the shadow agree.
+- Adapters live in `data/budget/BudgetAdapters.kt` (like the location adapters), registered in
+  `defaultEntityAdapters`. Plan and month row ids are derived from the logged-in member's household id. The plan's
+  past-month check uses the server's rule including the day of grace (month of `now − 1 day` in the household zone).
+- `LocalWriter` writes one row per call, so `savePlan` from the current month writes the version first, then the
+  month row (`table` null); the integration test of this case passes.
+- The writer sends every field of a row with nulls as JSON null (a cleared amount or month table must travel).
+  `editMonth` compares normalized tables and skips the write when there is no month copy and the table equals the
+  plan; `resetMonth`, `clearIncome` and `unfund` write nothing when there is nothing to clear.
+- `BudgetToday.notFunded` counts categories (not cells) with an unticked planned cell of a recorded income;
+  `nextIncome` is the first unrecorded planned income dated today or later, else the earliest unrecorded one (M5-06).
+- `isCategoryUsed` / `isIncomeUsed` count a funding row also when it is unticked.
+- Integration tests: `Snapshot` has the four budget maps; `shared` leaves them out, since Kids hold none.
+
 ## UI (M5-04…M5-06)
 
 Budget is the «Бюджет» tile in «Ещё» (FND-064), shown with `budget.view`. Strings in en and ru; amounts formatted with

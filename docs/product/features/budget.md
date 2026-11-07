@@ -62,39 +62,52 @@ the 20th, 12 000 on the 25th; about twenty categories.
   what was already entered or ticked.
   *Contract: plan versions with derived ids, `BudgetMath.planFor` / `firstMonth` (M5-01).*
   *Server: versions stored and synced; versions of past months read-only, with a day of grace after midnight (M5-02).*
+  *Client core: versions kept offline; saving from the current month returns its month copy to the plan, keeping
+  amounts and ticks; past versions refused on the phone too; history newest first (M5-03).*
 
 ### Month
 
-- **BUD-010** `MVP` `todo` — A month is opened from the plan version in force (automatically on its first day, or
+- **BUD-010** `MVP` `doing` — A month is opened from the plan version in force (automatically on its first day, or
   when someone opens it earlier). Past months stay viewable; a month is never deleted.
+  *Client core: months listed from the first version to the current one, nothing written to open a month (M5-03).*
 - **BUD-011** `MVP` `doing` — Actual income: for each income of the month, the amount and date it actually came; the
   date may be earlier or later than planned. ASSUMPTION: an extra income not in the plan (a bonus) can be added to a
   month; it has no cells and counts as free money.
   *Contract: receipts of planned and extra incomes, validation (M5-01).*
   *Server: receipts stored and synced; only extra incomes can be deleted (M5-02).*
+  *Client core: record / clear an income, add, change and delete extra incomes offline; two phones recording one
+  income write one row (M5-03).*
 - **BUD-012** `MVP` `doing` — Funding: in each income's column the member ticks the categories transferred from it.
   The transferred amount is the planned one and can be changed (less or more). The category row shows funded of its
   monthly amount.
   *Contract: ticks with derived ids, `fundedBy` written only as oneself (M5-01).*
   *Server: ticks stored and synced; two members ticking the same cell write one row, the later amount wins (M5-02).*
+  *Client core: tick, untick, «Отметить все»; the income view with who ticked and changed cells; ticks of different
+  categories on two phones offline both survive (M5-03).*
 - **BUD-013** `MVP` `doing` — Changing a month without changing the plan: a cell's planned amount, a category added
   or left out for this month only. Every difference from the plan is marked in the month (customer: «должно быть
   отражено»).
   *Contract: month copy of the table, `BudgetMath.tableFor` / `differences` (M5-01).*
   *Server: month copies stored and synced (M5-02).*
+  *Client core: month copy written only when it differs from the plan; reset to the plan (M5-03).*
 - **BUD-014** `MVP` `doing` — Totals of the month and of each income: expected, actual, transferred; shortfall
   (actual below expected) and free money (actual minus transferred). Free money is only shown; it is not carried to
   the next month or assigned anywhere (customer, 2026-11-07).
   *Contract: `BudgetMath.summary` — expected, actual, transferred, shortfall, free money (M5-01).*
+  *Client core: totals of every month and income on the phone (M5-03).*
 - **BUD-015** `MVP` `doing` — Works offline and syncs like the other modules (FND-040).
   *Server: four sync types, `budget.view` reads and `budget.manage` writes (M5-02).*
+  *Client core: four local tables and adapters with the server's checks; members without `budget.view` hold no
+  budget rows (M5-03).*
 
 ### Overview
 
-- **BUD-020** `MVP` `todo` — Budget opens on the current month: the next expected income, what is not yet funded,
+- **BUD-020** `MVP` `doing` — Budget opens on the current month: the next expected income, what is not yet funded,
   the month's shortfall or free money. The list of months shows for each its expected, actual and free money.
-- **BUD-021** `MVP` `todo` — «Today» shows a budget card to members with `budget.view` (FND-063). ASSUMPTION: the next
+  *Client core: views of the current month and of all months (M5-03).*
+- **BUD-021** `MVP` `doing` — «Today» shows a budget card to members with `budget.view` (FND-063). ASSUMPTION: the next
   expected income and how many categories of the month are not funded yet.
+  *Client core: the next unrecorded income and the categories of recorded incomes not ticked yet (M5-03).*
 - **BUD-022** `later` `todo` — Analytics over months (plan vs. actual, totals per category over a year, months with a
   shortfall). The customer will say which (Q-033).
 

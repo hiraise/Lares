@@ -12,6 +12,8 @@ import app.lares.client.data.PersonsRepository
 import app.lares.client.data.PersonsWriter
 import app.lares.client.data.TagsRepository
 import app.lares.client.data.TagsWriter
+import app.lares.client.data.budget.BudgetRepository
+import app.lares.client.data.budget.BudgetWriter
 import app.lares.client.data.calendar.CalendarRepository
 import app.lares.client.data.calendar.CalendarWriter
 import app.lares.client.data.location.LocationRepository
@@ -37,6 +39,10 @@ import app.lares.client.sync.SyncEngine
 import app.lares.contract.api.LaresJson
 import app.lares.contract.api.admin.CreateMemberRequest
 import app.lares.contract.api.auth.DeviceInfo
+import app.lares.contract.entities.BudgetFundingData
+import app.lares.contract.entities.BudgetMonthData
+import app.lares.contract.entities.BudgetPlanData
+import app.lares.contract.entities.BudgetReceiptData
 import app.lares.contract.entities.ChecklistItemData
 import app.lares.contract.entities.EventData
 import app.lares.contract.entities.EventOccurrenceData
@@ -184,6 +190,8 @@ class TestClient(
     val shoppingWriter: ShoppingWriter = koin.get()
     val calendar: CalendarRepository = koin.get()
     val calendarWriter: CalendarWriter = koin.get()
+    val budget: BudgetRepository = koin.get()
+    val budgetWriter: BudgetWriter = koin.get()
     val places: PlacesRepository = koin.get()
     val placesWriter: PlacesWriter = koin.get()
     val location: LocationRepository = koin.get()
@@ -232,6 +240,10 @@ class TestClient(
             eventReminders = typedRows(EntityTypes.EVENT_REMINDER) { event_reminderQueries.selectAll().executeAsList().map { it.id } },
             places = typedRows(EntityTypes.PLACE) { placeQueries.selectAll().executeAsList().map { it.id } },
             placeAlerts = typedRows(EntityTypes.PLACE_ALERT) { place_alertQueries.selectAll().executeAsList().map { it.id } },
+            budgetPlans = typedRows(EntityTypes.BUDGET_PLAN) { budget_planQueries.selectAll().executeAsList().map { it.id } },
+            budgetMonths = typedRows(EntityTypes.BUDGET_MONTH) { budget_monthQueries.selectAll().executeAsList().map { it.id } },
+            budgetReceipts = typedRows(EntityTypes.BUDGET_RECEIPT) { budget_receiptQueries.selectAll().executeAsList().map { it.id } },
+            budgetFundings = typedRows(EntityTypes.BUDGET_FUNDING) { budget_fundingQueries.selectAll().executeAsList().map { it.id } },
         )
 
     @Suppress("UNCHECKED_CAST")
@@ -276,6 +288,10 @@ class TestClient(
             eventReminders = of(EntityTypes.EVENT_REMINDER, EventReminderData.serializer()),
             places = of(EntityTypes.PLACE, PlaceData.serializer()),
             placeAlerts = of(EntityTypes.PLACE_ALERT, PlaceAlertData.serializer()),
+            budgetPlans = of(EntityTypes.BUDGET_PLAN, BudgetPlanData.serializer()),
+            budgetMonths = of(EntityTypes.BUDGET_MONTH, BudgetMonthData.serializer()),
+            budgetReceipts = of(EntityTypes.BUDGET_RECEIPT, BudgetReceiptData.serializer()),
+            budgetFundings = of(EntityTypes.BUDGET_FUNDING, BudgetFundingData.serializer()),
         )
     }
 
@@ -306,16 +322,33 @@ data class Snapshot(
     val places: Map<String, PlaceData>,
     /** Only the member's own rows (ADR-0024). */
     val placeAlerts: Map<String, PlaceAlertData>,
+    /** The budget only with `budget.view`, which Kids lack (ADR-0032). */
+    val budgetPlans: Map<String, BudgetPlanData>,
+    val budgetMonths: Map<String, BudgetMonthData>,
+    val budgetReceipts: Map<String, BudgetReceiptData>,
+    val budgetFundings: Map<String, BudgetFundingData>,
 ) {
     val isEmpty: Boolean
         get() =
             households.isEmpty() && members.isEmpty() && groups.isEmpty() && persons.isEmpty() && tags.isEmpty() &&
                 tasks.isEmpty() && checklistItems.isEmpty() && taskCompletions.isEmpty() && shoppingLists.isEmpty() &&
                 shoppingItems.isEmpty() && events.isEmpty() && eventOccurrences.isEmpty() && eventReminders.isEmpty() &&
-                places.isEmpty() && placeAlerts.isEmpty()
+                places.isEmpty() && placeAlerts.isEmpty() && !hasBudget
 
-    /** Without the rows that only their member sees. */
-    val shared: Snapshot get() = copy(eventReminders = emptyMap(), placeAlerts = emptyMap())
+    val hasBudget: Boolean
+        get() = budgetPlans.isNotEmpty() || budgetMonths.isNotEmpty() || budgetReceipts.isNotEmpty() || budgetFundings.isNotEmpty()
+
+    /** Without the rows that only their member sees, and without the budget, which only some members see. */
+    val shared: Snapshot
+        get() =
+            copy(
+                eventReminders = emptyMap(),
+                placeAlerts = emptyMap(),
+                budgetPlans = emptyMap(),
+                budgetMonths = emptyMap(),
+                budgetReceipts = emptyMap(),
+                budgetFundings = emptyMap(),
+            )
 }
 
 /**

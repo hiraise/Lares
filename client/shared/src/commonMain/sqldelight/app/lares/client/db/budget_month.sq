@@ -1,0 +1,25 @@
+-- Month-only changes (BUD-013): a full copy of the month's table as JSON, or NULL when the month follows its plan
+-- version. The id is derived from household and month; rows are never deleted.
+CREATE TABLE budget_month (
+    id TEXT NOT NULL PRIMARY KEY,
+    month TEXT NOT NULL,
+    month_table TEXT,
+    updated_by TEXT NOT NULL
+);
+
+CREATE INDEX budget_month_month ON budget_month (month);
+
+selectAll:
+SELECT * FROM budget_month ORDER BY month;
+
+selectById:
+SELECT * FROM budget_month WHERE id = ?;
+
+upsert:
+INSERT OR REPLACE INTO budget_month (id, month, month_table, updated_by) VALUES (?, ?, ?, ?);
+
+deleteById:
+DELETE FROM budget_month WHERE id = ?;
+
+deleteAll:
+DELETE FROM budget_month;

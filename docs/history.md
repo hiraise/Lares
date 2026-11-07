@@ -467,3 +467,11 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   (checked in `validate`, so an unchanged upsert of one is rejected too; a day of grace in the household zone),
   `fundedAt` / plan `updatedAt` at most a day ahead; housekeeping purges receipt tombstones. Fixtures
   `BudgetFixtures.kt`, `seed.py budget` (the notebook plan from this month). 8 new server tests.
+- 2026-11-07 M5-03 Budget in the client core: local tables `budget_plan`, `budget_month`, `budget_receipt`,
+  `budget_funding` (migration 6, `DATA_SCHEMA_VERSION = 6`), four adapters with the server's checks (rights, derived ids,
+  immutable fields, writer fields, planned receipts not deletable, past versions with the day of grace, times ahead),
+  `BudgetViews` (months, month, income, plan, history, today), `BudgetRepository` with flows and the "used" queries for
+  category / income deletion, `BudgetWriter` (plan, month copy, reset, incomes, extra incomes, ticks, «Отметить все»).
+  Times truncated to milliseconds so local rows match the shadow. 23 unit tests (adapters, views on the notebook,
+  writer, migration) and 6 multi-device tests (`BudgetSyncTest`: different / same tick offline, same income, plan from next month
+  while ticking, plan from this month resets the copy, no rows for Kids).

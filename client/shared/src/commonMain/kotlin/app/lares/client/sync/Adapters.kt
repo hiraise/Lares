@@ -1,5 +1,9 @@
 package app.lares.client.sync
 
+import app.lares.client.data.budget.BudgetFundingAdapter
+import app.lares.client.data.budget.BudgetMonthAdapter
+import app.lares.client.data.budget.BudgetPlanAdapter
+import app.lares.client.data.budget.BudgetReceiptAdapter
 import app.lares.client.data.location.PlaceAdapter
 import app.lares.client.data.location.PlaceAlertAdapter
 import app.lares.client.db.LaresDb
@@ -1011,5 +1015,9 @@ fun defaultEntityAdapters(clock: Clock) =
             EventReminderAdapter(),
             PlaceAdapter(),
             PlaceAlertAdapter(),
+            BudgetPlanAdapter(clock),
+            BudgetMonthAdapter(),
+            BudgetReceiptAdapter(),
+            BudgetFundingAdapter(clock),
         ),
     )

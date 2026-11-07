@@ -201,7 +201,8 @@ WebSocket `GET /api/v1/sync/events` (bearer token on the upgrade request).
 ## Client data model (SQLite)
 
 - **Typed tables** per entity type (`household`, `member`, `group_entity`, `person`, `tag`, `task`, `checklist_item`,
-  `task_completion`, `shopping_list`, `shopping_item`, `event`, `event_occurrence`, `event_reminder`) — what the UI
+  `task_completion`, `shopping_list`, `shopping_item`, `event`, `event_occurrence`, `event_reminder`, `place`,
+  `place_alert`, `budget_plan`, `budget_month`, `budget_receipt`, `budget_funding`) — what the UI
   queries. `event_reminder` holds only the member's own rows (ADR-0023), so convergence (invariant 8) compares it with
   the member's own pull.
 - `sync_shadow(type, id, seq, deleted, data, PK(type, id))` — last known server state as JSON.

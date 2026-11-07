@@ -1,0 +1,40 @@
+-- Schema 7 (M5-03): the budget (architecture/budget.md § Client); DATA_SCHEMA_VERSION 6 makes the next sync a full
+-- resync.
+
+CREATE TABLE budget_plan (
+    id TEXT NOT NULL PRIMARY KEY,
+    effective_from TEXT NOT NULL,
+    plan_table TEXT NOT NULL,
+    updated_by TEXT NOT NULL,
+    updated_at INTEGER NOT NULL
+);
+
+CREATE TABLE budget_month (
+    id TEXT NOT NULL PRIMARY KEY,
+    month TEXT NOT NULL,
+    month_table TEXT,
+    updated_by TEXT NOT NULL
+);
+CREATE INDEX budget_month_month ON budget_month (month);
+
+CREATE TABLE budget_receipt (
+    id TEXT NOT NULL PRIMARY KEY,
+    month TEXT NOT NULL,
+    income_id TEXT,
+    label TEXT,
+    amount INTEGER,
+    date TEXT,
+    updated_by TEXT NOT NULL
+);
+CREATE INDEX budget_receipt_month ON budget_receipt (month);
+
+CREATE TABLE budget_funding (
+    id TEXT NOT NULL PRIMARY KEY,
+    month TEXT NOT NULL,
+    income_id TEXT NOT NULL,
+    category_id TEXT NOT NULL,
+    amount INTEGER,
+    funded_by TEXT,
+    funded_at INTEGER
+);
+CREATE INDEX budget_funding_month ON budget_funding (month);
