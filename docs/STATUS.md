@@ -14,12 +14,15 @@ None in progress. [M5 Budget](product/roadmap.md#m5-budget): the [spec](product/
 the customer (Q-031) and approved on 2026-11-07; [design](architecture/budget.md), ADR-0032 and
 [M5 plans](plans/README.md#m5-plans) M5-01…M5-06 are ready. Next: M5-01. M0–M4 accepted 2026-11-07.
 
-**Active release branch: `release/0.5.2`** (battery saving, ADR-0030; the next milestone gets `release/0.6.0`). Commit approved work here; `main` is protected
-([release process](process/release.md), ADR-0020). Latest release: [v0.5.1](https://github.com/hiraise/Lares/releases/tag/v0.5.1)
-(M3, 2026-10-25).
+**Active release branch: `release/0.6.0`** (M5 Budget). Commit approved work here; `main` is protected
+([release process](process/release.md), ADR-0020). Latest release: [v0.5.2](https://github.com/hiraise/Lares/releases/tag/v0.5.2)
+(2026-11-07).
 
 ## Last completed
 
+- 2026-11-07 Release **v0.5.2**: battery saving while sharing location (ADR-0030), calmer tracking indoors, tags apart
+  from people (ADR-0031). Pull request #6. Next branch `release/0.6.0` for M5. Servers must be updated with the app
+  (an older server rejects the new tag colors).
 - 2026-11-07 Budget design and plans: four sync types (`budget_plan` versions by month, `budget_month` month-only
   copy, `budget_receipt`, `budget_funding`), derived ids, `BudgetMath` on the phone (ADR-0032); plans M5-01…M5-06.
   ADR-0031 corrected: an older server rejects the new tag colors.

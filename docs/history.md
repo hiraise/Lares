@@ -452,3 +452,5 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
 - 2026-11-07 M5 budget design ([architecture/budget.md](architecture/budget.md), ADR-0032): plan versions keyed by
   `effectiveFrom` month, month-only edits as a full table copy, receipts and fundings as upsert-only rows with derived
   ids (markers 0x21–0x24), sums and checks in shared `BudgetMath`; plans M5-01…M5-06 written.
+- 2026-11-07 Release **v0.5.2** (battery saving, indoor tracking, tag look and colors): pull request #6. Next branch
+  `release/0.6.0`.
