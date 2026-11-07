@@ -1,5 +1,5 @@
 ---
-status: approved  # customer, 2026-10-25 (Q-025…Q-029 answered the same day)
+status: implemented  # phones accepted by the customer, 2026-11-07; GPS trackers not scheduled
 milestone: M4 (phones, map, history, places); GPS trackers later
 updated: 2026-10-25
 ---

@@ -10,6 +10,7 @@ Answered questions stay in the "Answered" section for history.
 
 | Q | Topic | Question | Default |
 | --- | --- | --- | --- |
+| Q-031 | Budget concept (2026-11-07) | The customer will rework the budget (M5): which of the confirmed concepts (allocation rules, category deficits, inter-category loans, real debts) change, and how? | M5 is not planned until the customer describes the new concept. |
 | Q-030 | Battery vs. freshness while moving (2026-10-27) | Should a moving phone upload less often (every 2–3 min instead of 30 s), go «live» only while someone looks at the map or taps «Обновить», or send less at night? Each saves battery but makes a moving member's pin lag. | No change: positions every minute on foot (30 s in a vehicle), uploaded within 30 s; less only on low battery (ADR-0030). |
 
 ## Answered

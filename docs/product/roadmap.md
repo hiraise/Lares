@@ -1,6 +1,6 @@
 ---
 status: approved
-updated: 2026-10-24
+updated: 2026-11-07
 ---
 # Roadmap
 
@@ -9,12 +9,12 @@ Each milestone ends with a build the family can install (APK) and a short change
 
 | # | Milestone | Spec | State |
 | --- | --- | --- | --- |
-| M0 | Foundation | [foundation](features/foundation.md), [tags](features/tags.md) | implemented (M0-01…M0-11); customer acceptance pending |
-| M1 | Tasks | [tasks](features/tasks.md) | implemented (M1-01…M1-07); customer acceptance pending |
-| M2 | Shopping lists | [shopping](features/shopping.md) | implemented (M2-01…M2-06); customer acceptance pending |
-| M3 | Calendar | [calendar](features/calendar.md) | implemented (M3-01…M3-08); customer acceptance pending |
-| M4 | Location | [location](features/location.md) | not started |
-| M5 | Budget | [budget](features/budget.md) | not started |
+| M0 | Foundation | [foundation](features/foundation.md), [tags](features/tags.md) | implemented (M0-01…M0-11); accepted 2026-11-07 |
+| M1 | Tasks | [tasks](features/tasks.md) | implemented (M1-01…M1-07); accepted 2026-11-07 |
+| M2 | Shopping lists | [shopping](features/shopping.md) | implemented (M2-01…M2-06); accepted 2026-11-07 |
+| M3 | Calendar | [calendar](features/calendar.md) | implemented (M3-01…M3-08); accepted 2026-11-07 |
+| M4 | Location | [location](features/location.md) | implemented (M4-01…M4-11); accepted 2026-11-07 |
+| M5 | Budget | [budget](features/budget.md) | not started; the customer reworks the concept (Q-031) |
 | M5b | Files and photos | [files](features/files.md) | not started |
 | M6 | Public release | — | not started |
 | M7 | Web client | — | not started |

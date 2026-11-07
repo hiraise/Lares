@@ -1,5 +1,5 @@
 ---
-status: outline
+status: outline  # the customer will rework the concept (2026-11-07, Q-031); do not plan M5 until then
 milestone: M5
 updated: 2026-10-22
 ---
