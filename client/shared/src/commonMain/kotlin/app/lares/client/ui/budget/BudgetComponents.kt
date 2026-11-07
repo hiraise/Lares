@@ -161,14 +161,16 @@ fun ChangedDot(modifier: Modifier = Modifier) {
 }
 
 /**
- * One income of the month: «5 декабря · 162 000 ₽», its state, «Недобор …», «Переведено 7 из 12» with a bar, a check
- * when every planned row is ticked. Extra incomes have no progress.
+ * One income of the month: «5 декабря · 162 000 ₽» (with the «изменено» dot when the month changed it), its state,
+ * «Недобор …», «Переведено 7 из 12» with a bar, a check when every planned row is ticked. Extra incomes have no
+ * progress.
  */
 @Composable
 fun IncomeRow(
     income: IncomeSummary,
     today: LocalDate,
     modifier: Modifier = Modifier,
+    changed: Boolean = false,
     onClick: (() -> Unit)? = null,
 ) {
     val complete = income.plannedCount > 0 && income.fundedCount == income.plannedCount
@@ -182,7 +184,14 @@ fun IncomeRow(
         horizontalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(BudgetLogic.incomeTitle(income, today).text(), style = MaterialTheme.typography.bodyMedium.tabular())
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {
+                Text(
+                    BudgetLogic.incomeTitle(income, today).text(),
+                    style = MaterialTheme.typography.bodyMedium.tabular(),
+                    modifier = Modifier.weight(1f, fill = false),
+                )
+                if (changed) ChangedDot()
+            }
             val state = BudgetLogic.incomeState(income).text()
             val shortfall = BudgetLogic.incomeShortfall(income)?.text()
             Row(horizontalArrangement = Arrangement.spacedBy(Spacing.s)) {

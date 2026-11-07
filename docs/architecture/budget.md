@@ -352,7 +352,7 @@ a thin space and «₽» (`1 234 ₽`), no kopecks. Look per [visual style](../d
 ### Implementation notes (M5-04)
 
 - `ui/budget/`: `BudgetFormat` (the one amount format: digits grouped by U+202F, «−» for negatives, then a no-break
-  space and «₽»; input keeps up to 10 digits), `BudgetLogic` (hero precedence and all row texts as `UiText`),
+  space and «₽»; input keeps up to 9 digits since M5-06, so a typed amount always fits the 1 000 000 000 limit), `BudgetLogic` (hero precedence and all row texts as `UiText`),
   `BudgetViewModel` (screen and «Все месяцы»), `IncomeViewModel`, `BudgetScreen`, `IncomePage`, `BudgetComponents`.
 - Routes `BudgetDestination(month?)`, `BudgetIncomeDestination(month, incomeId)`, `BudgetMonthsDestination`. The month
   shown lives in the route's `rememberSaveable` (survives process death) and is passed to the view model; a month
@@ -392,6 +392,35 @@ a thin space and «₽» (`1 234 ₽`), no kopecks. Look per [visual style](../d
 - Known limit: when a version from next month exists and the user saves the draft from the current month, the next
   month's version stays as it was (the draft started from it, so usually nothing is lost; the edits made now apply
   only to the current month).
+
+### Implementation notes (M5-06)
+
+- Month mode is `PlanViewModel` with `PlanArgs.month`, routed as `BudgetPlanDestination(month)`: title «Только
+  декабрь» (string array `bud_months_only`), no history, «Сохранить» writes `editMonth` without the dialog.
+  `PlanUiState.differences` compares the draft with the plan of that month (`BudgetMath.differences`, null when
+  empty); `PlanLogic.categoryChanged` adds `removedCategories` (left out this month) to `BudgetLogic.categoryChanged`,
+  `PlanLogic.incomeChanged` marks added and changed incomes. The dot is on category and income rows, table name cells
+  and changed cells. «Удалить» in month mode only for ids the plan does not have and no receipt or tick of the month
+  uses (`monthLocked`); else «Не использовать» («Не попадёт только в этот месяц, план не изменится»).
+- `BudgetWriter.editMonth` compares tables up to the order of cells: the editor re-adds a category's cells at the end,
+  so a draft set back to the plan's amounts is written as null.
+- Budget screen: `BudgetUiState.monthChanged` = non-empty differences; the line under the hero opens month mode (plain
+  text without `budget.manage`); the ⋮ menu (`budget.manage`) has «Изменить этот месяц» and, when changed, «Вернуть как
+  в плане» with a confirmation. Planned incomes get the dot too.
+- Extra incomes: «Добавить поступление» (link under «Поступления», `budget.manage`) opens `ExtraIncomeSheet` (amount
+  first and required, optional name ≤ 60, date default today) and calls `addExtraIncome`. Their page is `IncomePage`
+  with `IncomeArgs(month, null, receiptId)` (`BudgetIncomeDestination(month, receiptId = …)`): «Название», «Сумма»,
+  «Дата» written like a receipt (an emptied amount is not written), no categories, «Удалить» with a confirmation; the
+  page closes after the delete. `IncomeViewModel.startEdit` checks the local editing flag (the state may lag one
+  update behind, which overwrote a typed label).
+- Leaving an income page with a field still focused writes what was typed (back handler while editing, the top-bar
+  arrow); the write runs `NonCancellable`, so it finishes after the view model is cleared. Amount fields keep 9 digits:
+  with 10 a typed amount (e.g. digits inserted before the prefilled amount) could exceed the limit and be refused while
+  the page was already closed. Known: the prefilled «Пришло» puts the cursor before the amount.
+- Today card: `TodayViewModel(…, budget: BudgetRepository?)` maps `BudgetViews.today` to `TodayBudgetUi`; `build`
+  drops it without `budget.view`; `TodayBudget` after «Семья сейчас» is one row (wallet icon, chevron) with
+  `BudgetLogic.todayLines`: the next income, else «Не переведено: N категорий», else «Всё распределено»; «Не
+  переведено» is the second line under an income. The card alone keeps Today out of its empty state.
 
 ## Invariants to test
 

@@ -58,6 +58,7 @@ import app.lares.client.resources.task_discard_confirm
 import app.lares.client.resources.task_discard_keep
 import app.lares.client.resources.task_discard_title
 import app.lares.client.ui.budget.BudgetFormat
+import app.lares.client.ui.budget.ChangedDot
 import app.lares.client.ui.common.text
 import app.lares.client.ui.components.AppIcon
 import app.lares.client.ui.components.AppPage
@@ -118,15 +119,17 @@ fun PlanRoute(
         CategorySheet(
             form,
             state.incomes,
-            CategorySheetActions(
-                onName = viewModel::onCategoryName,
-                onAmount = viewModel::onCategoryAmount,
-                onCell = viewModel::onCell,
-                onUnused = viewModel::onCategoryUnused,
-                onDone = viewModel::saveCategory,
-                onDelete = viewModel::deleteCategory,
-                onDismiss = viewModel::closeCategory,
-            ),
+            monthMode = state.month != null,
+            actions =
+                CategorySheetActions(
+                    onName = viewModel::onCategoryName,
+                    onAmount = viewModel::onCategoryAmount,
+                    onCell = viewModel::onCell,
+                    onUnused = viewModel::onCategoryUnused,
+                    onDone = viewModel::saveCategory,
+                    onDelete = viewModel::deleteCategory,
+                    onDismiss = viewModel::closeCategory,
+                ),
         )
     }
     state.incomeForm?.let { form ->
@@ -184,7 +187,13 @@ fun PlanScreen(
         return
     }
     val version = state.version
-    val title = if (version != null) PlanLogic.versionTitle(version).text() else stringResource(Res.string.bud_plan)
+    val month = state.month
+    val title =
+        when {
+            version != null -> PlanLogic.versionTitle(version).text()
+            month != null -> PlanLogic.monthOnlyTitle(month).text()
+            else -> stringResource(Res.string.bud_plan)
+        }
     AppPage(
         topBar = {
             DetailTopBar(title, actions.onBack) {
@@ -223,7 +232,7 @@ fun PlanScreen(
         when (state.tab) {
             PlanTab.CATEGORIES -> CategoriesTab(state, actions)
             PlanTab.INCOMES -> IncomesTab(state, actions)
-            PlanTab.TABLE -> PlanTable(state.table, state.check)
+            PlanTab.TABLE -> PlanTable(state.table, state.check, state.differences)
         }
     }
 }
@@ -330,6 +339,7 @@ private fun CategoryPlanRow(
         trailingText = BudgetFormat.amount(category.amount),
         onClick = if (state.editable) ({ actions.onCategory(category.id) }) else null,
         trailing = {
+            if (PlanLogic.categoryChanged(category.id, state.differences)) ChangedDot()
             if (bad) AppIcon(Res.drawable.ic_error, null, tint = warning, modifier = Modifier.testTag("plan_row_warning"))
             if (state.editable) MoveMenu(category, state, actions)
         },
@@ -384,7 +394,10 @@ private fun IncomesTab(
                     modifier = Modifier.testTag("plan_income_row"),
                     supporting = PlanLogic.distributed(sum, income.amount).text(),
                     onClick = if (state.editable) ({ actions.onIncome(income.id) }) else null,
-                    trailing = { if (bad) AppIcon(Res.drawable.ic_error, null, tint = warning) },
+                    trailing = {
+                        if (PlanLogic.incomeChanged(income.id, state.differences)) ChangedDot()
+                        if (bad) AppIcon(Res.drawable.ic_error, null, tint = warning)
+                    },
                 )
             }
         }

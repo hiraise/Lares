@@ -14,9 +14,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
@@ -24,14 +26,23 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import app.lares.client.data.budget.FundingRow
 import app.lares.client.resources.Res
 import app.lares.client.resources.action_clear
+import app.lares.client.resources.action_delete
 import app.lares.client.resources.action_done
 import app.lares.client.resources.bud_came_on
+import app.lares.client.resources.bud_extra_amount
+import app.lares.client.resources.bud_extra_delete_text
+import app.lares.client.resources.bud_extra_delete_title
+import app.lares.client.resources.bud_extra_label_hint
 import app.lares.client.resources.bud_field_came
 import app.lares.client.resources.bud_field_came_hint
 import app.lares.client.resources.bud_field_date
@@ -39,6 +50,7 @@ import app.lares.client.resources.bud_fund_all
 import app.lares.client.resources.bud_funded
 import app.lares.client.resources.bud_income_gone
 import app.lares.client.resources.bud_not_came
+import app.lares.client.resources.bud_plan_name
 import app.lares.client.resources.bud_sheet_planned
 import app.lares.client.resources.bud_sheet_title
 import app.lares.client.resources.bud_to_fund
@@ -49,6 +61,7 @@ import app.lares.client.ui.calendar.CalendarLogic
 import app.lares.client.ui.common.text
 import app.lares.client.ui.components.AppIcon
 import app.lares.client.ui.components.AppPage
+import app.lares.client.ui.components.ConfirmDialog
 import app.lares.client.ui.components.DateDialog
 import app.lares.client.ui.components.DetailTopBar
 import app.lares.client.ui.components.EmptyState
@@ -71,14 +84,26 @@ import org.koin.core.parameter.parametersOf
 fun IncomeRoute(
     args: IncomeArgs,
     onBack: () -> Unit,
-    viewModel: IncomeViewModel = koinViewModel(key = "income-${args.month}-${args.incomeId}") { parametersOf(args) },
+    viewModel: IncomeViewModel = koinViewModel(key = "income-${args.month}-${args.incomeId}-${args.receiptId}") { parametersOf(args) },
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    LaunchedEffect(state.deleted) { if (state.deleted) onBack() }
+    // Leaving with a field still focused writes what was typed (the focus is not lost before the page goes).
+    val leave = {
+        viewModel.commit()
+        onBack()
+    }
+    NavigationBackHandler(
+        state = rememberNavigationEventState(NavigationEventInfo.None),
+        isBackEnabled = state.editing,
+        onBackCompleted = leave,
+    )
     IncomePage(
         state,
         IncomeActions(
-            onBack = onBack,
+            onBack = leave,
             onStartEdit = viewModel::startEdit,
+            onLabel = viewModel::changeLabel,
             onAmount = viewModel::changeAmount,
             onCommit = viewModel::commit,
             onDate = viewModel::pickDate,
@@ -89,6 +114,7 @@ fun IncomeRoute(
             onSheetText = viewModel::changeSheet,
             onSheetSave = viewModel::saveSheet,
             onSheetClose = viewModel::closeSheet,
+            onDelete = viewModel::delete,
         ),
     )
 }
@@ -96,6 +122,7 @@ fun IncomeRoute(
 data class IncomeActions(
     val onBack: () -> Unit = {},
     val onStartEdit: () -> Unit = {},
+    val onLabel: (String) -> Unit = {},
     val onAmount: (String) -> Unit = {},
     val onCommit: () -> Unit = {},
     val onDate: (kotlinx.datetime.LocalDate) -> Unit = {},
@@ -106,11 +133,13 @@ data class IncomeActions(
     val onSheetText: (String) -> Unit = {},
     val onSheetSave: () -> Unit = {},
     val onSheetClose: () -> Unit = {},
+    val onDelete: () -> Unit = {},
 )
 
 /**
  * The income page (BUD-011, BUD-012): «Пришло» and «Дата», the categories to transfer and the transferred ones,
- * «Отметить все», the free money of the income. Read-only members see the receipt as text and no checkboxes.
+ * «Отметить все», the free money of the income. Read-only members see the receipt as text and no checkboxes. An extra
+ * income has «Название», «Сумма» and «Дата», no categories, and «Удалить» (M5-06).
  */
 @Composable
 fun IncomePage(
@@ -160,6 +189,10 @@ fun IncomePage(
             }
             ErrorText(state.error)
         }
+        if (state.extra) {
+            if (state.canManage) DeleteExtra(actions.onDelete)
+            return@AppPage
+        }
         val toFund = state.toFund
         val funded = state.funded
         if (toFund.isNotEmpty()) {
@@ -206,11 +239,26 @@ private fun ReceiptFields(
     var picking by remember { mutableStateOf(false) }
     val focus = LocalFocusManager.current
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.m)) {
+        if (state.extra) {
+            FormField(
+                value = state.labelText,
+                onValueChange = actions.onLabel,
+                label = stringResource(Res.string.bud_plan_name),
+                hint = stringResource(Res.string.bud_extra_label_hint),
+                capitalization = KeyboardCapitalization.Sentences,
+                imeAction = ImeAction.Done,
+                onDone = { focus.clearFocus() },
+                modifier =
+                    Modifier
+                        .onFocusChanged { if (it.hasFocus) actions.onStartEdit() else actions.onCommit() }
+                        .testTag("income_label"),
+            )
+        }
         FormField(
             value = state.amountText,
             onValueChange = actions.onAmount,
-            label = stringResource(Res.string.bud_field_came),
-            hint = stringResource(Res.string.bud_field_came_hint, BudgetFormat.amount(summary.expected)),
+            label = stringResource(if (state.extra) Res.string.bud_extra_amount else Res.string.bud_field_came),
+            hint = if (state.extra) null else stringResource(Res.string.bud_field_came_hint, BudgetFormat.amount(summary.expected)),
             keyboardType = KeyboardType.Number,
             imeAction = ImeAction.Done,
             onDone = { focus.clearFocus() },
@@ -234,7 +282,7 @@ private fun ReceiptFields(
                     .testTag("income_date"),
             )
         }
-        if (summary.actual != null) {
+        if (summary.actual != null && !state.extra) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                 LinkButton(stringResource(Res.string.action_clear), actions.onClear, Modifier.testTag("income_clear"))
             }
@@ -246,6 +294,31 @@ private fun ReceiptFields(
             canClear = false,
             onPick = { date -> date?.let(actions.onDate) },
             onDismiss = { picking = false },
+        )
+    }
+}
+
+/** «Удалить» of an extra income, after a confirmation. */
+@Composable
+private fun DeleteExtra(onDelete: () -> Unit) {
+    var confirm by rememberSaveable { mutableStateOf(false) }
+    LinkButton(
+        stringResource(Res.string.action_delete),
+        { confirm = true },
+        color = MaterialTheme.colorScheme.error,
+        modifier = Modifier.testTag("income_delete"),
+    )
+    if (confirm) {
+        ConfirmDialog(
+            title = stringResource(Res.string.bud_extra_delete_title),
+            text = stringResource(Res.string.bud_extra_delete_text),
+            confirmLabel = stringResource(Res.string.action_delete),
+            onConfirm = {
+                confirm = false
+                onDelete()
+            },
+            onDismiss = { confirm = false },
+            destructive = true,
         )
     }
 }

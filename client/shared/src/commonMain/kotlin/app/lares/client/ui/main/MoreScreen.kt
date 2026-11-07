@@ -21,6 +21,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import app.lares.client.resources.Res
+import app.lares.client.resources.budget_tile_subtitle
 import app.lares.client.resources.group_administrators
 import app.lares.client.resources.ic_account_balance_wallet
 import app.lares.client.resources.ic_chevron_right
@@ -108,7 +109,7 @@ fun MoreScreen(
                             Tile(
                                 Res.drawable.ic_account_balance_wallet,
                                 stringResource(Res.string.section_budget),
-                                null,
+                                stringResource(Res.string.budget_tile_subtitle),
                                 true,
                                 PaletteColor.BLUE,
                             ) {

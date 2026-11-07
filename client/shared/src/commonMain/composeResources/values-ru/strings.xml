@@ -1311,4 +1311,38 @@
     <string name="bud_plan_table_total">Итого</string>
     <string name="bud_plan_empty_categories">Категорий пока нет</string>
     <string name="bud_plan_empty_incomes">Поступлений пока нет</string>
+    <string-array name="bud_months_only">
+        <item>Только январь</item>
+        <item>Только февраль</item>
+        <item>Только март</item>
+        <item>Только апрель</item>
+        <item>Только май</item>
+        <item>Только июнь</item>
+        <item>Только июль</item>
+        <item>Только август</item>
+        <item>Только сентябрь</item>
+        <item>Только октябрь</item>
+        <item>Только ноябрь</item>
+        <item>Только декабрь</item>
+    </string-array>
+    <string name="bud_month_unused_hint">Не попадёт только в этот месяц, план не изменится</string>
+    <string name="bud_month_menu">Действия с месяцем</string>
+    <string name="bud_month_edit">Изменить этот месяц</string>
+    <string name="bud_month_reset">Вернуть как в плане</string>
+    <string name="bud_month_reset_title">Вернуть месяц как в плане?</string>
+    <string name="bud_month_reset_text">Изменения, сделанные только для этого месяца, будут убраны. Отметки и суммы поступлений останутся.</string>
+    <string name="bud_month_reset_confirm">Вернуть</string>
+    <string name="bud_month_changed_line">В этом месяце план изменён</string>
+    <string name="bud_extra_add">Добавить поступление</string>
+    <string name="bud_extra_label_hint">Необязательно, например «Премия»</string>
+    <string name="bud_extra_amount">Сумма</string>
+    <string name="bud_extra_delete_title">Удалить поступление?</string>
+    <string name="bud_extra_delete_text">Оно исчезнет из месяца.</string>
+    <plurals name="today_budget_not_funded">
+        <item quantity="one">Не переведено: %1$d категория</item>
+        <item quantity="few">Не переведено: %1$d категории</item>
+        <item quantity="many">Не переведено: %1$d категорий</item>
+        <item quantity="other">Не переведено: %1$d категории</item>
+    </plurals>
+    <string name="budget_tile_subtitle">Доход по плану</string>
 </resources>

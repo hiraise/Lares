@@ -39,7 +39,7 @@ class BudgetFormatTest {
     @Test
     fun `BUD-011 amount input keeps at most ten digits, empty is not recorded`() {
         assertEquals("150000", BudgetFormat.input("150 000 ₽"))
-        assertEquals("1234567890", BudgetFormat.input("123456789012"))
+        assertEquals("123456789", BudgetFormat.input("123456789012"), "nine digits always fit the 1 000 000 000 limit")
         assertEquals("", BudgetFormat.input("-,."))
         assertNull(BudgetFormat.parse(""))
         assertEquals(150_000L, BudgetFormat.parse("150000"))

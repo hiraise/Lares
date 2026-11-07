@@ -103,6 +103,8 @@ Add terms here before using them in code.
 | Funding | Перевод в категорию | Ticking that a category got its money from an income (transferred in the bank), with the amount. |
 | Shortfall | Недобор | Actual income below expected. |
 | Free money | Свободная сумма | Actual income not transferred to any category; only shown. |
+| Extra income | Дополнительное поступление | Income recorded in one month outside the plan (a bonus): no cells, counts as free money. |
+| Month-only change | Изменение только этого месяца | A month's own copy of the table that differs from its plan version; marked «изменено», reset with «Вернуть как в плане». |
 
 ## Sync
 

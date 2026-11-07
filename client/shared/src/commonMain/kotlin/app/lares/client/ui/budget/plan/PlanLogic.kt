@@ -2,6 +2,7 @@ package app.lares.client.ui.budget.plan
 
 import app.lares.client.data.budget.VersionRow
 import app.lares.client.resources.Res
+import app.lares.client.resources.bud_months_only
 import app.lares.client.resources.bud_plan_cell_label
 import app.lares.client.resources.bud_plan_distributed
 import app.lares.client.resources.bud_plan_history_line
@@ -20,6 +21,7 @@ import app.lares.client.ui.common.UiText
 import app.lares.client.ui.common.raw
 import app.lares.client.ui.common.uiText
 import app.lares.contract.budget.TableCheck
+import app.lares.contract.budget.TableDifferences
 import app.lares.contract.entities.BudgetCategory
 import app.lares.contract.entities.BudgetIncome
 import app.lares.contract.entities.BudgetTable
@@ -98,6 +100,21 @@ object PlanLogic {
         sum: Long,
         of: Long,
     ): UiText = uiText(Res.string.bud_plan_distributed, raw(BudgetFormat.digits(sum)), raw(BudgetFormat.digits(of)))
+
+    /** «Только декабрь»: the title of month mode (BUD-013). */
+    fun monthOnlyTitle(month: YearMonth): UiText = UiText.Item(Res.array.bud_months_only, month.month.number - 1)
+
+    /** A category the month changed against its plan, also one left out for this month (BUD-013). */
+    fun categoryChanged(
+        id: String,
+        differences: TableDifferences?,
+    ): Boolean = differences != null && (BudgetLogic.categoryChanged(id, differences) || id in differences.removedCategories)
+
+    /** An income added to the month or with another day or amount than in the plan (BUD-013). */
+    fun incomeChanged(
+        id: String,
+        differences: TableDifferences?,
+    ): Boolean = differences != null && (id in differences.addedIncomes || id in differences.changedIncomes)
 
     /** «План с января 2027». */
     fun versionTitle(from: YearMonth): UiText = uiText(Res.string.bud_plan_version_title, genitive(from), raw(from.year.toString()))

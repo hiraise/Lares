@@ -17,6 +17,7 @@ import app.lares.client.ui.FamilyFixture.change
 import app.lares.client.ui.location.LiveLocations
 import app.lares.client.ui.location.LiveLocationsState
 import app.lares.client.ui.location.LocatedMember
+import app.lares.client.ui.main.TodayBudgetUi
 import app.lares.client.ui.main.TodayViewModel
 import app.lares.client.ui.tasks.TaskEvent
 import app.lares.contract.api.location.SharingStatus
@@ -33,6 +34,7 @@ import app.lares.contract.sync.EntityTypes
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -212,6 +214,30 @@ class TodayViewModelTest {
             assertFalse(shoppingOnly.empty, "the card alone is enough")
 
             assertTrue(with(Permission.CALENDAR_VIEW).empty)
+        }
+    }
+
+    @Test
+    fun `BUD-021 the budget card only with budget view, and alone it is enough`() {
+        shoppingCore().use { core ->
+            val tasks = core.taskInputs()
+            val viewer = tasks.viewer!!
+            val card = TodayBudgetUi(null, 3, LocalDate(2026, 12, 10))
+
+            fun with(vararg permissions: Permission) =
+                TodayViewModel.build(
+                    tasks.copy(viewer = viewer.copy(permissions = EffectivePermissions(false, permissions.toSet()))),
+                    null,
+                    null,
+                    card,
+                )
+
+            assertNull(with(Permission.TASKS_VIEW).budget, "no budget.view: no card")
+            assertTrue(with(Permission.CALENDAR_VIEW).empty)
+            val budgetOnly = with(Permission.BUDGET_VIEW)
+            assertEquals(card, budgetOnly.budget)
+            assertFalse(budgetOnly.empty, "the card alone is enough")
+            assertNull(TodayViewModel.build(tasks, null, null, null).budget, "no plan: no card")
         }
     }
 

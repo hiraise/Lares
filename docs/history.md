@@ -492,3 +492,17 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   month-only changes), «История плана» and read-only versions; «План» and «Создать план» on the Budget screen.
   13 new tests (6 view model, 7 screen including building through the sheets); emulator walkthrough of scenarios 1
   and 5, the table with 12 categories, light and dark, without bugs (long category names now end with «…»).
+
+- 2026-11-07 M5-06 Month-only changes, extra incomes, Today card, manual: the plan editor in month mode («Только
+  декабрь», saved with `editMonth`, a one-off category stays in the month, «Удалить» only for month-only rows), the
+  «изменено» dot on categories, incomes and table cells, «В этом месяце план изменён» under the hero, the ⋮ menu with
+  «Изменить этот месяц» / «Вернуть как в плане»; «Добавить поступление» sheet and the extra income page (rename, amount,
+  date, «Удалить»); the «Бюджет» Today card (next income, «Не переведено: N категорий», «Всё распределено»), only with
+  `budget.view` and a plan; user manual "Budget" (en, ru), glossary terms, spec all MVP requirements done. Fixed on the
+  way: `editMonth` compared cells by order (a month set back to the plan stayed a copy), `IncomeViewModel.startEdit`
+  read a lagging state (a typed label was overwritten), income edits typed just before leaving the page were lost
+  (written on back and not cancelled with the view model), amount fields accepted 10 digits (an amount over the
+  limit was refused after the page closed; now 9), the Budget tile said «Появится в следующих версиях».
+  11 new tests (3 view model on a synced core, 7 screen, 1 Today); emulator walkthrough of the seven spec scenarios in
+  ru, light and dark, with a kid. Gate fix: Spotless targets skip build directories (the full gate failed now and then
+  reading class files a parallel compile was replacing).

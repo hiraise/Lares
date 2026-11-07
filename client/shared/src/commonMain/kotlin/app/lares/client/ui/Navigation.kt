@@ -164,21 +164,26 @@ data class BudgetDestination(
     val month: String? = null,
 )
 
-/** The income page of a planned income (M5-04); [month] is an ISO year-month. */
+/** The income page of a planned income [incomeId] (M5-04) or of an extra income [receiptId] (M5-06); [month] is an ISO year-month. */
 @Serializable
 data class BudgetIncomeDestination(
     val month: String,
-    val incomeId: String,
+    val incomeId: String? = null,
+    val receiptId: String? = null,
 )
 
 /** «Все месяцы» of the budget (M5-04). */
 @Serializable
 data object BudgetMonthsDestination
 
-/** The budget plan (M5-05); [version] is an ISO year-month of a version shown read-only, null = edit the plan. */
+/**
+ * The budget plan (M5-05); [version] is an ISO year-month of a version shown read-only, [month] one month changed
+ * without the plan (M5-06); both null = edit the plan.
+ */
 @Serializable
 data class BudgetPlanDestination(
     val version: String? = null,
+    val month: String? = null,
 )
 
 /** «История плана» (M5-05). */
@@ -400,6 +405,7 @@ fun MainNavHost() {
                     onEventEditor = { navController.navigate(EventEditorDestination.of(it)) },
                     onPerson = { navController.navigate(PersonDestination(it)) },
                     onMap = { navController.navigate(MapDestination(memberId = it)) },
+                    onBudget = { navController.navigate(BudgetDestination()) },
                 ),
             )
         }
@@ -467,14 +473,17 @@ fun MainNavHost() {
             BudgetRoute(
                 entry.toRoute<BudgetDestination>().month?.let(YearMonth::parse),
                 onBack = { navController.popBackStack() },
-                onIncome = { month, id -> navController.navigate(BudgetIncomeDestination(month.toString(), id)) },
+                onIncome = { month, id -> navController.navigate(BudgetIncomeDestination(month.toString(), incomeId = id)) },
                 onMonths = { navController.navigate(BudgetMonthsDestination) },
                 onPlan = { navController.navigate(BudgetPlanDestination()) },
+                onExtra = { month, id -> navController.navigate(BudgetIncomeDestination(month.toString(), receiptId = id)) },
+                onEditMonth = { navController.navigate(BudgetPlanDestination(month = it.toString())) },
             )
         }
         composable<BudgetPlanDestination> { entry ->
+            val route = entry.toRoute<BudgetPlanDestination>()
             PlanRoute(
-                PlanArgs(version = entry.toRoute<BudgetPlanDestination>().version?.let(YearMonth::parse)),
+                PlanArgs(version = route.version?.let(YearMonth::parse), month = route.month?.let(YearMonth::parse)),
                 onBack = { navController.popBackStack() },
                 onHistory = { navController.navigate(BudgetPlanHistoryDestination) },
             )
@@ -487,7 +496,10 @@ fun MainNavHost() {
         }
         composable<BudgetIncomeDestination> { entry ->
             val route = entry.toRoute<BudgetIncomeDestination>()
-            IncomeRoute(IncomeArgs(YearMonth.parse(route.month), route.incomeId), onBack = { navController.popBackStack() })
+            IncomeRoute(
+                IncomeArgs(YearMonth.parse(route.month), route.incomeId, route.receiptId),
+                onBack = { navController.popBackStack() },
+            )
         }
         composable<BudgetMonthsDestination> {
             MonthsRoute(

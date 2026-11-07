@@ -116,7 +116,7 @@ fun uiModule(): Module =
         viewModel { LocationRulesViewModel(get(), get(), get(), get(), get(), get()) }
         viewModel { params -> HistoryViewModel(get(), get(), get(), get(), getOrNull<Clock>() ?: Clock.System, params.get()) }
         viewModel { params -> PlaceEditorViewModel(get(), get(), get(), get(), get(), params.get()) }
-        viewModel { BudgetViewModel(get()) }
+        viewModel { BudgetViewModel(get(), get()) }
         viewModel { params -> IncomeViewModel(get(), get(), params.get()) }
         viewModel { params -> PlanViewModel(get(), get(), params.getOrNull<PlanArgs>() ?: PlanArgs()) }
         viewModel { PlanHistoryViewModel(get()) }
@@ -140,7 +140,7 @@ fun uiModule(): Module =
         }
         viewModel { FamilySettingsViewModel(get(), get(), get(), get()) }
         viewModel { TasksViewModel(get(), get(), get()) }
-        viewModel { TodayViewModel(get(), get(), get(), get(), get()) }
+        viewModel { TodayViewModel(get(), get(), get(), get(), get(), get()) }
         viewModel { params -> TagViewModel(get(), get(), get(), get(), get(), params.get(), get()) }
         viewModel { params -> TaskDetailViewModel(get(), get(), params.get()) }
         viewModel { params -> TaskEditorViewModel(get(), get(), get(), get(), get(), params.get()) }

@@ -14,7 +14,7 @@ Each milestone ends with a build the family can install (APK) and a short change
 | M2 | Shopping lists | [shopping](features/shopping.md) | implemented (M2-01…M2-06); accepted 2026-11-07 |
 | M3 | Calendar | [calendar](features/calendar.md) | implemented (M3-01…M3-08); accepted 2026-11-07 |
 | M4 | Location | [location](features/location.md) | implemented (M4-01…M4-11); accepted 2026-11-07 |
-| M5 | Budget | [budget](features/budget.md) | spec approved 2026-11-07; technical design and plans next |
+| M5 | Budget | [budget](features/budget.md) | implemented 2026-11-07 (M5-01…M5-06); acceptance by the customer next |
 | M5b | Files and photos | [files](features/files.md) | not started |
 | M6 | Public release | — | not started |
 | M7 | Web client | — | not started |
@@ -70,6 +70,10 @@ switches and taps, the user manual "Map" (M4-01…M4-10).
 Monthly distribution of income into categories: a versioned plan (categories × incomes by day of the month), each
 month's actual incomes and funded categories, shortfall and free money. No spending tracking (customer, 2026-11-07).
 Whole roubles.
+Implemented: the plan editor with incomes by day, categories split between them, the notebook-like table, versions
+from the next or the current month and the plan history; the month with free money or shortfall, recording incomes and
+ticking transfers (another amount, «Отметить все»), «Все месяцы»; month-only changes marked with a dot and «Вернуть как
+в плане»; extra incomes; the Today card; read-only access with `budget.view`; the user manual "Budget" (M5-01…M5-06).
 
 ## M5b Files and photos
 

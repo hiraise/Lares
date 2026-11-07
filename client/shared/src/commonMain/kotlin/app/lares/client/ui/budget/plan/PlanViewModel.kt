@@ -18,6 +18,7 @@ import app.lares.contract.Ids
 import app.lares.contract.api.FieldErrorCode
 import app.lares.contract.budget.BudgetMath
 import app.lares.contract.budget.TableCheck
+import app.lares.contract.budget.TableDifferences
 import app.lares.contract.entities.BudgetCategory
 import app.lares.contract.entities.BudgetCell
 import app.lares.contract.entities.BudgetIncome
@@ -37,7 +38,8 @@ import kotlinx.datetime.yearMonth
 
 /**
  * Koin parameters of [PlanViewModel] (plan M5-05): no arguments = edit the plan; [version] = look at that plan version
- * read-only (from «История плана»); [month] = month mode (only that month's copy, wired in M5-06).
+ * read-only (from «История плана»); [month] = month mode: only that month's copy changes, never the plan (BUD-013,
+ * M5-06).
  */
 data class PlanArgs(
     val version: YearMonth? = null,
@@ -78,7 +80,8 @@ data class IncomeForm(
  * The plan screen. [table] is the local draft while editing (else the shown table), [check] its row and column sums.
  * [saveMonths] are the months a save may apply from, the default first (BUD-004); [monthHasOwnTable] = the current
  * month has month-only changes that a save from the current month replaces. [saving] is the month picked in the
- * save dialog (null = closed).
+ * save dialog (null = closed). In month mode [differences] compares [table] with the plan of that month (null when
+ * equal or outside month mode), marked with the «изменено» dot (BUD-013).
  */
 data class PlanUiState(
     val loaded: Boolean = false,
@@ -98,6 +101,9 @@ data class PlanUiState(
     val showUnused: Boolean = false,
     val saved: Boolean = false,
     val error: UiError? = null,
+    val differences: TableDifferences? = null,
+    /** Month mode: the plan's categories and incomes and those the month's receipts or ticks use; no «Удалить». */
+    val monthLocked: Set<String> = emptySet(),
 ) {
     /** Incomes by day, then table order (BUD-002). */
     val incomes: List<BudgetIncome> get() = PlanLogic.incomesByDay(table)
@@ -143,6 +149,8 @@ class PlanViewModel(
         val table = local.draft ?: base
         val firstPlan = inputs.plans.isEmpty()
         val next = current.plusMonth()
+        val month = args.month
+        val plan = month?.let { BudgetViews.month(inputs, it)?.plan?.table }
         return PlanUiState(
             loaded = true,
             editable = canManage && args.version == null,
@@ -161,8 +169,27 @@ class PlanViewModel(
             showUnused = local.showUnused,
             saved = local.saved,
             error = local.error,
+            differences = plan?.let { BudgetMath.differences(table, it).takeUnless { d -> d.isEmpty } },
+            monthLocked = if (month != null && plan != null) monthLocked(inputs, month, plan) else emptySet(),
         )
     }
+
+    private fun monthLocked(
+        inputs: BudgetInputs,
+        month: YearMonth,
+        plan: BudgetTable,
+    ): Set<String> =
+        buildSet {
+            plan.categories.mapTo(this) { it.id }
+            plan.incomes.mapTo(this) { it.id }
+            inputs.fundings.filter { it.month == month }.forEach {
+                add(it.categoryId)
+                add(it.incomeId)
+            }
+            inputs.receipts.values
+                .filter { it.month == month }
+                .mapNotNullTo(this) { it.incomeId }
+        }
 
     /** The table the screen starts from: the shown version, the month's table, or the plan that applies next month. */
     private fun baseTable(
@@ -212,6 +239,10 @@ class PlanViewModel(
                         unused = category.unused,
                     ),
             )
+        }
+        if (args.month != null) {
+            local.update { l -> l.copy(categoryForm = l.categoryForm?.copy(deletable = id !in state.monthLocked)) }
+            return
         }
         val before = state.saveMonths.firstOrNull() ?: return
         viewModelScope.launch {
@@ -310,6 +341,10 @@ class PlanViewModel(
                 ?.toString()
                 .orEmpty()
         local.update { it.copy(incomeForm = IncomeForm(id, isNew = false, day = income.day.toString(), amount = amount)) }
+        if (args.month != null) {
+            local.update { l -> l.copy(incomeForm = l.incomeForm?.copy(deletable = id !in state.monthLocked)) }
+            return
+        }
         val before = state.saveMonths.firstOrNull() ?: return
         viewModelScope.launch {
             val used = repository.isIncomeUsed(id, before)
@@ -350,7 +385,10 @@ class PlanViewModel(
 
     // Saving (BUD-004)
 
-    /** «Сохранить»: the plan asks from which month; month mode writes the month at once (M5-06). */
+    /**
+     * «Сохранить»: the plan asks from which month; month mode writes the month copy at once (a table equal to the plan
+     * is written as null, BUD-013).
+     */
     fun openSave() {
         val state = state.value
         if (!state.editable) return

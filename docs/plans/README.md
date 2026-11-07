@@ -164,7 +164,7 @@ customer and approved on 2026-11-07 (Q-031).
 | [M5-03](M5/03-budget-client-data.md) | Budget in the client core: tables, adapters, views, repository, writer | M5-02 | done |
 | [M5-04](M5/04-budget-month-ui.md) | Budget UI: the month screen, the income page, all months | M5-03 | done |
 | [M5-05](M5/05-budget-plan-editor-ui.md) | Budget UI: the plan editor, the table, versions and history | M5-04 | done |
-| [M5-06](M5/06-budget-month-edits-today-manual.md) | Month-only changes, extra incomes, Today card, manual, M5 wrap-up | M5-05 | ready |
+| [M5-06](M5/06-budget-month-edits-today-manual.md) | Month-only changes, extra incomes, Today card, manual, M5 wrap-up | M5-05 | done |
 
 M5 acceptance (after all plans): APK on the family's phones against the real server, the family's real plan entered
 from the notebook, one month of incomes and ticks on two phones, a month-only change, a plan change from the next

@@ -22,6 +22,7 @@ import app.lares.client.resources.bud_month_row
 import app.lares.client.resources.bud_month_row_current
 import app.lares.client.resources.date_day_month_short
 import app.lares.client.resources.months_short
+import app.lares.client.resources.today_budget_not_funded
 import app.lares.client.ui.calendar.CalendarLogic
 import app.lares.client.ui.common.UiText
 import app.lares.client.ui.common.raw
@@ -159,6 +160,30 @@ object BudgetLogic {
             free < 0 -> uiText(Res.string.bud_hero_over, raw(BudgetFormat.amount(-free)))
             else -> null
         }
+
+    /**
+     * The Today card (BUD-021): the first line is the next unrecorded income «20 декабря · 160 000 ₽», else «Не
+     * переведено: N категорий», else «Всё распределено»; the second line «Не переведено: …» only under an income.
+     */
+    fun todayLines(
+        nextIncome: IncomeSummary?,
+        notFunded: Int,
+        today: LocalDate,
+    ): Pair<UiText, UiText?> {
+        val funding =
+            if (notFunded >
+                0
+            ) {
+                UiText.Plural(Res.plurals.today_budget_not_funded, notFunded, listOf(raw(notFunded.toString())))
+            } else {
+                null
+            }
+        return when {
+            nextIncome != null -> incomeTitle(nextIncome, today) to funding
+            funding != null -> funding to null
+            else -> uiText(Res.string.bud_hero_done) to null
+        }
+    }
 
     /** «4 дек.». */
     fun shortDate(date: LocalDate): UiText =

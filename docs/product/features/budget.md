@@ -1,5 +1,5 @@
 ---
-status: approved  # customer, 2026-11-07 (Q-031; Q-032, Q-033 open)
+status: approved  # customer, 2026-11-07 (Q-031; Q-032, Q-033 open); all MVP requirements done (M5-06), implemented after acceptance
 milestone: M5
 updated: 2026-11-07
 ---
@@ -74,12 +74,12 @@ the 20th, 12 000 on the 25th; about twenty categories.
 
 ### Month
 
-- **BUD-010** `MVP` `doing` — A month is opened from the plan version in force (automatically on its first day, or
+- **BUD-010** `MVP` `done` — A month is opened from the plan version in force (automatically on its first day, or
   when someone opens it earlier). Past months stay viewable; a month is never deleted.
   *Client core: months listed from the first version to the current one, nothing written to open a month (M5-03).*
   *UI: «Ещё › Бюджет» opens the current month, ‹ › and «Все месяцы» open past months; without a plan the empty state
   «Составьте план распределения» (M5-04).*
-- **BUD-011** `MVP` `doing` — Actual income: for each income of the month, the amount and date it actually came; the
+- **BUD-011** `MVP` `done` — Actual income: for each income of the month, the amount and date it actually came; the
   date may be earlier or later than planned. ASSUMPTION: an extra income not in the plan (a bonus) can be added to a
   month; it has no cells and counts as free money.
   *Contract: receipts of planned and extra incomes, validation (M5-01).*
@@ -88,7 +88,9 @@ the 20th, 12 000 on the 25th; about twenty categories.
   income write one row (M5-03).*
   *UI: the income page records «Пришло» and «Дата» (prefilled with the expected amount and today), «Очистить»; extra
   incomes in UI with M5-06 (M5-04).*
-- **BUD-012** `MVP` `doing` — Funding: in each income's column the member ticks the categories transferred from it.
+  *UI: «Добавить поступление» (amount required, optional name ≤ 60, date default today); extra incomes after the planned
+  ones with their name or «Дополнительное поступление»; their page changes them and has «Удалить» (M5-06).*
+- **BUD-012** `MVP` `done` — Funding: in each income's column the member ticks the categories transferred from it.
   The transferred amount is the planned one and can be changed (less or more). The category row shows funded of its
   monthly amount.
   *Contract: ticks with derived ids, `fundedBy` written only as oneself (M5-01).*
@@ -97,33 +99,38 @@ the 20th, 12 000 on the 25th; about twenty categories.
   categories on two phones offline both survive (M5-03).*
   *UI: square checkboxes per category of the income, «Перевели» sheet for another amount («20 000 из 27 000»),
   «Отметить все»; read-only without checkboxes (M5-04).*
-- **BUD-013** `MVP` `doing` — Changing a month without changing the plan: a cell's planned amount, a category added
+- **BUD-013** `MVP` `done` — Changing a month without changing the plan: a cell's planned amount, a category added
   or left out for this month only. Every difference from the plan is marked in the month (customer: «должно быть
   отражено»).
   *Contract: month copy of the table, `BudgetMath.tableFor` / `differences` (M5-01).*
   *Server: month copies stored and synced (M5-02).*
   *Client core: month copy written only when it differs from the plan; reset to the plan (M5-03).*
-- **BUD-014** `MVP` `doing` — Totals of the month and of each income: expected, actual, transferred; shortfall
+  *UI: menu «Изменить этот месяц» opens the plan editor as «Только декабрь» (a one-off category stays in the month);
+  differences marked with a dot on categories, incomes and table cells, «В этом месяце план изменён» under the hero;
+  «Вернуть как в плане» after a confirmation (M5-06).*
+- **BUD-014** `MVP` `done` — Totals of the month and of each income: expected, actual, transferred; shortfall
   (actual below expected) and free money (actual minus transferred). Free money is only shown; it is not carried to
   the next month or assigned anywhere (customer, 2026-11-07).
   *Contract: `BudgetMath.summary` — expected, actual, transferred, shortfall, free money (M5-01).*
   *Client core: totals of every month and income on the phone (M5-03).*
   *UI: hero «Свободно / Недобор / Ожидается», per income «Недобор» and «Не распределено», categories funded of
   planned (M5-04).*
-- **BUD-015** `MVP` `doing` — Works offline and syncs like the other modules (FND-040).
+- **BUD-015** `MVP` `done` — Works offline and syncs like the other modules (FND-040).
   *Server: four sync types, `budget.view` reads and `budget.manage` writes (M5-02).*
   *Client core: four local tables and adapters with the server's checks; members without `budget.view` hold no
   budget rows (M5-03).*
 
 ### Overview
 
-- **BUD-020** `MVP` `doing` — Budget opens on the current month: the next expected income, what is not yet funded,
+- **BUD-020** `MVP` `done` — Budget opens on the current month: the next expected income, what is not yet funded,
   the month's shortfall or free money. The list of months shows for each its expected, actual and free money.
   *Client core: views of the current month and of all months (M5-03).*
   *UI: the Budget screen and «Все месяцы» with expected, actual and free money or shortfall (M5-04).*
-- **BUD-021** `MVP` `doing` — «Today» shows a budget card to members with `budget.view` (FND-063). ASSUMPTION: the next
+- **BUD-021** `MVP` `done` — «Today» shows a budget card to members with `budget.view` (FND-063). ASSUMPTION: the next
   expected income and how many categories of the month are not funded yet.
   *Client core: the next unrecorded income and the categories of recorded incomes not ticked yet (M5-03).*
+  *UI: «Бюджет» after «Семья сейчас»: «20 декабря · 160 000 ₽», «Не переведено: N категорий», or «Всё распределено»;
+  only with `budget.view` and a plan; a tap opens the Budget screen (M5-06).*
 - **BUD-022** `later` `todo` — Analytics over months (plan vs. actual, totals per category over a year, months with a
   shortfall). The customer will say which (Q-033).
 
@@ -161,5 +168,4 @@ There is no per-category access.
 
 - Q-032: reminders on the income day.
 - Q-033: which analytics.
-- Technical design (sync of the plan and months, versions, conflicts when two phones tick the same cell) before the M5
-  plans.
+- Technical design: done ([architecture/budget.md](../../architecture/budget.md), ADR-0032).

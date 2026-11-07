@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import app.lares.client.resources.Res
 import app.lares.client.resources.action_delete
 import app.lares.client.resources.action_done
+import app.lares.client.resources.bud_month_unused_hint
 import app.lares.client.resources.bud_plan_amount
 import app.lares.client.resources.bud_plan_category
 import app.lares.client.resources.bud_plan_category_new
@@ -79,6 +80,7 @@ fun CategorySheet(
     form: CategoryForm,
     incomes: List<BudgetIncome>,
     actions: CategorySheetActions,
+    monthMode: Boolean = false,
 ) {
     val nameFocus = remember { FocusRequester() }
     LaunchedEffect(Unit) { if (form.id == null) nameFocus.requestFocus() }
@@ -143,7 +145,7 @@ fun CategorySheet(
             Column(Modifier.weight(1f)) {
                 Text(stringResource(Res.string.bud_plan_unused), style = MaterialTheme.typography.bodyMedium)
                 Text(
-                    stringResource(Res.string.bud_plan_unused_hint),
+                    stringResource(if (monthMode) Res.string.bud_month_unused_hint else Res.string.bud_plan_unused_hint),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -217,7 +219,7 @@ fun IncomeSheet(
 /** A bottom sheet like the tag sheet: fully expanded (moves up with the keyboard), its content scrolls. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun PlanSheet(
+internal fun PlanSheet(
     onDismiss: () -> Unit,
     tag: String,
     content: @Composable ColumnScope.() -> Unit,

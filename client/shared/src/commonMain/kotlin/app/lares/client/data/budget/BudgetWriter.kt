@@ -64,10 +64,16 @@ class BudgetWriter(
         val (me, plans, monthRow) = localDb.read { Triple(me(), plans(), monthRow(month)) }
         val plan = BudgetMath.planFor(month, plans)?.table
         val normalized = Validators.normalizeBudgetTable(table)
-        val own = normalized.takeIf { plan == null || it != Validators.normalizeBudgetTable(plan) }
+        val own = normalized.takeIf { plan == null || !sameTable(it, Validators.normalizeBudgetTable(plan)) }
         if (own == null && monthRow?.table == null) return
         writeMonth(me, month, own)
     }
+
+    /** Equal tables up to the order of cells (the editor re-adds a category's cells at the end). */
+    private fun sameTable(
+        a: BudgetTable,
+        b: BudgetTable,
+    ): Boolean = a.copy(cells = emptyList()) == b.copy(cells = emptyList()) && a.cells.toSet() == b.cells.toSet()
 
     /** «Вернуть как в плане»: the month follows its plan version again. */
     suspend fun resetMonth(month: YearMonth) {

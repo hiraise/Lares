@@ -2,11 +2,14 @@ package app.lares.client.ui.budget
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -14,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -28,12 +32,21 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.lares.client.resources.Res
 import app.lares.client.resources.action_back
+import app.lares.client.resources.action_cancel
 import app.lares.client.resources.bud_categories
 import app.lares.client.resources.bud_create_plan
 import app.lares.client.resources.bud_empty_hint_manage
 import app.lares.client.resources.bud_empty_hint_view
 import app.lares.client.resources.bud_empty_title
+import app.lares.client.resources.bud_extra_add
 import app.lares.client.resources.bud_incomes
+import app.lares.client.resources.bud_month_changed_line
+import app.lares.client.resources.bud_month_edit
+import app.lares.client.resources.bud_month_menu
+import app.lares.client.resources.bud_month_reset
+import app.lares.client.resources.bud_month_reset_confirm
+import app.lares.client.resources.bud_month_reset_text
+import app.lares.client.resources.bud_month_reset_title
 import app.lares.client.resources.bud_months_all
 import app.lares.client.resources.bud_next_month
 import app.lares.client.resources.bud_plan
@@ -42,12 +55,18 @@ import app.lares.client.resources.ic_account_balance_wallet
 import app.lares.client.resources.ic_arrow_back
 import app.lares.client.resources.ic_chevron_left
 import app.lares.client.resources.ic_chevron_right
+import app.lares.client.resources.ic_edit
+import app.lares.client.resources.ic_more_vert
+import app.lares.client.resources.ic_undo
 import app.lares.client.resources.section_budget
+import app.lares.client.ui.budget.plan.PlanLogic
 import app.lares.client.ui.common.text
 import app.lares.client.ui.components.AppIcon
 import app.lares.client.ui.components.AppPage
+import app.lares.client.ui.components.ConfirmDialog
 import app.lares.client.ui.components.DetailTopBar
 import app.lares.client.ui.components.EmptyState
+import app.lares.client.ui.components.ErrorText
 import app.lares.client.ui.components.FullScreenLoading
 import app.lares.client.ui.components.LinkButton
 import app.lares.client.ui.components.ListDivider
@@ -62,7 +81,8 @@ import org.koin.compose.viewmodel.koinViewModel
 
 /**
  * «Ещё › Бюджет» (plan M5-04). The month shown is kept in saved state, so it survives process death; [initialMonth]
- * comes from «Все месяцы». «План» and «Создать план» open the plan editor (M5-05).
+ * comes from «Все месяцы». «План» and «Создать план» open the plan editor (M5-05); the menu changes only this month or
+ * resets it to the plan, «Добавить поступление» adds an extra income (M5-06).
  */
 @Composable
 fun BudgetRoute(
@@ -71,9 +91,12 @@ fun BudgetRoute(
     onIncome: (YearMonth, String) -> Unit,
     onMonths: () -> Unit,
     onPlan: () -> Unit,
+    onExtra: (YearMonth, String) -> Unit = { _, _ -> },
+    onEditMonth: (YearMonth) -> Unit = {},
     viewModel: BudgetViewModel = koinViewModel(),
 ) {
     var saved by rememberSaveable { mutableStateOf(initialMonth?.toString()) }
+    var confirmReset by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(saved) { viewModel.show(saved?.let(YearMonth::parse)) }
     val state by viewModel.state.collectAsStateWithLifecycle()
     BudgetScreen(
@@ -84,9 +107,42 @@ fun BudgetRoute(
             onNext = { state.next?.let { saved = it.toString() } },
             onMonths = onMonths,
             onIncome = { id -> state.month?.let { onIncome(it, id) } },
+            onExtra = { id -> state.month?.let { onExtra(it, id) } },
             onPlan = onPlan,
+            onEditMonth = { state.month?.let(onEditMonth) },
+            onReset = { confirmReset = true },
+            onAddExtra = viewModel::newExtra,
         ),
     )
+    val today = state.today
+    state.extraForm?.let { form ->
+        if (today != null) {
+            ExtraIncomeSheet(
+                form,
+                today,
+                ExtraIncomeSheetActions(
+                    onLabel = viewModel::onExtraLabel,
+                    onAmount = viewModel::onExtraAmount,
+                    onDate = viewModel::onExtraDate,
+                    onDone = viewModel::saveExtra,
+                    onDismiss = viewModel::closeExtra,
+                ),
+            )
+        }
+    }
+    if (confirmReset) {
+        ConfirmDialog(
+            title = stringResource(Res.string.bud_month_reset_title),
+            text = stringResource(Res.string.bud_month_reset_text),
+            confirmLabel = stringResource(Res.string.bud_month_reset_confirm),
+            dismissLabel = stringResource(Res.string.action_cancel),
+            onConfirm = {
+                confirmReset = false
+                viewModel.resetMonth()
+            },
+            onDismiss = { confirmReset = false },
+        )
+    }
 }
 
 data class BudgetActions(
@@ -95,7 +151,15 @@ data class BudgetActions(
     val onNext: () -> Unit = {},
     val onMonths: () -> Unit = {},
     val onIncome: (String) -> Unit = {},
+    /** An extra income's page, by its receipt id. */
+    val onExtra: (String) -> Unit = {},
     val onPlan: () -> Unit = {},
+    /** «Изменить этот месяц» and the line under the hero: the plan screen in month mode. */
+    val onEditMonth: () -> Unit = {},
+    /** «Вернуть как в плане» (asks first). */
+    val onReset: () -> Unit = {},
+    /** «Добавить поступление». */
+    val onAddExtra: () -> Unit = {},
 )
 
 /** The month: hero, «Поступления», «Категории»; the empty state without a plan. */
@@ -126,15 +190,33 @@ fun BudgetScreen(
         return
     }
     AppPage(topBar = { MonthTopBar(state, actions) }) {
-        BudgetHero(month, view.summary)
+        Column(verticalArrangement = Arrangement.spacedBy(Spacing.s)) {
+            BudgetHero(month, view.summary)
+            if (state.monthChanged) MonthChangedLine(if (state.canManage) actions.onEditMonth else null)
+        }
+        ErrorText(state.error)
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             SectionHeader(stringResource(Res.string.bud_incomes))
             ListGroup(Modifier.testTag("budget_incomes")) {
                 view.summary.incomes.forEachIndexed { index, income ->
                     if (index > 0) ListDivider(Spacing.l)
                     val id = income.incomeId
-                    IncomeRow(income, today, onClick = id?.let { { actions.onIncome(it) } })
+                    val receipt = income.receiptId
+                    IncomeRow(
+                        income,
+                        today,
+                        changed = id != null && PlanLogic.incomeChanged(id, view.differences),
+                        onClick =
+                            when {
+                                id != null -> ({ actions.onIncome(id) })
+                                receipt != null -> ({ actions.onExtra(receipt) })
+                                else -> null
+                            },
+                    )
                 }
+            }
+            if (state.canManage) {
+                LinkButton(stringResource(Res.string.bud_extra_add), actions.onAddExtra, Modifier.testTag("budget_add_extra"))
             }
         }
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -182,6 +264,66 @@ private fun MonthTopBar(
             AppIcon(Res.drawable.ic_chevron_right, stringResource(Res.string.bud_next_month))
         }
         LinkButton(stringResource(Res.string.bud_plan), actions.onPlan, modifier = Modifier.testTag("budget_plan"))
+        if (state.canManage && state.view != null) MonthMenu(state.monthChanged, actions)
+    }
+}
+
+/** «Изменить этот месяц» and, when the month differs from the plan, «Вернуть как в плане» (BUD-013). */
+@Composable
+private fun MonthMenu(
+    changed: Boolean,
+    actions: BudgetActions,
+) {
+    var open by remember { mutableStateOf(false) }
+    Box {
+        IconButton(onClick = { open = true }, modifier = Modifier.testTag("budget_menu")) {
+            AppIcon(Res.drawable.ic_more_vert, stringResource(Res.string.bud_month_menu))
+        }
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            DropdownMenuItem(
+                text = { Text(stringResource(Res.string.bud_month_edit), style = MaterialTheme.typography.bodyLarge) },
+                leadingIcon = { AppIcon(Res.drawable.ic_edit, null) },
+                onClick = {
+                    open = false
+                    actions.onEditMonth()
+                },
+                modifier = Modifier.testTag("budget_edit_month"),
+            )
+            if (changed) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(Res.string.bud_month_reset), style = MaterialTheme.typography.bodyLarge) },
+                    leadingIcon = { AppIcon(Res.drawable.ic_undo, null) },
+                    onClick = {
+                        open = false
+                        actions.onReset()
+                    },
+                    modifier = Modifier.testTag("budget_reset_month"),
+                )
+            }
+        }
+    }
+}
+
+/** «В этом месяце план изменён» under the hero; a tap opens the month editor (`budget.manage`). */
+@Composable
+private fun MonthChangedLine(onClick: (() -> Unit)?) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.small)
+            .then(if (onClick != null) Modifier.clickable(role = Role.Button, onClick = onClick) else Modifier)
+            .heightIn(min = 40.dp)
+            .padding(horizontal = Spacing.xs, vertical = Spacing.s)
+            .testTag("budget_month_changed"),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.s),
+    ) {
+        ChangedDot()
+        Text(
+            stringResource(Res.string.bud_month_changed_line),
+            style = MaterialTheme.typography.bodyMedium,
+            color = if (onClick != null) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 

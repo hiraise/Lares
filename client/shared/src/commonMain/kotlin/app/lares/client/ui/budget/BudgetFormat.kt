@@ -9,8 +9,8 @@ object BudgetFormat {
     const val MINUS = '−'
     const val CURRENCY = " ₽"
 
-    /** Longest amount a field accepts (BUD amounts are below 10¹⁰). */
-    const val MAX_DIGITS = 10
+    /** Longest amount a field accepts: nine digits always fit `Validators.BUDGET_AMOUNT_MAX` (10⁹). */
+    const val MAX_DIGITS = 9
 
     /** «1 234 567», «−3 000». */
     fun digits(value: Long): String {
