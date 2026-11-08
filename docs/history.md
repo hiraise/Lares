@@ -506,3 +506,7 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
   11 new tests (3 view model on a synced core, 7 screen, 1 Today); emulator walkthrough of the seven spec scenarios in
   ru, light and dark, with a kid. Gate fix: Spotless targets skip build directories (the full gate failed now and then
   reading class files a parallel compile was replacing).
+
+- 2026-11-08 Fix found while the customer looked at the budget: a quick second tap on a top-bar «Назад» popped the
+  screen behind too, down to an empty white window. Every screen's back now goes through `backAction()`
+  (`dropUnlessResumed`, and never pops the first screen of the graph). Checked on the emulator: Budget and Plan.

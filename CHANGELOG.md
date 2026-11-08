@@ -20,6 +20,11 @@ Versioning: [SemVer](https://semver.org/) from the first release.
 - Today shows a «Бюджет» card: the next income to record and how many categories are not transferred yet.
 - User manual "Budget" (en, ru).
 
+### Fixed
+
+- Tapping «Назад» twice quickly no longer leaves an empty white screen (it closed the main screen too) or closes two
+  screens at once.
+
 ## [0.5.2] - 2026-11-07
 
 ### Changed
