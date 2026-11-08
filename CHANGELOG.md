@@ -5,6 +5,8 @@ Versioning: [SemVer](https://semver.org/) from the first release.
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-08
+
 ### Added
 
 - Budget: «Ещё › Бюджет» shows the current month — free money or shortfall, each income expected and received, how
