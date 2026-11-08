@@ -253,8 +253,10 @@ class CalendarViewModelTest {
             vm.select(later)
             awaitState(vm.state) { it.nav.selected == later }
             vm.setMode(CalendarMode.WEEK)
-            val week = awaitState(vm.state) { it.mode == CalendarMode.WEEK && it.weeks.isNotEmpty() }
-            assertEquals(CalendarViews.mondayOnOrBefore(later), week.nav.weekStart)
+            // Waits for the selected day's week: the mode may switch one update before the week follows (CI flake).
+            val expected = CalendarViews.mondayOnOrBefore(later)
+            val week = awaitState(vm.state) { it.mode == CalendarMode.WEEK && it.nav.weekStart == expected && it.weeks.isNotEmpty() }
+            assertEquals(expected, week.nav.weekStart)
         }
     }
 }

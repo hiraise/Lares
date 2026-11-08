@@ -1,11 +1,11 @@
 # Project status
 
-Updated: 2026-11-07
+Updated: 2026-11-08
 
 ## Phase
 
 **M0–M4 implemented and accepted by the customer (2026-11-07): foundation, tasks, shopping lists, calendar, location.
-M5 Budget implemented (M5-01…M5-06, 2026-11-07); customer acceptance next.**
+M5 Budget implemented (M5-01…M5-06, 2026-11-07) and released in v0.6.0 (2026-11-08); customer acceptance next.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
@@ -15,12 +15,15 @@ Detailed plans for implementation sessions are in [docs/plans/](plans/README.md)
 customer's acceptance on real phones.
 M0–M4 accepted 2026-11-07.
 
-**Active release branch: `release/0.6.0`** (M5 Budget). Commit approved work here; `main` is protected
-([release process](process/release.md), ADR-0020). Latest release: [v0.5.2](https://github.com/hiraise/Lares/releases/tag/v0.5.2)
-(2026-11-07).
+**Active release branch: `release/0.6.1`** (fixes after the customer's budget acceptance). Commit approved work here;
+`main` is protected ([release process](process/release.md), ADR-0020). Latest release:
+[v0.6.0](https://github.com/hiraise/Lares/releases/tag/v0.6.0) (2026-11-08).
 
 ## Last completed
 
+- 2026-11-08 Release **v0.6.0** (M5 Budget): pull request #7, signed APK, server image
+  `ghcr.io/hiraise/lares-server:0.6.0`, GitHub release. Includes the double-«Назад» white screen fix. Next branch
+  `release/0.6.1`. Servers must be updated with the app (an older server does not know the budget).
 - 2026-11-07 M5-06 Budget finished: «Изменить этот месяц» changes one month without the plan («Только декабрь»), every
   difference marked with an orange dot and «В этом месяце план изменён», «Вернуть как в плане»; «Добавить поступление»
   for a bonus (its page changes or deletes it); the «Бюджет» card on Today; user manual "Budget" (en, ru). All MVP
@@ -220,11 +223,10 @@ M0–M4 accepted 2026-11-07.
 
 ## Next steps
 
-1. Release v0.5.2 (battery saving, ADR-0030) when the customer approves; check a day of battery and home tracks on a
-   real phone.
-2. M5 acceptance by the customer (plans README § M5 acceptance): APK on the family's phones, the real plan from the
-   notebook, a month of incomes and ticks on two phones; then release 0.6.0 and the spec `implemented`.
-3. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
+1. M5 acceptance by the customer on v0.6.0 (plans README § M5 acceptance): APK on the family's phones, the real plan
+   from the notebook, a month of incomes and ticks on two phones; fixes go to `release/0.6.1`; then the spec
+   `implemented`. Check a day of battery and home tracks on a real phone (ADR-0030).
+2. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
 
 ## Plan progress
 

@@ -510,3 +510,6 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
 - 2026-11-08 Fix found while the customer looked at the budget: a quick second tap on a top-bar «Назад» popped the
   screen behind too, down to an empty white window. Every screen's back now goes through `backAction()`
   (`dropUnlessResumed`, and never pops the first screen of the graph). Checked on the emulator: Budget and Plan.
+- 2026-11-08 Release **v0.6.0** (M5 Budget): release pull request #7 merged, signed APK, server image
+  `ghcr.io/hiraise/lares-server:0.6.0`, GitHub release. Fixed on the way: CI flakes in `PlanViewModelTest` (waits for the
+  new category) and `CalendarViewModelTest` (waits for the target week, not any week). Next branch `release/0.6.1`.
