@@ -9,6 +9,7 @@
   tools/dev/seed.py shopping               # sample shopping lists (after family; skips if already seeded)
   tools/dev/seed.py calendar               # relatives with birthdays, sample events, memorable date (after family)
   tools/dev/seed.py location               # places Дом, Школа №12; sharing and positions of Дмитрий, Аня, Тимур (after family)
+  tools/dev/seed.py budget                 # the notebook plan from this month, the 5th's income recorded, half of it ticked (after family)
   tools/dev/seed.py move NAME LAT LON      # one position now for a seeded member (Аня, Тимур, Дмитрий)
   tools/dev/seed.py tick NAME [--as LOGIN] # mark the first item named NAME bought by that member (default olga)
   tools/dev/seed.py call METHOD PATH [JSON] [--as NAME]  # NAME: olga, or a seeded member (stored session after location)
@@ -370,12 +371,103 @@ def place_alert_row_id(member_id, subscriber_id):
     return derive_row_id(member_id, int.from_bytes(uuid.UUID(subscriber_id).bytes[8:], "big"), marker=0x3C)
 
 
+def month_index(month):
+    """index(m) of architecture/budget.md § Derived ids for a "2026-12" month."""
+    year, number = (int(part) for part in month.split("-"))
+    return year * 12 + number - 1
+
+
+def budget_plan_row_id(household_id, effective_from):
+    """The id of the budget_plan version in force from `effective_from` ("2026-12") (ADR-0032)."""
+    return derive_row_id(household_id, month_index(effective_from), marker=0x21)
+
+
+def budget_month_row_id(household_id, month):
+    """The id of the budget_month row (month-only edits) of `month` ("2026-12")."""
+    return derive_row_id(household_id, month_index(month), marker=0x22)
+
+
+def budget_receipt_row_id(income_id, month):
+    """The id of the budget_receipt row of a planned income in `month` ("2026-12")."""
+    return derive_row_id(income_id, month_index(month), marker=0x23)
+
+
+def budget_funding_row_id(income_id, category_id, month):
+    """The id of the budget_funding row (one tick) of a category from an income in `month` ("2026-12")."""
+    salt = int.from_bytes(uuid.UUID(category_id).bytes[8:], "big")
+    return derive_row_id(budget_receipt_row_id(income_id, month), salt, marker=0x24)
+
+
 # Golden values of contract IdsTest (M3-01).
 _GOLDEN_EVENT = "0192f3a4-5b6c-7d8e-9f01-23456789abcd"
 assert occurrence_row_id(_GOLDEN_EVENT, datetime.date(2026, 10, 28)) == "0192f3a4-5b6c-8d8e-9f01-23456789fadf"
 assert occurrence_row_id(_GOLDEN_EVENT, datetime.date(1969, 12, 31)) == "0192f3a4-5b6c-8d8e-a0fe-dcba98765432"
 assert reminder_row_id(_GOLDEN_EVENT, "0192f3a4-0000-7000-8000-00000000c0de") == "0192f3a4-5b6c-8dd4-9f01-234567896b13"
 assert place_alert_row_id(_GOLDEN_EVENT, "0192f3a4-0000-7000-8000-00000000c0de") == "0192f3a4-5b6c-8db2-9f01-234567896b13"
+# Budget (M5-01): the same id as household and income, so only the markers tell the rows apart.
+assert budget_plan_row_id(_GOLDEN_EVENT, "2026-12") == "0192f3a4-5b6c-8daf-9f01-23456789f4ce"
+assert budget_month_row_id(_GOLDEN_EVENT, "2026-12") == "0192f3a4-5b6c-8dac-9f01-23456789f4ce"
+assert budget_receipt_row_id(_GOLDEN_EVENT, "2026-12") == "0192f3a4-5b6c-8dad-9f01-23456789f4ce"
+assert budget_receipt_row_id(_GOLDEN_EVENT, "1999-01") == "0192f3a4-5b6c-8dad-9f01-23456789f679"
+assert budget_funding_row_id(_GOLDEN_EVENT, "0192f3a4-0000-7000-8000-00000000c0de", "2026-12") == "0192f3a4-5b6c-8d89-9f01-234567893410"
+
+
+def budget():
+    """The customer's notebook (budget spec § Scenarios) as the plan from the current month; the first income recorded
+    and half of its categories ticked."""
+    state = load_state()
+    if not state.get("members"):
+        sys.exit("no test family; run: seed.py family")
+    if state.get("budget"):
+        print("budget already seeded from", state["budget"])
+        return
+    token = login()
+    me_info = call("GET", "/me", token=token)
+    me, household = me_info["memberId"], me_info["householdId"]
+    now = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0)
+    # The household zone (Europe/Moscow, UTC+3 all year).
+    today = (now + datetime.timedelta(hours=3)).date()
+    month = today.strftime("%Y-%m")
+    incomes = {day: (uuid7(), amount) for day, amount in ((5, 162_000), (10, 12_000), (20, 160_000), (25, 12_000))}
+    categories = [
+        ("Продукты", 60_000, {5: 27_000, 10: 2_000, 20: 29_000, 25: 2_000}),
+        ("Машина", 20_000, {5: 10_000, 20: 10_000}),
+        ("Коммуналка", 25_000, {5: 25_000}),
+        ("Ипотека", 100_000, {5: 100_000}),
+        ("Сейф", 20_000, {10: 10_000, 25: 10_000}),
+        ("Отпуск", 30_000, {20: 30_000}),
+        ("Подарки", 10_000, {20: 10_000}),
+        ("Накопления", 81_000, {20: 81_000}),
+    ]
+    category_ids = {name: uuid7() for name, _, _ in categories}
+    table = {
+        "categories": [{"id": category_ids[n], "name": n, "amount": a, "unused": False} for n, a, _ in categories],
+        "incomes": [{"id": i, "day": d, "amount": a} for d, (i, a) in incomes.items()],
+        "cells": [
+            {"categoryId": category_ids[n], "incomeId": incomes[d][0], "amount": a}
+            for n, _, cells in categories
+            for d, a in cells.items()
+        ],
+    }
+    first, first_amount = incomes[5]
+    mutations = [
+        ("budget_plan", budget_plan_row_id(household, month),
+         {"effectiveFrom": month, "table": table, "updatedBy": me, "updatedAt": instant(now)}),
+        ("budget_receipt", budget_receipt_row_id(first, month),
+         {"month": month, "incomeId": first, "amount": first_amount, "date": f"{month}-05", "updatedBy": me}),
+    ]
+    funded = [(n, cells[5]) for n, _, cells in categories if 5 in cells]
+    for name, amount in funded[: len(funded) // 2]:
+        mutations.append(
+            ("budget_funding", budget_funding_row_id(first, category_ids[name], month),
+             {"month": month, "incomeId": first, "categoryId": category_ids[name], "amount": amount,
+              "fundedBy": me, "fundedAt": instant(now)})
+        )
+    push(token, mutations)
+    state["budget"] = month
+    save_state(state)
+    print(f"budget plan from {month}: 4 incomes, {len(categories)} categories; income of the 5th recorded, "
+          f"{len(funded) // 2} of {len(funded)} categories ticked")
 
 
 def calendar():
@@ -617,6 +709,8 @@ def main(argv):
         shopping()
     elif cmd == "calendar":
         calendar()
+    elif cmd == "budget":
+        budget()
     elif cmd == "location":
         location()
     elif cmd == "move":

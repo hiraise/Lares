@@ -1,0 +1,28 @@
+-- Funding ticks (BUD-012): category × income × month, id derived from the three; never deleted. NULL amount = unticked
+-- (`funded_by` is kept); `funded_at` in epoch milliseconds.
+CREATE TABLE budget_funding (
+    id TEXT NOT NULL PRIMARY KEY,
+    month TEXT NOT NULL,
+    income_id TEXT NOT NULL,
+    category_id TEXT NOT NULL,
+    amount INTEGER,
+    funded_by TEXT,
+    funded_at INTEGER
+);
+
+CREATE INDEX budget_funding_month ON budget_funding (month);
+
+selectAll:
+SELECT * FROM budget_funding ORDER BY month, id;
+
+selectById:
+SELECT * FROM budget_funding WHERE id = ?;
+
+upsert:
+INSERT OR REPLACE INTO budget_funding (id, month, income_id, category_id, amount, funded_by, funded_at) VALUES (?, ?, ?, ?, ?, ?, ?);
+
+deleteById:
+DELETE FROM budget_funding WHERE id = ?;
+
+deleteAll:
+DELETE FROM budget_funding;

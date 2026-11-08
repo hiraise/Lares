@@ -119,6 +119,8 @@ class MainNavigation(
     val onPerson: (String) -> Unit = {},
     /** The Map, centred on a member when given (Today «Семья сейчас»). */
     val onMap: (String?) -> Unit = {},
+    /** The Budget screen (Today «Бюджет»). */
+    val onBudget: () -> Unit = {},
 )
 
 @Composable
@@ -202,6 +204,7 @@ fun MainScaffoldRoute(
                     }
                 },
                 onMap = navigation.onMap,
+                onBudget = navigation.onBudget,
             ),
         familyNow = todayViewModel.familyNow,
     )

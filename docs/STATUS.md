@@ -5,21 +5,47 @@ Updated: 2026-11-07
 ## Phase
 
 **M0–M4 implemented and accepted by the customer (2026-11-07): foundation, tasks, shopping lists, calendar, location.
-M5 Budget: spec approved (2026-11-07); design and plans M5-01…M5-06 ready; next M5-01.**
+M5 Budget implemented (M5-01…M5-06, 2026-11-07); customer acceptance next.**
 Detailed plans for implementation sessions are in [docs/plans/](plans/README.md).
 
 ## Active milestone
 
-None in progress. [M5 Budget](product/roadmap.md#m5-budget): the [spec](product/features/budget.md) was reworked with
-the customer (Q-031) and approved on 2026-11-07; [design](architecture/budget.md), ADR-0032 and
-[M5 plans](plans/README.md#m5-plans) M5-01…M5-06 are ready. Next: M5-01. M0–M4 accepted 2026-11-07.
+[M5 Budget](product/roadmap.md#m5-budget): [spec](product/features/budget.md) approved 2026-11-07,
+[design](architecture/budget.md), ADR-0032, [M5 plans](plans/README.md#m5-plans). Done: M5-01…M5-06. Next: the
+customer's acceptance on real phones.
+M0–M4 accepted 2026-11-07.
 
-**Active release branch: `release/0.5.2`** (battery saving, ADR-0030; the next milestone gets `release/0.6.0`). Commit approved work here; `main` is protected
-([release process](process/release.md), ADR-0020). Latest release: [v0.5.1](https://github.com/hiraise/Lares/releases/tag/v0.5.1)
-(M3, 2026-10-25).
+**Active release branch: `release/0.6.0`** (M5 Budget). Commit approved work here; `main` is protected
+([release process](process/release.md), ADR-0020). Latest release: [v0.5.2](https://github.com/hiraise/Lares/releases/tag/v0.5.2)
+(2026-11-07).
 
 ## Last completed
 
+- 2026-11-07 M5-06 Budget finished: «Изменить этот месяц» changes one month without the plan («Только декабрь»), every
+  difference marked with an orange dot and «В этом месяце план изменён», «Вернуть как в плане»; «Добавить поступление»
+  for a bonus (its page changes or deletes it); the «Бюджет» card on Today; user manual "Budget" (en, ru). All MVP
+  budget requirements done. 11 new tests; emulator walkthrough of all seven scenarios, light and dark, with a kid; two
+  bugs found and fixed (Budget tile said «Появится…», an amount typed just before leaving the page was lost).
+- 2026-11-07 M5-05 Budget plan editor: «Бюджет › План» with categories (sheet with per-income amounts, «Не
+  использовать», «Удалить» only when unused anywhere, «Выше» / «Ниже»), incomes by day, the read-only table like the
+  notebook, summary «Доход · Категории» with «не сходится на N»; saving asks «С января» / «С декабря (текущий месяц)»;
+  «История плана» opens versions read-only. 13 new tests; emulator walkthrough without bugs.
+- 2026-11-07 M5-04 Budget month UI: «Ещё › Бюджет» shows the current month (free money or shortfall, incomes,
+  categories), «Все месяцы», the income page to record what came in and tick transfers («Перевели» for another
+  amount, «Отметить все»); read-only without checkboxes; empty state without a plan. 15 new tests, emulator walkthrough
+  without bugs.
+- 2026-11-07 M5-03 Budget in the client core: the phone keeps the budget offline and syncs it (tables, adapters with
+  the server's checks, views for every screen, repository, writer); two phones ticking or recording at the same time
+  lose nothing; 23 unit and 6 multi-device tests.
+- 2026-11-07 M5-02 Budget on the server: plan versions, month copies, incomes and ticks stored and synced; only
+  `budget.view` reads and `budget.manage` writes, past plan versions read-only, only extra incomes deletable;
+  `seed.py budget`; 8 new server tests.
+- 2026-11-07 M5-01 Budget contract: plan versions, month copies, receipts and ticks as sync data with derived ids
+  (also in `seed.py`), write rules, validators, `BudgetMath` (plan in force, table checks, differences from the plan,
+  month totals with shortfall and free money) tested on the customer's notebook; 33 new contract tests.
+- 2026-11-07 Release **v0.5.2**: battery saving while sharing location (ADR-0030), calmer tracking indoors, tags apart
+  from people (ADR-0031). Pull request #6. Next branch `release/0.6.0` for M5. Servers must be updated with the app
+  (an older server rejects the new tag colors).
 - 2026-11-07 Budget design and plans: four sync types (`budget_plan` versions by month, `budget_month` month-only
   copy, `budget_receipt`, `budget_funding`), derived ids, `BudgetMath` on the phone (ADR-0032); plans M5-01…M5-06.
   ADR-0031 corrected: an older server rejects the new tag colors.
@@ -196,7 +222,8 @@ the customer (Q-031) and approved on 2026-11-07; [design](architecture/budget.md
 
 1. Release v0.5.2 (battery saving, ADR-0030) when the customer approves; check a day of battery and home tracks on a
    real phone.
-2. M5 Budget: execute plans [M5-01…M5-06](plans/README.md#m5-plans) in order (`/plan-run M5-01`).
+2. M5 acceptance by the customer (plans README § M5 acceptance): APK on the family's phones, the real plan from the
+   notebook, a month of incomes and ticks on two phones; then release 0.6.0 and the spec `implemented`.
 3. Once a VPS and domain exist: install by the manual and check instant notifications end to end on a real phone (FND-051).
 
 ## Plan progress

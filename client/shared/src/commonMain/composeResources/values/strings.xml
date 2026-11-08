@@ -1184,4 +1184,122 @@
     <string name="today_family_title">Family now</string>
     <string name="today_family_map">Map</string>
     <string name="person_where_now">Where now</string>
+    <string name="bud_months_all">All months</string>
+    <string name="bud_prev_month">Previous month</string>
+    <string name="bud_next_month">Next month</string>
+    <string name="bud_hero_free">Free %1$s</string>
+    <string name="bud_hero_shortfall">Short %1$s</string>
+    <string name="bud_hero_over">Transferred more than came in: %1$s</string>
+    <string name="bud_hero_expected">Expected %1$s</string>
+    <string name="bud_hero_done">All distributed</string>
+    <string name="bud_hero_line">Came in %1$s of %2$s · transferred %3$s</string>
+    <string name="bud_incomes">Incomes</string>
+    <string name="bud_categories">Categories</string>
+    <string name="bud_income_title">%1$s · %2$s</string>
+    <string name="bud_income_expected_state">Expected</string>
+    <string name="bud_income_came">Came in %1$s · %2$s</string>
+    <string name="bud_income_came_amount">Came in %1$s</string>
+    <string name="bud_income_shortfall">Short %1$s</string>
+    <string name="bud_income_progress">Transferred %1$d of %2$d</string>
+    <string name="bud_income_all_funded">All transferred</string>
+    <string name="bud_extra_income">Extra income</string>
+    <string name="bud_amount_of">%1$s of %2$s</string>
+    <string name="bud_changed">Changed this month</string>
+    <string name="bud_empty_title">Make a distribution plan</string>
+    <string name="bud_empty_hint_manage">Add the incomes and categories to the plan, and every month opens from it.</string>
+    <string name="bud_empty_hint_view">There is no plan yet. Someone who manages the budget will make it.</string>
+    <string name="bud_create_plan">Create plan</string>
+    <string name="bud_field_came">Came in</string>
+    <string name="bud_field_date">Date</string>
+    <string name="bud_field_came_hint">Expected %1$s</string>
+    <string name="bud_not_came">Not received yet</string>
+    <string name="bud_came_on">Came in %1$s on %2$s</string>
+    <string name="bud_fund_all">Tick all</string>
+    <string name="bud_to_fund">To transfer</string>
+    <string name="bud_funded">Transferred</string>
+    <string name="bud_funded_by">Ticked by %1$s</string>
+    <string name="bud_sheet_title">Transferred</string>
+    <string name="bud_sheet_planned">Planned %1$s</string>
+    <string name="bud_income_free">Not distributed %1$s</string>
+    <string name="bud_income_over">Transferred more than came in: %1$s</string>
+    <string name="bud_income_all_distributed">All distributed</string>
+    <string name="bud_month_row">Expected %1$s · came in %2$s</string>
+    <string name="bud_month_row_current">This month · expected %1$s · came in %2$s</string>
+    <string name="bud_income_gone">This income is no longer in the month</string>
+    <string name="bud_plan">Plan</string>
+    <string name="bud_plan_version_title">Plan from %1$s %2$s</string>
+    <string name="bud_plan_tab_table">Table</string>
+    <string name="bud_plan_summary">Income %1$s · Categories %2$s</string>
+    <string name="bud_plan_mismatch">off by %1$s</string>
+    <string name="bud_plan_bad_cells">Some rows or columns do not add up</string>
+    <string name="bud_plan_add_category">Add category</string>
+    <string name="bud_plan_add_income">Add income</string>
+    <string name="bud_plan_unused_group">Not used</string>
+    <string name="bud_plan_move_up">Move up</string>
+    <string name="bud_plan_move_down">Move down</string>
+    <string name="bud_plan_category_actions">Category actions</string>
+    <string name="bud_plan_distributed">Distributed %1$s of %2$s</string>
+    <string name="bud_plan_income_row">Day %1$d · %2$s</string>
+    <string name="bud_plan_income_day">Day %1$d</string>
+    <string name="bud_plan_cell_label">%1$s · of %2$s</string>
+    <string name="bud_plan_category_new">New category</string>
+    <string name="bud_plan_category">Category</string>
+    <string name="bud_plan_name">Name</string>
+    <string name="bud_plan_amount">Monthly amount</string>
+    <string name="bud_plan_per_income">By income</string>
+    <string name="bud_plan_no_incomes">Add incomes to split the amount between them</string>
+    <string name="bud_plan_unused">Don't use</string>
+    <string name="bud_plan_unused_hint">Stays in the plan history but is left out of new months</string>
+    <string name="bud_plan_name_taken">There is already a category with this name</string>
+    <string name="bud_plan_income">Income</string>
+    <string name="bud_plan_income_new">New income</string>
+    <string name="bud_plan_day">Day of the month</string>
+    <string name="bud_plan_day_hint">In shorter months, the last day</string>
+    <string name="bud_plan_day_error">From 1 to 31</string>
+    <string name="bud_plan_expected">Expected amount</string>
+    <string name="bud_plan_save_title">From which month do the changes apply?</string>
+    <string name="bud_plan_save_from">From %1$s</string>
+    <string name="bud_plan_save_from_current">From %1$s (this month)</string>
+    <string name="bud_plan_save_warning">One-off changes of %1$s will be replaced by the plan. Amounts and ticks stay.</string>
+    <string name="bud_plan_discard_text">Changes to the plan will not be saved.</string>
+    <string name="bud_plan_history">Plan history</string>
+    <string name="bud_plan_history_title">From %1$s %2$s</string>
+    <string name="bud_plan_history_line">%1$s · %2$s</string>
+    <string name="bud_plan_in_force">In force</string>
+    <string name="bud_plan_table_amount">Amount</string>
+    <string name="bud_plan_table_total">Total</string>
+    <string name="bud_plan_empty_categories">No categories yet</string>
+    <string name="bud_plan_empty_incomes">No incomes yet</string>
+    <string-array name="bud_months_only">
+        <item>January only</item>
+        <item>February only</item>
+        <item>March only</item>
+        <item>April only</item>
+        <item>May only</item>
+        <item>June only</item>
+        <item>July only</item>
+        <item>August only</item>
+        <item>September only</item>
+        <item>October only</item>
+        <item>November only</item>
+        <item>December only</item>
+    </string-array>
+    <string name="bud_month_unused_hint">Left out of this month only; the plan stays as it is</string>
+    <string name="bud_month_menu">Month actions</string>
+    <string name="bud_month_edit">Change this month</string>
+    <string name="bud_month_reset">Reset to the plan</string>
+    <string name="bud_month_reset_title">Reset the month to the plan?</string>
+    <string name="bud_month_reset_text">The changes made only for this month will be removed. Ticks and recorded amounts stay.</string>
+    <string name="bud_month_reset_confirm">Reset</string>
+    <string name="bud_month_changed_line">This month differs from the plan</string>
+    <string name="bud_extra_add">Add income</string>
+    <string name="bud_extra_label_hint">Optional, for example “Bonus”</string>
+    <string name="bud_extra_amount">Amount</string>
+    <string name="bud_extra_delete_title">Delete this income?</string>
+    <string name="bud_extra_delete_text">It will disappear from the month.</string>
+    <plurals name="today_budget_not_funded">
+        <item quantity="one">Not transferred: %1$d category</item>
+        <item quantity="other">Not transferred: %1$d categories</item>
+    </plurals>
+    <string name="budget_tile_subtitle">Income by plan</string>
 </resources>

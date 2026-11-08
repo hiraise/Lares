@@ -452,3 +452,61 @@ longer asks (`NotificationPermissions.openNotificationSettings`). Checked on the
 - 2026-11-07 M5 budget design ([architecture/budget.md](architecture/budget.md), ADR-0032): plan versions keyed by
   `effectiveFrom` month, month-only edits as a full table copy, receipts and fundings as upsert-only rows with derived
   ids (markers 0x21–0x24), sums and checks in shared `BudgetMath`; plans M5-01…M5-06 written.
+- 2026-11-07 Release **v0.5.2** (battery saving, indoor tracking, tag look and colors): pull request #6. Next branch
+  `release/0.6.0`.
+- 2026-11-07 M5-01 Budget contract: `BudgetEntities` (plan version, month copy, receipt, funding; `YearMonth` as
+  `"2026-12"` with the library's default serializer), four entity types, derived ids `Ids.budget*RowId` with markers
+  0x21–0x24 (same vectors in `seed.py`), `BudgetRules` and `WriteRules` gates (delete only receipts), budget validators
+  and normalizers, `BudgetMath` (`planFor`, `tableFor`, `incomeDate`, `check`, `differences`, `summary`). Design
+  detail changed: `summary` takes receipts keyed by row id (extra incomes need their id). 33 new contract tests on the
+  customer's notebook (contract 242 total).
+- 2026-11-07 M5-02 Budget on the server: migration `V12__budget.sql` (V10/V11 were taken by location; the plan's
+  `updatedAt` stored as `saved_at`), package `app.lares.server.budget` with four `WritableSyncHandler`s registered after
+  location: derived-id and immutable-field checks (extra receipts need a UUIDv7), `budget.view` reads, `budget.manage`
+  writes, `updatedBy` / new `fundedBy` only the writer, planned receipts not deletable, past plan versions read-only
+  (checked in `validate`, so an unchanged upsert of one is rejected too; a day of grace in the household zone),
+  `fundedAt` / plan `updatedAt` at most a day ahead; housekeeping purges receipt tombstones. Fixtures
+  `BudgetFixtures.kt`, `seed.py budget` (the notebook plan from this month). 8 new server tests.
+- 2026-11-07 M5-03 Budget in the client core: local tables `budget_plan`, `budget_month`, `budget_receipt`,
+  `budget_funding` (migration 6, `DATA_SCHEMA_VERSION = 6`), four adapters with the server's checks (rights, derived ids,
+  immutable fields, writer fields, planned receipts not deletable, past versions with the day of grace, times ahead),
+  `BudgetViews` (months, month, income, plan, history, today), `BudgetRepository` with flows and the "used" queries for
+  category / income deletion, `BudgetWriter` (plan, month copy, reset, incomes, extra incomes, ticks, «Отметить все»).
+  Times truncated to milliseconds so local rows match the shadow. 23 unit tests (adapters, views on the notebook,
+  writer, migration) and 6 multi-device tests (`BudgetSyncTest`: different / same tick offline, same income, plan from next month
+  while ticking, plan from this month resets the copy, no rows for Kids).
+
+- 2026-11-07 M5-04 Budget month UI: «Ещё › Бюджет» opens the current month (gradient hero «Свободно / Недобор /
+  Ожидается», incomes with their state and «Переведено N из M», categories funded of planned with bars and the
+  «изменено» dot), ‹ › and «Все месяцы»; the income page records «Пришло» and «Дата» (prefilled on first edit),
+  «Очистить», ticks categories (square checkboxes, «Перевести» / «Переведено»), the «Перевели» sheet for another amount,
+  «Отметить все», free money of the income; read-only without checkboxes; empty state without a plan (create button
+  waits for M5-05). One amount formatter (U+202F groups, «₽»). 15 new tests (format, hero precedence, screens,
+  view models); emulator walkthrough of spec scenarios 2, 3, 6 in light and dark without bugs (category amount
+  alignment and the «Все месяцы» line fixed after it).
+- 2026-11-07 M5-05 Budget plan editor: `ui/budget/plan/` — the plan as a local draft with live `TableCheck`,
+  «Категории | Поступления | Таблица», category sheet (name, monthly amount, per-income fields, «Распределено X из Y»,
+  «Не использовать», «Удалить» only when `isCategoryUsed` is false), «Выше» / «Ниже» row menu (no drag-to-reorder in
+  the app), income sheet (day, expected amount), the read-only grid with a sticky name column, the summary bar with
+  «не сходится на N», the save dialog (next month by default, the current month for the first plan, warning about
+  month-only changes), «История плана» and read-only versions; «План» and «Создать план» on the Budget screen.
+  13 new tests (6 view model, 7 screen including building through the sheets); emulator walkthrough of scenarios 1
+  and 5, the table with 12 categories, light and dark, without bugs (long category names now end with «…»).
+
+- 2026-11-07 M5-06 Month-only changes, extra incomes, Today card, manual: the plan editor in month mode («Только
+  декабрь», saved with `editMonth`, a one-off category stays in the month, «Удалить» only for month-only rows), the
+  «изменено» dot on categories, incomes and table cells, «В этом месяце план изменён» under the hero, the ⋮ menu with
+  «Изменить этот месяц» / «Вернуть как в плане»; «Добавить поступление» sheet and the extra income page (rename, amount,
+  date, «Удалить»); the «Бюджет» Today card (next income, «Не переведено: N категорий», «Всё распределено»), only with
+  `budget.view` and a plan; user manual "Budget" (en, ru), glossary terms, spec all MVP requirements done. Fixed on the
+  way: `editMonth` compared cells by order (a month set back to the plan stayed a copy), `IncomeViewModel.startEdit`
+  read a lagging state (a typed label was overwritten), income edits typed just before leaving the page were lost
+  (written on back and not cancelled with the view model), amount fields accepted 10 digits (an amount over the
+  limit was refused after the page closed; now 9), the Budget tile said «Появится в следующих версиях».
+  11 new tests (3 view model on a synced core, 7 screen, 1 Today); emulator walkthrough of the seven spec scenarios in
+  ru, light and dark, with a kid. Gate fix: Spotless targets skip build directories (the full gate failed now and then
+  reading class files a parallel compile was replacing).
+
+- 2026-11-08 Fix found while the customer looked at the budget: a quick second tap on a top-bar «Назад» popped the
+  screen behind too, down to an empty white window. Every screen's back now goes through `backAction()`
+  (`dropUnlessResumed`, and never pops the first screen of the graph). Checked on the emulator: Budget and Plan.

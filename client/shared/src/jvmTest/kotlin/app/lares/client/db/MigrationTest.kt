@@ -91,14 +91,30 @@ class MigrationTest {
         assertEquals(emptyList(), old.indexes("position%"))
 
         LaresDb.Schema.migrate(old, 5, 6)
-        assertEquals(6L, LaresDb.Schema.version)
         assertEquals(fresh.schemaOf(*LOCATION_TABLES), old.schemaOf(*LOCATION_TABLES))
         assertEquals(listOf("position_outbox_recorded"), old.indexes("position%"))
+    }
+
+    @Test
+    fun version6DatabaseGetsTheBudgetTablesOfAFreshInstall() {
+        val fresh = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY).also { LaresDb.Schema.create(it) }
+
+        // An M4 database (schema version 6): everything except the budget tables.
+        val old = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
+        LaresDb.Schema.create(old)
+        BUDGET_TABLES.forEach { old.execute(null, "DROP TABLE $it", 0) }
+        assertEquals(emptyList(), old.indexes("budget%"))
+
+        LaresDb.Schema.migrate(old, 6, 7)
+        assertEquals(7L, LaresDb.Schema.version)
+        assertEquals(fresh.schemaOf(*BUDGET_TABLES), old.schemaOf(*BUDGET_TABLES))
+        assertEquals(listOf("budget_funding_month", "budget_month_month", "budget_receipt_month"), old.indexes("budget%"))
     }
 
     private companion object {
         val SHOPPING_TABLES = arrayOf("shopping_list", "shopping_item")
         val CALENDAR_TABLES = arrayOf("event", "event_occurrence", "event_reminder", "notification_pref")
         val LOCATION_TABLES = arrayOf("place", "place_alert", "position_outbox", "location_pref", "location_snapshot")
+        val BUDGET_TABLES = arrayOf("budget_plan", "budget_month", "budget_receipt", "budget_funding")
     }
 }

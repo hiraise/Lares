@@ -1,0 +1,25 @@
+-- Budget plan versions (ADR-0032): the whole table in force from `effective_from` ("2026-12") on. The id is derived
+-- from household and month; rows are never deleted. `plan_table` is the contract BudgetTable as JSON; `updated_at` is
+-- the version's own save time (the history), in epoch milliseconds.
+CREATE TABLE budget_plan (
+    id TEXT NOT NULL PRIMARY KEY,
+    effective_from TEXT NOT NULL,
+    plan_table TEXT NOT NULL,
+    updated_by TEXT NOT NULL,
+    updated_at INTEGER NOT NULL
+);
+
+selectAll:
+SELECT * FROM budget_plan ORDER BY effective_from;
+
+selectById:
+SELECT * FROM budget_plan WHERE id = ?;
+
+upsert:
+INSERT OR REPLACE INTO budget_plan (id, effective_from, plan_table, updated_by, updated_at) VALUES (?, ?, ?, ?, ?);
+
+deleteById:
+DELETE FROM budget_plan WHERE id = ?;
+
+deleteAll:
+DELETE FROM budget_plan;

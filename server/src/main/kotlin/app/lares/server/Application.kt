@@ -1,5 +1,9 @@
 package app.lares.server
 
+import app.lares.server.budget.BudgetFundingSyncHandler
+import app.lares.server.budget.BudgetMonthSyncHandler
+import app.lares.server.budget.BudgetPlanSyncHandler
+import app.lares.server.budget.BudgetReceiptSyncHandler
 import app.lares.server.calendar.EventNotifier
 import app.lares.server.calendar.EventOccurrenceSyncHandler
 import app.lares.server.calendar.EventReminderSyncHandler
@@ -168,6 +172,10 @@ class AppDeps(
                 EventReminderSyncHandler(),
                 PlaceSyncHandler(locationHub),
                 PlaceAlertSyncHandler(),
+                BudgetPlanSyncHandler(),
+                BudgetMonthSyncHandler(),
+                BudgetReceiptSyncHandler(),
+                BudgetFundingSyncHandler(),
             ),
         )
     val syncPullService = SyncPullService(db, syncHandlers, permissionService)

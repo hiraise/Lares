@@ -3,6 +3,7 @@ package app.lares.client.ui
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -15,6 +16,13 @@ import app.lares.client.platform.EventLinks
 import app.lares.client.platform.NavTarget
 import app.lares.client.platform.PendingNavigation
 import app.lares.client.platform.TaskLinks
+import app.lares.client.ui.budget.BudgetRoute
+import app.lares.client.ui.budget.IncomeArgs
+import app.lares.client.ui.budget.IncomeRoute
+import app.lares.client.ui.budget.MonthsRoute
+import app.lares.client.ui.budget.plan.PlanArgs
+import app.lares.client.ui.budget.plan.PlanHistoryRoute
+import app.lares.client.ui.budget.plan.PlanRoute
 import app.lares.client.ui.calendar.EventEditorArgs
 import app.lares.client.ui.calendar.EventEditorRoute
 import app.lares.client.ui.calendar.EventRoute
@@ -64,6 +72,7 @@ import app.lares.contract.DeepLink
 import app.lares.contract.permissions.Section
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.YearMonth
 import kotlinx.serialization.Serializable
 import org.koin.compose.koinInject
 
@@ -149,6 +158,38 @@ data class PlaceEditorDestination(
     val lat: Double? = null,
     val lon: Double? = null,
 )
+
+/** «Ещё › Бюджет» (M5-04); [month] is an ISO year-month picked in «Все месяцы», null = the current month. */
+@Serializable
+data class BudgetDestination(
+    val month: String? = null,
+)
+
+/** The income page of a planned income [incomeId] (M5-04) or of an extra income [receiptId] (M5-06); [month] is an ISO year-month. */
+@Serializable
+data class BudgetIncomeDestination(
+    val month: String,
+    val incomeId: String? = null,
+    val receiptId: String? = null,
+)
+
+/** «Все месяцы» of the budget (M5-04). */
+@Serializable
+data object BudgetMonthsDestination
+
+/**
+ * The budget plan (M5-05); [version] is an ISO year-month of a version shown read-only, [month] one month changed
+ * without the plan (M5-06); both null = edit the plan.
+ */
+@Serializable
+data class BudgetPlanDestination(
+    val version: String? = null,
+    val month: String? = null,
+)
+
+/** «История плана» (M5-05). */
+@Serializable
+data object BudgetPlanHistoryDestination
 
 @Serializable
 data object AboutDestination
@@ -323,7 +364,7 @@ fun OnboardingNavHost(
                 onBack = { navController.backOrServer() },
             )
         }
-        composable<QrScanDestination> { QrScanRoute(onBack = { navController.popBackStack() }) }
+        composable<QrScanDestination> { QrScanRoute(onBack = navController.backAction()) }
     }
 }
 
@@ -338,6 +379,17 @@ private fun NavHostController.backOrServer() {
     if (previousBackStackEntry != null) popBackStack() else backToServer()
 }
 
+/**
+ * «Назад» of a screen: only while the screen is the resumed one, and never popping the first screen of the graph. A
+ * quick second tap on a top-bar arrow (or one during the slow exit animation) used to pop the screen behind too, down to
+ * an empty window.
+ */
+@Composable
+private fun NavHostController.backAction(): () -> Unit =
+    dropUnlessResumed {
+        if (previousBackStackEntry != null) popBackStack()
+    }
+
 /** Sections (bottom bar) and the screens opened from them. */
 @Composable
 fun MainNavHost() {
@@ -351,12 +403,10 @@ fun MainNavHost() {
                     onProfile = { navController.navigate(ProfileDestination) },
                     onDevices = { navController.navigate(DevicesDestination) },
                     onSection = {
-                        if (it ==
-                            Section.MAP
-                        ) {
-                            navController.navigate(MapDestination())
-                        } else {
-                            navController.navigate(SectionPageDestination(it))
+                        when (it) {
+                            Section.MAP -> navController.navigate(MapDestination())
+                            Section.BUDGET -> navController.navigate(BudgetDestination())
+                            else -> navController.navigate(SectionPageDestination(it))
                         }
                     },
                     onFamily = { navController.navigate(FamilyDestination(it)) },
@@ -367,6 +417,7 @@ fun MainNavHost() {
                     onEventEditor = { navController.navigate(EventEditorDestination.of(it)) },
                     onPerson = { navController.navigate(PersonDestination(it)) },
                     onMap = { navController.navigate(MapDestination(memberId = it)) },
+                    onBudget = { navController.navigate(BudgetDestination()) },
                 ),
             )
         }
@@ -375,7 +426,7 @@ fun MainNavHost() {
             EventRoute(
                 route.id,
                 route.occurrence?.let(LocalDate::parse),
-                onBack = { navController.popBackStack() },
+                onBack = navController.backAction(),
                 onEdit = { navController.navigate(EventEditorDestination.of(it)) },
                 onTag = { navController.navigate(TagDestination(it)) },
             )
@@ -383,7 +434,7 @@ fun MainNavHost() {
         composable<EventEditorDestination> { entry ->
             EventEditorRoute(
                 entry.toRoute<EventEditorDestination>().toArgs(),
-                onBack = { navController.popBackStack() },
+                onBack = navController.backAction(),
                 // The new event's page replaces the editor, so Back returns to the calendar.
                 onCreated = { id ->
                     navController.navigate(EventDestination(id)) { popUpTo<EventEditorDestination> { inclusive = true } }
@@ -396,13 +447,13 @@ fun MainNavHost() {
         }
         composable<ShoppingListDestination> { entry ->
             val route = entry.toRoute<ShoppingListDestination>()
-            ShoppingListRoute(route.id, onBack = { navController.popBackStack() }, tagId = route.tagId)
+            ShoppingListRoute(route.id, onBack = navController.backAction(), tagId = route.tagId)
         }
         composable<TaskDetailDestination> { entry ->
             val id = entry.toRoute<TaskDetailDestination>().id
             TaskDetailRoute(
                 id,
-                onBack = { navController.popBackStack() },
+                onBack = navController.backAction(),
                 onEdit = { navController.navigate(TaskEditorDestination(id)) },
                 onTag = { navController.navigate(TagDestination(it)) },
             )
@@ -410,7 +461,7 @@ fun MainNavHost() {
         composable<TaskEditorDestination> { entry ->
             TaskEditorRoute(
                 entry.toRoute<TaskEditorDestination>().toArgs(),
-                onBack = { navController.popBackStack() },
+                onBack = navController.backAction(),
                 // The new task's page replaces the editor, so Back returns to the list.
                 onCreated = { id ->
                     navController.navigate(TaskDetailDestination(id)) { popUpTo<TaskEditorDestination> { inclusive = true } }
@@ -422,35 +473,75 @@ fun MainNavHost() {
             if (section == Section.MAP) {
                 MapRoute(
                     MapArgs(),
-                    onBack = { navController.popBackStack() },
+                    onBack = navController.backAction(),
                     onHistory = { navController.navigate(LocationHistoryDestination(it)) },
                     onPlaceEditor = { navController.navigate(PlaceEditorDestination(it.id, it.lat, it.lon)) },
                 )
             } else {
-                SectionPlaceholderPage(section, onBack = { navController.popBackStack() })
+                SectionPlaceholderPage(section, onBack = navController.backAction())
             }
+        }
+        composable<BudgetDestination> { entry ->
+            BudgetRoute(
+                entry.toRoute<BudgetDestination>().month?.let(YearMonth::parse),
+                onBack = navController.backAction(),
+                onIncome = { month, id -> navController.navigate(BudgetIncomeDestination(month.toString(), incomeId = id)) },
+                onMonths = { navController.navigate(BudgetMonthsDestination) },
+                onPlan = { navController.navigate(BudgetPlanDestination()) },
+                onExtra = { month, id -> navController.navigate(BudgetIncomeDestination(month.toString(), receiptId = id)) },
+                onEditMonth = { navController.navigate(BudgetPlanDestination(month = it.toString())) },
+            )
+        }
+        composable<BudgetPlanDestination> { entry ->
+            val route = entry.toRoute<BudgetPlanDestination>()
+            PlanRoute(
+                PlanArgs(version = route.version?.let(YearMonth::parse), month = route.month?.let(YearMonth::parse)),
+                onBack = navController.backAction(),
+                onHistory = { navController.navigate(BudgetPlanHistoryDestination) },
+            )
+        }
+        composable<BudgetPlanHistoryDestination> {
+            PlanHistoryRoute(
+                onBack = navController.backAction(),
+                onVersion = { navController.navigate(BudgetPlanDestination(it.toString())) },
+            )
+        }
+        composable<BudgetIncomeDestination> { entry ->
+            val route = entry.toRoute<BudgetIncomeDestination>()
+            IncomeRoute(
+                IncomeArgs(YearMonth.parse(route.month), route.incomeId, route.receiptId),
+                onBack = navController.backAction(),
+            )
+        }
+        composable<BudgetMonthsDestination> {
+            MonthsRoute(
+                onBack = navController.backAction(),
+                onPick = { month ->
+                    navController.navigate(BudgetDestination(month.toString())) { popUpTo<BudgetDestination> { inclusive = true } }
+                },
+            )
         }
         composable<MapDestination> { entry ->
             val route = entry.toRoute<MapDestination>()
             MapRoute(
                 MapArgs(route.memberId, route.placeId),
-                onBack = { navController.popBackStack() },
+                onBack = navController.backAction(),
                 onHistory = { navController.navigate(LocationHistoryDestination(it)) },
                 onPlaceEditor = { navController.navigate(PlaceEditorDestination(it.id, it.lat, it.lon)) },
             )
         }
         composable<LocationHistoryDestination> { entry ->
             val route = entry.toRoute<LocationHistoryDestination>()
-            HistoryRoute(HistoryArgs(route.memberId, route.date?.let(LocalDate::parse)), onBack = { navController.popBackStack() })
+            HistoryRoute(HistoryArgs(route.memberId, route.date?.let(LocalDate::parse)), onBack = navController.backAction())
         }
         composable<PlaceEditorDestination> { entry ->
             val route = entry.toRoute<PlaceEditorDestination>()
-            PlaceEditorRoute(PlaceEditorArgs(route.id, route.lat, route.lon), onBack = { navController.popBackStack() })
+            PlaceEditorRoute(PlaceEditorArgs(route.id, route.lat, route.lon), onBack = navController.backAction())
         }
         composable<SettingsDestination> {
             SettingsRoute(
                 SettingsNavigation(
-                    onBack = { navController.popBackStack() },
+                    onBack = navController.backAction(),
                     onProfile = { navController.navigate(ProfileDestination) },
                     onDevices = { navController.navigate(DevicesDestination) },
                     onNotifications = { navController.navigate(NotificationSettingsDestination) },
@@ -461,20 +552,20 @@ fun MainNavHost() {
         }
         composable<ProfileDestination> {
             ProfileRoute(
-                onBack = { navController.popBackStack() },
+                onBack = navController.backAction(),
                 onChangePassword = { navController.navigate(ChangePasswordDestination) },
                 onLoginOtherDevice = { navController.navigate(LoginQrDestination) },
             )
         }
-        composable<ChangePasswordDestination> { ChangePasswordRoute(onBack = { navController.popBackStack() }) }
-        composable<LoginQrDestination> { LoginQrRoute(onBack = { navController.popBackStack() }) }
-        composable<DevicesDestination> { DevicesRoute(onBack = { navController.popBackStack() }) }
-        composable<NotificationSettingsDestination> { NotificationSettingsRoute(onBack = { navController.popBackStack() }) }
-        composable<LocationSettingsDestination> { LocationSettingsRoute(onBack = { navController.popBackStack() }) }
+        composable<ChangePasswordDestination> { ChangePasswordRoute(onBack = navController.backAction()) }
+        composable<LoginQrDestination> { LoginQrRoute(onBack = navController.backAction()) }
+        composable<DevicesDestination> { DevicesRoute(onBack = navController.backAction()) }
+        composable<NotificationSettingsDestination> { NotificationSettingsRoute(onBack = navController.backAction()) }
+        composable<LocationSettingsDestination> { LocationSettingsRoute(onBack = navController.backAction()) }
         composable<AboutDestination> {
-            AboutRoute(onBack = { navController.popBackStack() }, onLicenses = { navController.navigate(LicensesDestination) })
+            AboutRoute(onBack = navController.backAction(), onLicenses = { navController.navigate(LicensesDestination) })
         }
-        composable<LicensesDestination> { LicensesRoute(onBack = { navController.popBackStack() }) }
+        composable<LicensesDestination> { LicensesRoute(onBack = navController.backAction()) }
         familyGraph(navController)
     }
 }
@@ -535,13 +626,12 @@ private fun NotificationTaps(
 
 /** Family (plan M0-08): tabs, member detail, adding members, groups, persons, family settings. */
 private fun NavGraphBuilder.familyGraph(navController: NavHostController) {
-    val back: () -> Unit = { navController.popBackStack() }
     composable<FamilyDestination> { entry ->
         FamilyRoute(
             initialTab = entry.toRoute<FamilyDestination>().tab,
             navigation =
                 FamilyNavigation(
-                    onBack = back,
+                    onBack = navController.backAction(),
                     onMember = { navController.navigate(MemberDestination(it)) },
                     onAddMember = { navController.navigate(AddMemberDestination(it)) },
                     onGroup = { navController.navigate(GroupDestination(it)) },
@@ -554,7 +644,7 @@ private fun NavGraphBuilder.familyGraph(navController: NavHostController) {
     composable<TagDestination> { entry ->
         TagRoute(
             entry.toRoute<TagDestination>().id,
-            onBack = back,
+            onBack = navController.backAction(),
             onTask = { navController.navigate(TaskDetailDestination(it)) },
             onShoppingList = { id, tagId -> navController.navigate(ShoppingListDestination(id, tagId)) },
             onEvent = { id, occurrence -> navController.navigate(EventDestination(id, occurrence.toString())) },
@@ -563,7 +653,7 @@ private fun NavGraphBuilder.familyGraph(navController: NavHostController) {
     composable<MemberDestination> { entry ->
         MemberDetailRoute(
             memberId = entry.toRoute<MemberDestination>().memberId,
-            onBack = back,
+            onBack = navController.backAction(),
             onPerson = { navController.navigate(PersonDestination(it)) },
             onLoginQr = { id, name -> navController.navigate(MemberLoginQrDestination(id, name)) },
         )
@@ -571,7 +661,7 @@ private fun NavGraphBuilder.familyGraph(navController: NavHostController) {
     composable<AddMemberDestination> { entry ->
         AddMemberRoute(
             mode = entry.toRoute<AddMemberDestination>().mode,
-            onBack = back,
+            onBack = navController.backAction(),
             onMemberCreated = { id, name ->
                 // The new account logs in by QR next; Back from there returns to the family.
                 navController.navigate(MemberLoginQrDestination(id, name)) { popUpTo<AddMemberDestination> { inclusive = true } }
@@ -580,13 +670,15 @@ private fun NavGraphBuilder.familyGraph(navController: NavHostController) {
     }
     composable<MemberLoginQrDestination> { entry ->
         val route = entry.toRoute<MemberLoginQrDestination>()
-        LoginQrRoute(onBack = back, memberId = route.memberId, memberName = route.name)
+        LoginQrRoute(onBack = navController.backAction(), memberId = route.memberId, memberName = route.name)
     }
-    composable<GroupDestination> { entry -> GroupEditorRoute(entry.toRoute<GroupDestination>().groupId, onBack = back) }
+    composable<GroupDestination> { entry ->
+        GroupEditorRoute(entry.toRoute<GroupDestination>().groupId, onBack = navController.backAction())
+    }
     composable<PersonDestination> { entry ->
         PersonRoute(
             entry.toRoute<PersonDestination>().personId,
-            onBack = back,
+            onBack = navController.backAction(),
             onEvent = { navController.navigate(EventDestination(it)) },
             onAddMemorable = { navController.navigate(EventEditorDestination.of(EventEditorArgs(memorable = true, personId = it))) },
             onMap = { navController.navigate(MapDestination(memberId = it)) },
@@ -594,7 +686,7 @@ private fun NavGraphBuilder.familyGraph(navController: NavHostController) {
         )
     }
     composable<FamilySettingsDestination> {
-        FamilySettingsRoute(onBack = back, onLocationRules = { navController.navigate(LocationRulesDestination) })
+        FamilySettingsRoute(onBack = navController.backAction(), onLocationRules = { navController.navigate(LocationRulesDestination) })
     }
-    composable<LocationRulesDestination> { LocationRulesRoute(onBack = back) }
+    composable<LocationRulesDestination> { LocationRulesRoute(onBack = navController.backAction()) }
 }

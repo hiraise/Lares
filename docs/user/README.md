@@ -11,9 +11,10 @@ Available:
 - Shopping lists: adding items, departments, ticking off in a store, suggestions, tags: [en](en/shopping.md), [ru](ru/shopping.md)
 - Calendar: views and filters, events and repeats, reminders, birthdays and memorable dates, notifications: [en](en/calendar.md), [ru](ru/calendar.md)
 - Map: sharing and battery settings on different phone brands, pause, places, arrive and leave notifications, history, who sees whom, privacy: [en](en/map.md), [ru](ru/map.md)
+- Budget: the distribution plan and its versions, a month, recording incomes, ticking transfers, extra incomes, changing only one month, who sees what: [en](en/budget.md), [ru](ru/budget.md)
 
 Planned:
 
 - First setup: household, inviting members, child accounts
 - Installing the Android app and connecting to the server
-- One guide per module: budget, tags
+- One guide per module: tags

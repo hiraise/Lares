@@ -13,6 +13,11 @@ import app.lares.client.platform.DeepLinkHandler
 import app.lares.client.platform.EventLinks
 import app.lares.client.platform.PendingNavigation
 import app.lares.client.platform.TaskLinks
+import app.lares.client.ui.budget.BudgetViewModel
+import app.lares.client.ui.budget.IncomeViewModel
+import app.lares.client.ui.budget.plan.PlanArgs
+import app.lares.client.ui.budget.plan.PlanHistoryViewModel
+import app.lares.client.ui.budget.plan.PlanViewModel
 import app.lares.client.ui.calendar.CalendarViewModel
 import app.lares.client.ui.calendar.EventEditorViewModel
 import app.lares.client.ui.calendar.EventViewModel
@@ -111,6 +116,10 @@ fun uiModule(): Module =
         viewModel { LocationRulesViewModel(get(), get(), get(), get(), get(), get()) }
         viewModel { params -> HistoryViewModel(get(), get(), get(), get(), getOrNull<Clock>() ?: Clock.System, params.get()) }
         viewModel { params -> PlaceEditorViewModel(get(), get(), get(), get(), get(), params.get()) }
+        viewModel { BudgetViewModel(get(), get()) }
+        viewModel { params -> IncomeViewModel(get(), get(), params.get()) }
+        viewModel { params -> PlanViewModel(get(), get(), params.getOrNull<PlanArgs>() ?: PlanArgs()) }
+        viewModel { PlanHistoryViewModel(get()) }
         viewModel { AboutViewModel(get(), get(), get()) }
         viewModel { FamilyViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
         viewModel { params -> MemberDetailViewModel(get(), get(), get(), get(), get(), get(), params.get()) }
@@ -131,7 +140,7 @@ fun uiModule(): Module =
         }
         viewModel { FamilySettingsViewModel(get(), get(), get(), get()) }
         viewModel { TasksViewModel(get(), get(), get()) }
-        viewModel { TodayViewModel(get(), get(), get(), get(), get()) }
+        viewModel { TodayViewModel(get(), get(), get(), get(), get(), get()) }
         viewModel { params -> TagViewModel(get(), get(), get(), get(), get(), params.get(), get()) }
         viewModel { params -> TaskDetailViewModel(get(), get(), params.get()) }
         viewModel { params -> TaskEditorViewModel(get(), get(), get(), get(), get(), params.get()) }

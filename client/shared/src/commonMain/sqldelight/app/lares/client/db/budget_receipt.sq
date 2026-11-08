@@ -1,0 +1,29 @@
+-- Actual incomes of a month (BUD-011). A planned income's row has an id derived from income and month and is never
+-- deleted; an extra income (`income_id` NULL) has a random id and may be deleted. `date` is ISO; NULL amount = not
+-- recorded.
+CREATE TABLE budget_receipt (
+    id TEXT NOT NULL PRIMARY KEY,
+    month TEXT NOT NULL,
+    income_id TEXT,
+    label TEXT,
+    amount INTEGER,
+    date TEXT,
+    updated_by TEXT NOT NULL
+);
+
+CREATE INDEX budget_receipt_month ON budget_receipt (month);
+
+selectAll:
+SELECT * FROM budget_receipt ORDER BY month, id;
+
+selectById:
+SELECT * FROM budget_receipt WHERE id = ?;
+
+upsert:
+INSERT OR REPLACE INTO budget_receipt (id, month, income_id, label, amount, date, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?);
+
+deleteById:
+DELETE FROM budget_receipt WHERE id = ?;
+
+deleteAll:
+DELETE FROM budget_receipt;

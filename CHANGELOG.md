@@ -5,6 +5,30 @@ Versioning: [SemVer](https://semver.org/) from the first release.
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-08
+
+### Added
+
+- Budget: «Ещё › Бюджет» shows the current month — free money or shortfall, each income expected and received, how
+  much of each category is transferred. Record what came in and tick the categories you transferred (another amount
+  through the amount), «Отметить все»; past months from «Все месяцы». Members who may only view see it without
+  checkboxes.
+- Budget plan: «Бюджет › План» builds and changes the distribution plan like the notebook — incomes by day, categories
+  with monthly amounts split between the incomes, the table with rows and columns that do not add up highlighted.
+  Saving asks from which month the change applies (next or this month); «История плана» shows earlier versions.
+- Budget: change only this month without touching the plan (menu «Изменить этот месяц», for example more for gifts in
+  December); every difference from the plan is marked with an orange dot and «В этом месяце план изменён», «Вернуть как
+  в плане» undoes it. «Добавить поступление» records a bonus or other income outside the plan, counted as free money.
+- Today shows a «Бюджет» card: the next income to record and how many categories are not transferred yet.
+- User manual "Budget" (en, ru).
+
+### Fixed
+
+- Tapping «Назад» twice quickly no longer leaves an empty white screen (it closed the main screen too) or closes two
+  screens at once.
+
+Update the server together with the app: the budget needs server 0.6.0 (it adds the budget tables on start).
+
 ## [0.5.2] - 2026-11-07
 
 ### Changed

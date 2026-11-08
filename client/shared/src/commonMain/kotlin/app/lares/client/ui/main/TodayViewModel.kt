@@ -3,6 +3,9 @@ package app.lares.client.ui.main
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.lares.client.data.MemberView
+import app.lares.client.data.budget.BudgetInputs
+import app.lares.client.data.budget.BudgetRepository
+import app.lares.client.data.budget.BudgetViews
 import app.lares.client.data.calendar.CalendarItem
 import app.lares.client.data.calendar.CalendarRepository
 import app.lares.client.data.calendar.DatedItem
@@ -21,6 +24,7 @@ import app.lares.client.ui.tasks.TaskEvent
 import app.lares.client.ui.tasks.TaskRowUi
 import app.lares.client.ui.tasks.TaskRows
 import app.lares.client.ui.tasks.TaskTicker
+import app.lares.contract.budget.IncomeSummary
 import app.lares.contract.permissions.Permission
 import app.lares.contract.tasks.TaskGroup
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +32,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -62,7 +67,17 @@ data class TodayUpcomingUi(
     val allNames: List<String>,
 )
 
-/** The "Today" blocks (FND-063): the active shopping list, the tasks (TSK-023) and «Скоро» (CAL-019). */
+/**
+ * The budget card on Today (BUD-021): the next income whose actual amount is not recorded and how many categories of
+ * recorded incomes are not ticked yet; [today] for the date of the income.
+ */
+data class TodayBudgetUi(
+    val nextIncome: IncomeSummary?,
+    val notFunded: Int,
+    val today: LocalDate,
+)
+
+/** The "Today" blocks (FND-063): the active shopping list, the tasks (TSK-023), «Скоро» (CAL-019) and the budget (BUD-021). */
 data class TodayUiState(
     val loaded: Boolean = false,
     /** Null when the member does not see Shopping or no list has items to buy. */
@@ -79,9 +94,11 @@ data class TodayUiState(
     val allNames: List<String> = emptyList(),
     /** Null without `calendar.view` or when nothing is coming up. */
     val upcoming: TodayUpcomingUi? = null,
+    /** Null without `budget.view` or without a plan. */
+    val budget: TodayBudgetUi? = null,
 ) {
     /** Nothing to show: the empty state. */
-    val empty: Boolean get() = loaded && shopping == null && !showTasks && upcoming == null
+    val empty: Boolean get() = loaded && shopping == null && !showTasks && upcoming == null && budget == null
 }
 
 /**
@@ -94,14 +111,20 @@ class TodayViewModel(
     shopping: ShoppingRepository,
     calendar: CalendarRepository,
     live: LiveLocations? = null,
+    budget: BudgetRepository? = null,
 ) : ViewModel() {
     private val ticker = TaskTicker(viewModelScope, writer)
 
     val events: Flow<TaskEvent> = ticker.events
 
     val state: StateFlow<TodayUiState> =
-        combine(repository.observeInputs(), shopping.observeActive(), calendar.observeUpcoming(), ::build)
-            .flowOn(Dispatchers.Default)
+        combine(
+            repository.observeInputs(),
+            shopping.observeActive(),
+            calendar.observeUpcoming(),
+            budget?.observeInputs()?.map(::budgetCard)?.distinctUntilChanged() ?: flowOf(null),
+            ::build,
+        ).flowOn(Dispatchers.Default)
             .stateIn(viewModelScope, SharingStarted.Eagerly, TodayUiState())
 
     /**
@@ -125,16 +148,22 @@ class TodayViewModel(
             return if (rows.isEmpty()) null else TodayFamilyNowUi(rows, state.members.map { it.member.name })
         }
 
+        /** The budget card of the current month; null without a plan in force (BUD-021). */
+        fun budgetCard(inputs: BudgetInputs): TodayBudgetUi? =
+            BudgetViews.today(inputs)?.let { TodayBudgetUi(it.nextIncome, it.notFunded, inputs.today) }
+
         fun build(
             inputs: TaskInputs,
             active: ActiveList? = null,
             coming: Upcoming? = null,
+            budgetCard: TodayBudgetUi? = null,
         ): TodayUiState {
             val viewer = inputs.viewer
             val shopping = active?.takeIf { viewer?.permissions?.has(Permission.SHOPPING_VIEW) == true }?.let(::shopping)
             val upcoming = coming?.takeIf { viewer?.permissions?.has(Permission.CALENDAR_VIEW) == true }?.let(::upcoming)
+            val budget = budgetCard?.takeIf { viewer?.permissions?.has(Permission.BUDGET_VIEW) == true }
             if (viewer == null || !viewer.permissions.has(Permission.TASKS_VIEW)) {
-                return TodayUiState(loaded = true, shopping = shopping, upcoming = upcoming)
+                return TodayUiState(loaded = true, shopping = shopping, upcoming = upcoming, budget = budget)
             }
             val mine = TaskViews.filter(TaskViews.build(inputs), TaskFilter(scope = TaskScope.MINE), viewer.memberId)
             val views =
@@ -153,6 +182,7 @@ class TodayViewModel(
                 more = (views.size - MAX_ROWS).coerceAtLeast(0),
                 allNames = rows.allNames,
                 upcoming = upcoming,
+                budget = budget,
             )
         }
 

@@ -1225,4 +1225,124 @@
     <string name="today_family_title">Семья сейчас</string>
     <string name="today_family_map">Карта</string>
     <string name="person_where_now">Где сейчас</string>
+    <string name="bud_months_all">Все месяцы</string>
+    <string name="bud_prev_month">Предыдущий месяц</string>
+    <string name="bud_next_month">Следующий месяц</string>
+    <string name="bud_hero_free">Свободно %1$s</string>
+    <string name="bud_hero_shortfall">Недобор %1$s</string>
+    <string name="bud_hero_over">Переведено больше, чем пришло: %1$s</string>
+    <string name="bud_hero_expected">Ожидается %1$s</string>
+    <string name="bud_hero_done">Всё распределено</string>
+    <string name="bud_hero_line">Пришло %1$s из %2$s · переведено %3$s</string>
+    <string name="bud_incomes">Поступления</string>
+    <string name="bud_categories">Категории</string>
+    <string name="bud_income_title">%1$s · %2$s</string>
+    <string name="bud_income_expected_state">Ожидается</string>
+    <string name="bud_income_came">Пришло %1$s · %2$s</string>
+    <string name="bud_income_came_amount">Пришло %1$s</string>
+    <string name="bud_income_shortfall">Недобор %1$s</string>
+    <string name="bud_income_progress">Переведено %1$d из %2$d</string>
+    <string name="bud_income_all_funded">Всё переведено</string>
+    <string name="bud_extra_income">Дополнительное поступление</string>
+    <string name="bud_amount_of">%1$s из %2$s</string>
+    <string name="bud_changed">Изменено в этом месяце</string>
+    <string name="bud_empty_title">Составьте план распределения</string>
+    <string name="bud_empty_hint_manage">Добавьте в план поступления и категории — каждый месяц будет открываться по нему.</string>
+    <string name="bud_empty_hint_view">Плана пока нет. Его составит тот, кто ведёт бюджет.</string>
+    <string name="bud_create_plan">Создать план</string>
+    <string name="bud_field_came">Пришло</string>
+    <string name="bud_field_date">Дата</string>
+    <string name="bud_field_came_hint">Ожидается %1$s</string>
+    <string name="bud_not_came">Ещё не пришло</string>
+    <string name="bud_came_on">Пришло %1$s, %2$s</string>
+    <string name="bud_fund_all">Отметить все</string>
+    <string name="bud_to_fund">Перевести</string>
+    <string name="bud_funded">Переведено</string>
+    <string name="bud_funded_by">Отметка: %1$s</string>
+    <string name="bud_sheet_title">Перевели</string>
+    <string name="bud_sheet_planned">По плану %1$s</string>
+    <string name="bud_income_free">Не распределено %1$s</string>
+    <string name="bud_income_over">Переведено больше, чем пришло: %1$s</string>
+    <string name="bud_income_all_distributed">Всё распределено</string>
+    <string name="bud_month_row">Ожидается %1$s · пришло %2$s</string>
+    <string name="bud_month_row_current">Текущий месяц · ожидается %1$s · пришло %2$s</string>
+    <string name="bud_income_gone">Этого поступления больше нет в месяце</string>
+    <string name="bud_plan">План</string>
+    <string name="bud_plan_version_title">План с %1$s %2$s</string>
+    <string name="bud_plan_tab_table">Таблица</string>
+    <string name="bud_plan_summary">Доход %1$s · Категории %2$s</string>
+    <string name="bud_plan_mismatch">не сходится на %1$s</string>
+    <string name="bud_plan_bad_cells">Есть строки или столбцы, которые не сходятся</string>
+    <string name="bud_plan_add_category">Добавить категорию</string>
+    <string name="bud_plan_add_income">Добавить поступление</string>
+    <string name="bud_plan_unused_group">Не используются</string>
+    <string name="bud_plan_move_up">Выше</string>
+    <string name="bud_plan_move_down">Ниже</string>
+    <string name="bud_plan_category_actions">Действия с категорией</string>
+    <string name="bud_plan_distributed">Распределено %1$s из %2$s</string>
+    <string name="bud_plan_income_row">%1$d-е число · %2$s</string>
+    <string name="bud_plan_income_day">%1$d-е</string>
+    <string name="bud_plan_cell_label">%1$s · из %2$s</string>
+    <string name="bud_plan_category_new">Новая категория</string>
+    <string name="bud_plan_category">Категория</string>
+    <string name="bud_plan_name">Название</string>
+    <string name="bud_plan_amount">Сумма в месяц</string>
+    <string name="bud_plan_per_income">По поступлениям</string>
+    <string name="bud_plan_no_incomes">Добавьте поступления, чтобы разделить сумму между ними</string>
+    <string name="bud_plan_unused">Не использовать</string>
+    <string name="bud_plan_unused_hint">Останется в истории плана, но не попадёт в новые месяцы</string>
+    <string name="bud_plan_name_taken">Такая категория уже есть</string>
+    <string name="bud_plan_income">Поступление</string>
+    <string name="bud_plan_income_new">Новое поступление</string>
+    <string name="bud_plan_day">День месяца</string>
+    <string name="bud_plan_day_hint">В коротких месяцах — последний день</string>
+    <string name="bud_plan_day_error">От 1 до 31</string>
+    <string name="bud_plan_expected">Ожидаемая сумма</string>
+    <string name="bud_plan_save_title">С какого месяца действуют изменения?</string>
+    <string name="bud_plan_save_from">С %1$s</string>
+    <string name="bud_plan_save_from_current">С %1$s (текущий месяц)</string>
+    <string name="bud_plan_save_warning">Разовые изменения %1$s будут заменены планом. Отметки и суммы останутся.</string>
+    <string name="bud_plan_discard_text">Изменения в плане не сохранятся.</string>
+    <string name="bud_plan_history">История плана</string>
+    <string name="bud_plan_history_title">С %1$s %2$s</string>
+    <string name="bud_plan_history_line">%1$s · %2$s</string>
+    <string name="bud_plan_in_force">Действует</string>
+    <string name="bud_plan_table_amount">Сумма</string>
+    <string name="bud_plan_table_total">Итого</string>
+    <string name="bud_plan_empty_categories">Категорий пока нет</string>
+    <string name="bud_plan_empty_incomes">Поступлений пока нет</string>
+    <string-array name="bud_months_only">
+        <item>Только январь</item>
+        <item>Только февраль</item>
+        <item>Только март</item>
+        <item>Только апрель</item>
+        <item>Только май</item>
+        <item>Только июнь</item>
+        <item>Только июль</item>
+        <item>Только август</item>
+        <item>Только сентябрь</item>
+        <item>Только октябрь</item>
+        <item>Только ноябрь</item>
+        <item>Только декабрь</item>
+    </string-array>
+    <string name="bud_month_unused_hint">Не попадёт только в этот месяц, план не изменится</string>
+    <string name="bud_month_menu">Действия с месяцем</string>
+    <string name="bud_month_edit">Изменить этот месяц</string>
+    <string name="bud_month_reset">Вернуть как в плане</string>
+    <string name="bud_month_reset_title">Вернуть месяц как в плане?</string>
+    <string name="bud_month_reset_text">Изменения, сделанные только для этого месяца, будут убраны. Отметки и суммы поступлений останутся.</string>
+    <string name="bud_month_reset_confirm">Вернуть</string>
+    <string name="bud_month_changed_line">В этом месяце план изменён</string>
+    <string name="bud_extra_add">Добавить поступление</string>
+    <string name="bud_extra_label_hint">Необязательно, например «Премия»</string>
+    <string name="bud_extra_amount">Сумма</string>
+    <string name="bud_extra_delete_title">Удалить поступление?</string>
+    <string name="bud_extra_delete_text">Оно исчезнет из месяца.</string>
+    <plurals name="today_budget_not_funded">
+        <item quantity="one">Не переведено: %1$d категория</item>
+        <item quantity="few">Не переведено: %1$d категории</item>
+        <item quantity="many">Не переведено: %1$d категорий</item>
+        <item quantity="other">Не переведено: %1$d категории</item>
+    </plurals>
+    <string name="budget_tile_subtitle">Доход по плану</string>
 </resources>

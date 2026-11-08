@@ -65,6 +65,21 @@ class WriteRulesTest {
     }
 
     @Test
+    fun `BUD-004 BUD-011 budget rows need budget manage, only receipts are deleted`() {
+        val manager = viewer(Permission.BUDGET_VIEW, Permission.BUDGET_MANAGE)
+        val types = listOf(EntityTypes.BUDGET_PLAN, EntityTypes.BUDGET_MONTH, EntityTypes.BUDGET_RECEIPT, EntityTypes.BUDGET_FUNDING)
+        for (type in types) {
+            assertTrue(can(type, MutationOp.UPSERT, manager), type)
+            assertTrue(can(type, MutationOp.UPSERT, viewer(admin = true)), "$type by admin")
+            assertFalse(can(type, MutationOp.UPSERT, viewer(Permission.BUDGET_VIEW)), "$type view only")
+            assertFalse(can(type, MutationOp.DELETE, viewer(Permission.BUDGET_VIEW)), "$type delete view only")
+            val deletable = type == EntityTypes.BUDGET_RECEIPT
+            assertTrue(can(type, MutationOp.DELETE, manager) == deletable, "$type delete")
+            assertTrue(can(type, MutationOp.DELETE, viewer(admin = true)) == deletable, "$type delete by admin")
+        }
+    }
+
+    @Test
     fun readOnlyAndUnknownTypesAreNeverWritable() {
         for (type in listOf(EntityTypes.HOUSEHOLD, EntityTypes.MEMBER, EntityTypes.GROUP, "widget")) {
             for (op in MutationOp.entries) assertFalse(can(type, op, viewer(admin = true), own = true), "$type $op")

@@ -1,6 +1,6 @@
 ---
 id: M5-01
-status: ready
+status: done
 depends_on: [M4]
 requirements: [BUD-001, BUD-002, BUD-003, BUD-004, BUD-011, BUD-012, BUD-013, BUD-014]
 ---

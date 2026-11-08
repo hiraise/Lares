@@ -1,6 +1,7 @@
 package app.lares.contract
 
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.YearMonth
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -52,6 +53,40 @@ class IdsTest {
         assertFailsWith<IllegalArgumentException> { Ids.placeAlertRowId(event, "m1") }
     }
 
+    private val december = YearMonth(2026, 12)
+
+    @Test
+    fun `BUD-004 BUD-011 BUD-012 BUD-013 budget row ids are stable (same vectors in seed py)`() {
+        // The same id as household and income: only the markers tell the rows apart.
+        assertEquals("0192f3a4-5b6c-8daf-9f01-23456789f4ce", Ids.budgetPlanRowId(event, december))
+        assertEquals("0192f3a4-5b6c-8dac-9f01-23456789f4ce", Ids.budgetMonthRowId(event, december))
+        assertEquals("0192f3a4-5b6c-8dad-9f01-23456789f4ce", Ids.budgetReceiptRowId(event, december))
+        assertEquals("0192f3a4-5b6c-8dad-9f01-23456789f679", Ids.budgetReceiptRowId(event, YearMonth(1999, 1)))
+        assertEquals("0192f3a4-5b6c-8d89-9f01-234567893410", Ids.budgetFundingRowId(event, member, december))
+        assertEquals(Ids.budgetPlanRowId(event, december), Ids.budgetPlanRowId(event.uppercase(), december))
+    }
+
+    @Test
+    fun `BUD-012 budget row ids are distinct by kind, month and category`() {
+        val category = Ids.newId()
+        assertNotEquals(Ids.budgetPlanRowId(event, december), Ids.budgetMonthRowId(event, december))
+        assertNotEquals(Ids.budgetReceiptRowId(event, december), Ids.budgetFundingRowId(event, member, december))
+        assertNotEquals(Ids.budgetFundingRowId(event, member, december), Ids.budgetFundingRowId(event, category, december))
+        assertNotEquals(Ids.budgetReceiptRowId(event, december), Ids.budgetReceiptRowId(event, YearMonth(2027, 1)))
+        val months = (0 until 1_200).map { YearMonth(2000 + it / 12, it % 12 + 1) }
+        val all =
+            months.flatMap {
+                listOf(
+                    Ids.budgetPlanRowId(event, it),
+                    Ids.budgetMonthRowId(event, it),
+                    Ids.budgetReceiptRowId(event, it),
+                    Ids.budgetFundingRowId(event, member, it),
+                )
+            }
+        assertEquals(all.size, all.toSet().size)
+        assertFailsWith<IllegalArgumentException> { Ids.budgetFundingRowId(event, "c1", december) }
+    }
+
     @Test
     fun `derived ids are version 8, RFC variant, canonical lowercase`() {
         val ids =
@@ -59,6 +94,10 @@ class IdsTest {
                 Ids.occurrenceRowId(event, LocalDate(2026, 10, 28)),
                 Ids.reminderRowId(event, member),
                 Ids.placeAlertRowId(event, member),
+                Ids.budgetPlanRowId(event, december),
+                Ids.budgetMonthRowId(event, december),
+                Ids.budgetReceiptRowId(event, december),
+                Ids.budgetFundingRowId(event, member, december),
             )
         for (id in ids) {
             val uuid = UUID.fromString(id)

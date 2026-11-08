@@ -120,8 +120,8 @@ object BudgetMath {
     fun incomeDate(month: YearMonth, day: Int): LocalDate                               // day clamped to the month's length
     fun check(table: BudgetTable): TableCheck
     fun differences(monthTable: BudgetTable, planTable: BudgetTable): TableDifferences
-    fun summary(month: YearMonth, table: BudgetTable, receipts: List<BudgetReceiptData>,
-                fundings: List<BudgetFundingData>): MonthSummary
+    fun summary(month: YearMonth, table: BudgetTable, receipts: Map<String, BudgetReceiptData>,  // keyed by row id
+                fundings: Collection<BudgetFundingData>): MonthSummary
 }
 
 data class TableCheck(
@@ -151,8 +151,12 @@ data class IncomeSummary(val incomeId: String?, val receiptId: String?, val labe
                          val expected: Long, val actual: Long?, val actualDate: LocalDate?, val transferred: Long,
                          val fundedCount: Int, val plannedCount: Int)   // plannedCount = cells of used categories
 data class CategorySummary(val categoryId: String, val name: String, val amount: Long, val planned: Long,
-                           val funded: Long, val complete: Boolean)    // complete = every planned cell ticked
+                           val funded: Long, val complete: Boolean)    // complete = every planned cell ticked; false without cells
 ```
+
+Receipts are passed with their row ids (M5-01): an extra income's `receiptId` and its order "by date, then id" need
+the id, which the receipt data does not hold. `fundedCount` counts the ticked planned cells of an income;
+`transferred` also counts ticks of a used category without a cell.
 
 Rules: a funding counts only if its income and category are in the month's table and the category is used;
 `transferred` sums funding amounts (not planned amounts). Extra incomes have `expected = 0` and no cells. An income
@@ -211,12 +215,13 @@ Server-only checks:
 
 ## Server
 
-### Tables (`V10__budget.sql`)
+### Tables (`V12__budget.sql`)
 
 ```sql
 budget_plan    (id uuid PK, household_id uuid NOT NULL → household, effective_from text NOT NULL,   -- "2026-12"
                 plan_table text NOT NULL,                                                         -- JSON BudgetTable
-                updated_by uuid NOT NULL → member, seq, created_at, updated_at, deleted)
+                updated_by uuid NOT NULL → member, saved_at timestamptz NOT NULL,                 -- data.updatedAt
+                seq, created_at, updated_at, deleted)
 budget_month   (id uuid PK, household_id, month text NOT NULL, month_table text NULL, updated_by uuid NOT NULL → member,
                 seq, created_at, updated_at, deleted)
 budget_receipt (id uuid PK, household_id, month text NOT NULL, income_id uuid NULL, label text NULL, amount bigint NULL,
@@ -226,7 +231,8 @@ budget_funding (id uuid PK, household_id, month text NOT NULL, income_id uuid NO
                 seq, created_at, updated_at, deleted)
 ```
 
-Indexes: `(household_id, seq)` on all four. (`table` is reserved in SQL, hence `plan_table` / `month_table`.)
+Indexes: `(household_id, seq)` on all four. (`table` is reserved in SQL, hence `plan_table` / `month_table`; the plan's
+`updatedAt` is `saved_at`, since `updated_at` is the server's sync column.)
 
 ### Handlers (package `app.lares.server.budget`)
 
@@ -286,6 +292,23 @@ the household zone, so the user sees the error before sync.
 | `fund(month, incomeId, categoryId, amount)` / `unfund(month, incomeId, categoryId)` | the derived funding row; unfund = amount null |
 | `fundAll(month, incomeId)` | `fund` with the planned amount for every unticked row of the income (one mutation each) |
 
+### Implementation notes (M5-03)
+
+- `budget_plan` also stores `updated_at` (epoch ms; the version's `updatedAt`, needed by the history); `funded_at` is
+  epoch ms too. The writer truncates its times to milliseconds so the local row and the shadow agree.
+- Adapters live in `data/budget/BudgetAdapters.kt` (like the location adapters), registered in
+  `defaultEntityAdapters`. Plan and month row ids are derived from the logged-in member's household id. The plan's
+  past-month check uses the server's rule including the day of grace (month of `now − 1 day` in the household zone).
+- `LocalWriter` writes one row per call, so `savePlan` from the current month writes the version first, then the
+  month row (`table` null); the integration test of this case passes.
+- The writer sends every field of a row with nulls as JSON null (a cleared amount or month table must travel).
+  `editMonth` compares normalized tables and skips the write when there is no month copy and the table equals the
+  plan; `resetMonth`, `clearIncome` and `unfund` write nothing when there is nothing to clear.
+- `BudgetToday.notFunded` counts categories (not cells) with an unticked planned cell of a recorded income;
+  `nextIncome` is the first unrecorded planned income dated today or later, else the earliest unrecorded one (M5-06).
+- `isCategoryUsed` / `isIncomeUsed` count a funding row also when it is unticked.
+- Integration tests: `Snapshot` has the four budget maps; `shared` leaves them out, since Kids hold none.
+
 ## UI (M5-04…M5-06)
 
 Budget is the «Бюджет» tile in «Ещё» (FND-064), shown with `budget.view`. Strings in en and ru; amounts formatted with
@@ -325,6 +348,79 @@ a thin space and «₽» (`1 234 ₽`), no kopecks. Look per [visual style](../d
   differences from the plan marked with a dot.
 - **Today card** (BUD-021): «Бюджет» with the next expected income «20 декабря · 160 000 ₽» and «Не переведено: 5
   категорий»; tap opens the Budget screen. Placed after «Семья сейчас».
+
+### Implementation notes (M5-04)
+
+- `ui/budget/`: `BudgetFormat` (the one amount format: digits grouped by U+202F, «−» for negatives, then a no-break
+  space and «₽»; input keeps up to 9 digits since M5-06, so a typed amount always fits the 1 000 000 000 limit), `BudgetLogic` (hero precedence and all row texts as `UiText`),
+  `BudgetViewModel` (screen and «Все месяцы»), `IncomeViewModel`, `BudgetScreen`, `IncomePage`, `BudgetComponents`.
+- Routes `BudgetDestination(month?)`, `BudgetIncomeDestination(month, incomeId)`, `BudgetMonthsDestination`. The month
+  shown lives in the route's `rememberSaveable` (survives process death) and is passed to the view model; a month
+  outside first month…current month falls back to the current one. Picking in «Все месяцы» replaces the Budget entry.
+- The hero is the lake-gradient card (the one per screen); when free money takes the hero and the month also has a
+  shortfall, a second line «Недобор N ₽» shows it. «Пришло … из … · переведено …» and «45 000 из 60 000» use digits
+  without «₽»; titles and totals with «₽».
+- Income page: the receipt fields are written on keyboard «Готово», when the amount field loses focus and when a date
+  is picked; an emptied amount clears the receipt. Categories are split into «Перевести» (unticked, table order) and
+  «Переведено» (ticked, with «Отметка: имя»). A category whose transfer differs from the planned cell shows
+  «20 000 из 27 000». Extra incomes are listed on the month but have no page until M5-06.
+- «Создать план», «План» and the month menu were hidden until M5-05 / M5-06; M5-05 added «План» and «Создать план».
+- The «изменено» dot uses the `warning` color; category bars past 100 % use `error` on `errorContainer`.
+
+### Implementation notes (M5-05)
+
+- `ui/budget/plan/`: `PlanViewModel` (draft table, `TableCheck` on every change, sheets, save), `PlanLogic` (incomes by
+  day, reorder, texts), `PlanScreen` (summary bar, segmented tabs, rows, save dialog), `PlanSheets` (category and
+  income sheets), `PlanTable` (grid), `PlanHistoryPage` with `PlanHistoryViewModel`. Routes `BudgetPlanDestination
+  (version?)` and `BudgetPlanHistoryDestination`; «План» is a text action in the month top bar for everyone with
+  `budget.view` (read-only without `budget.manage`), «Создать план» in the empty state.
+- The draft is the whole `BudgetTable` held by the view model; nothing is written until «Сохранить», which is enabled
+  only when the draft differs from where it started. `PlanArgs.month` (month mode) loads the month's table and writes
+  it with `editMonth` without the dialog; it is not routed until M5-06.
+- Sheets edit a form and apply it to the draft on «Готово»; dismissing a sheet drops the form (a new income is already
+  in the draft with day 1 and amount 0). Names are collapsed like the normalizer; an empty or duplicate name
+  (case-insensitive) is refused in the sheet. An emptied amount field is 0; empty or 0 cells are no cells.
+- «Удалить» is shown once `isCategoryUsed` / `isIncomeUsed` answer false for the default save month (the first save
+  option): next month, or the current month for the very first plan. The draft's new rows are never used.
+- Reorder: no list in the app has drag-to-reorder, so each category row has a menu with «Выше» / «Ниже», moving within
+  its group (used or unused). Unused categories sit in a collapsed «Не используются» group.
+- Summary bar: «Доход 346 000 · Категории 346 000» with a check when every row, column and the totals add up; else
+  «не сходится на N» (|income − categories|, when they differ) and «Есть строки или столбцы, которые не сходятся».
+- Category names in the list end with «…» after two lines (`ListRow(titleMaxLines)`); the table keeps one line.
+- Table: sticky name column (128 dp), then «Сумма», the incomes by day («5-е» over the expected amount) and «Итого»;
+  a totals row; bad row and column totals in `warning`; the numbers scroll sideways.
+- Known limit: when a version from next month exists and the user saves the draft from the current month, the next
+  month's version stays as it was (the draft started from it, so usually nothing is lost; the edits made now apply
+  only to the current month).
+
+### Implementation notes (M5-06)
+
+- Month mode is `PlanViewModel` with `PlanArgs.month`, routed as `BudgetPlanDestination(month)`: title «Только
+  декабрь» (string array `bud_months_only`), no history, «Сохранить» writes `editMonth` without the dialog.
+  `PlanUiState.differences` compares the draft with the plan of that month (`BudgetMath.differences`, null when
+  empty); `PlanLogic.categoryChanged` adds `removedCategories` (left out this month) to `BudgetLogic.categoryChanged`,
+  `PlanLogic.incomeChanged` marks added and changed incomes. The dot is on category and income rows, table name cells
+  and changed cells. «Удалить» in month mode only for ids the plan does not have and no receipt or tick of the month
+  uses (`monthLocked`); else «Не использовать» («Не попадёт только в этот месяц, план не изменится»).
+- `BudgetWriter.editMonth` compares tables up to the order of cells: the editor re-adds a category's cells at the end,
+  so a draft set back to the plan's amounts is written as null.
+- Budget screen: `BudgetUiState.monthChanged` = non-empty differences; the line under the hero opens month mode (plain
+  text without `budget.manage`); the ⋮ menu (`budget.manage`) has «Изменить этот месяц» and, when changed, «Вернуть как
+  в плане» with a confirmation. Planned incomes get the dot too.
+- Extra incomes: «Добавить поступление» (link under «Поступления», `budget.manage`) opens `ExtraIncomeSheet` (amount
+  first and required, optional name ≤ 60, date default today) and calls `addExtraIncome`. Their page is `IncomePage`
+  with `IncomeArgs(month, null, receiptId)` (`BudgetIncomeDestination(month, receiptId = …)`): «Название», «Сумма»,
+  «Дата» written like a receipt (an emptied amount is not written), no categories, «Удалить» with a confirmation; the
+  page closes after the delete. `IncomeViewModel.startEdit` checks the local editing flag (the state may lag one
+  update behind, which overwrote a typed label).
+- Leaving an income page with a field still focused writes what was typed (back handler while editing, the top-bar
+  arrow); the write runs `NonCancellable`, so it finishes after the view model is cleared. Amount fields keep 9 digits:
+  with 10 a typed amount (e.g. digits inserted before the prefilled amount) could exceed the limit and be refused while
+  the page was already closed. Known: the prefilled «Пришло» puts the cursor before the amount.
+- Today card: `TodayViewModel(…, budget: BudgetRepository?)` maps `BudgetViews.today` to `TodayBudgetUi`; `build`
+  drops it without `budget.view`; `TodayBudget` after «Семья сейчас» is one row (wallet icon, chevron) with
+  `BudgetLogic.todayLines`: the next income, else «Не переведено: N категорий», else «Всё распределено»; «Не
+  переведено» is the second line under an income. The card alone keeps Today out of its empty state.
 
 ## Invariants to test
 

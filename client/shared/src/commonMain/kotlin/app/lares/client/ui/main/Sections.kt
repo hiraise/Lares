@@ -89,11 +89,13 @@ class TodayActions(
     val onCalendarList: () -> Unit = {},
     /** «Семья сейчас»: the Map, centred on the member when given. */
     val onMap: (String?) -> Unit = {},
+    /** The budget card: the Budget screen. */
+    val onBudget: () -> Unit = {},
 )
 
 /**
  * FND-063: date line and title, sync indicator and own avatar (→ More), the active shopping list (SHP-013), the tasks
- * block (TSK-023), «Скоро» (CAL-019) and the FAB.
+ * block (TSK-023), «Скоро» (CAL-019), «Семья сейчас» (LOC-016), «Бюджет» (BUD-021) and the FAB.
  */
 @Composable
 fun TodayScreen(
@@ -129,6 +131,7 @@ fun TodayScreen(
                     if (today.showTasks) TodayTasks(today, actions)
                     today.upcoming?.let { TodayUpcoming(it, actions) }
                     familyNow?.let { TodayFamilyNow(it, actions) }
+                    today.budget?.let { TodayBudget(it, actions.onBudget) }
                 }
             }
         }
