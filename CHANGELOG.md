@@ -25,6 +25,8 @@ Versioning: [SemVer](https://semver.org/) from the first release.
 - Tapping «Назад» twice quickly no longer leaves an empty white screen (it closed the main screen too) or closes two
   screens at once.
 
+Update the server together with the app: the budget needs server 0.6.0 (it adds the budget tables on start).
+
 ## [0.5.2] - 2026-11-07
 
 ### Changed
